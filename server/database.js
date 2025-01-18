@@ -1,15 +1,16 @@
-
+const config = require('config');
 
 const {Pool} = require('pg');
 
 const pool = new Pool({
-    user: 'postgres',
-    password: '123456',
-    host: 'localhost',
-    port: 5432,
-    database: 'usersaccs'
-});
+    user: config.get('postgre-server.user'),
+    password: config.get('postgre-server.password'),
+    host: config.get('postgre-server.host'),
+    port: config.get('postgre-server.port'),
+    database: config.get('postgre-server.database')
 
+});
+console.log('Database connected');
 
 
 module.exports = pool;
