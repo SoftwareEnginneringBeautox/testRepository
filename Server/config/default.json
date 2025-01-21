@@ -1,3 +1,5 @@
+//this is a sample of what the config.jason should be
+
 {
     "postgre-server":{
     "user": "postgres",
