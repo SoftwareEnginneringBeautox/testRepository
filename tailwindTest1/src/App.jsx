@@ -610,7 +610,7 @@ function App() {
       </h3>
       <div
         id="booking-container"
-        className="flex flex-col shadow-custom items-start rounded-lg py-8 bg-ash-100 mb-16"
+        className="flex flex-col shadow-custom items-center rounded-lg py-8 bg-ash-100 mb-16"
       >
         {/* Header Section */}
         <div className="flex flex-row justify-between w-[95%] mb-4">

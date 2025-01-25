@@ -6,7 +6,7 @@ export default function Layout({ children }) {
   // const location = useLocation();
 
   // // Routes that do not require a sidebar
-  // const noSidebarRoutes = ["/login", "/signup", "/404"]; // example path only
+  // const noSidebarRoutes = ["/login", "/signup", "/404"];
   // const hasSidebar = !noSidebarRoutes.includes(location.pathname);
 
   // if (!hasSidebar) {
