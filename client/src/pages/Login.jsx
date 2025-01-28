@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { CTAButton } from "./Components";
-import UserIcon from "./assets/icons/UserIcon";
-import PasswordIcon from "./assets/icons/PasswordIcon";
-import LoginIcon from "./assets/icons/LoginIcon";
-import BeautoxLogo from "./assets/logos/Beautox.svg";
+import { CTAButton } from "../Components";
+import UserIcon from "../assets/icons/UserIcon";
+import PasswordIcon from "../assets/icons/PasswordIcon";
+import LoginIcon from "../assets/icons/LoginIcon";
+import BeautoxLogo from "../assets/logos/Beautox.svg";
 
 function Login() {
   const [username, setUsername] = useState("");
@@ -15,9 +15,9 @@ function Login() {
       const response = await fetch("http://localhost:4000/login", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/json"
         },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ username, password })
       });
       const data = await response.json();
       if (data.success) {

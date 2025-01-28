@@ -1,12 +1,12 @@
 import React from "react";
-import "./App.css";
-import { CTAButton, OutlineButton, Pagination } from "./Components";
-import FilterIcon from "./assets/icons/FilterIcon";
-import ChevronLeftIcon from "./assets/icons/ChevronLeftIcon";
-import DownloadIcon from "./assets/icons/DownloadIcon";
-import BeautoxPieChart from "./components/BeautoxPieChart";
-import SalesChart from "./components/SalesChart";
-import PlusIcon from "./assets/icons/PlusIcon";
+import "../App.css";
+import { CTAButton, OutlineButton, Pagination } from "../Components";
+import FilterIcon from "../assets/icons/FilterIcon";
+import ChevronLeftIcon from "../assets/icons/ChevronLeftIcon";
+import DownloadIcon from "../assets/icons/DownloadIcon";
+import BeautoxPieChart from "../components/BeautoxPieChart";
+import SalesChart from "../components/SalesChart";
+import PlusIcon from "../assets/icons/PlusIcon";
 
 function FinancialOverwiew() {
   return (
