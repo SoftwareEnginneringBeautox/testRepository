@@ -2,13 +2,14 @@ import * as React from "react";
 import { cva } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";
+import CloseIcon from "@/assets/icons/CloseIcon";
 
 const alertVariants = cva(
-  "fixed top-10 left-1/2 -translate-x-1/2 min-w-1/6 rounded-lg border border-lavender-400 p-4 [&>svg~*]:pl-9 [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:top-1/2 [&>svg]:-translate-y-1/2 [&>svg]:text-foreground z-[999]",
+  "fixed flex items-center top-10 left-1/2 -translate-x-1/2 min-w-1/6 rounded-lg border border-lavender-400 p-4 gap-4 z-[999]",
   {
     variants: {
       variant: {
-        default: "bg-customNeutral-100  text-foreground",
+        default: "bg-customNeutral-100 text-foreground",
         destructive:
           "border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive"
       }
@@ -20,21 +21,30 @@ const alertVariants = cva(
 );
 
 const AlertContainer = React.forwardRef(
-  ({ className, variant, ...props }, ref) => (
+  ({ className, variant, children, ...props }, ref) => (
     <div
       ref={ref}
       role="alert"
       className={cn(alertVariants({ variant }), className)}
       {...props}
-    />
+    >
+      {children}
+    </div>
   )
 );
 AlertContainer.displayName = "AlertContainer";
 
+const AlertText = React.forwardRef(({ className, children, ...props }, ref) => (
+  <div ref={ref} className={cn("flex flex-col", className)} {...props}>
+    {children}
+  </div>
+));
+AlertText.displayName = "AlertText";
+
 const AlertTitle = React.forwardRef(({ className, ...props }, ref) => (
   <h5
     ref={ref}
-    className={cn("mb-1 font-medium leading-none tracking-tight", className)}
+    className={cn("font-medium leading-none tracking-tight text-lg", className)}
     {...props}
   />
 ));
@@ -43,7 +53,7 @@ AlertTitle.displayName = "AlertTitle";
 const AlertDescription = React.forwardRef(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("text-sm [&_p]:leading-relaxed", className)}
+    className={cn("text-sm text-foreground/80", className)}
     {...props}
   />
 ));
@@ -54,15 +64,15 @@ const CloseAlert = React.forwardRef(({ className, onClick, ...props }, ref) => (
     ref={ref}
     onClick={onClick}
     className={cn(
-      "absolute top-2 right-2 text-foreground hover:text-lavender-400 transition ml-auto text-xl text-foreground",
+      "ml-auto text-foreground hover:text-lavender-400 transition text-lg font-semibold",
       className
     )}
     aria-label="Close Alert"
     {...props}
   >
-    &times;
+    <CloseIcon size={16} />
   </button>
 ));
 CloseAlert.displayName = "CloseAlert";
 
-export { AlertContainer, AlertTitle, AlertDescription, CloseAlert };
+export { AlertContainer, AlertText, AlertTitle, AlertDescription, CloseAlert };

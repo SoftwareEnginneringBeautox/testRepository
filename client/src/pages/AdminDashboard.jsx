@@ -14,6 +14,7 @@ import {
   AlertContainer,
   AlertDescription,
   AlertTitle,
+  AlertText,
   CloseAlert
 } from "@/components/ui/Alert";
 import InformationIcon from "../assets/icons/InformationIcon";
@@ -107,6 +108,9 @@ function AdministratorDashboard() {
 
   const throwAlert = () => {
     setShowAlert(true);
+    setTimeout(() => {
+      setAlertVisible(false);
+    }, 15000);
   };
 
   return (
@@ -114,10 +118,13 @@ function AdministratorDashboard() {
       {showAlert && (
         <AlertContainer>
           <InformationIcon />
-          <AlertTitle>Heads up!</AlertTitle>
-          <AlertDescription>
-            You can add components to your app using the CLI.
-          </AlertDescription>
+          <AlertText>
+            <AlertTitle>Heads up!</AlertTitle>
+            <AlertDescription>
+              You can add components to your app using the CLI.
+            </AlertDescription>
+          </AlertText>
+
           <CloseAlert onClick={() => setShowAlert(false)}>&times;</CloseAlert>
         </AlertContainer>
       )}
