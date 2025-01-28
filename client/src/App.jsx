@@ -39,6 +39,7 @@ import ChevronDownIcon from "./assets/icons/ChevronDownIcon";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Login from "./pages/Login";
 import Fin from "./pages/FinancialOverview";
+import AdministratorDashboard from "./pages/AdminDashboard";
 
 function App() {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -122,6 +123,7 @@ function App() {
         <Routes>
           <Route index element={<Login />} />
           <Route path="/Financial" element={<Fin />} />
+          <Route path="/AdminDashboard" element={<AdministratorDashboard />} />
         </Routes>
       </BrowserRouter>
     </div>

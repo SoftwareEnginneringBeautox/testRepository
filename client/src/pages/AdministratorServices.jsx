@@ -1,18 +1,18 @@
 import React from "react";
-import "./App.css";
-import { CTAButton, OutlineButton, Pagination } from "./Components";
-import ChevronLeftIcon from "./assets/icons/ChevronLeftIcon";
-import PlusIcon from "./assets/icons/PlusIcon";
-import SettingsIcon from "./assets/icons/SettingsIcon";
-import PackageIcon from "./assets/icons/PackageIcon";
-import EllipsisIcon from "./assets/icons/EllipsisIcon";
-import UserIcon from "./assets/icons/UserIcon";
-import EmailIcon from "./assets/icons/EmailIcon";
-import UserIDIcon from "./assets/icons/UserIDIcon";
-import CalendarIcon from "./assets/icons/CalendarIcon";
-import ClockIcon from "./assets/icons/ClockIcon";
-import AgeIcon from "./assets/icons/AgeIcon";
-import ArrowNorthEastIcon from "./assets/icons/ArrowNorthEastIcon";
+import "../App.css";
+import { CTAButton, OutlineButton, Pagination } from "../Components";
+import ChevronLeftIcon from "../assets/icons/ChevronLeftIcon";
+import PlusIcon from "../assets/icons/PlusIcon";
+import SettingsIcon from "../assets/icons/SettingsIcon";
+import PackageIcon from "../assets/icons/PackageIcon";
+import EllipsisIcon from "../assets/icons/EllipsisIcon";
+import UserIcon from "../assets/icons/UserIcon";
+import EmailIcon from "../assets/icons/EmailIcon";
+import UserIDIcon from "../assets/icons/UserIDIcon";
+import CalendarIcon from "../assets/icons/CalendarIcon";
+import ClockIcon from "../assets/icons/ClockIcon";
+import AgeIcon from "../assets/icons/AgeIcon";
+import ArrowNorthEastIcon from "../assets/icons/ArrowNorthEastIcon";
 
 function AdministratorServices() {
   return (

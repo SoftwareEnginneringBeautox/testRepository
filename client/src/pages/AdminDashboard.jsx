@@ -8,7 +8,7 @@ import PlusIcon from "../assets/icons/PlusIcon";
 
 import UserIcon from "../assets/icons/UserIcon";
 
-import UserAdminIcon from "./assets/icons/UserAdminIcon";
+import UserAdminIcon from "../assets/icons/UserAdminIcon";
 
 import {
   AlertContainer,
@@ -16,7 +16,7 @@ import {
   AlertTitle,
   CloseAlert
 } from "@/components/ui/Alert";
-import InformationIcon from "./assets/icons/InformationIcon";
+import InformationIcon from "../assets/icons/InformationIcon";
 
 function AdministratorDashboard() {
   const [displayAlert, setDisplayAlert] = useState(false);
