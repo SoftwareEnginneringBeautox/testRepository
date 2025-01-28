@@ -34,6 +34,7 @@ import UserIDIcon from "./assets/icons/UserIDIcon";
 
 import { BrowserRouter,Routes,Route} from "react-router-dom";
 import Login from "./Login";
+import Fin from "./FinancialOverview";
 
 
 
@@ -613,6 +614,7 @@ function App() {
       <BrowserRouter>
         <Routes>
          <Route index element={<Login />} />
+         <Route path="/Financial" element={<Fin />} />
         </Routes>
       </BrowserRouter>
       </div>
