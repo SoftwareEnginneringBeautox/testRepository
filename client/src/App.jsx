@@ -32,6 +32,11 @@ import AgeIcon from "./assets/icons/AgeIcon";
 import ArrowNorthEastIcon from "./assets/icons/ArrowNorthEastIcon";
 import UserIDIcon from "./assets/icons/UserIDIcon";
 
+import { BrowserRouter,Routes,Route} from "react-router-dom";
+import Login from "./Login";
+
+
+
 function App() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [view, setView] = useState("monthly");
@@ -109,6 +114,8 @@ function App() {
   ];
 
   return (
+    //Router
+   
     // LOGIN
     // <div className="min-h-screen grid grid-cols-12">
     //   <div className="h-screen col-span-7 ">
@@ -602,100 +609,113 @@ function App() {
     //   </div>
     // </div>
     // ====================================================================================
-
-    // CURRENT APP (BOOKING)
-    <>
-      <h3 className="text-[2.5rem] leading-[3.75rem] font-semibold">
-        BOOKING CALENDAR
-      </h3>
-      <div
-        id="booking-container"
-        className="flex flex-col shadow-custom items-center rounded-lg py-8 bg-ash-100 mb-16"
-      >
-        {/* Header Section */}
-        <div className="flex flex-row justify-between w-[95%] mb-4">
-          <div className="flex flex-row items-center gap-2">
-            <button
-              className="border border-transparent p-1 rounded hover:border-lavender-400 text-lavender-400"
-              onClick={handlePrevious}
-            >
-              <ChevronLeftIcon />
-            </button>
-            <h2 className="text-xl font-semibold">
-              {view === "monthly"
-                ? `${currentDate.toLocaleString("default", {
-                    month: "long"
-                  })} ${year}`
-                : `${getStartOfWeek(currentDate).toLocaleDateString("en-US", {
-                    month: "long",
-                    day: "numeric"
-                  })} - ${new Date(
-                    getStartOfWeek(currentDate).getTime() +
-                      6 * 24 * 60 * 60 * 1000
-                  ).toLocaleDateString("en-US", {
-                    month: "long",
-                    day: "numeric"
-                  })}`}
-            </h2>
-
-            <button
-              className="border border-transparent p-1 rounded hover:border-lavender-400 text-lavender-400"
-              onClick={handleNext}
-            >
-              <ChevronRightIcon />
-            </button>
-          </div>
-          <div className="flex flex-row gap-4">
-            <div className="flex gap-2 text-xl">
-              <div className="flex gap-8 mr-8">
-                <button
-                  onClick={() => setView("monthly")}
-                  className="relative inline-block px-2 py-1 font-semibold overflow-hidden group"
-                >
-                  MONTHLY
-                  <span
-                    className={`absolute left-0 bottom-0 block w-0 h-0.5 bg-lavender-400 transition-all duration-300 ${
-                      view === "monthly" ? "w-full" : "group-hover:w-full"
-                    }`}
-                  ></span>
-                </button>
-
-                <button
-                  onClick={() => setView("weekly")}
-                  className="relative inline-block px-2 py-1 font-semibold overflow-hidden group"
-                >
-                  WEEKLY
-                  <span
-                    className={`absolute left-0 bottom-0 block w-0 h-0.5 bg-lavender-400 transition-all duration-300 ${
-                      view === "weekly" ? "w-full" : "group-hover:w-full"
-                    }`}
-                  ></span>
-                </button>
-              </div>
-              <CTAButton
-                text="FILTER DROPDOWN PLACEHOLDER"
-                rightIcon={<ChevronDownIcon />}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Calendar Views */}
-        <div className="w-full flex justify-center items-center gap-6">
-          {view === "monthly" ? (
-            <MonthlyBookingPanel
-              currentDate={currentDate}
-              handlePreviousMonth={handlePrevious}
-              handleNextMonth={handleNext}
-              calendarDays={calendar}
-            />
-          ) : (
-            <WeeklyBookingPanel currentDate={currentDate} events={events} />
-          )}
-        </div>
+<div>
+      <BrowserRouter>
+        <Routes>
+         <Route index element={<Login />} />
+        </Routes>
+      </BrowserRouter>
       </div>
-      {/* <p>eli</p> */}
-    </>
+    // CURRENT APP (BOOKING)
+    // <>
+    //   <div class = "routing">
+    //   <BrowserRouter>
+    //     <Routes>
+    //      <route index element={<Login />} />
+    //     </Routes>
+    //   </BrowserRouter>
+    //   </div>
+    //   <h3 className="text-[2.5rem] leading-[3.75rem] font-semibold">
+    //     BOOKING CALENDAR
+    //   </h3>
+    //   <div
+    //     id="booking-container"
+    //     className="flex flex-col shadow-custom items-center rounded-lg py-8 bg-ash-100 mb-16"
+    //   >
+    //     {/* Header Section */}
+    //     <div className="flex flex-row justify-between w-[95%] mb-4">
+    //       <div className="flex flex-row items-center gap-2">
+    //         <button
+    //           className="border border-transparent p-1 rounded hover:border-lavender-400 text-lavender-400"
+    //           onClick={handlePrevious}
+    //         >
+    //           <ChevronLeftIcon />
+    //         </button>
+    //         <h2 className="text-xl font-semibold">
+    //           {view === "monthly"
+    //             ? `${currentDate.toLocaleString("default", {
+    //                 month: "long"
+    //               })} ${year}`
+    //             : `${getStartOfWeek(currentDate).toLocaleDateString("en-US", {
+    //                 month: "long",
+    //                 day: "numeric"
+    //               })} - ${new Date(
+    //                 getStartOfWeek(currentDate).getTime() +
+    //                   6 * 24 * 60 * 60 * 1000
+    //               ).toLocaleDateString("en-US", {
+    //                 month: "long",
+    //                 day: "numeric"
+    //               })}`}
+    //         </h2>
+
+    //         <button
+    //           className="border border-transparent p-1 rounded hover:border-lavender-400 text-lavender-400"
+    //           onClick={handleNext}
+    //         >
+    //           <ChevronRightIcon />
+    //         </button>
+    //       </div>
+    //       <div className="flex flex-row gap-4">
+    //         <div className="flex gap-2 text-xl">
+    //           <div className="flex gap-8 mr-8">
+    //             <button
+    //               onClick={() => setView("monthly")}
+    //               className="relative inline-block px-2 py-1 font-semibold overflow-hidden group"
+    //             >
+    //               MONTHLY
+    //               <span
+    //                 className={`absolute left-0 bottom-0 block w-0 h-0.5 bg-lavender-400 transition-all duration-300 ${
+    //                   view === "monthly" ? "w-full" : "group-hover:w-full"
+    //                 }`}
+    //               ></span>
+    //             </button>
+
+    //             <button
+    //               onClick={() => setView("weekly")}
+    //               className="relative inline-block px-2 py-1 font-semibold overflow-hidden group"
+    //             >
+    //               WEEKLY
+    //               <span
+    //                 className={`absolute left-0 bottom-0 block w-0 h-0.5 bg-lavender-400 transition-all duration-300 ${
+    //                   view === "weekly" ? "w-full" : "group-hover:w-full"
+    //                 }`}
+    //               ></span>
+    //             </button>
+    //           </div>
+    //           <CTAButton
+    //             text="FILTER DROPDOWN PLACEHOLDER"
+    //             rightIcon={<ChevronDownIcon />}
+    //           />
+    //         </div>
+    //       </div>
+    //     </div>
+
+    //     {/* Calendar Views */}
+    //     <div className="w-full flex justify-center items-center gap-6">
+    //       {view === "monthly" ? (
+    //         <MonthlyBookingPanel
+    //           currentDate={currentDate}
+    //           handlePreviousMonth={handlePrevious}
+    //           handleNextMonth={handleNext}
+    //           calendarDays={calendar}
+    //         />
+    //       ) : (
+    //         <WeeklyBookingPanel currentDate={currentDate} events={events} />
+    //       )}
+    //     </div>
+    //   </div>
+    //   {/* <p>eli</p> */}
+    // </>
   );
 }
 

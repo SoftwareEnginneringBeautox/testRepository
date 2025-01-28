@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { CTAButton } from "./Components";
 import UserIcon from "./assets/icons/UserIcon";
 import PasswordIcon from "./assets/icons/PasswordIcon";
@@ -5,6 +6,32 @@ import LoginIcon from "./assets/icons/LoginIcon";
 import BeautoxLogo from "./assets/logos/Beautox.svg";
 
 function Login() {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await fetch("http://localhost:4000/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, password }),
+      });
+      const data = await response.json();
+      if (data.success) {
+        // Handle successful login
+        console.log("Login successful");
+      } else {
+        // Handle login failure
+        console.log("Login failed");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+
   return (
     <div className="min-h-screen grid grid-cols-12">
       <div className="h-screen col-span-7 ">
@@ -29,34 +56,38 @@ function Login() {
             BEAUTOX’S PATIENT RECORDS, INTEGRATION, SCHEDULING, AND MANAGEMENT
           </p>
 
-          <form action="" className="flex flex-col gap-4 mt-4">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4 mt-4">
             <div className="input-container">
-              <label htmlFor="" className="input-field-label">
+              <label htmlFor="username" className="input-field-label">
                 Username
               </label>
-
               <div className="input-field">
                 <UserIcon size={24} />
                 <input
                   type="text"
+                  id="username"
                   className="text-input"
                   placeholder="e.g. john_doe123"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
                   required
                 />
               </div>
             </div>
 
             <div className="input-container">
-              <label htmlFor="" className="input-field-label">
+              <label htmlFor="password" className="input-field-label">
                 Password
               </label>
-
               <div className="input-field">
                 <PasswordIcon size={24} />
                 <input
                   type="password"
+                  id="password"
                   className="text-input"
                   placeholder="e.g. P@ssw0rd123"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   required
                 />
               </div>
@@ -76,3 +107,5 @@ function Login() {
     </div>
   );
 }
+
+export default Login;

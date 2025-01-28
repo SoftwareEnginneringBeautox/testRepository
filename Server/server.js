@@ -6,8 +6,6 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-//localhost:3000
-//localhost:4000
 app.post('/adduser', (req, res) => {
     const id = req.body["id"];
     const username = req.body["username"];
@@ -63,7 +61,27 @@ app.put('/updateuser', (req, res) => {
     res.send("response Revieced"+req.body);
 }
 );
+
+app.post('/login', (req, res) => {
+  const { username, password } = req.body;
+
+  const query = 'SELECT * FROM accounts WHERE username = $1 AND password = $2';
+  pool.query(query, [username, password])
+    .then((response) => {
+      if (response.rows.length > 0) {
+        res.json({ success: true });
+        console.log("Login successful");
+      } else {
+        res.json({ success: false });
+        console.log("Login failed");
+      }
+    })
+    .catch((error) => {
+      console.error(error);
+      res.status(500).json({ success: false, error: 'Internal Server Error' });
+    });
+});
+
 app.listen(4000, () => {
   console.log('Server is running on port 4000');
 });
-//trest
