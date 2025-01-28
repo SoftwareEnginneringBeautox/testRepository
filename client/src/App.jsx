@@ -122,7 +122,7 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route index element={<Login />} />
-          <Route path="/Financial" element={<Fin />} />
+          <Route path="/FinancialOverview" element={<Fin />} />
           <Route path="/AdminDashboard" element={<AdministratorDashboard />} />
         </Routes>
       </BrowserRouter>
