@@ -142,7 +142,6 @@ function FinancialOverwiew() {
               <td>2</td>
               <td>3</td>
               <td>
-                {" "}
                 <DropdownMenu>
                   <DropdownMenuTrigger>
                     <EllipsisIcon />

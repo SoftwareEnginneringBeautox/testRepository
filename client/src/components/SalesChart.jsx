@@ -60,7 +60,7 @@ const SalesChart = () => {
             style={{
               width: "100%",
               height: "0",
-              paddingBottom: "50%",
+              paddingBottom: "55%",
               position: "relative"
             }}
           >
