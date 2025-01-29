@@ -8,6 +8,17 @@ import BeautoxPieChart from "../components/BeautoxPieChart";
 import SalesChart from "../components/SalesChart";
 import PlusIcon from "../assets/icons/PlusIcon";
 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuTrigger
+} from "@/components/ui/DropdownMenu";
+import EditIcon from "@/assets/icons/EditIcon";
+import DeleteIcon from "@/assets/icons/DeleteIcon";
+import EllipsisIcon from "@/assets/icons/EllipsisIcon";
+
 function FinancialOverwiew() {
   return (
     <div className="flex flex-col text-left w-full gap-4">
@@ -130,13 +141,50 @@ function FinancialOverwiew() {
               <td>1</td>
               <td>2</td>
               <td>3</td>
-              <td>4</td>
+              <td>
+                {" "}
+                <DropdownMenu>
+                  <DropdownMenuTrigger>
+                    <EllipsisIcon />
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuGroup>
+                      <DropdownMenuItem>
+                        <EditIcon />
+                        <p className="font-semibold">Edit</p>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem>
+                        <DeleteIcon />
+                        <p className="font-semibold">Delete</p>
+                      </DropdownMenuItem>
+                    </DropdownMenuGroup>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </td>
             </tr>
             <tr>
               <td>1</td>
               <td>2</td>
               <td>3</td>
-              <td>4</td>
+              <td>
+                <DropdownMenu>
+                  <DropdownMenuTrigger>
+                    <EllipsisIcon />
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuGroup>
+                      <DropdownMenuItem>
+                        <EditIcon />
+                        <p className="font-semibold">Edit</p>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem>
+                        <DeleteIcon />
+                        <p className="font-semibold">Delete</p>
+                      </DropdownMenuItem>
+                    </DropdownMenuGroup>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </td>
             </tr>
           </tbody>
         </table>

@@ -18,6 +18,17 @@ import {
   CloseAlert
 } from "@/components/ui/Alert";
 import InformationIcon from "../assets/icons/InformationIcon";
+import EllipsisIcon from "@/assets/icons/EllipsisIcon";
+
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuTrigger
+} from "@/components/ui/DropdownMenu";
+import EditIcon from "@/assets/icons/EditIcon";
+import DeleteIcon from "@/assets/icons/DeleteIcon";
 
 function AdministratorDashboard() {
   const [displayAlert, setDisplayAlert] = useState(false);
@@ -164,7 +175,23 @@ function AdministratorDashboard() {
             className="w-full flex justify-between rounded-md border-2 font-semibold border-reflexBlue-400 px-4 py-3"
           >
             {staffName}
-            <button type="submit">...</button>
+            <DropdownMenu>
+              <DropdownMenuTrigger>
+                <EllipsisIcon />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuGroup>
+                  <DropdownMenuItem>
+                    <EditIcon />
+                    <p className="font-semibold">Edit</p>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <DeleteIcon />
+                    <p className="font-semibold">Delete</p>
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         ))}
 
