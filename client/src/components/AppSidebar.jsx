@@ -12,9 +12,15 @@ import TreatmentIcon from "@/assets/icons/TreatmentIcon";
 import PatientRecordsIcon from "@/assets/icons/PatientRecordsIcon";
 import BookingsIcon from "@/assets/icons/BookingsIcon";
 import FinancesIcon from "@/assets/icons/FinancesIcon";
+import DashboardIcon from "@/assets/icons/DashboardIcon";
 import BeautoxLogo from "@/assets/logos/BeautoxLogo";
 
 const sideBarInformation = [
+  {
+    title: "DASHBOARD",
+    url: "/dasboard",
+    icon: <DashboardIcon />
+  },
   {
     title: "SERVICES",
     url: "/services",
