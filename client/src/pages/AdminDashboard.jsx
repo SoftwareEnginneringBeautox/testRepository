@@ -159,7 +159,25 @@ function AdministratorDashboard() {
             <tr>
               <td className="flex items-start gap-4">
                 <CalendarIcon />
-                check
+                check 1
+              </td>
+            </tr>
+            <tr>
+              <td className="flex items-start gap-4">
+                <CalendarIcon />
+                check 2
+              </td>
+            </tr>
+            <tr>
+              <td className="flex items-start gap-4">
+                <CalendarIcon />
+                check 3
+              </td>
+            </tr>
+            <tr>
+              <td className="flex items-start gap-4">
+                <CalendarIcon />
+                check 4
               </td>
             </tr>
           </tbody>
