@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/DropdownMenu";
 import EditIcon from "@/assets/icons/EditIcon";
 import DeleteIcon from "@/assets/icons/DeleteIcon";
+import CalendarIcon from "@/assets/icons/CalendarIcon";
 
 function AdministratorDashboard() {
   const [displayAlert, setDisplayAlert] = useState(false);
@@ -125,7 +126,7 @@ function AdministratorDashboard() {
   };
 
   return (
-    <div className="flex items-start gap-16 justify-center ">
+    <div className="flex items-start gap-12 justify-center ">
       {showAlert && (
         <AlertContainer>
           <InformationIcon />
@@ -156,14 +157,17 @@ function AdministratorDashboard() {
           </thead>
           <tbody>
             <tr>
-              <td>check</td>
+              <td className="flex items-start gap-4">
+                <CalendarIcon />
+                check
+              </td>
             </tr>
           </tbody>
         </table>
         <SalesChart />
         <br />
       </div>
-      <div className="w-1/4 shadow-custom p-12 bg-ash-100 rounded-lg h-auto flex flex-col items-center gap-4">
+      <div className="w-1/4 shadow-custom p-10 bg-ash-100 rounded-lg h-auto flex flex-col items-center gap-4">
         <h3 className="flex items-center gap-2 text-[2rem] leading-[2.8rem] font-semibold">
           <UserIcon size={32} />
           STAFF LIST
