@@ -25,7 +25,7 @@
 /* PRISM Table */
 
 .PRISM-table {
-  @apply rounded-md text-center w-full shadow-custom overflow-hidden;
+  @apply table-fixed rounded-md text-center w-full shadow-custom overflow-hidden;
 }
 
 .PRISM-table > thead {

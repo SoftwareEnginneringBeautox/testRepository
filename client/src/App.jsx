@@ -40,6 +40,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Login from "./pages/Login";
 import Fin from "./pages/FinancialOverview";
 import AdministratorDashboard from "./pages/AdminDashboard";
+import StaffDashboard from "./pages/StaffDashboard";
 
 function App() {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -124,6 +125,7 @@ function App() {
           <Route index element={<Login />} />
           <Route path="/FinancialOverview" element={<Fin />} />
           <Route path="/AdminDashboard" element={<AdministratorDashboard />} />
+          <Route path="/StaffDashboard" element={<StaffDashboard />} />
         </Routes>
       </BrowserRouter>
     </div>
