@@ -43,6 +43,7 @@ import AdministratorDashboard from "./pages/AdminDashboard";
 import StaffDashboard from "./pages/StaffDashboard";
 import PatientRecordsDatabase from "./pages/PatientRecordsDatabase";
 import AdministratorServices from "./pages/AdministratorServices";
+import ScheduleAppointment from "./pages/ScheduleAppointment";
 
 function App() {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -135,6 +136,10 @@ function App() {
           <Route
             path="/AdministratorServices"
             element={<AdministratorServices />}
+          />
+          <Route
+            path="/ScheduleAppointment"
+            element={<ScheduleAppointment />}
           />
         </Routes>
       </BrowserRouter>
