@@ -125,6 +125,38 @@ function StaffDashboard() {
     }, 15000);
   };
 
+  //dummy data for passing objects through table
+  const packages = [
+    {
+      productID: "1234432112",
+      package: "duchess",
+      treatment: "steaming",
+      sessions: 5,
+      price: 4999
+    },
+    {
+      productID: "123433522",
+      package: "me-so sexy",
+      treatment: "mesolipo",
+      sessions: 30,
+      price: 14999
+    },
+    {
+      productID: "765479901",
+      package: "hifu 7d",
+      treatment: "slimming",
+      sessions: 4,
+      price: 9999
+    },
+    {
+      productID: "1234664891",
+      package: "empress",
+      treatment: "diode lazer",
+      sessions: 6,
+      price: 14999
+    }
+  ];
+
   return (
     <div className="flex items-start gap-12 justify-center ">
       <div className="w-full flex flex-col gap-8">
@@ -180,34 +212,15 @@ function StaffDashboard() {
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>check 1</td>
-              <td>check 2</td>
-              <td>check 3</td>
-              <td>check 4</td>
-              <td>check 5</td>
-            </tr>
-            <tr>
-              <td>check 1</td>
-              <td>check 2</td>
-              <td>check 3</td>
-              <td>check 4</td>
-              <td>check 5</td>
-            </tr>
-            <tr>
-              <td>check 1</td>
-              <td>check 2</td>
-              <td>check 3</td>
-              <td>check 4</td>
-              <td>check 5</td>
-            </tr>
-            <tr>
-              <td>check 1</td>
-              <td>check 2</td>
-              <td>check 3</td>
-              <td>check 4</td>
-              <td>check 5</td>
-            </tr>
+            {packages.map((product, index) => (
+              <tr key={index}>
+                <td>{product.productID}</td>
+                <td>{product.package.toUpperCase()}</td>
+                <td>{product.treatment.toUpperCase()}</td>
+                <td>{product.sessions}</td>
+                <td>PHP {product.price.toLocaleString("en-US")}</td>
+              </tr>
+            ))}
           </tbody>
         </table>
         <br />

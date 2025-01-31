@@ -56,9 +56,6 @@ function AdministratorServices() {
             <td>5</td>
             <td></td>
           </tr>
-          <tr>
-            <Pagination />
-          </tr>
         </tbody>
       </table>
       <div className="w-full flex justify-end gap-4 mb-[10%]">

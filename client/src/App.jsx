@@ -41,6 +41,8 @@ import Login from "./pages/Login";
 import Fin from "./pages/FinancialOverview";
 import AdministratorDashboard from "./pages/AdminDashboard";
 import StaffDashboard from "./pages/StaffDashboard";
+import PatientRecordsDatabase from "./pages/PatientRecordsDatabase";
+import AdministratorServices from "./pages/AdministratorServices";
 
 function App() {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -126,6 +128,14 @@ function App() {
           <Route path="/FinancialOverview" element={<Fin />} />
           <Route path="/AdminDashboard" element={<AdministratorDashboard />} />
           <Route path="/StaffDashboard" element={<StaffDashboard />} />
+          <Route
+            path="/PatientRecordsDatabase"
+            element={<PatientRecordsDatabase />}
+          />
+          <Route
+            path="/AdministratorServices"
+            element={<AdministratorServices />}
+          />
         </Routes>
       </BrowserRouter>
     </div>
