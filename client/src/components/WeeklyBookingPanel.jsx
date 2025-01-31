@@ -29,7 +29,6 @@ const WeeklyBookingPanel = ({ events = [] }) => {
 
   return (
     <div className="w-[95%]">
-      {/* Header */}
       <div className="relative">
         <table className="w-full">
           <thead className="bg-lavender-400 text-customNeutral-100 text-center font-semibold text-[1.25rem] leading-8 py-4">

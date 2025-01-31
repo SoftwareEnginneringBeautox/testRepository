@@ -1,5 +1,6 @@
 import React from "react";
 import { CTAButton, OutlineButton } from "../Components";
+import { Button } from "@/components/ui/Button";
 import UserIcon from "../assets/icons/UserIcon";
 import EmailIcon from "../assets/icons/EmailIcon";
 import UserIDIcon from "../assets/icons/UserIDIcon";
@@ -123,6 +124,7 @@ function ScheduleAppointment() {
           />
         </div>
       </form>
+      <Button variant="outline">Button</Button>
     </div>
   );
 }
