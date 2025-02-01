@@ -5,7 +5,7 @@ import { cva } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "flex items-center justify-center text-center gap-2 whitespace-nowrap rounded-lg transition-colors disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-6 [&_svg]:shrink-0 font-semibold",
+  "flex items-center justify-center text-center gap-2 whitespace-nowrap rounded-lg transition-colors disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-6 [&_svg]:shrink-0 font-semibold focus-visible:outline-none",
 
   //for the default (callToAction) variant
   // p-[0.5rem_1rem] leading-6 rounded-lg gap-2 font-semibold bg-lavender-400 text-customNeutral-100 hover:bg-lavender-500 active:bg-lavender-200 active:text-lavender-500 active:border-lavender-200 flex items-center justify-center text-center
