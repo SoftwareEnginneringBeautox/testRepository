@@ -5,21 +5,20 @@ import { cva } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 dark:ring-offset-neutral-950 dark:focus-visible:ring-neutral-300",
+  "flex items-center justify-center text-center gap-2 whitespace-nowrap rounded-lg transition-colors disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-6 [&_svg]:shrink-0 font-semibold",
+
+  //for the default (callToAction) variant
+  // p-[0.5rem_1rem] leading-6 rounded-lg gap-2 font-semibold bg-lavender-400 text-customNeutral-100 hover:bg-lavender-500 active:bg-lavender-200 active:text-lavender-500 active:border-lavender-200 flex items-center justify-center text-center
+
+  //for the outline variant
+  //border-lavender-400 border-2 text-lavender-400 p-[0.5rem_1rem] leading-6 rounded-lg gap-2 font-semibold hover:bg-lavender-100 hover:border-lavender-100 active:bg-lavender-200 active:text-customNeutral-100 active:border-lavender-200 flex items-center justify-center text-center
   {
     variants: {
       variant: {
         default:
-          "bg-neutral-900 text-neutral-50 hover:bg-neutral-900/90 dark:bg-neutral-50 dark:text-neutral-900 dark:hover:bg-neutral-50/90",
-        destructive:
-          "bg-red-500 text-neutral-50 hover:bg-red-500/90 dark:bg-red-900 dark:text-neutral-50 dark:hover:bg-red-900/90",
+          "bg-lavender-400 text-customNeutral-100 hover:bg-lavender-500 active:bg-lavender-200 active:text-lavender-500 active:border-lavender-200",
         outline:
-          "border border-neutral-200 bg-white hover:bg-neutral-100 hover:text-neutral-900 dark:border-neutral-800 dark:bg-neutral-950 dark:hover:bg-neutral-800 dark:hover:text-neutral-50",
-        secondary:
-          "bg-neutral-100 text-neutral-900 hover:bg-neutral-100/80 dark:bg-neutral-800 dark:text-neutral-50 dark:hover:bg-neutral-800/80",
-        ghost:
-          "hover:bg-neutral-100 hover:text-neutral-900 dark:hover:bg-neutral-800 dark:hover:text-neutral-50",
-        link: "text-neutral-900 underline-offset-4 hover:underline dark:text-neutral-50"
+          "border-2 border-lavender-400 text-lavender-400 hover:bg-lavender-100 hover:border-lavender-100 active:bg-lavender-200 active:text-customNeutral-100 active:border-lavender-200"
       },
       size: {
         default: "h-10 px-4 py-2",

@@ -13,10 +13,22 @@ import CalendarIcon from "../assets/icons/CalendarIcon";
 import ClockIcon from "../assets/icons/ClockIcon";
 import AgeIcon from "../assets/icons/AgeIcon";
 import ArrowNorthEastIcon from "../assets/icons/ArrowNorthEastIcon";
+import EditIcon from "../assets/icons/EditIcon";
+import DeleteIcon from "../assets/icons/DeleteIcon";
+
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuTrigger
+} from "@/components/ui/DropdownMenu";
+
+import { Button, buttonVariants } from "@/components/ui/Button";
 
 function AdministratorServices() {
   return (
-    <>
+    <div className="flex flex-col gap-4">
       <h4 className="text-[2rem] leading-[44.8px] font-semibold">
         ADMINISTRATOR SERVICES
       </h4>
@@ -54,7 +66,25 @@ function AdministratorServices() {
             <td>3</td>
             <td>4</td>
             <td>5</td>
-            <td></td>
+            <td>
+              <DropdownMenu>
+                <DropdownMenuTrigger>
+                  <EllipsisIcon />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuGroup>
+                    <DropdownMenuItem>
+                      <EditIcon />
+                      <p className="font-semibold">Edit</p>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>
+                      <DeleteIcon />
+                      <p className="font-semibold">Delete</p>
+                    </DropdownMenuItem>
+                  </DropdownMenuGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </td>
           </tr>
         </tbody>
       </table>
@@ -65,6 +95,11 @@ function AdministratorServices() {
           className="items-end"
         />
 
+        <Button variant="outline">
+          <ChevronLeftIcon />
+          CHECK
+        </Button>
+
         <CTAButton
           text="ADD NEW PACKAGE"
           leftIcon={<PlusIcon />}
@@ -72,7 +107,12 @@ function AdministratorServices() {
           className="items-end"
         />
       </div>
-    </>
+      <Button variant="outline">
+        <ChevronLeftIcon />
+        CHECK
+        <ChevronLeftIcon />
+      </Button>
+    </div>
   );
 }
 
