@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CTAButton } from "../Components";
+import { Button } from "@/components/ui/Button";
 import UserIcon from "../assets/icons/UserIcon";
 import PasswordIcon from "../assets/icons/PasswordIcon";
 import LoginIcon from "../assets/icons/LoginIcon";
@@ -100,7 +100,10 @@ function Login() {
               </a>
             </p>
 
-            <CTAButton text="LOGIN" leftIcon={<LoginIcon size={24} />} />
+            <Button>
+              <LoginIcon size={24} />
+              LOGIN
+            </Button>
           </form>
         </div>
       </div>

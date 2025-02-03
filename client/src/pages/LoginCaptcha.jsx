@@ -28,7 +28,6 @@ function App() {
                 [CAPTCHA TEXT HERE]
               </div>
             </div>
-
             <div className="input-container">
               <label htmlFor="" className="input-field-label">
                 Enter the text
@@ -41,8 +40,10 @@ function App() {
                 />
               </div>
             </div>
-
-            <CTAButton text="LOGIN" leftIcon={<LoginIcon size={24} />} />
+            <Button>
+              <LoginIcon size={24} />
+              LOGIN
+            </Button>{" "}
           </form>
         </div>
       </div>

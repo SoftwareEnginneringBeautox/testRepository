@@ -1,7 +1,7 @@
 // Buttons
 export const CTAButton = ({ text, leftIcon, rightIcon, action, fullWidth }) => {
   const baseStyles =
-    "bg-lavender-400 text-customNeutral-100 p-[0.5rem_1rem] leading-6 rounded-lg gap-2 font-semibold hover:bg-lavender-500 active:bg-lavender-200 active:text-lavender-500 active:border-lavender-200 flex items-center justify-center text-center";
+    "bg-lavender-400 text-customNeutral-100 px-4 py-2 leading-6 rounded-lg gap-2 font-semibold hover:bg-lavender-500 active:bg-lavender-200 active:text-lavender-500 active:border-lavender-200 flex items-center justify-center text-center";
   const styles = fullWidth ? `w-full ${baseStyles}` : baseStyles;
 
   // For href button

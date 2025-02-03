@@ -1,5 +1,4 @@
 import React from "react";
-import { CTAButton, OutlineButton } from "../Components";
 import { Button } from "@/components/ui/Button";
 import UserIcon from "../assets/icons/UserIcon";
 import EmailIcon from "../assets/icons/EmailIcon";
@@ -111,20 +110,17 @@ function ScheduleAppointment() {
           </div>
         </div>
         <div className="flex flex-row gap-2 w-full">
-          <OutlineButton
-            text="RETURN"
-            leftIcon={<ChevronLeftIcon />}
-            fullWidth={true}
-          />
+          <Button variant="outline" fullWidth={true}>
+            <ChevronLeftIcon />
+            RETURN
+          </Button>
 
-          <CTAButton
-            text="SUBMIT SCHEDULE APPOINTMENT"
-            leftIcon={<ArrowNorthEastIcon size={16} />}
-            fullWidth={true}
-          />
+          <Button fullWidth={true}>
+            <ArrowNorthEastIcon />
+            SUBMIT SCHEDULE APPOINTMENT
+          </Button>
         </div>
       </form>
-      <Button variant="outline">Button</Button>
     </div>
   );
 }

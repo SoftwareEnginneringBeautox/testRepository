@@ -17,9 +17,7 @@ export function NavMain({ items }) {
           <SidebarMenuItem key={item.title}>
             <SidebarMenuButton tooltip={item.title}>
               {item.icon}
-              <span className="flex flex-row gap-2 justify-center items-center">
-                {item.title}
-              </span>
+              <span className="flex flex-row gap-2">{item.title}</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         ))}

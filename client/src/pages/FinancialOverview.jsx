@@ -1,6 +1,7 @@
 import React from "react";
 import "../App.css";
-import { CTAButton, OutlineButton, Pagination } from "../Components";
+import { Button } from "@/components/ui/Button";
+
 import FilterIcon from "../assets/icons/FilterIcon";
 import ChevronLeftIcon from "../assets/icons/ChevronLeftIcon";
 import DownloadIcon from "../assets/icons/DownloadIcon";
@@ -31,11 +32,10 @@ function FinancialOverwiew() {
       <h2 className="font-bold text-[2rem]">SALES TRACKER</h2>
       <SalesChart />
       <div className="w-full flex justify-end">
-        <CTAButton
-          text="FILTER BY"
-          rightIcon={<FilterIcon />}
-          className="items-end"
-        />
+        <Button>
+          <FilterIcon />
+          FILTER BY
+        </Button>
       </div>
       <table className="PRISM-table">
         <thead>
@@ -81,22 +81,18 @@ function FinancialOverwiew() {
             <td>Data 3.7</td>
             <td>Data 3.8</td>
           </tr>
-          <tr>
-            <Pagination />
-          </tr>
+          <tr></tr>
         </tbody>
       </table>
       <div className="w-full flex justify-end gap-4">
-        <OutlineButton
-          text="RETURN"
-          leftIcon={<ChevronLeftIcon />}
-          className="items-end"
-        />
-        <CTAButton
-          text="DOWNLOAD SALES REPORT"
-          leftIcon={<DownloadIcon />}
-          className="items-end"
-        />
+        <Button variant="outline">
+          <ChevronLeftIcon />
+          RETURN
+        </Button>
+        <Button variant="callToAction">
+          <DownloadIcon />
+          DOWNLOAD SALES REPORT
+        </Button>
       </div>
       <h2 className="font-bold text-[2rem]">MONTHLY EXPENSES TRACKER</h2>
       <div className="grid gap-14">
@@ -191,21 +187,18 @@ function FinancialOverwiew() {
           TOTAL PROFIT <span className="font-bold">PHP 200,000</span>
         </div>
         <div className="w-full flex justify-end gap-4 mb-[10%]">
-          <OutlineButton
-            text="RETURN"
-            leftIcon={<ChevronLeftIcon />}
-            className="items-end"
-          />
-          <CTAButton
-            text="ADD ADDITIONAL EXPENSES"
-            leftIcon={<PlusIcon />}
-            className="items-end"
-          />
-          <CTAButton
-            text="DOWNLOAD SALES REPORT"
-            leftIcon={<DownloadIcon />}
-            className="items-end"
-          />
+          <Button variant="outline">
+            <ChevronLeftIcon />
+            RETURN
+          </Button>
+          <Button>
+            <PlusIcon />
+            ADD ADDITIONAL EXPENSES
+          </Button>
+          <Button>
+            <DownloadIcon />
+            DOWNLOAD SALES REPORT
+          </Button>
         </div>
       </div>
     </div>

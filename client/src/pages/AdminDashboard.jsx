@@ -1,7 +1,7 @@
 import React from "react";
 import "../App.css";
-import { CTAButton } from "../Components";
 import { useState } from "react";
+import { Button } from "@/components/ui/Button";
 
 import SalesChart from "../components/SalesChart";
 import PlusIcon from "../assets/icons/PlusIcon";
@@ -217,13 +217,11 @@ function AdministratorDashboard() {
           </div>
         ))}
 
-        <CTAButton
-          text="ADD NEW STAFF"
-          leftIcon={<PlusIcon />}
-          rightIcon={<UserIcon />}
-          fullWidth={true}
-          action={throwAlert}
-        />
+        <Button fullWidth="true">
+          <PlusIcon />
+          ADD NEW STAFF
+          <UserIcon />
+        </Button>
       </div>
     </div>
   );

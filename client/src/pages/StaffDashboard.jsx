@@ -1,6 +1,5 @@
 import React from "react";
 import "../App.css";
-import { CTAButton } from "../Components";
 import { useState } from "react";
 
 import SalesChart from "../components/SalesChart";

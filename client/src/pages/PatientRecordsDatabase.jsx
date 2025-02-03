@@ -1,5 +1,5 @@
 import React from "react";
-import { CTAButton, OutlineButton } from "@/Components";
+import { Button } from "@/components/ui/Button";
 import ChevronLeftIcon from "@/assets/icons/ChevronLeftIcon";
 import PlusIcon from "@/assets/icons/PlusIcon";
 import SortIcon from "@/assets/icons/SortIcon";
@@ -90,7 +90,10 @@ function PatientRecordsDatabase() {
               <MagnifyingGlassIcon />
             </button>
           </div>
-          <CTAButton text="SORT BY" rightIcon={<SortIcon />} />
+          <Button>
+            SORT BY
+            <SortIcon />
+          </Button>
         </div>
       </div>
       <table className="PRISM-table">
@@ -145,8 +148,14 @@ function PatientRecordsDatabase() {
         </tbody>
       </table>
       <div className="flex flex-row gap-4 justify-end">
-        <OutlineButton text="RETURN" leftIcon={<ChevronLeftIcon />} />
-        <CTAButton text="ADD NEW ENTRY" leftIcon={<PlusIcon />} />
+        <Button variant="outline">
+          <ChevronLeftIcon />
+          RETURN
+        </Button>
+        <Button>
+          <PlusIcon />
+          ADD NEW ENTRY
+        </Button>
       </div>
     </div>
   );

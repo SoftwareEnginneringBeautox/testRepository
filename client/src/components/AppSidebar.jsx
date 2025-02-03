@@ -18,17 +18,17 @@ import BeautoxLogo from "@/assets/logos/BeautoxLogo";
 const sideBarInformation = [
   {
     title: "DASHBOARD",
-    url: "/dasboard",
+    url: "/AdminDashboard",
     icon: <DashboardIcon />
   },
   {
     title: "SERVICES",
-    url: "/services",
+    url: "/AdministratorServices",
     icon: <TreatmentIcon />
   },
   {
     title: "PATIENT RECORDS",
-    url: "/patient-records",
+    url: "/PatientRecordsDatabase",
     icon: <PatientRecordsIcon />
   },
   {
@@ -38,7 +38,7 @@ const sideBarInformation = [
   },
   {
     title: "FINANCIAL OVERVIEW",
-    url: "/financial-overview",
+    url: "/FinancialOverview",
     icon: <FinancesIcon />
   }
 ];

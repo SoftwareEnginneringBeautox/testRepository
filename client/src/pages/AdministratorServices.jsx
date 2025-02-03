@@ -1,6 +1,16 @@
 import React from "react";
 import "../App.css";
-import { CTAButton, OutlineButton, Pagination } from "../Components";
+
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuTrigger
+} from "@/components/ui/DropdownMenu";
+
+import { Button } from "@/components/ui/Button";
+
 import ChevronLeftIcon from "../assets/icons/ChevronLeftIcon";
 import PlusIcon from "../assets/icons/PlusIcon";
 import SettingsIcon from "../assets/icons/SettingsIcon";
@@ -15,16 +25,6 @@ import AgeIcon from "../assets/icons/AgeIcon";
 import ArrowNorthEastIcon from "../assets/icons/ArrowNorthEastIcon";
 import EditIcon from "../assets/icons/EditIcon";
 import DeleteIcon from "../assets/icons/DeleteIcon";
-
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuTrigger
-} from "@/components/ui/DropdownMenu";
-
-import { Button, buttonVariants } from "@/components/ui/Button";
 
 function AdministratorServices() {
   return (
@@ -89,29 +89,17 @@ function AdministratorServices() {
         </tbody>
       </table>
       <div className="w-full flex justify-end gap-4 mb-[10%]">
-        <OutlineButton
-          text="RETURN"
-          leftIcon={<ChevronLeftIcon />}
-          className="items-end"
-        />
-
         <Button variant="outline">
           <ChevronLeftIcon />
           CHECK
         </Button>
 
-        <CTAButton
-          text="ADD NEW PACKAGE"
-          leftIcon={<PlusIcon />}
-          rightIcon={<PackageIcon />}
-          className="items-end"
-        />
+        <Button>
+          <PlusIcon />
+          ADD NEW PACKAGE
+          <PackageIcon />
+        </Button>
       </div>
-      <Button variant="outline">
-        <ChevronLeftIcon />
-        CHECK
-        <ChevronLeftIcon />
-      </Button>
     </div>
   );
 }
