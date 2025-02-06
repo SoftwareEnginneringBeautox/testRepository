@@ -36,3 +36,21 @@ const ModalForm = React.forwardRef(({ className, ...props }, ref) => (
 ModalForm.displayName = "ModalForm";
 
 export { ModalContainer, ModalTitle, ModalContent, ModalForm };
+
+function CustomModal({ isOpen, onClose }) {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+      <div className="bg-white p-6 rounded-md shadow-lg">
+        <p>This is a custom modal!</p>
+        <button
+          onClick={onClose}
+          className="mt-4 bg-red-500 text-white p-2 rounded"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  );
+}

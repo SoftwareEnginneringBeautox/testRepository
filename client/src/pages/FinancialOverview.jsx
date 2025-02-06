@@ -16,6 +16,18 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from "@/components/ui/DropdownMenu";
+
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow
+} from "@/components/ui/table";
+
 import EditIcon from "@/assets/icons/EditIcon";
 import DeleteIcon from "@/assets/icons/DeleteIcon";
 import EllipsisIcon from "@/assets/icons/EllipsisIcon";
@@ -84,6 +96,22 @@ function FinancialOverwiew() {
           <tr></tr>
         </tbody>
       </table>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="py-4 text-center">CLIENT</TableHead>
+            <TableHead className="py-4 text-center">PERSON IN CHARGE</TableHead>
+            <TableHead className="py-4 text-center">DATE TRANSACTED</TableHead>
+            <TableHead className="py-4 text-center">PAYMENT METHOD</TableHead>
+            <TableHead className="py-4 text-center">PACKAGES</TableHead>
+            <TableHead className="py-4 text-center">TREATMENT</TableHead>
+            <TableHead className="py-4 text-center">PAYMENT</TableHead>
+            <TableHead className="py-4 text-center">REFERENCE NO.</TableHead>
+            <TableHead></TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody></TableBody>
+      </Table>
       <div className="w-full flex justify-end gap-4">
         <Button variant="outline">
           <ChevronLeftIcon />
@@ -98,46 +126,53 @@ function FinancialOverwiew() {
       <div className="grid gap-14">
         <div className="flex w-full gap-8">
           <BeautoxPieChart className="shadow-custom" />
-          <table className="PRISM-table">
-            <thead>
-              <tr>
-                <th className="text-left">CATEGORIES</th>
-              </tr>
-            </thead>
-            <tbody className="text-left">
-              <tr>
-                <td>CATEGORY 1</td>
-              </tr>
-              <tr>
-                <td>CATEGORY 2</td>
-              </tr>
-              <tr>
-                <td>CATEGORY 3</td>
-              </tr>
-              <tr>
-                <td>CATEGORY 4</td>
-              </tr>
-              <tr>
-                <td>CATEGORY 5</td>
-              </tr>
-            </tbody>
-          </table>
+          <Table className="h-full">
+            <TableHeader>
+              <TableRow>
+                <TableHead className="text-xl text-left font-semibold py-4 ">
+                  REMINDERS
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <TableRow>
+                <TableCell className="flex items-center gap-4 h-full">
+                  CHECK 1
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="flex items-center gap-4 h-full">
+                  CHECK 2
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="flex items-center gap-4 h-full">
+                  CHECK 3
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="flex items-center gap-4 h-full">
+                  CHECK 4
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
         </div>
-        <table className="PRISM-table">
-          <thead>
-            <tr>
-              <th>DATE</th>
-              <th>CATEGORY</th>
-              <th>EXPENSE</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>1</td>
-              <td>2</td>
-              <td>3</td>
-              <td>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="py-4 text-center">DATE</TableHead>
+              <TableHead className="py-4 text-center">CATEGORY</TableHead>
+              <TableHead className="py-4 text-center">EXPENSE</TableHead>
+              <TableHead></TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            <TableRow>
+              <TableCell className="py-4 text-center">1</TableCell>
+              <TableCell className="py-4 text-center">2</TableCell>
+              <TableCell className="py-4 text-center">3</TableCell>
+              <TableCell className="py-4 text-center">
                 <DropdownMenu>
                   <DropdownMenuTrigger>
                     <EllipsisIcon />
@@ -155,34 +190,10 @@ function FinancialOverwiew() {
                     </DropdownMenuGroup>
                   </DropdownMenuContent>
                 </DropdownMenu>
-              </td>
-            </tr>
-            <tr>
-              <td>1</td>
-              <td>2</td>
-              <td>3</td>
-              <td>
-                <DropdownMenu>
-                  <DropdownMenuTrigger>
-                    <EllipsisIcon />
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    <DropdownMenuGroup>
-                      <DropdownMenuItem>
-                        <EditIcon />
-                        <p className="font-semibold">Edit</p>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem>
-                        <DeleteIcon />
-                        <p className="font-semibold">Delete</p>
-                      </DropdownMenuItem>
-                    </DropdownMenuGroup>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+              </TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
         <div className="w-full rounded-lg p-4 border-2 border-lavender-400 text-center text-3xl leading-[67.2px] ">
           TOTAL PROFIT <span className="font-bold">PHP 200,000</span>
         </div>

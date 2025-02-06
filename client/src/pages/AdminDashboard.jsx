@@ -27,6 +27,18 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from "@/components/ui/DropdownMenu";
+
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow
+} from "@/components/ui/table";
+
 import EditIcon from "@/assets/icons/EditIcon";
 import DeleteIcon from "@/assets/icons/DeleteIcon";
 import CalendarIcon from "@/assets/icons/CalendarIcon";
@@ -149,6 +161,35 @@ function AdministratorDashboard() {
             WELCOME BACK, ADMINISTRATOR
           </h2>
         </div>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="text-xl text-left font-semibold py-4 ">
+                REMINDERS
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            <TableRow>
+              <TableCell className="flex items-center gap-4">
+                <CalendarIcon />
+                Check 1
+              </TableCell>
+              <TableCell className="flex items-center gap-4">
+                <CalendarIcon />
+                Check 2
+              </TableCell>
+              <TableCell className="flex items-center gap-4">
+                <CalendarIcon />
+                Check 3
+              </TableCell>
+              <TableCell className="flex items-center gap-4">
+                <CalendarIcon />
+                Check 4
+              </TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
         <table className="PRISM-table">
           <thead>
             <tr className="text-left">

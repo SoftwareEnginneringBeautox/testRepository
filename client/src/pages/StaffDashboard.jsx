@@ -26,6 +26,18 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from "@/components/ui/DropdownMenu";
+
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow
+} from "@/components/ui/Table";
+
 import EditIcon from "@/assets/icons/EditIcon";
 import DeleteIcon from "@/assets/icons/DeleteIcon";
 import CalendarIcon from "@/assets/icons/CalendarIcon";
@@ -167,61 +179,77 @@ function StaffDashboard() {
             WELCOME BACK, STAFF
           </h2>
         </div>
-        <table className="PRISM-table">
-          <thead>
-            <tr className="text-left">
-              <th>REMINDERS</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td className="flex items-start gap-4">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="text-xl text-left font-semibold py-4 ">
+                REMINDERS
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            <TableRow>
+              <TableCell className="flex items-center gap-4">
                 <CalendarIcon />
-                check 1
-              </td>
-            </tr>
-            <tr>
-              <td className="flex items-start gap-4">
+                Check 1
+              </TableCell>
+              <TableCell className="flex items-center gap-4">
                 <CalendarIcon />
-                check 2
-              </td>
-            </tr>
-            <tr>
-              <td className="flex items-start gap-4">
+                Check 2
+              </TableCell>
+              <TableCell className="flex items-center gap-4">
                 <CalendarIcon />
-                check 3
-              </td>
-            </tr>
-            <tr>
-              <td className="flex items-start gap-4">
+                Check 3
+              </TableCell>
+              <TableCell className="flex items-center gap-4">
                 <CalendarIcon />
-                check 4
-              </td>
-            </tr>
-          </tbody>
-        </table>
-        <table className="PRISM-table table-fixed">
-          <thead>
-            <tr>
-              <th>PRODUCT ID</th>
-              <th>PACKAGE</th>
-              <th>TREATMENTS</th>
-              <th>SESSIONS</th>
-              <th>PRICE</th>
-            </tr>
-          </thead>
-          <tbody>
+                Check 4
+              </TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="text-xl text-center font-semibold py-4 ">
+                PRODUCT ID
+              </TableHead>
+              <TableHead className="text-xl text-center font-semibold py-4 ">
+                PACKAGE
+              </TableHead>
+              <TableHead className="text-xl text-center font-semibold py-4 ">
+                TREATMENTS
+              </TableHead>
+              <TableHead className="text-xl text-center font-semibold py-4 ">
+                SESSIONS
+              </TableHead>
+              <TableHead className="text-xl text-center font-semibold py-4 ">
+                PRICE
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {packages.map((product, index) => (
-              <tr key={index}>
-                <td>{product.productID}</td>
-                <td>{product.package.toUpperCase()}</td>
-                <td>{product.treatment.toUpperCase()}</td>
-                <td>{product.sessions}</td>
-                <td>PHP {product.price.toLocaleString("en-US")}</td>
-              </tr>
+              <TableRow key={index}>
+                <TableCell className="text-center">
+                  {product.productID.toUpperCase()}
+                </TableCell>
+                <TableCell className="text-center">
+                  {product.package.toUpperCase()}
+                </TableCell>
+                <TableCell className="text-center">
+                  {product.treatment.toUpperCase()}
+                </TableCell>
+                <TableCell className="text-center">
+                  {product.sessions}
+                </TableCell>
+                <TableCell className="text-center">
+                  PHP{product.price.toLocaleString("en-US")}
+                </TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
         <br />
       </div>
     </div>

@@ -2,6 +2,17 @@ import React from "react";
 import "../App.css";
 
 import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow
+} from "@/components/ui/table";
+
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
@@ -32,41 +43,30 @@ function AdministratorServices() {
       <h4 className="text-[2rem] leading-[44.8px] font-semibold">
         ADMINISTRATOR SERVICES
       </h4>
-      <table className="PRISM-table">
-        <thead>
-          <tr>
-            <th>PRODUCT ID</th>
-            <th>PACKAGE</th>
-            <th>TREATMENT</th>
-            <th>SESSIONS</th>
-            <th>PRICE</th>
-            <th className="flex justify-center items-center h-full">
-              <button className="flex items-center justify-center h-12 w-ful">
+
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="py-4 text-center">PRODUCT ID</TableHead>
+            <TableHead className="py-4 text-center">PACKAGE</TableHead>
+            <TableHead className="py-4 text-center">TREATMENT</TableHead>
+            <TableHead className="py-4 text-center">SESSIONS</TableHead>
+            <TableHead className="py-4 text-center">PRICE</TableHead>
+            <TableHead className="py-4 text-center">
+              <button className="flex items-center justify-center h-8 w-full">
                 <SettingsIcon />
               </button>
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>1</td>
-            <td>2</td>
-            <td>3</td>
-            <td>4</td>
-            <td>5</td>
-            <td>
-              <button className="flex items-center justify-center h-8 w-full">
-                <EllipsisIcon />
-              </button>
-            </td>
-          </tr>
-          <tr>
-            <td>1</td>
-            <td>2</td>
-            <td>3</td>
-            <td>4</td>
-            <td>5</td>
-            <td>
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          <TableRow>
+            <TableCell className="py-4 text-center">1</TableCell>
+            <TableCell className="py-4 text-center">2</TableCell>
+            <TableCell className="py-4 text-center">3</TableCell>
+            <TableCell className="py-4 text-center">4</TableCell>
+            <TableCell className="py-4 text-center">5</TableCell>
+            <TableCell className="py-4 text-center">
               <DropdownMenu>
                 <DropdownMenuTrigger>
                   <EllipsisIcon />
@@ -84,10 +84,10 @@ function AdministratorServices() {
                   </DropdownMenuGroup>
                 </DropdownMenuContent>
               </DropdownMenu>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+            </TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>
       <div className="w-full flex justify-end gap-4 mb-[10%]">
         <Button variant="outline">
           <ChevronLeftIcon />

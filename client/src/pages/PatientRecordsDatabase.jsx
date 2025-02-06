@@ -7,6 +7,18 @@ import MagnifyingGlassIcon from "@/assets/icons/MagnifyingGlassIcon";
 import EditIcon from "@/assets/icons/EditIcon";
 import ArchiveIcon from "@/assets/icons/ArchiveIcon";
 
+import { Input } from "@/components/ui/Input";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow
+} from "@/components/ui/table";
+
 function PatientRecordsDatabase() {
   //dummy data
 
@@ -96,43 +108,46 @@ function PatientRecordsDatabase() {
           </Button>
         </div>
       </div>
-      <table className="PRISM-table">
-        <thead>
-          <tr>
-            <th>CLIENT</th>
-            <th>DATE TRANSACTED</th>
-            <th>NEXT SESSION DATE</th>
-            <th>NEXT SESSION TIME</th>
-            <th>PERSON IN CHARGE</th>
-            <th>PACKAGE</th>
-            <th>TREATMENT</th>
-            <th>REMAINING SESSIONS</th>
-            <th>CONSENT STATUS</th>
-            <th>PAYMENT METHOD</th>
-            <th>TOTAL AMOUNT</th>
-            <th>AMOUNT PAID</th>
-            <th>REMAINING BALANCE</th>
-            <th>REFERENCE NO.</th>
-            <th></th>
+      <table className="table-fixed rounded-md text-center w-full shadow-custom overflow-hidden">
+        <thead className="bg-lavender-400">
+          <tr className="text-customNeutral-100 leading-5 font-semibold text-[clamp(0.4rem,0.75vw,1rem)] text-center">
+            <th className="font-semibold p-4">CLIENT</th>
+            <th className="font-semibold p-4">DATE TRANSACTED</th>
+            <th className="font-semibold p-4">NEXT SESSION DATE</th>
+            <th className="font-semibold p-4">NEXT SESSION TIME</th>
+            <th className="font-semibold p-4">PERSON IN CHARGE</th>
+            <th className="font-semibold p-4">PACKAGE</th>
+            <th className="font-semibold p-4">TREATMENT</th>
+            <th className="font-semibold p-4">REMAINING SESSIONS</th>
+            <th className="font-semibold p-4">CONSENT STATUS</th>
+            <th className="font-semibold p-4">PAYMENT METHOD</th>
+            <th className="font-semibold p-4">TOTAL AMOUNT</th>
+            <th className="font-semibold p-4">AMOUNT PAID</th>
+            <th className="font-semibold p-4">REMAINING BALANCE</th>
+            <th className="font-semibold p-4">REFERENCE NO.</th>
+            <th className="font-semibold p-4"></th>
           </tr>
         </thead>
         <tbody>
           {dummyRecords.map((record, index) => (
-            <tr key={index}>
-              <td>{record.client}</td>
-              <td>{record.dateTransacted}</td>
-              <td>{record.nextSessionDate}</td>
-              <td>{record.nextSessionTime}</td>
-              <td>{record.personInCharge}</td>
-              <td>{record.package}</td>
-              <td>{record.treatment}</td>
-              <td>{record.remainingSessions}</td>
-              <td>{record.consentStatus}</td>
-              <td>{record.paymentMethod}</td>
-              <td>{record.totalAmount}</td>
-              <td>{record.amountPaid}</td>
-              <td>{record.remainingBalance}</td>
-              <td>{record.referenceNo}</td>
+            <tr
+              key={index}
+              className="odd:bg-reflexBlue-100 even:bg-faintingLight-100 text-[clamp(0.5rem,0.75vw,1rem)]"
+            >
+              <td className="p-5">{record.client.toUpperCase()}</td>
+              <td className="p-5">{record.dateTransacted}</td>
+              <td className="p-5">{record.nextSessionDate}</td>
+              <td className="p-5">{record.nextSessionTime}</td>
+              <td className="p-5">{record.personInCharge.toUpperCase()}</td>
+              <td className="p-5">{record.package.toUpperCase()}</td>
+              <td className="p-5">{record.treatment.toUpperCase()}</td>
+              <td className="p-5">{record.remainingSessions}</td>
+              <td className="p-5">{record.consentStatus.toUpperCase()}</td>
+              <td className="p-5">{record.paymentMethod.toUpperCase()}</td>
+              <td className="p-5">{record.totalAmount}</td>
+              <td className="p-5">{record.amountPaid}</td>
+              <td className="p-5">{record.remainingBalance}</td>
+              <td className="p-5">{record.referenceNo}</td>
               <td>
                 <div className="flex justify-center gap-2">
                   <button className="text-reflexBlue-400">
@@ -157,6 +172,82 @@ function PatientRecordsDatabase() {
           ADD NEW ENTRY
         </Button>
       </div>
+      <div>
+        <h4>test div</h4>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="py-4">CLIENT</TableHead>
+              <TableHead className="py-4">DATE TRANSACTED</TableHead>
+              <TableHead className="py-4">NEXT SESSION DATE</TableHead>
+              <TableHead className="py-4">NEXT SESSION TIME</TableHead>
+              <TableHead className="py-4">PERSON IN CHARGE</TableHead>
+              <TableHead className="py-4">PACKAGE</TableHead>
+              <TableHead className="py-4">TREATMENT</TableHead>
+              <TableHead className="py-4">REMAINING SESSIONS</TableHead>
+              <TableHead className="py-4">CONSENT STATUS</TableHead>
+              <TableHead className="py-4">PAYMENT METHOD</TableHead>
+              <TableHead className="py-4">TOTAL AMOUNT</TableHead>
+              <TableHead className="py-4">AMOUNT PAID </TableHead>
+              <TableHead className="py-4">REMAINING BALANCE</TableHead>
+              <TableHead className="py-4">REFERENCE NO.</TableHead>
+              <TableHead></TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {dummyRecords.map((record, index) => (
+              <TableRow key={index}>
+                <TableCell>{record.client.toUpperCase()}</TableCell>
+                <TableCell className="text-center">
+                  {record.dateTransacted}
+                </TableCell>
+                <TableCell className="text-center">
+                  {record.nextSessionDate}
+                </TableCell>
+                <TableCell className="text-center">
+                  {record.nextSessionTime}
+                </TableCell>
+                <TableCell>{record.personInCharge.toUpperCase()}</TableCell>
+                <TableCell>{record.package.toUpperCase()}</TableCell>
+                <TableCell className="text-center">
+                  {record.treatment.toUpperCase()}
+                </TableCell>
+                <TableCell className="text-center">
+                  {record.remainingSessions}
+                </TableCell>
+                <TableCell className="text-center">
+                  {record.consentStatus.toUpperCase()}
+                </TableCell>
+                <TableCell>{record.paymentMethod.toUpperCase()}</TableCell>
+                <TableCell className="text-center">
+                  PHP{record.totalAmount}
+                </TableCell>
+                <TableCell className="text-center">
+                  PP{record.amountPaid}
+                </TableCell>
+                <TableCell className="text-center">
+                  {record.remainingBalance}
+                </TableCell>
+                <TableCell className="text-center">
+                  {record.referenceNo}
+                </TableCell>
+                <TableCell>
+                  <div className="flex justify-center gap-2">
+                    <button className="text-reflexBlue-400">
+                      <EditIcon />
+                    </button>
+                    <button className="text-reflexBlue-400">
+                      <ArchiveIcon />
+                    </button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+      <br />
+      <br />
     </div>
   );
 }
