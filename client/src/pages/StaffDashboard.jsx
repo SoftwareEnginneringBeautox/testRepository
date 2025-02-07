@@ -38,6 +38,8 @@ import {
   TableRow
 } from "@/components/ui/Table";
 
+import { Input } from "@/components/ui/Input";
+
 import EditIcon from "@/assets/icons/EditIcon";
 import DeleteIcon from "@/assets/icons/DeleteIcon";
 import CalendarIcon from "@/assets/icons/CalendarIcon";
@@ -252,6 +254,7 @@ function StaffDashboard() {
         </Table>
         <br />
       </div>
+      <Input />
     </div>
   );
 }

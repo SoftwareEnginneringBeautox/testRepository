@@ -22,35 +22,6 @@
 
 /* ========================================================================================= */
 
-/* PRISM Table */
-
-.PRISM-table {
-  @apply table-fixed rounded-md text-center w-full shadow-custom overflow-hidden;
-}
-
-.PRISM-table > thead {
-  @apply bg-lavender-400;
-}
-
-.PRISM-table > thead > tr {
-  @apply text-customNeutral-100 leading-8 font-semibold text-[1.25rem];
-}
-
-.PRISM-table > thead > tr > th {
-  @apply font-semibold p-4;
-}
-
-.PRISM-table > tbody > tr:nth-child(odd) {
-  @apply bg-reflexBlue-100;
-}
-
-.PRISM-table > tbody > tr:nth-child(even) {
-  @apply bg-faintingLight-100;
-}
-
-.PRISM-table > tbody > tr > td {
-  @apply p-5;
-}
 
 /* ========================================================================================= */
 
