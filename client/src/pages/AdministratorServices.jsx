@@ -22,6 +22,8 @@ import {
 
 import { Button } from "@/components/ui/Button";
 
+import { InputContainer, InputLabel, Input } from "@/components/ui/Input";
+
 import ChevronLeftIcon from "../assets/icons/ChevronLeftIcon";
 import PlusIcon from "../assets/icons/PlusIcon";
 import SettingsIcon from "../assets/icons/SettingsIcon";
@@ -100,6 +102,10 @@ function AdministratorServices() {
           <PackageIcon />
         </Button>
       </div>
+      <InputContainer>
+        <InputLabel>Hi</InputLabel>
+        <Input />
+      </InputContainer>
     </div>
   );
 }

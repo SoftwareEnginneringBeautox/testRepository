@@ -254,7 +254,7 @@ function StaffDashboard() {
         </Table>
         <br />
       </div>
-      <Input />
+      {/* <Input /> */}
     </div>
   );
 }

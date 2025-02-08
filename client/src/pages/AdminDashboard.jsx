@@ -190,39 +190,7 @@ function AdministratorDashboard() {
             </TableRow>
           </TableBody>
         </Table>
-        <table className="PRISM-table">
-          <thead>
-            <tr className="text-left">
-              <th>REMINDERS</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td className="flex items-start gap-4">
-                <CalendarIcon />
-                check 1
-              </td>
-            </tr>
-            <tr>
-              <td className="flex items-start gap-4">
-                <CalendarIcon />
-                check 2
-              </td>
-            </tr>
-            <tr>
-              <td className="flex items-start gap-4">
-                <CalendarIcon />
-                check 3
-              </td>
-            </tr>
-            <tr>
-              <td className="flex items-start gap-4">
-                <CalendarIcon />
-                check 4
-              </td>
-            </tr>
-          </tbody>
-        </table>
+
         <SalesChart />
         <br />
       </div>

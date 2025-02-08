@@ -7,7 +7,7 @@ const InputContainer = React.forwardRef(
     return (
       <div
         type={type}
-        className={cn("flex gap-2", className)}
+        className={cn("flex flex-col gap-2", className)}
         ref={ref}
         {...props}
       />
@@ -43,4 +43,4 @@ const InputLabel = React.forwardRef(({ className, type, ...props }, ref) => {
 });
 InputLabel.displayName = "InputLabel";
 
-export { Input, InputLabel };
+export { InputContainer, Input, InputLabel };
