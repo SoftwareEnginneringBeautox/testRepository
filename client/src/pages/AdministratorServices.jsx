@@ -102,9 +102,8 @@ function AdministratorServices() {
           <PackageIcon />
         </Button>
       </div>
-      <InputContainer>
-        <InputLabel>Hi</InputLabel>
-        <Input />
+      <InputContainer label="Product ID">
+        <Input placeholder=":test:" />
       </InputContainer>
     </div>
   );
