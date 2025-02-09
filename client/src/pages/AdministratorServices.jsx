@@ -22,7 +22,13 @@ import {
 
 import { Button } from "@/components/ui/Button";
 
-import { InputContainer, InputLabel, Input } from "@/components/ui/Input";
+import {
+  InputContainer,
+  InputTextField,
+  InputLabel,
+  InputIcon,
+  Input
+} from "@/components/ui/Input";
 
 import ChevronLeftIcon from "../assets/icons/ChevronLeftIcon";
 import PlusIcon from "../assets/icons/PlusIcon";
@@ -104,6 +110,15 @@ function AdministratorServices() {
       </div>
       <InputContainer label="Product ID">
         <Input placeholder=":test:" />
+      </InputContainer>
+      <InputContainer>
+        <InputLabel>Eli Dizon</InputLabel>
+        <InputTextField>
+          <InputIcon>
+            <PlusIcon />
+          </InputIcon>
+          <Input placeholder=":test:" />
+        </InputTextField>
       </InputContainer>
     </div>
   );

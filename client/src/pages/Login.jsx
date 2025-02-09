@@ -5,6 +5,14 @@ import PasswordIcon from "../assets/icons/PasswordIcon";
 import LoginIcon from "../assets/icons/LoginIcon";
 import BeautoxLogo from "../assets/logos/Beautox.svg";
 
+import {
+  InputContainer,
+  InputTextField,
+  InputLabel,
+  InputIcon,
+  Input
+} from "@/components/ui/Input";
+
 function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -57,13 +65,13 @@ function Login() {
           </p>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-4 mt-4">
-            <div className="input-container">
-              <label htmlFor="username" className="input-field-label">
-                Username
-              </label>
-              <div className="input-field">
-                <UserIcon size={24} />
-                <input
+            <InputContainer>
+              <InputLabel>Username</InputLabel>
+              <InputTextField>
+                <InputIcon>
+                  <UserIcon />
+                </InputIcon>
+                <Input
                   type="text"
                   id="username"
                   className="text-input"
@@ -72,16 +80,16 @@ function Login() {
                   onChange={(e) => setUsername(e.target.value)}
                   required
                 />
-              </div>
-            </div>
+              </InputTextField>
+            </InputContainer>
 
-            <div className="input-container">
-              <label htmlFor="password" className="input-field-label">
-                Password
-              </label>
-              <div className="input-field">
-                <PasswordIcon size={24} />
-                <input
+            <InputContainer>
+              <InputLabel>Password</InputLabel>
+              <InputTextField>
+                <InputIcon>
+                  <PasswordIcon />
+                </InputIcon>
+                <Input
                   type="password"
                   id="password"
                   className="text-input"
@@ -90,8 +98,8 @@ function Login() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                 />
-              </div>
-            </div>
+              </InputTextField>
+            </InputContainer>
 
             <p className="text-customNeutral-300 text-xs font-bold leading-5 text-center">
               FORGOT PASSWORD?{" "}

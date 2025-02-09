@@ -1,33 +1,78 @@
 import * as React from "react";
 
+import { useId } from "react";
+
 import { cn } from "@/lib/utils";
 
 const InputContainer = React.forwardRef(
   ({ className, label, children, ...props }, ref) => {
+    // Generate a unique ID if not provided
+    const generatedId = useId();
+
+    // Clone children and ensure InputLabel gets the input's ID
+    const enhancedChildren = React.Children.map(children, (child) => {
+      if (React.isValidElement(child) && child.type === InputLabel) {
+        return React.cloneElement(child, { htmlFor: generatedId });
+      }
+      if (React.isValidElement(child) && child.type === Input) {
+        return React.cloneElement(child, { id: generatedId });
+      }
+      return child;
+    });
+
     return (
       <div
-        className={cn("flex flex-col gap-2", className)}
+        className={cn("flex flex-col gap-1 w-full", className)}
         ref={ref}
         {...props}
       >
-        {label && (
-          <label htmlFor={id} className="text-sm font-semibold">
-            {label}
-          </label>
-        )}
-        <div className="relative flex items-center">{children}</div>
+        {enhancedChildren}
       </div>
     );
   }
 );
 InputContainer.displayName = "InputContainer";
 
+const InputLabel = React.forwardRef(
+  ({ className, htmlFor, type, ...props }, ref) => {
+    return (
+      <label
+        htmlFor={htmlFor}
+        type={type}
+        className={cn("text-sm font-semibold", className)}
+        ref={ref}
+        {...props}
+      />
+    );
+  }
+);
+InputLabel.displayName = "InputLabel";
+
+const InputTextField = ({ children, className }) => {
+  return (
+    <div
+      className={cn(
+        "flex items-center gap-2 w-full bg-customNeutral-100 rounded-md border-2 border-customNeutral-200 focus-within:border-lavender-400 dark:border-neutral-800 dark:bg-neutral-950 dark:ring-offset-neutral-950 dark:file:text-neutral-50 dark:placeholder:text-neutral-400 px-3 py-2",
+        className
+      )}
+    >
+      {children}
+    </div>
+  );
+};
+InputTextField.displayName = "InputTextField";
+
+const InputIcon = ({ children }) => {
+  return <div className="[&_svg]:size-6 [&_svg]:shrink-0 ">{children}</div>;
+};
+InputIcon.displayName = "InputIcon";
+
 const Input = React.forwardRef(({ className, type, ...props }, ref) => {
   return (
     <input
       type={type}
       className={cn(
-        "flex gap-2 h-10 w-full rounded-md focus:border-lavender-400 border-2 border-customNeutral-200 bg-customNeutral-100 px-3 py-2 text-base ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-neutral-950 placeholder:text-customNeutral-300 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm dark:border-neutral-800 dark:bg-neutral-950 dark:ring-offset-neutral-950 dark:file:text-neutral-50 dark:placeholder:text-neutral-400 dark:focus-visible:ring-neutral-300",
+        "w-full flex-1 outline-none bg-inherit file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-neutral-950 placeholder:text-customNeutral-300 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
         className
       )}
       ref={ref}
@@ -37,16 +82,4 @@ const Input = React.forwardRef(({ className, type, ...props }, ref) => {
 });
 Input.displayName = "Input";
 
-const InputLabel = React.forwardRef(({ className, type, ...props }, ref) => {
-  return (
-    <label
-      type={type}
-      className={cn("text-sm font-semibold", className)}
-      ref={ref}
-      {...props}
-    />
-  );
-});
-InputLabel.displayName = "InputLabel";
-
-export { InputContainer, Input, InputLabel };
+export { InputContainer, InputTextField, InputLabel, InputIcon, Input };
