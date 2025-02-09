@@ -10,7 +10,7 @@ const pool = new Pool({
     database: config.get('postgre-server.database')
 
 });
-console.log('Database connected');
 
+console.log("Connected to Postgres");
 
 module.exports = pool;
