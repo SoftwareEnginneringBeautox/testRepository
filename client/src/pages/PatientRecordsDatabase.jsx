@@ -7,7 +7,6 @@ import MagnifyingGlassIcon from "@/assets/icons/MagnifyingGlassIcon";
 import EditIcon from "@/assets/icons/EditIcon";
 import ArchiveIcon from "@/assets/icons/ArchiveIcon";
 
-import { Input } from "@/components/ui/Input";
 import {
   Table,
   TableBody,
@@ -18,6 +17,23 @@ import {
   TableHeader,
   TableRow
 } from "@/components/ui/table";
+
+import {
+  InputContainer,
+  InputTextField,
+  InputLabel,
+  InputIcon,
+  Input
+} from "@/components/ui/Input";
+
+import {
+  Select,
+  SelectIcon,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select";
 
 function PatientRecordsDatabase() {
   //dummy data
@@ -96,16 +112,23 @@ function PatientRecordsDatabase() {
           PATIENT RECORDS
         </h4>
         <div className="flex gap-4">
-          <div className="input-field">
-            <input type="text" className="text-input" />
-            <button>
-              <MagnifyingGlassIcon />
-            </button>
-          </div>
-          <Button>
-            SORT BY
-            <SortIcon />
-          </Button>
+          <InputTextField>
+            <Input type="text" id="password" />
+            <MagnifyingGlassIcon />
+          </InputTextField>
+
+          <Select>
+            <SelectTrigger>
+              <SelectValue placeholder="SORT BY" />
+              <SelectIcon>
+                <SortIcon />
+              </SelectIcon>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="light">ALPHABETICAL </SelectItem>
+              <SelectItem value="dark">DATE</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
       <table className="table-fixed rounded-md text-center w-full shadow-custom overflow-hidden">

@@ -28,6 +28,15 @@ import {
   TableRow
 } from "@/components/ui/table";
 
+import {
+  Select,
+  SelectIcon,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select";
+
 import EditIcon from "@/assets/icons/EditIcon";
 import DeleteIcon from "@/assets/icons/DeleteIcon";
 import EllipsisIcon from "@/assets/icons/EllipsisIcon";
@@ -43,11 +52,20 @@ function FinancialOverwiew() {
       </div>
       <h2 className="font-bold text-[2rem]">SALES TRACKER</h2>
       <SalesChart />
-      <div className="w-full flex justify-end">
-        <Button>
-          <FilterIcon />
-          FILTER BY
-        </Button>
+      <div className=" flex justify-end">
+        <Select>
+          <SelectTrigger>
+            <SelectValue placeholder="FILTER BY" />
+            <SelectIcon>
+              <FilterIcon />
+            </SelectIcon>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="light">LIGHT </SelectItem>
+            <SelectItem value="dark">Dark</SelectItem>
+            <SelectItem value="system">System</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
       <table className="PRISM-table">
         <thead>
@@ -202,6 +220,7 @@ function FinancialOverwiew() {
             <ChevronLeftIcon />
             RETURN
           </Button>
+
           <Button>
             <PlusIcon />
             ADD ADDITIONAL EXPENSES

@@ -30,6 +30,15 @@ import {
   Input
 } from "@/components/ui/Input";
 
+import {
+  Select,
+  SelectIcon,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/Select";
+
 import ChevronLeftIcon from "../assets/icons/ChevronLeftIcon";
 import PlusIcon from "../assets/icons/PlusIcon";
 import SettingsIcon from "../assets/icons/SettingsIcon";
@@ -51,7 +60,6 @@ function AdministratorServices() {
       <h4 className="text-[2rem] leading-[44.8px] font-semibold">
         ADMINISTRATOR SERVICES
       </h4>
-
       <Table>
         <TableHeader>
           <TableRow>
@@ -108,9 +116,6 @@ function AdministratorServices() {
           <PackageIcon />
         </Button>
       </div>
-      <InputContainer label="Product ID">
-        <Input placeholder=":test:" />
-      </InputContainer>
       <InputContainer>
         <InputLabel>Eli Dizon</InputLabel>
         <InputTextField>
@@ -120,6 +125,19 @@ function AdministratorServices() {
           <Input placeholder=":test:" />
         </InputTextField>
       </InputContainer>
+      <Select>
+        <SelectTrigger>
+          <SelectValue placeholder="FILTER BY" />
+          <SelectIcon>
+            <ArrowNorthEastIcon />
+          </SelectIcon>
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="light">LIGHT </SelectItem>
+          <SelectItem value="dark">Dark</SelectItem>
+          <SelectItem value="system">System</SelectItem>
+        </SelectContent>
+      </Select>
     </div>
   );
 }
