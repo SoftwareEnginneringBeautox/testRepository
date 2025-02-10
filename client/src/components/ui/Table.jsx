@@ -1,27 +1,27 @@
 import * as React from "react";
-
 import { cn } from "@/lib/utils";
 
 const Table = React.forwardRef(({ className, ...props }, ref) => (
   <div
     className={cn(
-      "overflow-x-auto overflow-y-hidden rounded-md w-full",
+      "w-full max-w-full overflow-x-auto rounded-md flex-1",
       className
     )}
   >
     <table
       ref={ref}
-      className="w-full h-full table-auto caption-bottom text-sm rounded-md"
+      className="w-full h-full border-collapse text-sm rounded-md"
       {...props}
     />
   </div>
 ));
+
 Table.displayName = "Table";
 
 const TableHeader = React.forwardRef(({ className, ...props }, ref) => (
   <thead
     ref={ref}
-    className={cn("[&_tr]:border-b bg-lavender-400", className)}
+    className={cn("border-b bg-lavender-400", className)}
     {...props}
   />
 ));
@@ -52,7 +52,7 @@ const TableRow = React.forwardRef(({ className, ...props }, ref) => (
   <tr
     ref={ref}
     className={cn(
-      "border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted odd:bg-reflexBlue-100 even:bg-faintingLight-100",
+      "border-b transition-colors hover:bg-muted/50 odd:bg-reflexBlue-100 even:bg-faintingLight-100",
       className
     )}
     {...props}
@@ -64,7 +64,7 @@ const TableHead = React.forwardRef(({ className, ...props }, ref) => (
   <th
     ref={ref}
     className={cn(
-      "h-12 px-4 py-4 align-middle font-semibold text-muted-foreground overflow-auto [&:has([role=checkbox])]:pr-0 bg-lavender-400 text-customNeutral-100 text-xl",
+      "h-12 px-4 py-4 align-middle font-semibold text-xl bg-lavender-400 text-customNeutral-100",
       className
     )}
     {...props}
@@ -73,11 +73,7 @@ const TableHead = React.forwardRef(({ className, ...props }, ref) => (
 TableHead.displayName = "TableHead";
 
 const TableCell = React.forwardRef(({ className, ...props }, ref) => (
-  <td
-    ref={ref}
-    className={cn("p-4 align-middle [&:has([role=checkbox])]:pr-0", className)}
-    {...props}
-  />
+  <td ref={ref} className={cn("p-4 align-middle ", className)} {...props} />
 ));
 TableCell.displayName = "TableCell";
 

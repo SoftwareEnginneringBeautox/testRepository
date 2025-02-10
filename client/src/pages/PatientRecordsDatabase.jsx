@@ -111,7 +111,7 @@ function PatientRecordsDatabase() {
         <h4 className="font-semibold text-[2rem] leading-[2.8rem]">
           PATIENT RECORDS
         </h4>
-        <div className="flex items-center justify-center gap-4">
+        <div className="flex items-center justify-center gap-4 min-w-9">
           <InputTextField>
             <Input type="text" id="password" />
             <MagnifyingGlassIcon />
@@ -131,85 +131,91 @@ function PatientRecordsDatabase() {
           </Select>
         </div>
       </div>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="py-4">CLIENT</TableHead>
-            <TableHead className="py-4 text-center">DATE TRANSACTED</TableHead>
-            <TableHead className="py-4 text-center">
-              NEXT SESSION DATE
-            </TableHead>
-            <TableHead className="py-4 text-center">
-              NEXT SESSION TIME
-            </TableHead>
-            <TableHead className="py-4 text-center">PERSON IN CHARGE</TableHead>
-            <TableHead className="py-4">PACKAGE</TableHead>
-            <TableHead className="py-4">TREATMENT</TableHead>
-            <TableHead className="py-4 text-center">
-              REMAINING SESSIONS
-            </TableHead>
-            <TableHead className="py-4 text-center">CONSENT STATUS</TableHead>
-            <TableHead className="py-4 text-center">PAYMENT METHOD</TableHead>
-            <TableHead className="py-4 text-center">TOTAL AMOUNT</TableHead>
-            <TableHead className="py-4 text-center">AMOUNT PAID </TableHead>
-            <TableHead className="py-4 text-center">
-              REMAINING BALANCE
-            </TableHead>
-            <TableHead className="py-4 text-center">REFERENCE NO.</TableHead>
-            <TableHead></TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {dummyRecords.map((record, index) => (
-            <TableRow key={index}>
-              <TableCell>{record.client.toUpperCase()}</TableCell>
-              <TableCell className="text-center">
-                {record.dateTransacted}
-              </TableCell>
-              <TableCell className="text-center">
-                {record.nextSessionDate}
-              </TableCell>
-              <TableCell className="text-center">
-                {record.nextSessionTime}
-              </TableCell>
-              <TableCell>{record.personInCharge.toUpperCase()}</TableCell>
-              <TableCell>{record.package.toUpperCase()}</TableCell>
-              <TableCell className="text-center">
-                {record.treatment.toUpperCase()}
-              </TableCell>
-              <TableCell className="text-center">
-                {record.remainingSessions}
-              </TableCell>
-              <TableCell className="text-center">
-                {record.consentStatus.toUpperCase()}
-              </TableCell>
-              <TableCell>{record.paymentMethod.toUpperCase()}</TableCell>
-              <TableCell className="text-center">
-                PHP {record.totalAmount}
-              </TableCell>
-              <TableCell className="text-center">
-                PHP {record.amountPaid}
-              </TableCell>
-              <TableCell className="text-center">
-                {record.remainingBalance}
-              </TableCell>
-              <TableCell className="text-center">
-                {record.referenceNo}
-              </TableCell>
-              <TableCell>
-                <div className="flex justify-center gap-2">
-                  <button className="text-reflexBlue-400">
-                    <EditIcon />
-                  </button>
-                  <button className="text-reflexBlue-400">
-                    <ArchiveIcon />
-                  </button>
-                </div>
-              </TableCell>
+      <div className="flex w-full overflow-x-auto">
+        <Table className="flex-1">
+          <TableHeader>
+            <TableRow>
+              <TableHead className="py-4">CLIENT</TableHead>
+              <TableHead className="py-4 text-center">
+                DATE TRANSACTED
+              </TableHead>
+              <TableHead className="py-4 text-center">
+                NEXT SESSION DATE
+              </TableHead>
+              <TableHead className="py-4 text-center">
+                NEXT SESSION TIME
+              </TableHead>
+              <TableHead className="py-4 text-center">
+                PERSON IN CHARGE
+              </TableHead>
+              <TableHead className="py-4">PACKAGE</TableHead>
+              <TableHead className="py-4">TREATMENT</TableHead>
+              <TableHead className="py-4 text-center">
+                REMAINING SESSIONS
+              </TableHead>
+              <TableHead className="py-4 text-center">CONSENT STATUS</TableHead>
+              <TableHead className="py-4 text-center">PAYMENT METHOD</TableHead>
+              <TableHead className="py-4 text-center">TOTAL AMOUNT</TableHead>
+              <TableHead className="py-4 text-center">AMOUNT PAID </TableHead>
+              <TableHead className="py-4 text-center">
+                REMAINING BALANCE
+              </TableHead>
+              <TableHead className="py-4 text-center">REFERENCE NO.</TableHead>
+              <TableHead></TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {dummyRecords.map((record, index) => (
+              <TableRow key={index}>
+                <TableCell>{record.client.toUpperCase()}</TableCell>
+                <TableCell className="text-center">
+                  {record.dateTransacted}
+                </TableCell>
+                <TableCell className="text-center">
+                  {record.nextSessionDate}
+                </TableCell>
+                <TableCell className="text-center">
+                  {record.nextSessionTime}
+                </TableCell>
+                <TableCell>{record.personInCharge.toUpperCase()}</TableCell>
+                <TableCell>{record.package.toUpperCase()}</TableCell>
+                <TableCell className="text-center">
+                  {record.treatment.toUpperCase()}
+                </TableCell>
+                <TableCell className="text-center">
+                  {record.remainingSessions}
+                </TableCell>
+                <TableCell className="text-center">
+                  {record.consentStatus.toUpperCase()}
+                </TableCell>
+                <TableCell>{record.paymentMethod.toUpperCase()}</TableCell>
+                <TableCell className="text-center">
+                  PHP {record.totalAmount}
+                </TableCell>
+                <TableCell className="text-center">
+                  PHP {record.amountPaid}
+                </TableCell>
+                <TableCell className="text-center">
+                  {record.remainingBalance}
+                </TableCell>
+                <TableCell className="text-center">
+                  {record.referenceNo}
+                </TableCell>
+                <TableCell>
+                  <div className="flex justify-center gap-2">
+                    <button className="text-reflexBlue-400">
+                      <EditIcon />
+                    </button>
+                    <button className="text-reflexBlue-400">
+                      <ArchiveIcon />
+                    </button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
       {/* <table className="table-fixed rounded-md text-center w-full shadow-custom overflow-hidden">
         <thead className="bg-lavender-400">
           <tr className="text-customNeutral-100 leading-5 font-semibold text-[clamp(0.4rem,0.75vw,1rem)] text-center">

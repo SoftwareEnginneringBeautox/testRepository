@@ -143,38 +143,42 @@ function FinancialOverwiew() {
       <h2 className="font-bold text-[2rem]">MONTHLY EXPENSES TRACKER</h2>
       <div className="grid gap-14">
         <div className="flex w-full gap-8">
-          <BeautoxPieChart className="shadow-custom w-1/2" />
-          <Table className="h-full w-1/2">
-            <TableHeader>
-              <TableRow>
-                <TableHead className="text-xl text-left font-semibold py-4 ">
-                  REMINDERS
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              <TableRow>
-                <TableCell className="flex items-center gap-4 h-full">
-                  CHECK 1
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell className="flex items-center gap-4 h-full">
-                  CHECK 2
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell className="flex items-center gap-4 h-full">
-                  CHECK 3
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell className="flex items-center gap-4 h-full">
-                  CHECK 4
-                </TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
+          <div className="flex-1">
+            <BeautoxPieChart className="shadow-custom" />
+          </div>
+          <div className="flex-1 h-full">
+            <Table className="h-full">
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="text-xl text-left font-semibold py-4 ">
+                    REMINDERS
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                <TableRow>
+                  <TableCell className="flex items-center gap-4 h-full">
+                    CHECK 1
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="flex items-center gap-4 h-full">
+                    CHECK 2
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="flex items-center gap-4 h-full">
+                    CHECK 3
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="flex items-center gap-4 h-full">
+                    CHECK 4
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </div>
         </div>
         <Table>
           <TableHeader>

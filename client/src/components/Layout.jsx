@@ -3,18 +3,7 @@ import { AppSidebar } from "@/components/AppSidebar";
 import UserProfile from "./UserProfile";
 
 export default function Layout({ children }) {
-  // const location = useLocation();
-
-  // // Routes that do not require a sidebar
-  // const noSidebarRoutes = ["/login", "/signup", "/404"];
-  // const hasSidebar = !noSidebarRoutes.includes(location.pathname);
-
-  // if (!hasSidebar) {
-  //   return <main>{children}</main>;
-  // }
-
   return (
-    // <main>{children}</main>
     <SidebarProvider
       style={{
         "--sidebar-width": "18rem",
@@ -22,15 +11,13 @@ export default function Layout({ children }) {
       }}
     >
       <AppSidebar />
-      <main className="w-full">
+      <main className="w-full h-screen flex flex-col">
         <SidebarTrigger />
-        <div className="flex flex-col items-center ">
+        <div className="flex flex-col flex-1 items-center">
           <div className="flex flex-row justify-end w-full">
             <UserProfile />
           </div>
-          <div className="flex flex-col text-left w-[90%] gap-4">
-            {children}
-          </div>
+          <div className="flex flex-col flex-1 w-[90%] gap-4">{children}</div>
         </div>
       </main>
     </SidebarProvider>
