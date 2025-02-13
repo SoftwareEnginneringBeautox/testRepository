@@ -10,12 +10,11 @@ const Table = React.forwardRef(({ className, ...props }, ref) => (
   >
     <table
       ref={ref}
-      className="w-full h-full border-collapse text-sm rounded-md"
+      className="w-full h-full border-collapse text-sm rounded-md min-w-[1000px]"
       {...props}
     />
   </div>
 ));
-
 Table.displayName = "Table";
 
 const TableHeader = React.forwardRef(({ className, ...props }, ref) => (

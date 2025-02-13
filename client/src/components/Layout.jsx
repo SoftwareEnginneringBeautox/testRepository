@@ -11,9 +11,9 @@ export default function Layout({ children }) {
       }}
     >
       <AppSidebar />
-      <main className="w-full h-screen flex flex-col">
+      <main className="w-dvw h-screen flex flex-col">
         <SidebarTrigger />
-        <div className="flex flex-col flex-1 items-center">
+        <div className="flex flex-col flex-1 items-center ">
           <div className="flex flex-row justify-end w-full">
             <UserProfile />
           </div>

@@ -106,7 +106,7 @@ function PatientRecordsDatabase() {
   ];
 
   return (
-    <div className="flex flex-col gap-[1.5rem]">
+    <div className="flex flex-col gap-[1.5rem] max-w-[94vw] ">
       <div className="flex justify-between items-center">
         <h4 className="font-semibold text-[2rem] leading-[2.8rem]">
           PATIENT RECORDS
@@ -156,7 +156,7 @@ function PatientRecordsDatabase() {
               <TableHead className="py-4 text-center">CONSENT STATUS</TableHead>
               <TableHead className="py-4 text-center">PAYMENT METHOD</TableHead>
               <TableHead className="py-4 text-center">TOTAL AMOUNT</TableHead>
-              <TableHead className="py-4 text-center">AMOUNT PAID </TableHead>
+              <TableHead className="py-4 text-center">AMOUNT PAID</TableHead>
               <TableHead className="py-4 text-center">
                 REMAINING BALANCE
               </TableHead>
@@ -216,60 +216,6 @@ function PatientRecordsDatabase() {
           </TableBody>
         </Table>
       </div>
-      {/* <table className="table-fixed rounded-md text-center w-full shadow-custom overflow-hidden">
-        <thead className="bg-lavender-400">
-          <tr className="text-customNeutral-100 leading-5 font-semibold text-[clamp(0.4rem,0.75vw,1rem)] text-center">
-            <th className="font-semibold p-4">CLIENT</th>
-            <th className="font-semibold p-4">DATE TRANSACTED</th>
-            <th className="font-semibold p-4">NEXT SESSION DATE</th>
-            <th className="font-semibold p-4">NEXT SESSION TIME</th>
-            <th className="font-semibold p-4">PERSON IN CHARGE</th>
-            <th className="font-semibold p-4">PACKAGE</th>
-            <th className="font-semibold p-4">TREATMENT</th>
-            <th className="font-semibold p-4">REMAINING SESSIONS</th>
-            <th className="font-semibold p-4">CONSENT STATUS</th>
-            <th className="font-semibold p-4">PAYMENT METHOD</th>
-            <th className="font-semibold p-4">TOTAL AMOUNT</th>
-            <th className="font-semibold p-4">AMOUNT PAID</th>
-            <th className="font-semibold p-4">REMAINING BALANCE</th>
-            <th className="font-semibold p-4">REFERENCE NO.</th>
-            <th className="font-semibold p-4"></th>
-          </tr>
-        </thead>
-        <tbody>
-          {dummyRecords.map((record, index) => (
-            <tr
-              key={index}
-              className="odd:bg-reflexBlue-100 even:bg-faintingLight-100 text-[clamp(0.5rem,0.75vw,1rem)]"
-            >
-              <td className="p-5">{record.client.toUpperCase()}</td>
-              <td className="p-5">{record.dateTransacted}</td>
-              <td className="p-5">{record.nextSessionDate}</td>
-              <td className="p-5">{record.nextSessionTime}</td>
-              <td className="p-5">{record.personInCharge.toUpperCase()}</td>
-              <td className="p-5">{record.package.toUpperCase()}</td>
-              <td className="p-5">{record.treatment.toUpperCase()}</td>
-              <td className="p-5">{record.remainingSessions}</td>
-              <td className="p-5">{record.consentStatus.toUpperCase()}</td>
-              <td className="p-5">{record.paymentMethod.toUpperCase()}</td>
-              <td className="p-5">{record.totalAmount}</td>
-              <td className="p-5">{record.amountPaid}</td>
-              <td className="p-5">{record.remainingBalance}</td>
-              <td className="p-5">{record.referenceNo}</td>
-              <td>
-                <div className="flex justify-center gap-2">
-                  <button className="text-reflexBlue-400">
-                    <EditIcon />
-                  </button>
-                  <button className="text-reflexBlue-400">
-                    <ArchiveIcon />
-                  </button>
-                </div>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table> */}
       <div className="flex flex-row gap-4 justify-end">
         <Button variant="outline">
           <ChevronLeftIcon />
@@ -280,7 +226,6 @@ function PatientRecordsDatabase() {
           ADD NEW ENTRY
         </Button>
       </div>
-
       <br />
       <br />
     </div>

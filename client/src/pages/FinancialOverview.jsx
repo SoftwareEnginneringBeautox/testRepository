@@ -143,11 +143,11 @@ function FinancialOverwiew() {
       <h2 className="font-bold text-[2rem]">MONTHLY EXPENSES TRACKER</h2>
       <div className="grid gap-14">
         <div className="flex w-full gap-8">
-          <div className="flex-1">
+          <div className="flex-1 w-1/2">
             <BeautoxPieChart className="shadow-custom" />
           </div>
-          <div className="flex-1 h-full">
-            <Table className="h-full">
+          <div className="flex-1 w-1/2 h-full">
+            <Table className="h-full overflow-x-hidden">
               <TableHeader>
                 <TableRow>
                   <TableHead className="text-xl text-left font-semibold py-4 ">

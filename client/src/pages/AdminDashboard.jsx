@@ -161,7 +161,7 @@ function AdministratorDashboard() {
             WELCOME BACK, ADMINISTRATOR
           </h2>
         </div>
-        <Table>
+        <Table className="overflow-x-hidden">
           <TableHeader>
             <TableRow>
               <TableHead className="text-xl text-left font-semibold py-4 ">
