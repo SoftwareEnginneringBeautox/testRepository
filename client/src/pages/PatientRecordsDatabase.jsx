@@ -106,7 +106,7 @@ function PatientRecordsDatabase() {
   ];
 
   return (
-    <div className="flex flex-col gap-[1.5rem] max-w-[94vw] ">
+    <div className="flex flex-col gap-[1.5rem]">
       <div className="flex justify-between items-center">
         <h4 className="font-semibold text-[2rem] leading-[2.8rem]">
           PATIENT RECORDS
