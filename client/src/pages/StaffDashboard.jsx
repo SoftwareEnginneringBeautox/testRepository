@@ -10,29 +10,9 @@ import UserIcon from "../assets/icons/UserIcon";
 import UserAdminIcon from "../assets/icons/UserAdminIcon";
 
 import {
-  AlertContainer,
-  AlertDescription,
-  AlertTitle,
-  AlertText,
-  CloseAlert
-} from "@/components/ui/Alert";
-import InformationIcon from "../assets/icons/InformationIcon";
-import EllipsisIcon from "@/assets/icons/EllipsisIcon";
-
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuTrigger
-} from "@/components/ui/DropdownMenu";
-
-import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
-  TableFooter,
   TableHead,
   TableHeader,
   TableRow
@@ -45,8 +25,6 @@ import DeleteIcon from "@/assets/icons/DeleteIcon";
 import CalendarIcon from "@/assets/icons/CalendarIcon";
 
 function StaffDashboard() {
-  const [displayAlert, setDisplayAlert] = useState(false);
-
   const [currentDate, setCurrentDate] = useState(new Date());
   const [view, setView] = useState("monthly");
 
@@ -254,7 +232,6 @@ function StaffDashboard() {
         </Table>
         <br />
       </div>
-      {/* <Input /> */}
     </div>
   );
 }

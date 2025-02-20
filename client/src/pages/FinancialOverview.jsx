@@ -30,11 +30,10 @@ import {
 
 import {
   Select,
-  SelectIcon,
+  ModalSelect,
   SelectContent,
   SelectItem,
-  SelectTrigger,
-  SelectValue
+  SelectTrigger
 } from "@/components/ui/select";
 
 import EditIcon from "@/assets/icons/EditIcon";
@@ -53,19 +52,11 @@ function FinancialOverwiew() {
       <h2 className="font-bold text-[2rem]">SALES TRACKER</h2>
       <SalesChart />
       <div className=" flex justify-end">
-        <Select>
-          <SelectTrigger>
-            <SelectValue placeholder="FILTER BY" />
-            <SelectIcon>
-              <FilterIcon />
-            </SelectIcon>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="light">LIGHT </SelectItem>
-            <SelectItem value="dark">Dark</SelectItem>
-            <SelectItem value="system">System</SelectItem>
-          </SelectContent>
-        </Select>
+        <ModalSelect placeholder="Select an option">
+          <SelectItem value="OPTION 1">OPTION 1</SelectItem>
+          <SelectItem value="OPTION 2">OPTION 2</SelectItem>
+          <SelectItem value="OPTION 3">OPTION 3</SelectItem>
+        </ModalSelect>
       </div>
       <table className="PRISM-table">
         <thead>

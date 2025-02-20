@@ -10,21 +10,13 @@ import ArchiveIcon from "@/assets/icons/ArchiveIcon";
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
-  TableFooter,
   TableHead,
   TableHeader,
   TableRow
 } from "@/components/ui/table";
 
-import {
-  InputContainer,
-  InputTextField,
-  InputLabel,
-  InputIcon,
-  Input
-} from "@/components/ui/Input";
+import { InputTextField, Input } from "@/components/ui/Input";
 
 import {
   Select,

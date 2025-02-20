@@ -5,14 +5,19 @@ const ModalContainer = React.forwardRef(
   ({ className, children, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn(
-        "fixed inset-0 z-50 flex items-center justify-center p-16",
-        className
-      )}
+      className="fixed inset-0 z-50 flex items-center justify-center p-16 "
       {...props}
     >
+      {/* Overlay */}
       <ModalOverlay />
-      <div className="relative z-50 bg-white p-6 rounded-lg shadow-lg">
+
+      {/* Modal Content */}
+      <div
+        className={cn(
+          "relative z-50 bg-ash-100 p-8 rounded-lg shadow-lg min-w-[40%]",
+          className
+        )}
+      >
         {children}
       </div>
     </div>
@@ -22,15 +27,18 @@ ModalContainer.displayName = "ModalContainer";
 
 const ModalOverlay = React.forwardRef(({ className, ...props }, ref) => (
   <div
-    className={cn("fixed inset-0 z-40 bg-black/80", className)}
-    {...props}
     ref={ref}
+    className={cn(
+      "fixed inset-0 z-40 bg-black/80 transition-opacity duration-300",
+      className
+    )}
+    {...props}
   />
 ));
 ModalOverlay.displayName = "ModalOverlay";
 
 const ModalIcon = ({ children }) => {
-  return <div className="[&_svg]:size-6 [&_svg]:shrink-0">{children}</div>;
+  return <div className="[&_svg]:size-8 [&_svg]:shrink-0">{children}</div>;
 };
 ModalIcon.displayName = "ModalIcon";
 

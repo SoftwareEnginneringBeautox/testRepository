@@ -1,7 +1,9 @@
 import React from "react";
 import "../App.css";
 import { useState } from "react";
+import { useModal } from "@/hooks/useModal";
 import { Button } from "@/components/ui/Button";
+import CreateNewStaff from "@/components/modals/CreateNewStaff";
 
 import SalesChart from "../components/SalesChart";
 import PlusIcon from "../assets/icons/PlusIcon";
@@ -31,9 +33,7 @@ import {
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
-  TableFooter,
   TableHead,
   TableHeader,
   TableRow
@@ -44,7 +44,7 @@ import DeleteIcon from "@/assets/icons/DeleteIcon";
 import CalendarIcon from "@/assets/icons/CalendarIcon";
 
 function AdministratorDashboard() {
-  const [displayAlert, setDisplayAlert] = useState(false);
+  const { isOpen, openModal, closeModal } = useModal();
 
   const [currentDate, setCurrentDate] = useState(new Date());
   const [view, setView] = useState("monthly");
@@ -226,11 +226,12 @@ function AdministratorDashboard() {
           </div>
         ))}
 
-        <Button fullWidth="true">
+        <Button fullWidth="true" onClick={openModal}>
           <PlusIcon />
           ADD NEW STAFF
           <UserIcon />
         </Button>
+        <CreateNewStaff isOpen={isOpen} onClose={closeModal} />
       </div>
     </div>
   );
