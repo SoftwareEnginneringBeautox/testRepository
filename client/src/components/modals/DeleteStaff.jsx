@@ -28,7 +28,7 @@ import {
 } from "@/components/ui/select";
 
 import DeleteIcon from "@/assets/icons/DeleteIcon";
-import InformationIcon from "@/assets/icons/InformationIcon";
+import WarningIcon from "@/assets/icons/WarningIcon";
 import ChevronLeftIcon from "@/assets/icons/ChevronLeftIcon";
 
 function DeleteStaff({ isOpen, onClose }) {
@@ -37,9 +37,7 @@ function DeleteStaff({ isOpen, onClose }) {
   return (
     <ModalContainer className="flex flex-col gap-4">
       <div className="flex w-full flex-1 items-center justify-center text-warning-300">
-        <ModalIcon>
-          <InformationIcon />
-        </ModalIcon>
+        <WarningIcon size={48} />
       </div>
       <ModalTitle className="text-center">DELETE STAFF INFORMATION?</ModalTitle>
       <p>
