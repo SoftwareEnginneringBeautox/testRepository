@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useState } from "react";
 import * as SelectPrimitive from "@radix-ui/react-select";
 import { Check, ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -11,9 +12,9 @@ const selectVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-lavender-400 text-customNeutral-100 px-4 py-3 font-semibold",
+          "bg-lavender-400 text-customNeutral-100 px-4 py-3 font-semibold ",
         modal:
-          "bg-customNeutral-100 text-neutral-950 border-2 border-customNeutral-200 dark:border-neutral-800 dark:bg-neutral-950 px-3 py-2 max-h-12 outline-none flex-row font-normal"
+          "bg-customNeutral-100 border-2 border-customNeutral-200 dark:border-neutral-800 dark:bg-neutral-950 px-3 py-2 max-h-12 outline-none flex-row font-normal text-sm"
       }
     },
     defaultVariants: {
@@ -27,99 +28,156 @@ const SelectGroup = SelectPrimitive.Group;
 const SelectValue = SelectPrimitive.Value;
 
 const SelectTrigger = React.forwardRef(
-  ({ className, variant, placeholder, children, ...props }, ref) => (
+  (
+    { className, variant = "default", placeholder, icon: RightIcon, ...props },
+    ref
+  ) => (
     <SelectPrimitive.Trigger
       ref={ref}
       className={cn(
         selectVariants({ variant }),
-        "flex items-center justify-between",
+        "flex items-center gap-2 h-12 ",
         className
       )}
       {...props}
     >
-      {variant === "modal" && (
-        <SelectIcon>
-          {
-            React.Children.toArray(children).find(
-              (child) =>
-                React.isValidElement(child) && child.type === SelectIcon
-            )?.props.children
-          }
+      {/* Selected Value or Placeholder */}
+      <SelectValue
+        placeholder={placeholder}
+        className="text-left truncate flex-1 "
+      />
+
+      {/* ChevronDown Icon with dynamic color */}
+      <SelectIcon variant={variant}>
+        <ChevronDownIcon />
+      </SelectIcon>
+
+      {/* Optional Right Icon for Default Variant */}
+      {variant === "default" && RightIcon && (
+        <SelectIcon variant={variant} className="text-customNeutral-100">
+          {RightIcon}
         </SelectIcon>
       )}
-
-      <div className={cn("flex-1 text-left", variant === "modal" && "text-sm")}>
-        <SelectValue
-          placeholder={
-            <span
-              className={cn(
-                "font-normal",
-                variant === "modal"
-                  ? "text-sm text-customNeutral-300"
-                  : "text-customNeutral-100"
-              )}
-            >
-              {placeholder}
-            </span>
-          }
-        />
-        {!props.value && variant === "default" && (
-          <span className="text-customNeutral-100">{placeholder}</span>
-        )}
-      </div>
-
-      <div className="flex gap-2 items-center">
-        {children}
-        <SelectPrimitive.Icon asChild>
-          <ChevronDownIcon />
-        </SelectPrimitive.Icon>
-      </div>
     </SelectPrimitive.Trigger>
   )
 );
+
 SelectTrigger.displayName = SelectPrimitive.Trigger.displayName;
 
-const SelectIcon = ({ children, className }) => (
-  <div className={cn("[&_svg]:size-6 [&_svg]:shrink-0", className)}>
+const SelectIcon = ({ children, className, variant }) => (
+  <div
+    className={cn(
+      "[&_svg]:size-6 [&_svg]:shrink-0",
+      variant === "default"
+        ? "text-customNeutral-100"
+        : "text-customNeutral-700",
+      "data-[placeholder]:text-customNeutral-200", // Keep this for placeholders
+      className
+    )}
+  >
     {children}
   </div>
 );
+
 SelectIcon.displayName = "SelectIcon";
 
-const ModalSelectTrigger = ({ className, children, ...props }, ref) => (
-  <SelectTrigger ref={ref} variant="modal" className={cn(className)} {...props}>
-    {children}
-  </SelectTrigger>
-);
-
-const ModalSelectContent = React.forwardRef(
-  ({ className, children, ...props }, ref) => (
-    <SelectContent
+const ModalSelectTrigger = React.forwardRef(
+  ({ className, placeholder, icon: LeftIcon, value, ...props }, ref) => (
+    <SelectPrimitive.Trigger
       ref={ref}
-      variant="modal"
-      className={cn(className)}
+      className={cn(
+        selectVariants({ variant: "modal" }),
+        "flex items-center justify-between gap-2 w-full px-3 py-2 bg-customNeutral-100 rounded-lg border-2 border-customNeutral-200 data-[placeholder]:text-customNeutral-200 text-neutral-900",
+        className
+      )}
       {...props}
     >
-      {children}
-    </SelectContent>
+      <div className="flex items-center gap-2">
+        {LeftIcon && <SelectIcon variant="modal">{LeftIcon}</SelectIcon>}
+
+        {/* Pass `value` properly */}
+        <SelectPrimitive.Value
+          placeholder={placeholder}
+          className="truncate text-left text-neutral-900"
+        >
+          {value || placeholder}
+        </SelectPrimitive.Value>
+      </div>
+
+      <SelectIcon variant="modal">
+        <ChevronDownIcon className="w-4 h-4 shrink-0" />
+      </SelectIcon>
+    </SelectPrimitive.Trigger>
   )
 );
 
-const ModalSelect = ({ placeholder, children, ...props }) => {
+ModalSelectTrigger.displayName = "ModalSelectTrigger";
+
+const ModalSelectContent = React.forwardRef(
+  ({ className, children, isOpen, onClose, ...props }, ref) => {
+    if (!isOpen) return null;
+
+    return (
+      <SelectPrimitive.Portal>
+        <SelectPrimitive.Content
+          ref={ref}
+          className={cn(
+            "relative z-50 max-h-[90vh] w-full min-w-[var(--radix-select-trigger-width)] overflow-hidden rounded-md border bg-customNeutral-100 text-popover-foreground shadow-md text-sm",
+            className
+          )}
+          position="popper"
+          sideOffset={4}
+          align="start"
+          {...props}
+        >
+          <SelectPrimitive.Viewport className="p-1 w-full">
+            {children}
+          </SelectPrimitive.Viewport>
+        </SelectPrimitive.Content>
+      </SelectPrimitive.Portal>
+    );
+  }
+);
+
+const ModalSelect = ({ placeholder, icon, children }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [value, setValue] = useState(""); // Keep track of the selected value
+
+  React.useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+      document.body.style.position = "fixed";
+      document.body.style.width = "100%";
+    } else {
+      document.body.style.overflow = "";
+      document.body.style.position = "";
+      document.body.style.width = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+      document.body.style.position = "";
+      document.body.style.width = "";
+    };
+  }, [isOpen]);
+
   return (
-    <Select {...props}>
-      <SelectTrigger variant="modal">
-        <SelectIcon>
-          <FilterIcon />
-        </SelectIcon>
-        <SelectValue placeholder={placeholder} />
-      </SelectTrigger>
-      <SelectContent>{children}</SelectContent>
+    <Select
+      value={value}
+      onValueChange={(newValue) => {
+        setValue(newValue); // Update selected value
+        setIsOpen(false); // Close the dropdown
+      }}
+      open={isOpen}
+      onOpenChange={setIsOpen}
+    >
+      {/* Pass the selected value to ModalSelectTrigger */}
+      <ModalSelectTrigger placeholder={placeholder} icon={icon} value={value} />
+      <ModalSelectContent isOpen={isOpen}>{children}</ModalSelectContent>
     </Select>
   );
 };
 
-ModalSelect.Trigger = ModalSelectTrigger;
+ModalSelect.displayName = "ModalSelect";
 ModalSelect.Content = ModalSelectContent;
 
 const SelectScrollUpButton = React.forwardRef(
@@ -218,5 +276,6 @@ export {
   SelectTrigger,
   SelectContent,
   SelectItem,
-  SelectIcon
+  SelectIcon,
+  SelectValue
 };

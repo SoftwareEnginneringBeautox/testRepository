@@ -3,7 +3,10 @@ import "../App.css";
 import { useState } from "react";
 import { useModal } from "@/hooks/useModal";
 import { Button } from "@/components/ui/Button";
+
 import CreateNewStaff from "@/components/modals/CreateNewStaff";
+import ModifyStaff from "@/components/modals/ModifyStaff";
+import DeleteStaff from "@/components/modals/DeleteStaff";
 
 import SalesChart from "../components/SalesChart";
 import PlusIcon from "../assets/icons/PlusIcon";
@@ -44,13 +47,19 @@ import DeleteIcon from "@/assets/icons/DeleteIcon";
 import CalendarIcon from "@/assets/icons/CalendarIcon";
 
 function AdministratorDashboard() {
-  const { isOpen, openModal, closeModal } = useModal();
-
+  const { currentModal, openModal, closeModal } = useModal();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [view, setView] = useState("monthly");
 
   const month = currentDate.getMonth();
   const year = currentDate.getFullYear();
+
+  const currentStaff = [
+    "Jessica Simpson",
+    "Alice Alex",
+    "Violet Jessica",
+    "Patrick Star"
+  ];
 
   const getStartOfWeek = (date) => {
     const startDate = date.getDate() - date.getDay();
@@ -119,13 +128,6 @@ function AdministratorDashboard() {
       name: "Violet Jessica",
       description: "Brazilian"
     }
-  ];
-
-  const currentStaff = [
-    "Jessica Simpson",
-    "Alice Alex",
-    "Violet Jessica",
-    "Patrick Star "
   ];
 
   const [showAlert, setShowAlert] = useState(false);
@@ -199,11 +201,10 @@ function AdministratorDashboard() {
           <UserIcon size={32} />
           STAFF LIST
         </h3>
-
         {currentStaff.map((staffName, index) => (
           <div
             key={index}
-            className="w-full flex justify-between rounded-md border-2 font-semibold border-reflexBlue-400 px-4 py-3"
+            className="w-full flex justify-between border-2 border-reflexBlue-400 px-4 py-3 rounded-md"
           >
             {staffName}
             <DropdownMenu>
@@ -212,11 +213,11 @@ function AdministratorDashboard() {
               </DropdownMenuTrigger>
               <DropdownMenuContent>
                 <DropdownMenuGroup>
-                  <DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => openModal("modifyStaff")}>
                     <EditIcon />
                     <p className="font-semibold">Edit</p>
                   </DropdownMenuItem>
-                  <DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => openModal("deleteStaff")}>
                     <DeleteIcon />
                     <p className="font-semibold">Delete</p>
                   </DropdownMenuItem>
@@ -225,13 +226,27 @@ function AdministratorDashboard() {
             </DropdownMenu>
           </div>
         ))}
-
-        <Button fullWidth="true" onClick={openModal}>
+        <Button fullWidth="true" onClick={() => openModal("createStaff")}>
           <PlusIcon />
           ADD NEW STAFF
           <UserIcon />
         </Button>
-        <CreateNewStaff isOpen={isOpen} onClose={closeModal} />
+        {currentModal === "createStaff" && (
+          <CreateNewStaff isOpen={true} onClose={closeModal} />
+        )}
+        {currentModal === "modifyStaff" && (
+          <ModifyStaff
+            isOpen={true}
+            onClose={closeModal}
+            staffList={currentStaff}
+          />
+        )}
+        {currentModal === "deleteStaff" && (
+          <DeleteStaff
+            isOpen={currentModal === "deleteStaff"}
+            onClose={closeModal}
+          />
+        )}
       </div>
     </div>
   );

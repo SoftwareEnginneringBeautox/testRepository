@@ -14,7 +14,7 @@ const ModalContainer = React.forwardRef(
       {/* Modal Content */}
       <div
         className={cn(
-          "relative z-50 bg-ash-100 p-8 rounded-lg shadow-lg min-w-[40%]",
+          "relative z-50 bg-ash-100 p-8 rounded-lg shadow-lg min-w-[50%]",
           className
         )}
       >

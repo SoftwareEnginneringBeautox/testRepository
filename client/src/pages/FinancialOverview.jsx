@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/Button";
 
 import FilterIcon from "../assets/icons/FilterIcon";
 import ChevronLeftIcon from "../assets/icons/ChevronLeftIcon";
+import ChevronDownIcon from "../assets/icons/ChevronDownIcon";
 import DownloadIcon from "../assets/icons/DownloadIcon";
 import BeautoxPieChart from "../components/BeautoxPieChart";
 import SalesChart from "../components/SalesChart";
@@ -30,12 +31,14 @@ import {
 
 import {
   Select,
-  ModalSelect,
+  SelectIcon,
   SelectContent,
   SelectItem,
+  SelectValue,
   SelectTrigger
 } from "@/components/ui/select";
 
+import UserIcon from "@/assets/icons/UserIcon";
 import EditIcon from "@/assets/icons/EditIcon";
 import DeleteIcon from "@/assets/icons/DeleteIcon";
 import EllipsisIcon from "@/assets/icons/EllipsisIcon";
@@ -52,11 +55,16 @@ function FinancialOverwiew() {
       <h2 className="font-bold text-[2rem]">SALES TRACKER</h2>
       <SalesChart />
       <div className=" flex justify-end">
-        <ModalSelect placeholder="Select an option">
-          <SelectItem value="OPTION 1">OPTION 1</SelectItem>
-          <SelectItem value="OPTION 2">OPTION 2</SelectItem>
-          <SelectItem value="OPTION 3">OPTION 3</SelectItem>
-        </ModalSelect>
+        <Select>
+          <SelectTrigger placeholder="Filter b1y" icon={<FilterIcon />}>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="option1">Option 1</SelectItem>
+            <SelectItem value="option2">Option 2</SelectItem>
+            <SelectItem value="option3">Option 3</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
       <table className="PRISM-table">
         <thead>
