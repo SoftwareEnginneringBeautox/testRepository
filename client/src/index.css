@@ -1,27 +1,4 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-/* Input Fields templates */
-
-.input-container {
-  @apply gap-2;
-}
-
-.input-field-label {
-  @apply text-sm font-semibold;
-}
-
-.input-field {
-  @apply flex flex-row justify-center items-center bg-customNeutral-100 rounded-lg gap-2 p-[0.5rem_0.75rem] border-2 border-customNeutral-200 focus-within:border-lavender-400;
-}
-
-.text-input {
-  @apply bg-inherit focus:border-none focus:outline-none placeholder:text-customNeutral-300 self-stretch flex-grow;
-}
-
-/* ========================================================================================= */
-
+@import "tailwindcss";
 
 /* ========================================================================================= */
 
@@ -76,5 +53,14 @@
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
   }
 }

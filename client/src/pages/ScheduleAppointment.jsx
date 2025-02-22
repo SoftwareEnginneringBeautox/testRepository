@@ -100,7 +100,7 @@ function ScheduleAppointment() {
           </InputTextField>
         </InputContainer>
 
-        <div className="input-container flex flex-row w-full">
+        <div className="flex flex-row w-full gap-4">
           <InputContainer className="flex-1">
             <InputLabel>DATE OF SESSION</InputLabel>
             <InputTextField>
