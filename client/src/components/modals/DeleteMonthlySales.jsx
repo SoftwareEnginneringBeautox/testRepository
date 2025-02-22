@@ -8,7 +8,7 @@ import DeleteIcon from "@/assets/icons/DeleteIcon";
 import WarningIcon from "@/assets/icons/WarningIcon";
 import ChevronLeftIcon from "@/assets/icons/ChevronLeftIcon";
 
-function DeleteStaff({ isOpen, onClose }) {
+function DeleteMonthlySales({ isOpen, onClose }) {
   if (!isOpen) return null;
 
   return (
@@ -16,10 +16,8 @@ function DeleteStaff({ isOpen, onClose }) {
       <div className="flex w-full flex-1 items-center justify-center text-warning-300">
         <WarningIcon size={48} />
       </div>
-      <ModalTitle className="text-center">DELETE STAFF INFORMATION?</ModalTitle>
-      <p>
-        This will permanently delete the staff’s information from the system.
-      </p>
+      <ModalTitle className="text-center">DELETE MONTHLY EXPENSE?</ModalTitle>
+      <p>This will permanently delete the expense within the system.</p>
       <div className=" flex flex-row gap-4 w-full">
         <Button variant="outline" className="w-1/2" onClick={onClose}>
           <ChevronLeftIcon />
@@ -27,11 +25,11 @@ function DeleteStaff({ isOpen, onClose }) {
         </Button>
         <Button className="w-1/2">
           <DeleteIcon />
-          REMOVE STAFF
+          DELETE EXPENSE
         </Button>
       </div>
     </ModalContainer>
   );
 }
 
-export default DeleteStaff;
+export default DeleteMonthlySales;

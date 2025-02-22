@@ -26,7 +26,7 @@ import ChevronLeftIcon from "@/assets/icons/ChevronLeftIcon";
 import PlusIcon from "@/assets/icons/PlusIcon";
 import CalendarIcon from "@/assets/icons/CalendarIcon";
 
-function CreateNewStaff({ isOpen, onClose, onConfirm, itemName }) {
+function CreateNewStaff({ isOpen, onClose }) {
   if (!isOpen) return null;
 
   return (
@@ -77,7 +77,7 @@ function CreateNewStaff({ isOpen, onClose, onConfirm, itemName }) {
             </InputContainer>
           </div>
           <div className="flex flex-row gap-4 mt-6 w-full">
-            <Button variant="outline" className="w-1/2">
+            <Button variant="outline" className="w-1/2" onClick={onClose}>
               <ChevronLeftIcon />
               CANCEL AND RETURN
             </Button>

@@ -1,5 +1,12 @@
 import React from "react";
 import "../App.css";
+import { useState } from "react";
+import { useModal } from "@/hooks/useModal";
+
+import CreateMonthlySales from "@/components/modals/CreateMonthlySales";
+import EditMonthlySales from "@/components/modals/EditMonthlySales";
+import DeleteMonthlySales from "@/components/modals/DeleteMonthlySales";
+
 import { Button } from "@/components/ui/Button";
 
 import FilterIcon from "../assets/icons/FilterIcon";
@@ -44,6 +51,8 @@ import DeleteIcon from "@/assets/icons/DeleteIcon";
 import EllipsisIcon from "@/assets/icons/EllipsisIcon";
 
 function FinancialOverwiew() {
+  const { currentModal, openModal, closeModal } = useModal();
+
   return (
     <div className="flex flex-col text-left w-full gap-4">
       <div>
@@ -200,11 +209,15 @@ function FinancialOverwiew() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
                     <DropdownMenuGroup>
-                      <DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => openModal("editMonthlyExpense")}
+                      >
                         <EditIcon />
                         <p className="font-semibold">Edit</p>
                       </DropdownMenuItem>
-                      <DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => openModal("deleteMonthlyExpense")}
+                      >
                         <DeleteIcon />
                         <p className="font-semibold">Delete</p>
                       </DropdownMenuItem>
@@ -224,7 +237,7 @@ function FinancialOverwiew() {
             RETURN
           </Button>
 
-          <Button>
+          <Button onClick={() => openModal("createMonthlyExpense")}>
             <PlusIcon />
             ADD ADDITIONAL EXPENSES
           </Button>
@@ -234,6 +247,18 @@ function FinancialOverwiew() {
           </Button>
         </div>
       </div>
+      {currentModal === "createMonthlyExpense" && (
+        <CreateMonthlySales isOpen={true} onClose={closeModal} />
+      )}
+      {currentModal === "editMonthlyExpense" && (
+        <EditMonthlySales isOpen={true} onClose={closeModal} />
+      )}
+      {currentModal === "deleteMonthlyExpense" && (
+        <DeleteMonthlySales
+          isOpen={currentModal === "deleteMonthlyExpense"}
+          onClose={closeModal}
+        />
+      )}
     </div>
   );
 }

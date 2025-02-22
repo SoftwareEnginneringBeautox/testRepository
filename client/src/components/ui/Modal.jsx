@@ -54,7 +54,7 @@ ModalTitle.displayName = "ModalTitle";
 const ModalHeader = React.forwardRef(
   ({ className, children, ...props }, ref) => (
     <div
-      className={cn("flex items-center gap-2 mb-4", className)}
+      className={cn("flex items-center gap-4 mb-4", className)}
       ref={ref}
       {...props}
     >

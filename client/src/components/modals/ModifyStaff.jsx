@@ -17,15 +17,7 @@ import {
 } from "@/components/ui/Input";
 import { Button } from "../ui/Button";
 
-import {
-  Select,
-  ModalSelect,
-  SelectTrigger,
-  SelectContent,
-  SelectItem,
-  SelectIcon,
-  SelectValue
-} from "@/components/ui/select";
+import { ModalSelect, SelectItem } from "@/components/ui/select";
 
 import EditIcon from "@/assets/icons/EditIcon";
 import UserIcon from "@/assets/icons/UserIcon";
@@ -35,7 +27,9 @@ import CalendarIcon from "@/assets/icons/CalendarIcon";
 import UserAdminIcon from "@/assets/icons/UserAdminIcon";
 import UserIDIcon from "@/assets/icons/UserIDIcon";
 
-const ModifyStaff = ({ staffList }) => {
+const ModifyStaff = ({ staffList, isOpen, onClose }) => {
+  if (!isOpen) return null;
+
   return (
     <ModalContainer>
       <ModalHeader>
@@ -100,7 +94,7 @@ const ModifyStaff = ({ staffList }) => {
             </InputContainer>
           </div>
           <div className="flex flex-row gap-4 mt-6 w-full">
-            <Button variant="outline" className="w-1/3">
+            <Button variant="outline" className="w-1/3" onClick={onClose}>
               <ChevronLeftIcon />
               CANCEL AND RETURN
             </Button>
