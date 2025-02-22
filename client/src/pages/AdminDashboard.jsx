@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useModal } from "@/hooks/useModal";
 import { Button } from "@/components/ui/Button";
 
-import CreateNewStaff from "@/components/modals/CreateNewStaff";
+import CreateStaff from "@/components/modals/CreateStaff";
 import ModifyStaff from "@/components/modals/ModifyStaff";
 import DeleteStaff from "@/components/modals/DeleteStaff";
 
@@ -232,7 +232,7 @@ function AdministratorDashboard() {
           <UserIcon />
         </Button>
         {currentModal === "createStaff" && (
-          <CreateNewStaff isOpen={true} onClose={closeModal} />
+          <CreateStaff isOpen={true} onClose={closeModal} />
         )}
         {currentModal === "modifyStaff" && (
           <ModifyStaff

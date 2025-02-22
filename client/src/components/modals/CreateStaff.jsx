@@ -26,7 +26,7 @@ import ChevronLeftIcon from "@/assets/icons/ChevronLeftIcon";
 import PlusIcon from "@/assets/icons/PlusIcon";
 import CalendarIcon from "@/assets/icons/CalendarIcon";
 
-function CreateNewStaff({ isOpen, onClose }) {
+function CreateStaff({ isOpen, onClose }) {
   if (!isOpen) return null;
 
   return (
@@ -92,4 +92,4 @@ function CreateNewStaff({ isOpen, onClose }) {
   );
 }
 
-export default CreateNewStaff;
+export default CreateStaff;

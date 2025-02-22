@@ -1,6 +1,5 @@
 import React from "react";
 import "../App.css";
-import { useState } from "react";
 import { useModal } from "@/hooks/useModal";
 
 import CreateMonthlySales from "@/components/modals/CreateMonthlySales";
