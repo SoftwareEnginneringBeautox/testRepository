@@ -20,60 +20,81 @@ import { Button } from "../ui/Button";
 
 import { SelectItem, ModalSelect } from "@/components/ui/select";
 
-import UserIDIcon from "@/assets/icons/UserIDIcon";
 import UserIcon from "@/assets/icons/UserIcon";
 import ChevronLeftIcon from "@/assets/icons/ChevronLeftIcon";
 import PlusIcon from "@/assets/icons/PlusIcon";
-import CalendarIcon from "@/assets/icons/CalendarIcon";
+import PackageIcon from "@/assets/icons/PackageIcon";
+import TreatmentIcon from "@/assets/icons/TreatmentIcon";
+import HashtagIcon from "@/assets/icons/HashtagIcon";
+import PesoIcon from "@/assets/icons/PesoIcon";
 
-function CreateNewStaff({ isOpen, onClose }) {
+function CreatePackage({ isOpen, onClose }) {
   if (!isOpen) return null;
 
   return (
     <ModalContainer>
       <ModalHeader>
         <ModalIcon>
-          <UserIDIcon />
+          <PackageIcon />
         </ModalIcon>
-        <ModalTitle>CREATE NEW STAFF</ModalTitle>
+        <ModalTitle>CREATE NEW PACKAGE</ModalTitle>
       </ModalHeader>
       <ModalBody>
         <form action="">
           <div className="flex flex-col gap-4">
             <InputContainer>
-              <InputLabel>STAFF NAME</InputLabel>
+              <InputLabel>PACKAGE NAME</InputLabel>
               <InputTextField>
                 <InputIcon>
                   <UserIcon />
                 </InputIcon>
-                <Input placeholder="Name of the Staff" />
+                <Input placeholder="Name of the Package" />
               </InputTextField>
             </InputContainer>
             <InputContainer>
-              <InputLabel>STAFF ROLE</InputLabel>
+              <InputLabel>TREATMENTS</InputLabel>
 
               <ModalSelect
-                placeholder="Role of the Staff"
-                icon={<UserIDIcon className="w-4 h-4 " />}
+                placeholder="Treatments chosen"
+                icon={<TreatmentIcon className="w-4 h-4 " />}
               >
                 <SelectItem value="AESTHETICIAN">AESTHETICIAN</SelectItem>
                 <SelectItem value="RECEPTIONIST">RECEPTIONIST</SelectItem>
               </ModalSelect>
             </InputContainer>
+
             <InputContainer>
-              <InputLabel>DESIGNATED DAY OFF</InputLabel>
-              <ModalSelect
-                placeholder="Day Off of the Staff"
-                icon={<CalendarIcon className="w-4 h-4" />}
-              >
-                <SelectItem value="SUNDAY">SUNDAY</SelectItem>
-                <SelectItem value="MONDAY">MONDAY</SelectItem>
-                <SelectItem value="TUESDAY">TUESDAY</SelectItem>
-                <SelectItem value="WEDNESDAY">WEDNESDAY</SelectItem>
-                <SelectItem value="THURSDAY">THURSDAY</SelectItem>
-                <SelectItem value="FRIDAY">FRIDAY</SelectItem>
-                <SelectItem value="SATURDAY">SATURDAY</SelectItem>
-              </ModalSelect>
+              <InputLabel>NUMBER OF TREATMENTS</InputLabel>
+              <InputTextField>
+                <InputIcon>
+                  <HashtagIcon />
+                </InputIcon>
+                <Input
+                  placeholder="Number of treatments to be taken"
+                  type="text"
+                  inputMode="decimal"
+                  pattern="\\d+(\\.\\d{0,2})?"
+                  min="0"
+                  step="0.01"
+                />
+              </InputTextField>
+            </InputContainer>
+
+            <InputContainer>
+              <InputLabel>AMOUNT</InputLabel>
+              <InputTextField>
+                <InputIcon>
+                  <PesoIcon />
+                </InputIcon>
+                <Input
+                  placeholder="Total amount to pay"
+                  type="text"
+                  inputMode="decimal"
+                  pattern="\\d+(\\.\\d{0,2})?"
+                  min="0"
+                  step="0.01"
+                />
+              </InputTextField>
             </InputContainer>
           </div>
           <div className="flex flex-row gap-4 mt-6 w-full">
@@ -83,7 +104,7 @@ function CreateNewStaff({ isOpen, onClose }) {
             </Button>
             <Button className="w-1/2">
               <PlusIcon />
-              CREATE STAFF
+              CREATE PACKAGE
             </Button>
           </div>
         </form>
@@ -92,4 +113,4 @@ function CreateNewStaff({ isOpen, onClose }) {
   );
 }
 
-export default CreateNewStaff;
+export default CreatePackage;

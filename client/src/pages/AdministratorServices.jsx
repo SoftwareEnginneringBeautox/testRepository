@@ -1,12 +1,15 @@
 import React from "react";
 import "../App.css";
+import { useState } from "react";
+import { useModal } from "@/hooks/useModal";
+import CreatePackage from "@/components/modals/CreatePackage";
+import EditPackage from "@/components/modals/EditPackage";
+import DeletePackage from "@/components/modals/DeletePackage";
 
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
-  TableFooter,
   TableHead,
   TableHeader,
   TableRow
@@ -55,6 +58,8 @@ import EditIcon from "../assets/icons/EditIcon";
 import DeleteIcon from "../assets/icons/DeleteIcon";
 
 function AdministratorServices() {
+  const { currentModal, openModal, closeModal } = useModal();
+
   return (
     <div className="flex flex-col gap-4">
       <h4 className="text-[2rem] leading-[44.8px] font-semibold">
@@ -89,11 +94,13 @@ function AdministratorServices() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
                   <DropdownMenuGroup>
-                    <DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => openModal("editPackage")}>
                       <EditIcon />
                       <p className="font-semibold">Edit</p>
                     </DropdownMenuItem>
-                    <DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => openModal("deletePackage")}
+                    >
                       <DeleteIcon />
                       <p className="font-semibold">Delete</p>
                     </DropdownMenuItem>
@@ -110,7 +117,7 @@ function AdministratorServices() {
           CHECK
         </Button>
 
-        <Button>
+        <Button onClick={() => openModal("createPackage")}>
           <PlusIcon />
           ADD NEW PACKAGE
           <PackageIcon />
@@ -138,6 +145,18 @@ function AdministratorServices() {
           <SelectItem value="system">System</SelectItem>
         </SelectContent>
       </Select>
+      {currentModal === "createPackage" && (
+        <CreatePackage isOpen={true} onClose={closeModal} />
+      )}
+      {currentModal === "editPackage" && (
+        <EditPackage isOpen={true} onClose={closeModal} />
+      )}
+      {currentModal === "deletePackage" && (
+        <DeletePackage
+          isOpen={currentModal === "deletePackage}"}
+          onClose={closeModal}
+        />
+      )}
     </div>
   );
 }
