@@ -152,10 +152,7 @@ function AdministratorServices() {
         <EditPackage isOpen={true} onClose={closeModal} />
       )}
       {currentModal === "deletePackage" && (
-        <DeletePackage
-          isOpen={currentModal === "deletePackage}"}
-          onClose={closeModal}
-        />
+        <DeletePackage isOpen={true} onClose={closeModal} />
       )}
     </div>
   );

@@ -33,21 +33,28 @@ import UserIcon from "@/assets/icons/UserIcon";
 import UserIDIcon from "@/assets/icons/UserIDIcon";
 import PackageIcon from "@/assets/icons/PackageIcon";
 import PercentageIcon from "@/assets/icons/PercentageIcon";
+import CircleUserIcon from "@/assets/icons/CircleUserIcon";
+import TreatmentIcon from "@/assets/icons/TreatmentIcon";
+import EditIcon from "@/assets/icons/EditIcon";
 
-function CreatePatientEntry({ isOpen, onClose }) {
+function UpdatePatientEntry({ isOpen, onClose }) {
   if (!isOpen) return null;
 
   return (
     <ModalContainer>
       <ModalHeader>
         <ModalIcon>
-          <UserIcon />
+          <CircleUserIcon />
         </ModalIcon>
-        <ModalTitle>CREATE PATIENT RECORD</ModalTitle>
+        <ModalTitle>UPDATE PATIENT RECORD</ModalTitle>
       </ModalHeader>
       <ModalBody>
         <form action="">
           <div className="flex flex-col gap-4">
+            <p>[NAME HERE]'S PATIENT RECORD</p>
+            <p>
+              <span>CURRENT PACKAGE</span> [PACKAGE CHOSEN HERE]
+            </p>
             <InputContainer>
               <InputLabel>PATIENT NAME</InputLabel>
               <InputTextField>
@@ -71,24 +78,11 @@ function CreatePatientEntry({ isOpen, onClose }) {
             </InputContainer>
 
             <InputContainer>
-              <InputLabel>PACKAGE</InputLabel>
-
-              <ModalSelect
-                placeholder="Chosen package"
-                icon={<PackageIcon className="w-4 h-4" />}
-              >
-                <SelectItem value="Package 1">Package 1</SelectItem>
-                <SelectItem value="Package 2">Package 2</SelectItem>
-                <SelectItem value="Package 3">Package 3</SelectItem>
-              </ModalSelect>
-            </InputContainer>
-
-            <InputContainer>
               <InputLabel>TREATMENT</InputLabel>
 
               <ModalSelect
                 placeholder="Chosen treatment"
-                icon={<PackageIcon className="w-4 h-4" />}
+                icon={<TreatmentIcon className="w-4 h-4" />}
               >
                 <SelectItem value="Treatment 1">Treatment 1</SelectItem>
                 <SelectItem value="Treatment 2">Treatment 2</SelectItem>
@@ -96,8 +90,12 @@ function CreatePatientEntry({ isOpen, onClose }) {
               </ModalSelect>
             </InputContainer>
 
+            <h5 className="my-4 font-semibold">
+              TOTAL AMOUNT <span>[amount here]</span>
+            </h5>
+
             <InputContainer>
-              <InputLabel>TOTAL AMOUNT</InputLabel>
+              <InputLabel>AMOUNT PAID</InputLabel>
               <InputTextField>
                 <InputIcon>
                   <PesoIcon />
@@ -113,53 +111,9 @@ function CreatePatientEntry({ isOpen, onClose }) {
               </InputTextField>
             </InputContainer>
 
-            <InputContainer>
-              <InputLabel>PACKAGE DISCOUNT</InputLabel>
-              <InputTextField>
-                <InputIcon>
-                  <PercentageIcon />
-                </InputIcon>
-                <Input
-                  placeholder="Discount in percent"
-                  type="text"
-                  inputMode="decimal"
-                  pattern="\\d+(\\.\\d{0,2})?"
-                  min="0"
-                  step="0.01"
-                />
-              </InputTextField>
-            </InputContainer>
-
-            <InputContainer>
-              <InputLabel>AMOUNT</InputLabel>
-              <InputTextField>
-                <InputIcon>
-                  <PesoIcon />
-                </InputIcon>
-                <Input
-                  placeholder="Amount"
-                  type="text"
-                  inputMode="decimal"
-                  pattern="\\d+(\\.\\d{0,2})?"
-                  min="0"
-                  step="0.01"
-                />
-              </InputTextField>
-            </InputContainer>
-          </div>
-
-          <div className="flex flex-col my-4">
-            <h5 className="text-xl leading-8 font-semibold">PAYMENT METHOD</h5>
-            <RadioGroup defaultValue="full-payment">
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="full-payment" id="full-payment" />
-                <label htmlFor="full-payment">FULL PAYMENT</label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="installment" id="installment" />
-                <label htmlFor="installment">INSTALLMENT</label>
-              </div>
-            </RadioGroup>
+            <h5 className="my-4 font-semibold">
+              PAYMENT METHOD <span>[amount here]</span>
+            </h5>
           </div>
 
           <div className="flex flex-row w-full gap-4">
@@ -194,6 +148,19 @@ function CreatePatientEntry({ isOpen, onClose }) {
             </InputContainer>
           </div>
 
+          <div className="flex flex-col gap-4 mt-4">
+            <InputContainer>
+              <InputLabel>TREATMENTS</InputLabel>
+              <ModalSelect
+                placeholder="Next treatment chosen"
+                icon={<TreatmentIcon className="w-4 h-4 " />}
+              >
+                <SelectItem value="AESTHETICIAN">AESTHETICIAN</SelectItem>
+                <SelectItem value="RECEPTIONIST">RECEPTIONIST</SelectItem>
+              </ModalSelect>
+            </InputContainer>
+          </div>
+
           <div className="flex flex-col gap-4 my-4">
             <h5 className="text-xl leading-8 font-semibold">
               PATIENT CONSENT FORM
@@ -204,7 +171,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
                 htmlFor="consent"
                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
               >
-                Consent form has been signed
+                Accept terms and conditions
               </label>
             </div>
           </div>
@@ -215,8 +182,8 @@ function CreatePatientEntry({ isOpen, onClose }) {
               CANCEL AND RETURN
             </Button>
             <Button className="w-1/2">
-              <PlusIcon />
-              ADD ENTRY
+              <EditIcon />
+              UPDATE ENTRY
             </Button>
           </div>
         </form>
@@ -225,4 +192,4 @@ function CreatePatientEntry({ isOpen, onClose }) {
   );
 }
 
-export default CreatePatientEntry;
+export default UpdatePatientEntry;

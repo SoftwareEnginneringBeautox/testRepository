@@ -1,4 +1,7 @@
 import React from "react";
+import { useModal } from "@/hooks/useModal";
+import { useState } from "react";
+
 import { Button } from "@/components/ui/Button";
 import ChevronLeftIcon from "@/assets/icons/ChevronLeftIcon";
 import PlusIcon from "@/assets/icons/PlusIcon";
@@ -27,9 +30,21 @@ import {
   SelectValue
 } from "@/components/ui/select";
 
-function PatientRecordsDatabase() {
-  //dummy data
+import DisplayEntry from "@/components/modals/DisplayEntry";
+import CreatePatientEntry from "@/components/modals/CreatePatientEntry";
+import UpdatePatientEntry from "@/components/modals/UpdatePatientEntry";
+import DeletePatientEntry from "@/components/modals/DeletePatientEntry";
 
+function PatientRecordsDatabase() {
+  const { currentModal, openModal, closeModal } = useModal();
+  const [selectedEntry, setSelectedEntry] = useState(null);
+
+  const handleOpenDisplayEntry = (record) => {
+    setSelectedEntry(record);
+    openModal("displayEntry");
+  };
+
+  //dummy data
   const dummyRecords = [
     {
       client: "william wallace",
@@ -159,7 +174,12 @@ function PatientRecordsDatabase() {
           <TableBody>
             {dummyRecords.map((record, index) => (
               <TableRow key={index}>
-                <TableCell>{record.client.toUpperCase()}</TableCell>
+                <TableCell
+                  onClick={() => handleOpenDisplayEntry(record)}
+                  className="cursor-pointer"
+                >
+                  {record.client.toUpperCase()}
+                </TableCell>
                 <TableCell className="text-center">
                   {record.dateTransacted}
                 </TableCell>
@@ -195,10 +215,16 @@ function PatientRecordsDatabase() {
                 </TableCell>
                 <TableCell>
                   <div className="flex justify-center gap-2">
-                    <button className="text-reflexBlue-400">
+                    <button
+                      className="text-reflexBlue-400"
+                      onClick={() => openModal("updateEntry")}
+                    >
                       <EditIcon />
                     </button>
-                    <button className="text-reflexBlue-400">
+                    <button
+                      className="text-reflexBlue-400"
+                      onClick={() => openModal("deleteEntry")}
+                    >
                       <ArchiveIcon />
                     </button>
                   </div>
@@ -213,13 +239,28 @@ function PatientRecordsDatabase() {
           <ChevronLeftIcon />
           RETURN
         </Button>
-        <Button>
+        <Button onClick={() => openModal("createEntry")}>
           <PlusIcon />
           ADD NEW ENTRY
         </Button>
       </div>
       <br />
-      <br />
+      {currentModal === "createEntry" && (
+        <CreatePatientEntry isOpen={true} onClose={closeModal} />
+      )}
+      {currentModal === "updateEntry" && (
+        <UpdatePatientEntry isOpen={true} onClose={closeModal} />
+      )}
+      {currentModal === "deleteEntry" && (
+        <DeletePatientEntry isOpen={true} onClose={closeModal} />
+      )}
+      {currentModal === "displayEntry" && selectedEntry && (
+        <DisplayEntry
+          isOpen={true}
+          onClose={closeModal}
+          entryData={selectedEntry}
+        />
+      )}
     </div>
   );
 }
