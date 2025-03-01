@@ -28,9 +28,7 @@ import {
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
-  TableFooter,
   TableHead,
   TableHeader,
   TableRow
@@ -38,7 +36,6 @@ import {
 
 import {
   Select,
-  SelectIcon,
   SelectContent,
   SelectItem,
   SelectValue,

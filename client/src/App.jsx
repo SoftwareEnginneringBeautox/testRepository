@@ -44,6 +44,7 @@ import StaffDashboard from "./pages/StaffDashboard";
 import PatientRecordsDatabase from "./pages/PatientRecordsDatabase";
 import AdministratorServices from "./pages/AdministratorServices";
 import ScheduleAppointment from "./pages/ScheduleAppointment";
+import BookingCalendar from "./pages/BookingCalendar";
 
 function App() {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -141,6 +142,7 @@ function App() {
             path="/ScheduleAppointment"
             element={<ScheduleAppointment />}
           />
+          <Route path="/BookingCalendar" element={<BookingCalendar />} />
         </Routes>
       </BrowserRouter>
     </div>

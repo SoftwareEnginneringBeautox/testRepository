@@ -28,26 +28,24 @@ const WeeklyBookingPanel = ({ events = [] }) => {
   };
 
   return (
-    <div className="w-[95%]">
-      <div className="relative">
-        <table className="w-full">
-          <thead className="bg-lavender-400 text-customNeutral-100 text-center font-semibold text-[1.25rem] leading-8 py-4">
-            <tr>
-              <th className="w-24 bg-ash-100"></th>
-              {days.map((day, idx) => (
-                <th
-                  key={idx}
-                  className={`p-2 ${idx === 0 ? "rounded-l-[0.5rem]" : ""} ${
-                    idx === days.length - 1 ? "rounded-r-[0.5rem]" : ""
-                  }`}
-                >
-                  {day}
-                </th>
-              ))}
-            </tr>
-          </thead>
-        </table>
-      </div>
+    <div className="min-w-[95%]">
+      <table className="w-full">
+        <thead className="bg-lavender-400 text-customNeutral-100 text-center font-semibold text-[1.25rem] leading-8 py-4">
+          <tr>
+            <th className="w-24 bg-ash-100"></th>
+            {days.map((day, idx) => (
+              <th
+                key={idx}
+                className={`p-2 ${idx === 0 ? "rounded-l-[0.5rem]" : ""} ${
+                  idx === days.length - 1 ? "rounded-r-[0.5rem]" : ""
+                }`}
+              >
+                {day}
+              </th>
+            ))}
+          </tr>
+        </thead>
+      </table>
 
       {/* Main Content */}
       <div className="flex relative">
