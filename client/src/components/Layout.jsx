@@ -1,8 +1,16 @@
+import React from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/Sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
+import { useLocation, Outlet } from "react-router-dom";
 import UserProfile from "./UserProfile";
 
-export default function Layout({ children }) {
+export default function Layout() {
+  const location = useLocation();
+  const sidebarlessRoutes = ["/login", "/scheduleappointment"];
+  const isSidebarVisible = !sidebarlessRoutes.includes(
+    location.pathname.toLowerCase()
+  );
+
   return (
     <SidebarProvider
       style={{
@@ -10,15 +18,16 @@ export default function Layout({ children }) {
         "--sidebar-width-mobile": "18rem"
       }}
     >
-      <AppSidebar />
+      {isSidebarVisible && <AppSidebar />}
       <main className="w-dvw h-screen flex flex-col">
-        <SidebarTrigger />
-        <div className="flex flex-col flex-1 items-center ">
+        {isSidebarVisible && <SidebarTrigger />}
+        <div className="flex flex-col flex-1 items-center">
           <div className="flex flex-row justify-between w-full">
             <UserProfile />
           </div>
-          <div className="flex flex-col flex-1 max-w-[90%] gap-4">
-            {children}
+          <div className="flex flex-col flex-1 w-full gap-4">
+            {/* Outlet renders the actual page (like AdminDashboard, Fin, etc.) */}
+            <Outlet />
           </div>
         </div>
       </main>

@@ -61,7 +61,7 @@ function AdministratorServices() {
   const { currentModal, openModal, closeModal } = useModal();
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 text-left w-[90%] mx-auto">
       <h4 className="text-[2rem] leading-[44.8px] font-semibold">
         ADMINISTRATOR SERVICES
       </h4>
@@ -123,28 +123,7 @@ function AdministratorServices() {
           <PackageIcon />
         </Button>
       </div>
-      <InputContainer>
-        <InputLabel>Eli Dizon</InputLabel>
-        <InputTextField>
-          <InputIcon>
-            <PlusIcon />
-          </InputIcon>
-          <Input placeholder=":test:" />
-        </InputTextField>
-      </InputContainer>
-      <Select>
-        <SelectTrigger>
-          <SelectValue placeholder="FILTER BY" />
-          <SelectIcon>
-            <ArrowNorthEastIcon />
-          </SelectIcon>
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="light">LIGHT </SelectItem>
-          <SelectItem value="dark">Dark</SelectItem>
-          <SelectItem value="system">System</SelectItem>
-        </SelectContent>
-      </Select>
+
       {currentModal === "createPackage" && (
         <CreatePackage isOpen={true} onClose={closeModal} />
       )}

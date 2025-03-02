@@ -149,7 +149,7 @@ function StaffDashboard() {
   ];
 
   return (
-    <div className="flex items-start gap-12 justify-center ">
+    <div className="flex items-start gap-12 justify-center w-[90%] mx-auto">
       <div className="w-full flex flex-col gap-8">
         <div className="flex items-center rounded-lg gap-4">
           <div className="w-12 h-12 bg-gradient-to-r from-reflexBlue-400 to-lavender-300 text-customNeutral-100 rounded-lg flex items-center justify-center">

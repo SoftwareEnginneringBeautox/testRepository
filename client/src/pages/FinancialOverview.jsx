@@ -42,7 +42,6 @@ import {
   SelectTrigger
 } from "@/components/ui/select";
 
-import UserIcon from "@/assets/icons/UserIcon";
 import EditIcon from "@/assets/icons/EditIcon";
 import DeleteIcon from "@/assets/icons/DeleteIcon";
 import EllipsisIcon from "@/assets/icons/EllipsisIcon";
@@ -51,7 +50,7 @@ function FinancialOverwiew() {
   const { currentModal, openModal, closeModal } = useModal();
 
   return (
-    <div className="flex flex-col text-left w-full gap-4">
+    <div className="flex flex-col text-left w-[90%] mx-auto gap-4">
       <div>
         <h1 className="text-[40px] leading-[56px] font-bold">
           FINANCIAL OVERVIEW

@@ -93,13 +93,13 @@ function BookingCalendar() {
   ];
 
   return (
-    <div className="w-full">
-      <h3 className="text-4xl leading-[3.75rem] font-semibold my-4">
+    <div className="w-full flex flex-col items-center justify-center">
+      <h3 className="text-4xl leading-[3.75rem] font-semibold my-4 w-[90%]">
         BOOKING CALENDAR
       </h3>
       <div
         id="booking-container"
-        className="flex flex-col shadow-custom items-center rounded-lg p-8 bg-ash-100 w-full"
+        className="flex flex-col shadow-custom items-center rounded-lg p-8 bg-ash-100 w-[90%] mb-8"
       >
         {/* Header Section */}
         <div className="flex flex-row justify-between w-full">
@@ -153,14 +153,16 @@ function BookingCalendar() {
           </div>
         </div>
 
-        <div className="w-full flex justify-center">
+        <div className="w-full flex flex-1">
           {view === "monthly" ? (
             <MonthlyBookingPanel calendarDays={calendar} />
           ) : (
-            <div className="w-full min-w-screen">
-              {" "}
-              {/* Ensuring weekly panel has a sensible max width */}
-              <WeeklyBookingPanel events={events} />
+            <div className="w-full flex justify-center">
+              {/* Centering */}
+              <div className="w-full">
+                {/* Set a max width here */}
+                <WeeklyBookingPanel events={events} />
+              </div>
             </div>
           )}
         </div>

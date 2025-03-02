@@ -19,26 +19,11 @@ import {
 
 function ScheduleAppointment() {
   return (
-    <div>
+    <div className="flex flex-col text-left w-[90%] mx-auto gap-4">
       <h4 className="text-[2rem] leading-[44.8px] font-semibold">
         SCHEDULE APPOINTMENT
       </h4>
       <form action="" className="flex flex-col gap-5">
-        <div className="input-container">
-          <label htmlFor="" className="input-field-label">
-            NAME
-          </label>
-
-          <div className="input-field">
-            <UserIcon />
-            <input
-              type="text"
-              className="text-input"
-              placeholder="Full name"
-              required
-            />
-          </div>
-        </div>
         <InputContainer>
           <InputLabel>FULL NAME</InputLabel>
           <InputTextField>

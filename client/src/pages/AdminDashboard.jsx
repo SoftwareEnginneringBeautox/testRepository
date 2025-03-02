@@ -140,7 +140,7 @@ function AdministratorDashboard() {
   };
 
   return (
-    <div className="flex items-start gap-12 justify-center ">
+    <div className="flex items-start gap-12 justify-center w-[90%] mx-auto mt-10">
       {showAlert && (
         <AlertContainer>
           <InformationIcon />
