@@ -1,4 +1,3 @@
-import React from "react";
 import "./App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
@@ -10,14 +9,15 @@ import PatientRecordsDatabase from "./pages/PatientRecordsDatabase";
 import AdministratorServices from "./pages/AdministratorServices";
 import ScheduleAppointment from "./pages/ScheduleAppointment";
 import BookingCalendar from "./pages/BookingCalendar";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   return (
     <div className="w-full">
       <BrowserRouter>
         <Routes>
-          <Route index element={<Login />} />
-          <Route path="/FinancialOverview" element={<Fin />} />
+          <Route path="/Login" index element={<Login />} />
+         
           <Route path="/AdminDashboard" element={<AdministratorDashboard />} />
           <Route path="/StaffDashboard" element={<StaffDashboard />} />
           <Route
@@ -33,7 +33,17 @@ function App() {
             element={<ScheduleAppointment />}
           />
           <Route path="/BookingCalendar" element={<BookingCalendar />} />
+          <Route
+          path="/FinancialOverview"
+          element={
+            <ProtectedRoute>
+              <Fin />
+            </ProtectedRoute>
+          }
+        />
         </Routes>
+            {/* Protected route example */}
+            
       </BrowserRouter>
     </div>
   );
