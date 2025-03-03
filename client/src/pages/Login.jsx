@@ -1,12 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { CTAButton } from "../Components";
+import { Button } from "@/components/ui/Button";
 import UserIcon from "../assets/icons/UserIcon";
 import PasswordIcon from "../assets/icons/PasswordIcon";
 import LoginIcon from "../assets/icons/LoginIcon";
 import BeautoxLogo from "../assets/logos/Beautox.svg";
-
-import { Button } from "@/components/ui/Button";
 
 import {
   InputContainer,
@@ -31,9 +29,7 @@ function Login() {
     try {
       const response = await fetch("http://localhost:4000/login", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         credentials: "include", // Include cookies for session management
         body: JSON.stringify({ username, password })
       });
@@ -48,6 +44,9 @@ function Login() {
         localStorage.setItem("token", data.token);
         localStorage.setItem("role", data.role);
         localStorage.setItem("username", data.username);
+
+        // Dispatch a custom event to notify other components (like UserProfile)
+        window.dispatchEvent(new Event("userProfileUpdated"));
 
         // Redirect based on role (placeholder routes for now)
         if (data.role === "admin") {

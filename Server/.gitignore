@@ -7,4 +7,5 @@ vendor/
 /config.json
 .env
 config/
-
+/default.json
+config/default.json

@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useLocation } from "react-router-dom";
 import {
   Sidebar,
   SidebarContent,
@@ -44,6 +45,13 @@ const sideBarInformation = [
 ];
 
 export function AppSidebar({ ...props }) {
+  const { pathname } = useLocation();
+
+  // Hide sidebar on /login and index ("/") paths
+  if (pathname === "/login" || pathname === "/") {
+    return null;
+  }
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
