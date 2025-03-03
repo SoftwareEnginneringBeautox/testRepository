@@ -22,7 +22,7 @@ export default function Layout() {
       {isSidebarVisible && <AppSidebar />}
 
       <main className="w-dvw h-screen flex flex-col">
-        {isSidebarVisible && <UserProfile />}
+        {isSidebarVisible && <SidebarTrigger />}
         <div className="flex flex-col flex-1 items-center">
           <div className="flex flex-row justify-between w-full">
             {isSidebarVisible && <UserProfile />}
