@@ -16,6 +16,7 @@ function App() {
     <div className="w-full">
       <BrowserRouter>
         <Routes>
+        <Route index element={<Login />} />
           <Route path="/Login" index element={<Login />} />
          
           <Route path="/AdminDashboard" element={<AdministratorDashboard />} />

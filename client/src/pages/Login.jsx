@@ -34,9 +34,10 @@ function Login() {
         setSuccessMessage("Login successful! Redirecting...");
         console.log("Login successful");
 
-        // Save token and role in localStorage (for client-side checks)
+        // Save token, role, and username in localStorage for client-side checks
         localStorage.setItem("token", data.token);
         localStorage.setItem("role", data.role);
+        localStorage.setItem("username", data.username);
 
         // Redirect based on role (placeholder routes for now)
         if (data.role === "admin") {

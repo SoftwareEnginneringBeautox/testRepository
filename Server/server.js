@@ -70,7 +70,7 @@ app.put('/updateuser', isAuthenticated, async (req, res) => {
   }
 });
 
-// Login endpoint
+// Login endpoint (updated to return username)
 app.post('/login', async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -84,7 +84,13 @@ app.post('/login', async (req, res) => {
       if (passwordMatch) {
         // Save user data in session
         req.session.user = { id: user.id, username: user.username, role: user.role };
-        res.json({ success: true, message: "Login successful", role: user.role, token: "dummyToken" });
+        res.json({ 
+          success: true, 
+          message: "Login successful", 
+          role: user.role, 
+          token: "dummyToken", 
+          username: user.username   // Added username here
+        });
       } else {
         res.json({ success: false, message: "Invalid username or password" });
       }
