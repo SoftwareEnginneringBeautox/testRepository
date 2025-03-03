@@ -47,8 +47,9 @@ const sideBarInformation = [
 export function AppSidebar({ ...props }) {
   const { pathname } = useLocation();
 
-  // Hide sidebar on /login and index ("/") paths
-  if (pathname === "/login" || pathname === "/") {
+  // Hide the entire sidebar on /login, /, and /scheduleappointment paths
+  const hideSidebarRoutes = ["/", "/login", "/scheduleappointment"];
+  if (hideSidebarRoutes.includes(pathname.toLowerCase())) {
     return null;
   }
 

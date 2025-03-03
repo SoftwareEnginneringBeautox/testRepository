@@ -1,9 +1,19 @@
 import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import UserIcon from "@/assets/icons/UserIcon";
 
 const UserProfile = () => {
   const [userName, setUserName] = useState(localStorage.getItem("username") || "");
   const [userRole, setUserRole] = useState(localStorage.getItem("role") || "");
+
+  // 1. Use `useLocation` to get the current path
+  const location = useLocation();
+
+  // 2. Define which routes should hide the icon
+  const hideIconRoutes = ["/login"];
+
+  // 3. Determine if the icon should be visible
+  const isIconVisible = !hideIconRoutes.includes(location.pathname.toLowerCase());
 
   useEffect(() => {
     const updateUserData = () => {
@@ -11,18 +21,15 @@ const UserProfile = () => {
       setUserRole(localStorage.getItem("role") || "");
     };
 
-    // Listen for changes in localStorage (cross-tab support)
     const handleStorageChange = () => {
       updateUserData();
     };
 
-    window.addEventListener("storage", handleStorageChange);
-    
-    // Listen for manual updates (same-tab support)
     const handleCustomEvent = () => {
       updateUserData();
     };
-    
+
+    window.addEventListener("storage", handleStorageChange);
     window.addEventListener("userProfileUpdated", handleCustomEvent);
 
     return () => {
@@ -37,7 +44,8 @@ const UserProfile = () => {
         <h6 className="text-base font-semibold">{userName.toUpperCase()}</h6>
         <p className="text-xs text-gray-600">{userRole?.toUpperCase()}</p>
       </div>
-      <UserIcon size={36} className="h-full" />
+      {/* Conditionally render the UserIcon */}
+      {isIconVisible && <UserIcon size={36} className="h-full" />}
     </div>
   );
 };

@@ -3,6 +3,7 @@ import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva } from "class-variance-authority";
 import PanelLeftIcon from "@/assets/icons/PanelLeftIcon";
+import { useLocation } from "react-router-dom"; // Added import
 
 import { useIsMobile } from "@/hooks/useMobile";
 import { cn } from "@/lib/utils";
@@ -32,7 +33,6 @@ function useSidebar() {
   if (!context) {
     throw new Error("useSidebar must be used within a SidebarProvider.");
   }
-
   return context;
 }
 
@@ -233,6 +233,8 @@ Sidebar.displayName = "Sidebar";
 const SidebarTrigger = React.forwardRef(
   ({ className, onClick, ...props }, ref) => {
     const { toggleSidebar } = useSidebar();
+    const { pathname } = useLocation();
+    const isLoginRoute = pathname.toLowerCase() === "/login";
 
     return (
       <Button
@@ -252,8 +254,7 @@ const SidebarTrigger = React.forwardRef(
         }}
         {...props}
       >
-        <PanelLeftIcon />
-
+        {!isLoginRoute && <PanelLeftIcon />}
         <span className="sr-only">Toggle Sidebar</span>
       </Button>
     );

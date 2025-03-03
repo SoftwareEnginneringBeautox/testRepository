@@ -1,5 +1,6 @@
 "use client";
 
+import { useLocation } from "react-router-dom";
 import {
   SidebarGroup,
   SidebarGroupLabel,
@@ -9,6 +10,15 @@ import {
 } from "@/components/ui/Sidebar";
 
 export function NavMain({ items }) {
+  const { pathname } = useLocation();
+  // Define the routes where you want to hide the entire sidebar
+  const hideRoutes = ["/login", "/scheduleappointment"];
+  
+  // If the current pathname is one of the hide routes, render nothing
+  if (hideRoutes.includes(pathname.toLowerCase())) {
+    return null;
+  }
+
   return (
     <SidebarGroup>
       <SidebarGroupLabel>PRISM PAGES</SidebarGroupLabel>

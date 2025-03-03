@@ -5,7 +5,7 @@ import {
   SidebarMenuItem,
   useSidebar
 } from "@/components/ui/Sidebar";
-import LogoutIcon from "@/assets/icons/LogoutIcon";
+// Removed LogoutIcon import
 
 export function NavUser({ user }) {
   const { isMobile } = useSidebar();
@@ -26,7 +26,7 @@ export function NavUser({ user }) {
         localStorage.removeItem("role");
         localStorage.removeItem("username");
         
-        // Redirect to login page using window.location instead of navigate
+        // Redirect to login page
         window.location.href = "/login";
       } else {
         console.error("Logout failed:", data.message);
@@ -40,7 +40,7 @@ export function NavUser({ user }) {
     <SidebarMenu>
       <SidebarMenuItem>
         <SidebarMenuButton tooltip="LOGOUT" onClick={handleLogout}>
-          <LogoutIcon />
+          {/* Removed <LogoutIcon /> */}
           <span className="flex flex-row gap-2 justify-center items-center">
             LOGOUT
           </span>
