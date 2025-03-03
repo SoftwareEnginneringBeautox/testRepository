@@ -16,9 +16,9 @@ function App() {
     <div className="w-full">
       <BrowserRouter>
         <Routes>
-        <Route index element={<Login />} />
+          <Route index element={<Login />} />
           <Route path="/Login" index element={<Login />} />
-         
+
           <Route path="/AdminDashboard" element={<AdministratorDashboard />} />
           <Route path="/StaffDashboard" element={<StaffDashboard />} />
           <Route
@@ -35,16 +35,15 @@ function App() {
           />
           <Route path="/BookingCalendar" element={<BookingCalendar />} />
           <Route
-          path="/FinancialOverview"
-          element={
-            <ProtectedRoute>
-              <Fin />
-            </ProtectedRoute>
-          }
-        />
+            path="/FinancialOverview"
+            element={
+              <ProtectedRoute>
+                <Fin />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
-            {/* Protected route example */}
-            
+        {/* Protected route example */}
       </BrowserRouter>
     </div>
   );
