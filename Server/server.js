@@ -1,11 +1,17 @@
 const express = require('express');
 const cors = require('cors');
-const pool = require("./database.js");
+const pool = require("./config/database.js");
 const app = express();
+const session = require('express-session');
 
 app.use(express.json());
 app.use(cors());
 
+app.use(session({
+  secret: 'yourSecretKey',
+  resave: false,
+  saveUninitialized: false,
+}));
 app.post('/adduser', (req, res) => {
     const id = req.body["id"];
     const username = req.body["username"];
@@ -80,6 +86,14 @@ app.post('/login', (req, res) => {
       console.error(error);
       res.status(500).json({ success: false, error: 'Internal Server Error' });
     });
+});
+// Check session route
+app.get('/session', (req, res) => {
+  if (req.session.user) {
+    res.json({ loggedIn: true, user: req.session.user });
+  } else {
+    res.json({ loggedIn: false });
+  }
 });
 
 app.listen(4000, () => {
