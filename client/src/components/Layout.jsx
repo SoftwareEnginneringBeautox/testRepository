@@ -7,7 +7,9 @@ import UserProfile from "./UserProfile";
 export default function Layout() {
   const location = useLocation();
   const sidebarlessRoutes = ["/", "/login", "/scheduleappointment"];
-  const isSidebarVisible = !sidebarlessRoutes.includes(location.pathname.toLowerCase());
+  const isSidebarVisible = !sidebarlessRoutes.includes(
+    location.pathname.toLowerCase()
+  );
 
   return (
     <SidebarProvider
@@ -20,10 +22,10 @@ export default function Layout() {
       {isSidebarVisible && <AppSidebar />}
 
       <main className="w-dvw h-screen flex flex-col">
-        <SidebarTrigger />
+        {isSidebarVisible && <UserProfile />}
         <div className="flex flex-col flex-1 items-center">
           <div className="flex flex-row justify-between w-full">
-            <UserProfile />
+            {isSidebarVisible && <UserProfile />}
           </div>
 
           {/* <Outlet /> is where child routes render */}

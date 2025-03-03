@@ -3,7 +3,9 @@ import { useLocation } from "react-router-dom";
 import UserIcon from "@/assets/icons/UserIcon";
 
 const UserProfile = () => {
-  const [userName, setUserName] = useState(localStorage.getItem("username") || "");
+  const [userName, setUserName] = useState(
+    localStorage.getItem("username") || ""
+  );
   const [userRole, setUserRole] = useState(localStorage.getItem("role") || "");
 
   // 1. Use `useLocation` to get the current path
@@ -13,7 +15,9 @@ const UserProfile = () => {
   const hideIconRoutes = ["/login"];
 
   // 3. Determine if the icon should be visible
-  const isIconVisible = !hideIconRoutes.includes(location.pathname.toLowerCase());
+  const isIconVisible = !hideIconRoutes.includes(
+    location.pathname.toLowerCase()
+  );
 
   useEffect(() => {
     const updateUserData = () => {
@@ -39,7 +43,7 @@ const UserProfile = () => {
   }, []);
 
   return (
-    <div className="flex items-center justify-end gap-2 p-3 rounded-lg bg-transparent w-full">
+    <div className="flex items-center justify-end gap-2 p-3 rounded-lg bg-transparent w-full z-50">
       <div className="text-right">
         <h6 className="text-base font-semibold">{userName.toUpperCase()}</h6>
         <p className="text-xs text-gray-600">{userRole?.toUpperCase()}</p>
