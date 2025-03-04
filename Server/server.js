@@ -1,18 +1,21 @@
+// server.js
+
 const express = require('express');
 const cors = require('cors');
 const pool = require("./config/database.js");
 const session = require('express-session');
 const bodyParser = require('body-parser');
 const bcrypt = require('bcrypt');
-const isAuthenticated = require('./authMiddleware'); // Import the middleware
+const isAuthenticated = require('./authMiddleware'); // Custom middleware
 
 const app = express();
+
 
 // Middleware Setup
 app.use(bodyParser.json());
 app.use(express.json());
 app.use(cors({
-  origin: "http://localhost:5173", // Adjust this to match your client URL
+  origin: "http://localhost:5173", // Adjust to match your client URL
   credentials: true
 }));
 
@@ -34,6 +37,10 @@ app.use(session({
   }
 }));
 
+// --------------------
+// User Management Endpoints
+// --------------------
+
 // Register endpoint (for creating new users)
 app.post('/adduser', async (req, res) => {
   try {
@@ -49,17 +56,16 @@ app.post('/adduser', async (req, res) => {
   }
 });
 
-// Protected endpoint to get all users (using the middleware)
+// Protected endpoint to get all users
 app.get('/getusers', isAuthenticated, (req, res) => {
   pool.query("SELECT * FROM accounts")
     .then((response) => res.send(response.rows))
     .catch((error) => res.status(500).json({ success: false, error: 'Error retrieving users' }));
 });
 
-// Protected endpoint to update a user (using the middleware)
+// Protected endpoint to update a user
 app.put('/updateuser', isAuthenticated, async (req, res) => {
   const { id, username, password, role } = req.body;
-  // Note: In production, re-hash the password if it is changed.
   const updatest = `UPDATE accounts SET username = $1, password = $2, role = $3 WHERE id = $4;`;
   try {
     await pool.query(updatest, [username, password, role, id]);
@@ -70,7 +76,7 @@ app.put('/updateuser', isAuthenticated, async (req, res) => {
   }
 });
 
-// Login endpoint (updated to return username)
+// Login endpoint
 app.post('/login', async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -84,12 +90,12 @@ app.post('/login', async (req, res) => {
       if (passwordMatch) {
         // Save user data in session
         req.session.user = { id: user.id, username: user.username, role: user.role };
-        res.json({ 
-          success: true, 
-          message: "Login successful", 
-          role: user.role, 
-          token: "dummyToken", 
-          username: user.username   // Added username here
+        res.json({
+          success: true,
+          message: "Login successful",
+          role: user.role,
+          token: "dummyToken",
+          username: user.username   // Return username as well
         });
       } else {
         res.json({ success: false, message: "Invalid username or password" });
@@ -103,7 +109,7 @@ app.post('/login', async (req, res) => {
   }
 });
 
-// Logout endpoint to destroy the session
+// Logout endpoint
 app.post('/logout', (req, res) => {
   req.session.destroy((err) => {
     if (err) {
@@ -113,6 +119,82 @@ app.post('/logout', (req, res) => {
   });
 });
 
+// --------------------
+// Patient Records Endpoints
+// --------------------
+
+// Create a new patient record
+app.post('/api/patients', async (req, res) => {
+  try {
+    const {
+      patient_name,
+      person_in_charge,
+      package_name,
+      treatment,
+      total_amount,
+      package_discount,
+      payment_method,
+      date_of_session,
+      time_of_session,
+      consent_form_signed
+    } = req.body;
+
+    const insertQuery = `
+      INSERT INTO patient_records (
+        patient_name,
+        person_in_charge,
+        package_name,
+        treatment,
+        total_amount,
+        package_discount,
+        payment_method,
+        date_of_session,
+        time_of_session,
+        consent_form_signed
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+      RETURNING id;
+    `;
+
+    const values = [
+      patient_name,
+      person_in_charge,
+      package_name,
+      treatment,
+      total_amount,
+      package_discount,
+      payment_method,
+      date_of_session,
+      time_of_session,
+      consent_form_signed
+    ];
+
+    const result = await pool.query(insertQuery, values);
+
+    res.json({
+      success: true,
+      message: 'Patient record created',
+      patientId: result.rows[0].id
+    });
+  } catch (error) {
+    console.error('Error creating patient record:', error);
+    res.status(500).json({ success: false, error: 'Error creating patient record' });
+  }
+});
+
+// (Optional) Retrieve all patient records
+// You can protect it with isAuthenticated if desired
+app.get('/api/patients', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM patient_records ORDER BY id DESC');
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error retrieving patient records:', error);
+    res.status(500).json({ success: false, error: 'Error retrieving patient records' });
+  }
+});
+
+// Start the server
 app.listen(4000, () => {
   console.log('Server is running on port 4000');
 });

@@ -9,12 +9,17 @@ import {
   SidebarMenuItem
 } from "@/components/ui/Sidebar";
 
+// Ensure your icons are imported
+import DashboardIcon from "@/assets/icons/DashboardIcon";
+import TreatmentIcon from "@/assets/icons/TreatmentIcon";
+import PatientRecordsIcon from "@/assets/icons/PatientRecordsIcon";
+import BookingsIcon from "@/assets/icons/BookingsIcon";
+import FinancesIcon from "@/assets/icons/FinancesIcon";
+
 export function NavMain({ items }) {
   const { pathname } = useLocation();
-  // Define the routes where you want to hide the entire sidebar
+  // Define routes where the entire sidebar is hidden
   const hideRoutes = ["/login", "/scheduleappointment"];
-  
-  // If the current pathname is one of the hide routes, render nothing
   if (hideRoutes.includes(pathname.toLowerCase())) {
     return null;
   }
@@ -25,7 +30,7 @@ export function NavMain({ items }) {
       <SidebarMenu>
         {items.map((item) => (
           <SidebarMenuItem key={item.title}>
-            <SidebarMenuButton tooltip={item.title}>
+            <SidebarMenuButton tooltip={item.title} onClick={item.onClick}>
               {item.icon}
               <span className="flex flex-row gap-2">{item.title}</span>
             </SidebarMenuButton>

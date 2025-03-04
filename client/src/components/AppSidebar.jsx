@@ -15,32 +15,52 @@ import BookingsIcon from "@/assets/icons/BookingsIcon";
 import FinancesIcon from "@/assets/icons/FinancesIcon";
 import DashboardIcon from "@/assets/icons/DashboardIcon";
 import BeautoxLogo from "@/assets/logos/BeautoxLogo";
+const handleRedirectAdmin = () => {
+  window.location.href = "/AdminDashboard";
+};
+const handleRedirectServices = () => {
+  window.location.href = "/AdministratorServices";
+};
+const handleRedirectPatientRecords = () => {
+  window.location.href = "/PatientRecordsDatabase";
+};
+const handleRedirectBookings = () => {
+  window.location.href = "/bookings";
+};
+const handleRedirectFinancialOverview = () => {
+  window.location.href = "/FinancialOverview";
+};
 
 const sideBarInformation = [
   {
     title: "DASHBOARD",
     url: "/AdminDashboard",
-    icon: <DashboardIcon />
+    icon: <DashboardIcon />,
+    onClick: handleRedirectAdmin
   },
   {
     title: "SERVICES",
     url: "/AdministratorServices",
-    icon: <TreatmentIcon />
+    icon: <TreatmentIcon />,
+    onClick: handleRedirectServices
   },
   {
     title: "PATIENT RECORDS",
     url: "/PatientRecordsDatabase",
-    icon: <PatientRecordsIcon />
+    icon: <PatientRecordsIcon />,
+    onClick: handleRedirectPatientRecords
   },
   {
     title: "BOOKINGS",
     url: "/bookings",
-    icon: <BookingsIcon />
+    icon: <BookingsIcon />,
+    onClick: handleRedirectBookings
   },
   {
     title: "FINANCIAL OVERVIEW",
     url: "/FinancialOverview",
-    icon: <FinancesIcon />
+    icon: <FinancesIcon />,
+    onClick: handleRedirectFinancialOverview
   }
 ];
 

@@ -1,7 +1,5 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useModal } from "@/hooks/useModal";
-import { useState } from "react";
-
 import { Button } from "@/components/ui/Button";
 import ChevronLeftIcon from "@/assets/icons/ChevronLeftIcon";
 import PlusIcon from "@/assets/icons/PlusIcon";
@@ -16,7 +14,7 @@ import {
   TableCell,
   TableHead,
   TableHeader,
-  TableRow
+  TableRow,
 } from "@/components/ui/table";
 
 import { InputTextField, Input } from "@/components/ui/Input";
@@ -27,7 +25,7 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue
+  SelectValue,
 } from "@/components/ui/select";
 
 import DisplayEntry from "@/components/modals/DisplayEntry";
@@ -38,79 +36,50 @@ import DeletePatientEntry from "@/components/modals/DeletePatientEntry";
 function PatientRecordsDatabase() {
   const { currentModal, openModal, closeModal } = useModal();
   const [selectedEntry, setSelectedEntry] = useState(null);
+  const [records, setRecords] = useState([]);
 
+  // Fetch patient records from the API
+  const fetchRecords = async () => {
+    try {
+      const response = await fetch("http://localhost:4000/api/patients", {
+        method: "GET",
+        credentials: "include",
+      });
+      const data = await response.json();
+      setRecords(data);
+    } catch (error) {
+      console.error("Error fetching records:", error);
+    }
+  };
+
+  // Fetch records on component mount
+  useEffect(() => {
+    fetchRecords();
+  }, []);
+
+  // Wrap onClose to refresh the table data when a modal is closed
+  const handleModalClose = () => {
+    closeModal();
+    fetchRecords();
+  };
+
+  // Open display entry modal
   const handleOpenDisplayEntry = (record) => {
     setSelectedEntry(record);
     openModal("displayEntry");
   };
 
-  //dummy data
-  const dummyRecords = [
-    {
-      client: "william wallace",
-      dateTransacted: "2021-09-01",
-      nextSessionDate: "2021-09-01",
-      nextSessionTime: "09:00",
-      personInCharge: "Dr. John Doe",
-      package: "Botox",
-      treatment: "Botox",
-      remainingSessions: 5,
-      consentStatus: "Yes",
-      paymentMethod: "Cash",
-      totalAmount: 500,
-      amountPaid: 500,
-      remainingBalance: 0,
-      referenceNo: "123456"
-    },
-    {
-      client: "jane doe",
-      dateTransacted: "2021-08-15",
-      nextSessionDate: "2021-08-22",
-      nextSessionTime: "10:00",
-      personInCharge: "Dr. Jane Smith",
-      package: "Laser Hair Removal",
-      treatment: "Laser",
-      remainingSessions: 3,
-      consentStatus: "Yes",
-      paymentMethod: "Credit Card",
-      totalAmount: 300,
-      amountPaid: 150,
-      remainingBalance: 150,
-      referenceNo: "654321"
-    },
-    {
-      client: "john smith",
-      dateTransacted: "2021-07-20",
-      nextSessionDate: "2021-07-27",
-      nextSessionTime: "11:00",
-      personInCharge: "Dr. Emily Johnson",
-      package: "Chemical Peel",
-      treatment: "Peel",
-      remainingSessions: 2,
-      consentStatus: "Yes",
-      paymentMethod: "Debit Card",
-      totalAmount: 200,
-      amountPaid: 100,
-      remainingBalance: 100,
-      referenceNo: "789012"
-    },
-    {
-      client: "alice johnson",
-      dateTransacted: "2021-06-10",
-      nextSessionDate: "2021-06-17",
-      nextSessionTime: "12:00",
-      personInCharge: "Dr. Michael Brown",
-      package: "Microdermabrasion",
-      treatment: "Microderm",
-      remainingSessions: 4,
-      consentStatus: "Yes",
-      paymentMethod: "Cash",
-      totalAmount: 400,
-      amountPaid: 200,
-      remainingBalance: 200,
-      referenceNo: "345678"
-    }
-  ];
+  // Open update entry modal
+  const handleOpenUpdateEntry = (record) => {
+    setSelectedEntry(record);
+    openModal("updateEntry");
+  };
+
+  // Open delete entry modal
+  const handleOpenDeleteEntry = (record) => {
+    setSelectedEntry(record);
+    openModal("deleteEntry");
+  };
 
   return (
     <div className="flex flex-col gap-[1.5rem] text-left w-[90%] mx-auto">
@@ -120,7 +89,7 @@ function PatientRecordsDatabase() {
         </h4>
         <div className="flex items-center justify-center gap-4 min-w-9">
           <InputTextField>
-            <Input type="text" id="password" />
+            <Input type="text" id="search" placeholder="Search..." />
             <MagnifyingGlassIcon />
           </InputTextField>
 
@@ -132,98 +101,80 @@ function PatientRecordsDatabase() {
               </SelectIcon>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="light">ALPHABETICAL </SelectItem>
-              <SelectItem value="dark">DATE</SelectItem>
+              <SelectItem value="alphabetical">ALPHABETICAL</SelectItem>
+              <SelectItem value="date">DATE</SelectItem>
             </SelectContent>
           </Select>
         </div>
       </div>
+
       <div className="flex w-full overflow-x-auto">
         <Table className="flex-1">
           <TableHeader>
             <TableRow>
               <TableHead className="py-4">CLIENT</TableHead>
-              <TableHead className="py-4 text-center">
-                DATE TRANSACTED
-              </TableHead>
-              <TableHead className="py-4 text-center">
-                NEXT SESSION DATE
-              </TableHead>
-              <TableHead className="py-4 text-center">
-                NEXT SESSION TIME
-              </TableHead>
-              <TableHead className="py-4 text-center">
-                PERSON IN CHARGE
-              </TableHead>
+              <TableHead className="py-4 text-center">DATE OF SESSION</TableHead>
+              <TableHead className="py-4 text-center">TIME OF SESSION</TableHead>
+              <TableHead className="py-4 text-center">PERSON IN CHARGE</TableHead>
               <TableHead className="py-4">PACKAGE</TableHead>
               <TableHead className="py-4">TREATMENT</TableHead>
-              <TableHead className="py-4 text-center">
-                REMAINING SESSIONS
-              </TableHead>
-              <TableHead className="py-4 text-center">CONSENT STATUS</TableHead>
+              <TableHead className="py-4 text-center">CONSENT FORM SIGNED</TableHead>
               <TableHead className="py-4 text-center">PAYMENT METHOD</TableHead>
               <TableHead className="py-4 text-center">TOTAL AMOUNT</TableHead>
-              <TableHead className="py-4 text-center">AMOUNT PAID</TableHead>
-              <TableHead className="py-4 text-center">
-                REMAINING BALANCE
-              </TableHead>
-              <TableHead className="py-4 text-center">REFERENCE NO.</TableHead>
               <TableHead></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {dummyRecords.map((record, index) => (
+            {records.map((record, index) => (
               <TableRow key={index}>
                 <TableCell
                   onClick={() => handleOpenDisplayEntry(record)}
                   className="cursor-pointer"
                 >
-                  {record.client.toUpperCase()}
+                  {record.client ||
+                    record.patient_name?.toUpperCase() ||
+                    "N/A"}
                 </TableCell>
                 <TableCell className="text-center">
-                  {record.dateTransacted}
+                  {record.dateTransacted || record.date_of_session}
                 </TableCell>
                 <TableCell className="text-center">
-                  {record.nextSessionDate}
+                  {record.nextSessionTime || record.time_of_session}
                 </TableCell>
                 <TableCell className="text-center">
-                  {record.nextSessionTime}
+                  {(record.personInCharge || record.person_in_charge)?.toUpperCase()}
                 </TableCell>
-                <TableCell>{record.personInCharge.toUpperCase()}</TableCell>
-                <TableCell>{record.package.toUpperCase()}</TableCell>
-                <TableCell className="text-center">
-                  {record.treatment.toUpperCase()}
+                <TableCell>
+                  {(record.package || record.package_name)?.toUpperCase()}
                 </TableCell>
                 <TableCell className="text-center">
-                  {record.remainingSessions}
+                  {record.treatment?.toUpperCase()}
                 </TableCell>
                 <TableCell className="text-center">
-                  {record.consentStatus.toUpperCase()}
+                  {record.consentStatus ||
+                    (typeof record.consent_form_signed === "boolean"
+                      ? record.consent_form_signed
+                        ? "YES"
+                        : "NO"
+                      : record.consent_form_signed)}
                 </TableCell>
-                <TableCell>{record.paymentMethod.toUpperCase()}</TableCell>
-                <TableCell className="text-center">
-                  PHP {record.totalAmount}
-                </TableCell>
-                <TableCell className="text-center">
-                  PHP {record.amountPaid}
-                </TableCell>
-                <TableCell className="text-center">
-                  {record.remainingBalance}
+                <TableCell>
+                  {(record.paymentMethod || record.payment_method)?.toUpperCase()}
                 </TableCell>
                 <TableCell className="text-center">
-                  {record.referenceNo}
+                  PHP {record.totalAmount || record.total_amount}
                 </TableCell>
                 <TableCell>
                   <div className="flex justify-center gap-2">
                     <button
                       className="text-reflexBlue-400"
-                      onClick={() => openModal("updateEntry")}
+                      onClick={() => handleOpenUpdateEntry(record)}
                     >
                       <EditIcon />
                     </button>
                     <button
                       className="text-reflexBlue-400"
-                      onClick={() => openModal("deleteEntry")}
+                      onClick={() => handleOpenDeleteEntry(record)}
                     >
                       <ArchiveIcon />
                     </button>
@@ -234,6 +185,7 @@ function PatientRecordsDatabase() {
           </TableBody>
         </Table>
       </div>
+
       <div className="flex flex-row gap-4 justify-end">
         <Button variant="outline">
           <ChevronLeftIcon />
@@ -244,15 +196,23 @@ function PatientRecordsDatabase() {
           ADD NEW ENTRY
         </Button>
       </div>
-      <br />
+
       {currentModal === "createEntry" && (
-        <CreatePatientEntry isOpen={true} onClose={closeModal} />
+        <CreatePatientEntry isOpen={true} onClose={handleModalClose} />
       )}
-      {currentModal === "updateEntry" && (
-        <UpdatePatientEntry isOpen={true} onClose={closeModal} />
+      {currentModal === "updateEntry" && selectedEntry && (
+        <UpdatePatientEntry
+          isOpen={true}
+          onClose={handleModalClose}
+          entryData={selectedEntry}
+        />
       )}
-      {currentModal === "deleteEntry" && (
-        <DeletePatientEntry isOpen={true} onClose={closeModal} />
+      {currentModal === "deleteEntry" && selectedEntry && (
+        <DeletePatientEntry
+          isOpen={true}
+          onClose={handleModalClose}
+          entryData={selectedEntry}
+        />
       )}
       {currentModal === "displayEntry" && selectedEntry && (
         <DisplayEntry
