@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/Button";
 import UserIcon from "../assets/icons/UserIcon";
@@ -21,12 +21,25 @@ function Login() {
   const [successMessage, setSuccessMessage] = useState("");
   const navigate = useNavigate();
 
+  // Listen for login events from other tabs.
+  useEffect(() => {
+    const syncLogin = (event) => {
+      if (event.key === "login") {
+        // Reload the page to pick up the new login state.
+        window.location.reload();
+      }
+    };
+    window.addEventListener("storage", syncLogin);
+    return () => {
+      window.removeEventListener("storage", syncLogin);
+    };
+  }, []);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMessage("");
     setSuccessMessage("");
 
-    // Trim username here to ensure no extra whitespace is sent
     const trimmedUsername = username.trim();
 
     try {
@@ -43,21 +56,23 @@ function Login() {
         setSuccessMessage("Login successful! Redirecting...");
         console.log("Login successful");
 
-        // Save token, role, and username (trimmed) in localStorage for client-side checks
+        // Save authentication details in localStorage.
         localStorage.setItem("token", data.token);
         localStorage.setItem("role", data.role);
         localStorage.setItem("username", data.username);
+        // Also record the login time (for session expiry)...
+        localStorage.setItem("loginTime", Date.now());
+        // And broadcast a login event to sync other tabs.
+        localStorage.setItem("login", Date.now());
 
-        // Dispatch a custom event to notify other components (like UserProfile)
+        // Dispatch a custom event if needed.
         window.dispatchEvent(new Event("userProfileUpdated"));
 
-        // Redirect based on role (placeholder routes for now)
+        // Redirect based on role.
         if (data.role === "admin") {
-          navigate("/adminDashboard");
-        } else if (data.role === "receptionist") {
-          navigate("/staffDashboard");
-        } else if (data.role === "aesthetician") {
-          navigate("/staffDashboard");
+          navigate("/AdminDashboard");
+        } else if (data.role === "receptionist" || data.role === "aesthetician") {
+          navigate("/StaffDashboard");
         } else {
           navigate("/dashboard");
         }

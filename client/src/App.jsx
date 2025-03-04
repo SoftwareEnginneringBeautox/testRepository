@@ -11,8 +11,9 @@ import ScheduleAppointment from "./pages/ScheduleAppointment";
 import BookingCalendar from "./pages/BookingCalendar";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ErrorPage from "./errors/Error404";
+import LandingPage from "@/pages/LandingPage";
 
-// PublicRoute prevents logged-in users from accessing the login page.
+// PublicRoute prevents logged-in users from accessing login/landing pages.
 function PublicRoute({ children }) {
   const token = localStorage.getItem("token");
   const role = (localStorage.getItem("role") || "").trim().toLowerCase();
@@ -56,7 +57,7 @@ function App() {
           index
           element={
             <PublicRoute>
-              <Login />
+              <LandingPage />
             </PublicRoute>
           }
         />
