@@ -1,20 +1,14 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import "../App.css";
-import { useState } from "react";
 import { useModal } from "@/hooks/useModal";
 import { Button } from "@/components/ui/Button";
-
 import CreateStaff from "@/components/modals/CreateStaff";
 import ModifyStaff from "@/components/modals/ModifyStaff";
 import DeleteStaff from "@/components/modals/DeleteStaff";
-
 import SalesChart from "../components/SalesChart";
 import PlusIcon from "../assets/icons/PlusIcon";
-
 import UserIcon from "../assets/icons/UserIcon";
-
 import UserAdminIcon from "../assets/icons/UserAdminIcon";
-
 import {
   AlertContainer,
   AlertDescription,
@@ -24,7 +18,6 @@ import {
 } from "@/components/ui/Alert";
 import InformationIcon from "../assets/icons/InformationIcon";
 import EllipsisIcon from "@/assets/icons/EllipsisIcon";
-
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -32,7 +25,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from "@/components/ui/DropdownMenu";
-
 import {
   Table,
   TableBody,
@@ -41,7 +33,6 @@ import {
   TableHeader,
   TableRow
 } from "@/components/ui/table";
-
 import EditIcon from "@/assets/icons/EditIcon";
 import DeleteIcon from "@/assets/icons/DeleteIcon";
 import CalendarIcon from "@/assets/icons/CalendarIcon";
@@ -54,44 +45,47 @@ function AdministratorDashboard() {
   const month = currentDate.getMonth();
   const year = currentDate.getFullYear();
 
-  const currentStaff = [
-    "Jessica Simpson",
-    "Alice Alex",
-    "Violet Jessica",
-    "Patrick Star"
-  ];
+  // State for dynamic staff list
+  const [staffList, setStaffList] = useState([]);
+  const [loadingStaff, setLoadingStaff] = useState(true);
+  const [errorStaff, setErrorStaff] = useState(null);
 
-  const getStartOfWeek = (date) => {
-    const startDate = date.getDate() - date.getDay();
-    return new Date(date.setDate(startDate));
+  // Fetch staff from the database filtering for receptionist and aesthetician roles
+  useEffect(() => {
+    async function fetchStaff() {
+      try {
+        const response = await fetch("http://localhost:4000/getusers", {
+          method: "GET",
+          credentials: "include",
+        });
+        if (!response.ok) {
+          throw new Error("Failed to fetch staff");
+        }
+        const data = await response.json();
+        // Filter to include only receptionist and aesthetician roles
+        const filteredStaff = data.filter(
+          (user) =>
+            user.role === "receptionist" || user.role === "aesthetician"
+        );
+        setStaffList(filteredStaff);
+      } catch (error) {
+        console.error("Error fetching staff:", error);
+        setErrorStaff(error.message);
+      } finally {
+        setLoadingStaff(false);
+      }
+    }
+    fetchStaff();
+  }, []);
+
+  const [showAlert, setShowAlert] = useState(false);
+
+  const throwAlert = () => {
+    setShowAlert(true);
+    setTimeout(() => {
+      setShowAlert(false);
+    }, 15000);
   };
-
-  const firstDayOfMonth = new Date(year, month, 1);
-  const lastDayOfMonth = new Date(year, month + 1, 0);
-
-  const startDate = new Date(firstDayOfMonth);
-  startDate.setDate(firstDayOfMonth.getDate() - firstDayOfMonth.getDay());
-
-  const calendar = [];
-  let currentWeek = [];
-
-  for (let i = startDate; i <= lastDayOfMonth; i.setDate(i.getDate() + 1)) {
-    const currentDate = new Date(i);
-    if (currentDate.getMonth() === month) {
-      currentWeek.push(currentDate);
-    } else {
-      currentWeek.push(null);
-    }
-
-    if (currentWeek.length === 7) {
-      calendar.push(currentWeek);
-      currentWeek = [];
-    }
-  }
-
-  if (currentWeek.length > 0) {
-    calendar.push(currentWeek);
-  }
 
   const handlePrevious = () => {
     if (view === "monthly") {
@@ -113,32 +107,6 @@ function AdministratorDashboard() {
     }
   };
 
-  const events = [
-    {
-      day: "WED",
-      startTime: "9:00AM",
-      endTime: "10:30AM",
-      name: "Alice Alex",
-      description: "Me So Sexy Package"
-    },
-    {
-      day: "FRI",
-      startTime: "5:00PM",
-      endTime: "6:00PM",
-      name: "Violet Jessica",
-      description: "Brazilian"
-    }
-  ];
-
-  const [showAlert, setShowAlert] = useState(false);
-
-  const throwAlert = () => {
-    setShowAlert(true);
-    setTimeout(() => {
-      setAlertVisible(false);
-    }, 15000);
-  };
-
   return (
     <div className="flex items-start gap-12 justify-center w-[90%] mx-auto mt-10">
       {showAlert && (
@@ -150,7 +118,6 @@ function AdministratorDashboard() {
               You can add components to your app using the CLI.
             </AlertDescription>
           </AlertText>
-
           <CloseAlert onClick={() => setShowAlert(false)}>&times;</CloseAlert>
         </AlertContainer>
       )}
@@ -192,7 +159,6 @@ function AdministratorDashboard() {
             </TableRow>
           </TableBody>
         </Table>
-
         <SalesChart />
         <br />
       </div>
@@ -201,31 +167,39 @@ function AdministratorDashboard() {
           <UserIcon size={32} />
           STAFF LIST
         </h3>
-        {currentStaff.map((staffName, index) => (
-          <div
-            key={index}
-            className="w-full flex justify-between border-2 border-reflexBlue-400 px-4 py-3 rounded-md"
-          >
-            {staffName}
-            <DropdownMenu>
-              <DropdownMenuTrigger>
-                <EllipsisIcon />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuGroup>
-                  <DropdownMenuItem onClick={() => openModal("modifyStaff")}>
-                    <EditIcon />
-                    <p className="font-semibold">Edit</p>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => openModal("deleteStaff")}>
-                    <DeleteIcon />
-                    <p className="font-semibold">Delete</p>
-                  </DropdownMenuItem>
-                </DropdownMenuGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        ))}
+        {loadingStaff ? (
+          <p>Loading staff...</p>
+        ) : errorStaff ? (
+          <p className="text-red-500">{errorStaff}</p>
+        ) : staffList.length === 0 ? (
+          <p>No staff found.</p>
+        ) : (
+          staffList.map((staff, index) => (
+            <div
+              key={index}
+              className="w-full flex justify-between border-2 border-reflexBlue-400 px-4 py-3 rounded-md"
+            >
+              {staff.username}
+              <DropdownMenu>
+                <DropdownMenuTrigger>
+                  <EllipsisIcon />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuGroup>
+                    <DropdownMenuItem onClick={() => openModal("modifyStaff")}>
+                      <EditIcon />
+                      <p className="font-semibold">Edit</p>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => openModal("deleteStaff")}>
+                      <DeleteIcon />
+                      <p className="font-semibold">Delete</p>
+                    </DropdownMenuItem>
+                  </DropdownMenuGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          ))
+        )}
         <Button fullWidth="true" onClick={() => openModal("createStaff")}>
           <PlusIcon />
           ADD NEW STAFF
@@ -238,7 +212,7 @@ function AdministratorDashboard() {
           <ModifyStaff
             isOpen={true}
             onClose={closeModal}
-            staffList={currentStaff}
+            staffList={staffList}
           />
         )}
         {currentModal === "deleteStaff" && (

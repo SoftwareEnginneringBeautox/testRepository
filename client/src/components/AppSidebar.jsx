@@ -25,7 +25,7 @@ const handleRedirectPatientRecords = () => {
   window.location.href = "/PatientRecordsDatabase";
 };
 const handleRedirectBookings = () => {
-  window.location.href = "/bookings";
+  window.location.href = "/BookingCalendar";
 };
 const handleRedirectFinancialOverview = () => {
   window.location.href = "/FinancialOverview";

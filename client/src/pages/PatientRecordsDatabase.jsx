@@ -33,6 +33,9 @@ import CreatePatientEntry from "@/components/modals/CreatePatientEntry";
 import UpdatePatientEntry from "@/components/modals/UpdatePatientEntry";
 import DeletePatientEntry from "@/components/modals/DeletePatientEntry";
 
+// Import date-fns for date formatting
+import { format } from "date-fns";
+
 function PatientRecordsDatabase() {
   const { currentModal, openModal, closeModal } = useModal();
   const [selectedEntry, setSelectedEntry] = useState(null);
@@ -136,7 +139,12 @@ function PatientRecordsDatabase() {
                     "N/A"}
                 </TableCell>
                 <TableCell className="text-center">
-                  {record.dateTransacted || record.date_of_session}
+                  {record.dateTransacted || record.date_of_session
+                    ? format(
+                        new Date(record.dateTransacted || record.date_of_session),
+                        "yyyy-MM-dd"
+                      )
+                    : "N/A"}
                 </TableCell>
                 <TableCell className="text-center">
                   {record.nextSessionTime || record.time_of_session}
