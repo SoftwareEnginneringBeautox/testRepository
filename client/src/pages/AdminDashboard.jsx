@@ -16,7 +16,7 @@ import {
   AlertText,
   CloseAlert
 } from "@/components/ui/Alert";
-import InformationIcon from "../assets/icons/InformationIcon";
+import InformationIcon from "@/assets/icons/InformationIcon";
 import EllipsisIcon from "@/assets/icons/EllipsisIcon";
 import {
   DropdownMenu,
@@ -133,7 +133,7 @@ function AdministratorDashboard() {
         <Table className="overflow-x-hidden">
           <TableHeader>
             <TableRow>
-              <TableHead className="text-xl text-left font-semibold py-4 ">
+              <TableHead className="text-xl text-left font-semibold py-4">
                 REMINDERS
               </TableHead>
             </TableRow>
@@ -179,7 +179,15 @@ function AdministratorDashboard() {
               key={index}
               className="w-full flex justify-between border-2 border-reflexBlue-400 px-4 py-3 rounded-md"
             >
-              {staff.username}
+              <div className="flex flex-col">
+                <span className="font-semibold">{staff.username}</span>
+                {(staff.role === "receptionist" ||
+                  staff.role === "aesthetician") && (
+                  <span className="text-sm text-gray-500 capitalize">
+                    ({staff.role})
+                  </span>
+                )}
+              </div>
               <DropdownMenu>
                 <DropdownMenuTrigger>
                   <EllipsisIcon />
@@ -209,11 +217,7 @@ function AdministratorDashboard() {
           <CreateStaff isOpen={true} onClose={closeModal} />
         )}
         {currentModal === "modifyStaff" && (
-          <ModifyStaff
-            isOpen={true}
-            onClose={closeModal}
-            staffList={staffList}
-          />
+          <ModifyStaff isOpen={true} onClose={closeModal} staffList={staffList} />
         )}
         {currentModal === "deleteStaff" && (
           <DeleteStaff

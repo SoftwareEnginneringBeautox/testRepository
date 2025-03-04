@@ -15,6 +15,7 @@ import BookingsIcon from "@/assets/icons/BookingsIcon";
 import FinancesIcon from "@/assets/icons/FinancesIcon";
 import DashboardIcon from "@/assets/icons/DashboardIcon";
 import BeautoxLogo from "@/assets/logos/BeautoxLogo";
+
 const handleRedirectAdmin = () => {
   window.location.href = "/AdminDashboard";
 };
@@ -67,11 +68,25 @@ const sideBarInformation = [
 export function AppSidebar({ ...props }) {
   const { pathname } = useLocation();
 
-  // Hide the entire sidebar on /login, /, and /scheduleappointment paths
+  // Hide the sidebar on these routes
   const hideSidebarRoutes = ["/", "/login", "/scheduleappointment"];
   if (hideSidebarRoutes.includes(pathname.toLowerCase())) {
     return null;
   }
+
+  // Retrieve the user role from localStorage and normalize it.
+  const userRole = localStorage.getItem("role")?.toLowerCase();
+
+  // Filter out the "SERVICES" item if the role is receptionist or aesthetician.
+  const navItems = sideBarInformation.filter((item) => {
+    if (
+      item.title === "SERVICES" &&
+      (userRole === "receptionist" || userRole === "aesthetician")
+    ) {
+      return false;
+    }
+    return true;
+  });
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -79,7 +94,7 @@ export function AppSidebar({ ...props }) {
         <BeautoxLogo />
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={sideBarInformation} />
+        <NavMain items={navItems} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser />
