@@ -12,12 +12,12 @@ import BookingCalendar from "./pages/BookingCalendar";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ErrorPage from "./errors/Error404";
 
-// PublicRoute prevents logged-in users from accessing login pages.
+// PublicRoute prevents logged-in users from accessing the login page.
 function PublicRoute({ children }) {
   const token = localStorage.getItem("token");
-  const role = localStorage.getItem("role");
+  const role = (localStorage.getItem("role") || "").trim().toLowerCase();
 
-  // If the user is already logged in, redirect them to the correct dashboard.
+  // If a user is already logged in, send them to their appropriate dashboard.
   if (token) {
     if (role === "admin") {
       return <Navigate to="/AdminDashboard" replace />;
@@ -30,16 +30,16 @@ function PublicRoute({ children }) {
   return children;
 }
 
-// AdminRoute protects admin-only routes.
+// AdminRoute protects admin-only pages.
 function AdminRoute({ children }) {
   const token = localStorage.getItem("token");
-  const role = localStorage.getItem("role");
+  const role = (localStorage.getItem("role") || "").trim().toLowerCase();
 
   // If not logged in, redirect to login.
   if (!token) {
     return <Navigate to="/login" replace />;
   }
-  // If logged in but not an admin, redirect to staff dashboard.
+  // If logged in but not an admin, redirect to the staff dashboard.
   if (role !== "admin") {
     return <Navigate to="/StaffDashboard" replace />;
   }
@@ -51,7 +51,7 @@ function App() {
     <Routes>
       {/* The root route ("/") uses <Layout> as a wrapper */}
       <Route path="/" element={<Layout />}>
-        {/* Public routes: accessible only if not logged in */}
+        {/* Public routes (accessible only if not logged in) */}
         <Route
           index
           element={
@@ -69,9 +69,9 @@ function App() {
           }
         />
 
-        {/* Admin-only routes */}
+        {/* Admin-only routes (using wildcard to capture any trailing query parameters) */}
         <Route
-          path="AdminDashboard"
+          path="AdminDashboard/*"
           element={
             <AdminRoute>
               <AdministratorDashboard />
@@ -79,7 +79,7 @@ function App() {
           }
         />
         <Route
-          path="AdministratorServices"
+          path="AdministratorServices/*"
           element={
             <AdminRoute>
               <AdministratorServices />
@@ -87,7 +87,7 @@ function App() {
           }
         />
 
-        {/* Other routes (accessible once logged in) */}
+        {/* Other routes */}
         <Route path="StaffDashboard" element={<StaffDashboard />} />
         <Route
           path="PatientRecordsDatabase"
