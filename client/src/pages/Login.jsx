@@ -26,12 +26,15 @@ function Login() {
     setErrorMessage("");
     setSuccessMessage("");
 
+    // Trim username here to ensure no extra whitespace is sent
+    const trimmedUsername = username.trim();
+
     try {
       const response = await fetch("http://localhost:4000/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include", // Include cookies for session management
-        body: JSON.stringify({ username, password })
+        body: JSON.stringify({ username: trimmedUsername, password })
       });
 
       const data = await response.json();
@@ -40,7 +43,7 @@ function Login() {
         setSuccessMessage("Login successful! Redirecting...");
         console.log("Login successful");
 
-        // Save token, role, and username in localStorage for client-side checks
+        // Save token, role, and username (trimmed) in localStorage for client-side checks
         localStorage.setItem("token", data.token);
         localStorage.setItem("role", data.role);
         localStorage.setItem("username", data.username);
@@ -52,9 +55,9 @@ function Login() {
         if (data.role === "admin") {
           navigate("/adminDashboard");
         } else if (data.role === "receptionist") {
-          navigate("/receptionistDashboard");
+          navigate("/staffDashboard");
         } else if (data.role === "aesthetician") {
-          navigate("/aestheticianDashboard");
+          navigate("/staffDashboard");
         } else {
           navigate("/dashboard");
         }
@@ -115,6 +118,7 @@ function Login() {
                   id="username"
                   className="text-input"
                   onChange={(e) => setUsername(e.target.value)}
+                  onBlur={(e) => setUsername(e.target.value.trim())}
                   placeholder="e.g. john_doe123"
                   required
                 />

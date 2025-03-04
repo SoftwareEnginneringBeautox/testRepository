@@ -30,10 +30,12 @@ const SidebarContext = React.createContext(null);
 
 function useSidebar() {
   const context = React.useContext(SidebarContext);
+  
   if (!context) {
     throw new Error("useSidebar must be used within a SidebarProvider.");
   }
   return context;
+  
 }
 
 const SidebarProvider = React.forwardRef(
@@ -230,37 +232,62 @@ const Sidebar = React.forwardRef(
 );
 Sidebar.displayName = "Sidebar";
 
-const SidebarTrigger = React.forwardRef(
-  ({ className, onClick, ...props }, ref) => {
-    const { toggleSidebar } = useSidebar();
-    const { pathname } = useLocation();
-    const isLoginRoute = pathname.toLowerCase() === "/login";
+const SidebarTrigger = React.forwardRef(({ className, ...props }, ref) => {
+  const { toggleSidebar } = useSidebar();
+  const location = useLocation();
+  
+  // Define routes that should not show the sidebar trigger
+  const hiddenRoutes = ["/", "/login", "/scheduleappointment"];
+  const shouldHideTrigger = hiddenRoutes.includes(location.pathname.toLowerCase());
+  
+  if (shouldHideTrigger) {
+    return null;
+  }
 
-    return (
-      <Button
+  return (
+    // Use absolute positioning so it can be placed relative to a parent container.
+    // Adjust left offset and use a lower z-index (z-40) so the user profile (z-50) appears above it if overlapping.
+    <div className=" top-2 left-2 z-40 pointer-events-auto">
+      <button
         ref={ref}
-        data-sidebar="trigger"
-        variant="ghost"
-        size="icon"
+        type="button"
         className={cn(
-          "fixed h-10 w-10 mt-2 ml-2",
-          "[&_svg]:w-6 [&_svg]:h-6",
-          "text-lavender-700",
+          "h-10 w-10",
+          "bg-white hover:bg-gray-100",
+          
+          "flex items-center justify-center",
+          "transition-colors duration-200",
           className
         )}
-        onClick={(event) => {
-          onClick?.(event);
+        onClick={() => {
+          console.log("Sidebar toggle clicked");
           toggleSidebar();
         }}
         {...props}
       >
-        {!isLoginRoute && <PanelLeftIcon />}
+        <svg 
+          xmlns="http://www.w3.org/2000/svg" 
+          width="24" 
+          height="24" 
+          viewBox="0 0 24 24" 
+          fill="none" 
+          stroke="currentColor" 
+          strokeWidth="2" 
+          strokeLinecap="round" 
+          strokeLinejoin="round"
+          className="text-lavender-700 w-6 h-6"
+        >
+          <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+          <line x1="9" x2="9" y1="3" y2="21" />
+        </svg>
         <span className="sr-only">Toggle Sidebar</span>
-      </Button>
-    );
-  }
-);
+      </button>
+    </div>
+  );
+});
+
 SidebarTrigger.displayName = "SidebarTrigger";
+
 
 const SidebarRail = React.forwardRef(({ className, ...props }, ref) => {
   const { toggleSidebar } = useSidebar();

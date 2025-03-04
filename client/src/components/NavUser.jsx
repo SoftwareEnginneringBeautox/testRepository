@@ -1,14 +1,16 @@
 "use client";
+import { useNavigate } from "react-router-dom";
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar
 } from "@/components/ui/Sidebar";
-// Removed LogoutIcon import
+import LogoutIcon from "@/assets/icons/LogoutIcon";
 
 export function NavUser({ user }) {
   const { isMobile } = useSidebar();
+  const navigate = useNavigate();
 
   const handleLogout = async () => {
     try {
@@ -27,12 +29,14 @@ export function NavUser({ user }) {
         localStorage.removeItem("username");
         
         // Redirect to login page
-        window.location.href = "/login";
+        navigate("/login");
       } else {
         console.error("Logout failed:", data.message);
+        // You might want to show an error message to the user
       }
     } catch (error) {
       console.error("Error during logout:", error);
+      // You might want to show an error message to the user
     }
   };
 
@@ -40,7 +44,7 @@ export function NavUser({ user }) {
     <SidebarMenu>
       <SidebarMenuItem>
         <SidebarMenuButton tooltip="LOGOUT" onClick={handleLogout}>
-          {/* Removed <LogoutIcon /> */}
+          <LogoutIcon />
           <span className="flex flex-row gap-2 justify-center items-center">
             LOGOUT
           </span>

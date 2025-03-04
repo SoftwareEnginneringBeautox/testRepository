@@ -1,23 +1,16 @@
+"use client";
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import UserIcon from "@/assets/icons/UserIcon";
 
 const UserProfile = () => {
-  const [userName, setUserName] = useState(
-    localStorage.getItem("username") || ""
-  );
+  const [userName, setUserName] = useState(localStorage.getItem("username") || "");
   const [userRole, setUserRole] = useState(localStorage.getItem("role") || "");
-
-  // 1. Use `useLocation` to get the current path
   const location = useLocation();
-
-  // 2. Define which routes should hide the icon
+  
+  // Define routes that should hide the user icon
   const hideIconRoutes = ["/login"];
-
-  // 3. Determine if the icon should be visible
-  const isIconVisible = !hideIconRoutes.includes(
-    location.pathname.toLowerCase()
-  );
+  const isIconVisible = !hideIconRoutes.includes(location.pathname.toLowerCase());
 
   useEffect(() => {
     const updateUserData = () => {
@@ -43,12 +36,13 @@ const UserProfile = () => {
   }, []);
 
   return (
-    <div className="flex items-center justify-end gap-2 p-3 rounded-lg bg-transparent w-full z-50">
+    // The relative positioning ensures that if you need to overlay or align elements,
+    // the UserProfile will serve as the reference. The higher z-index (z-50) places it above the trigger.
+    <div className="relative flex items-center justify-end gap-2 p-3 rounded-lg bg-transparent w-full z-50">
       <div className="text-right">
         <h6 className="text-base font-semibold">{userName.toUpperCase()}</h6>
         <p className="text-xs text-gray-600">{userRole?.toUpperCase()}</p>
       </div>
-      {/* Conditionally render the UserIcon */}
       {isIconVisible && <UserIcon size={36} className="h-full" />}
     </div>
   );

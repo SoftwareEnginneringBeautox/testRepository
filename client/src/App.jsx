@@ -10,6 +10,7 @@ import AdministratorServices from "./pages/AdministratorServices";
 import ScheduleAppointment from "./pages/ScheduleAppointment";
 import BookingCalendar from "./pages/BookingCalendar";
 import ProtectedRoute from "./components/ProtectedRoute";
+import ErrorPage from "./errors/Error404";
 
 function App() {
   return (
@@ -39,6 +40,8 @@ function App() {
 
         {/* /BookingCalendar */}
         <Route path="BookingCalendar" element={<BookingCalendar />} />
+
+        <Route path="*" element={<ErrorPage />} />
 
         {/* /FinancialOverview (Protected) */}
         <Route
