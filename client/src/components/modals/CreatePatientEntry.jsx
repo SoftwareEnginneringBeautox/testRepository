@@ -9,7 +9,7 @@ import {
   ModalHeader,
   ModalTitle,
   ModalIcon,
-  ModalBody,
+  ModalBody
 } from "@/components/ui/Modal";
 
 import {
@@ -17,7 +17,7 @@ import {
   InputTextField,
   InputLabel,
   InputIcon,
-  Input,
+  Input
 } from "@/components/ui/Input";
 
 import { Button } from "../ui/Button";
@@ -53,7 +53,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
 
   // Consent form
   const [consentFormSigned, setConsentFormSigned] = useState(false);
-  
+
   // Form validation
   const [formSubmitAttempted, setFormSubmitAttempted] = useState(false);
   const [formErrors, setFormErrors] = useState({});
@@ -62,31 +62,32 @@ function CreatePatientEntry({ isOpen, onClose }) {
   useEffect(() => {
     const numericAmount = parseFloat(amount) || 0;
     const numericDiscount = parseFloat(packageDiscount) || 0;
-    const computedTotal = numericAmount - (numericAmount * numericDiscount / 100);
+    const computedTotal =
+      numericAmount - (numericAmount * numericDiscount) / 100;
     setTotalAmount(computedTotal.toFixed(2));
   }, [amount, packageDiscount]);
 
   if (!isOpen) return null;
-  
+
   console.log("Current state values:", {
     personInCharge,
     packageName,
-    treatment,
+    treatment
   });
 
   // Handle form submission, sending new patient record to the server
   const handleSubmit = async (e) => {
     e.preventDefault();
     setFormSubmitAttempted(true);
-    
+
     // Validate required dropdown selections
     const errors = {};
     if (!personInCharge) errors.personInCharge = "Person in charge is required";
     if (!packageName) errors.packageName = "Package is required";
     if (!treatment) errors.treatment = "Treatment is required";
-    
+
     setFormErrors(errors);
-    
+
     // If there are validation errors, stop submission
     if (Object.keys(errors).length > 0) {
       console.error("Form validation failed:", errors);
@@ -123,7 +124,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
       payment_method: paymentMethod,
       date_of_session: dateOfSession,
       time_of_session: timeOfSession,
-      consent_form_signed: consentFormSigned,
+      consent_form_signed: consentFormSigned
     };
 
     console.log("Payload being sent to API:", payload);
@@ -132,9 +133,9 @@ function CreatePatientEntry({ isOpen, onClose }) {
       const response = await fetch("http://localhost:4000/api/patients", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/json"
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(payload)
       });
 
       if (response.ok) {
@@ -184,18 +185,23 @@ function CreatePatientEntry({ isOpen, onClose }) {
               <InputLabel>PERSON IN CHARGE</InputLabel>
               <InputTextField
                 className={
-                  formSubmitAttempted && formErrors.personInCharge ? "border-red-500 rounded" : ""
+                  formSubmitAttempted && formErrors.personInCharge
+                    ? "border-red-500 rounded"
+                    : ""
                 }
               >
                 <InputIcon>
                   <UserIDIcon className="w-4 h-4" />
                 </InputIcon>
-                <select 
+                <select
                   className="w-full p-2 border rounded bg-[#F5F3F0]"
                   value={personInCharge}
                   onChange={(e) => {
                     const selectedValue = e.target.value;
-                    console.log("Selected person in charge (direct):", selectedValue);
+                    console.log(
+                      "Selected person in charge (direct):",
+                      selectedValue
+                    );
                     setPersonInCharge(selectedValue);
                     setFormErrors({ ...formErrors, personInCharge: null });
                   }}
@@ -205,8 +211,11 @@ function CreatePatientEntry({ isOpen, onClose }) {
                   <option value="Jimmy">Jimmy</option>
                 </select>
               </InputTextField>
-              {formSubmitAttempted && formErrors.personInCharge && 
-                <p className="text-red-500 text-sm mt-1">{formErrors.personInCharge}</p>}
+              {formSubmitAttempted && formErrors.personInCharge && (
+                <p className="text-red-500 text-sm mt-1">
+                  {formErrors.personInCharge}
+                </p>
+              )}
             </InputContainer>
 
             {/* PACKAGE */}
@@ -214,13 +223,15 @@ function CreatePatientEntry({ isOpen, onClose }) {
               <InputLabel>PACKAGE</InputLabel>
               <InputTextField
                 className={
-                  formSubmitAttempted && formErrors.packageName ? "border-red-500 rounded" : ""
+                  formSubmitAttempted && formErrors.packageName
+                    ? "border-red-500 rounded"
+                    : ""
                 }
               >
                 <InputIcon>
                   <PackageIcon className="w-4 h-4" />
                 </InputIcon>
-                <select 
+                <select
                   className="w-full p-2 border rounded bg-[#F5F3F0]"
                   value={packageName}
                   onChange={(e) => {
@@ -236,8 +247,11 @@ function CreatePatientEntry({ isOpen, onClose }) {
                   <option value="Package 3">Package 3</option>
                 </select>
               </InputTextField>
-              {formSubmitAttempted && formErrors.packageName && 
-                <p className="text-red-500 text-sm mt-1">{formErrors.packageName}</p>}
+              {formSubmitAttempted && formErrors.packageName && (
+                <p className="text-red-500 text-sm mt-1">
+                  {formErrors.packageName}
+                </p>
+              )}
             </InputContainer>
 
             {/* TREATMENT */}
@@ -245,13 +259,15 @@ function CreatePatientEntry({ isOpen, onClose }) {
               <InputLabel>TREATMENT</InputLabel>
               <InputTextField
                 className={
-                  formSubmitAttempted && formErrors.treatment ? "border-red-500 rounded" : ""
+                  formSubmitAttempted && formErrors.treatment
+                    ? "border-red-500 rounded"
+                    : ""
                 }
               >
                 <InputIcon>
                   <PackageIcon className="w-4 h-4" />
                 </InputIcon>
-                <select 
+                <select
                   className="w-full p-2 border rounded bg-[#F5F3F0]"
                   value={treatment}
                   onChange={(e) => {
@@ -267,13 +283,16 @@ function CreatePatientEntry({ isOpen, onClose }) {
                   <option value="Treatment 3">Treatment 3</option>
                 </select>
               </InputTextField>
-              {formSubmitAttempted && formErrors.treatment && 
-                <p className="text-red-500 text-sm mt-1">{formErrors.treatment}</p>}
+              {formSubmitAttempted && formErrors.treatment && (
+                <p className="text-red-500 text-sm mt-1">
+                  {formErrors.treatment}
+                </p>
+              )}
             </InputContainer>
 
-            {/* AMOUNT (CURRENCY) */}
+            {/* TOTAL AMOUNT (CURRENCY) - Computed */}
             <InputContainer>
-              <InputLabel>AMOUNT</InputLabel>
+              <InputLabel>TOTAL AMOUNT</InputLabel>
               <InputTextField>
                 <InputIcon>
                   <PesoIcon />
@@ -284,8 +303,8 @@ function CreatePatientEntry({ isOpen, onClose }) {
                   placeholder="₱0.00"
                   decimalsLimit={2}
                   allowNegativeValue={false}
-                  value={amount}
-                  onValueChange={(value) => setAmount(value || "")}
+                  value={totalAmount}
+                  readOnly
                 />
               </InputTextField>
             </InputContainer>
@@ -309,9 +328,9 @@ function CreatePatientEntry({ isOpen, onClose }) {
               </InputTextField>
             </InputContainer>
 
-            {/* TOTAL AMOUNT (CURRENCY) - Computed */}
+            {/* AMOUNT (CURRENCY) */}
             <InputContainer>
-              <InputLabel>TOTAL AMOUNT</InputLabel>
+              <InputLabel>AMOUNT</InputLabel>
               <InputTextField>
                 <InputIcon>
                   <PesoIcon />
@@ -322,8 +341,8 @@ function CreatePatientEntry({ isOpen, onClose }) {
                   placeholder="₱0.00"
                   decimalsLimit={2}
                   allowNegativeValue={false}
-                  value={totalAmount}
-                  readOnly
+                  value={amount}
+                  onValueChange={(value) => setAmount(value || "")}
                 />
               </InputTextField>
             </InputContainer>

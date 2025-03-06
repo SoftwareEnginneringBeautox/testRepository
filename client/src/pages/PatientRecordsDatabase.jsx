@@ -14,7 +14,7 @@ import {
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
+  TableRow
 } from "@/components/ui/table";
 
 import { InputTextField, Input } from "@/components/ui/Input";
@@ -25,7 +25,7 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from "@/components/ui/select";
 
 import DisplayEntry from "@/components/modals/DisplayEntry";
@@ -46,7 +46,7 @@ function PatientRecordsDatabase() {
     try {
       const response = await fetch("http://localhost:4000/api/patients", {
         method: "GET",
-        credentials: "include",
+        credentials: "include"
       });
       const data = await response.json();
       setRecords(data);
@@ -116,12 +116,20 @@ function PatientRecordsDatabase() {
           <TableHeader>
             <TableRow>
               <TableHead className="py-4">CLIENT</TableHead>
-              <TableHead className="py-4 text-center">DATE OF SESSION</TableHead>
-              <TableHead className="py-4 text-center">TIME OF SESSION</TableHead>
-              <TableHead className="py-4 text-center">PERSON IN CHARGE</TableHead>
+              <TableHead className="py-4 text-center">
+                DATE OF SESSION
+              </TableHead>
+              <TableHead className="py-4 text-center">
+                TIME OF SESSION
+              </TableHead>
+              <TableHead className="py-4 text-center">
+                PERSON IN CHARGE
+              </TableHead>
               <TableHead className="py-4">PACKAGE</TableHead>
               <TableHead className="py-4">TREATMENT</TableHead>
-              <TableHead className="py-4 text-center">CONSENT FORM SIGNED</TableHead>
+              <TableHead className="py-4 text-center">
+                CONSENT FORM SIGNED
+              </TableHead>
               <TableHead className="py-4 text-center">PAYMENT METHOD</TableHead>
               <TableHead className="py-4 text-center">TOTAL AMOUNT</TableHead>
               <TableHead></TableHead>
@@ -134,14 +142,14 @@ function PatientRecordsDatabase() {
                   onClick={() => handleOpenDisplayEntry(record)}
                   className="cursor-pointer"
                 >
-                  {record.client ||
-                    record.patient_name?.toUpperCase() ||
-                    "N/A"}
+                  {record.client || record.patient_name?.toUpperCase() || "N/A"}
                 </TableCell>
                 <TableCell className="text-center">
                   {record.dateTransacted || record.date_of_session
                     ? format(
-                        new Date(record.dateTransacted || record.date_of_session),
+                        new Date(
+                          record.dateTransacted || record.date_of_session
+                        ),
                         "yyyy-MM-dd"
                       )
                     : "N/A"}
@@ -150,7 +158,9 @@ function PatientRecordsDatabase() {
                   {record.nextSessionTime || record.time_of_session}
                 </TableCell>
                 <TableCell className="text-center">
-                  {(record.personInCharge || record.person_in_charge)?.toUpperCase()}
+                  {(
+                    record.personInCharge || record.person_in_charge
+                  )?.toUpperCase()}
                 </TableCell>
                 <TableCell>
                   {(record.package || record.package_name)?.toUpperCase()}
@@ -167,7 +177,9 @@ function PatientRecordsDatabase() {
                       : record.consent_form_signed)}
                 </TableCell>
                 <TableCell>
-                  {(record.paymentMethod || record.payment_method)?.toUpperCase()}
+                  {(
+                    record.paymentMethod || record.payment_method
+                  )?.toUpperCase()}
                 </TableCell>
                 <TableCell className="text-center">
                   PHP {record.totalAmount || record.total_amount}

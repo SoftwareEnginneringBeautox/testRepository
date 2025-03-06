@@ -38,6 +38,9 @@ import DeleteIcon from "@/assets/icons/DeleteIcon";
 import CalendarIcon from "@/assets/icons/CalendarIcon";
 
 function AdministratorDashboard() {
+  const [userName, setUserName] = useState(
+    localStorage.getItem("username") || ""
+  );
   const { currentModal, openModal, closeModal } = useModal();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [view, setView] = useState("monthly");
@@ -56,7 +59,7 @@ function AdministratorDashboard() {
       try {
         const response = await fetch("http://localhost:4000/getusers", {
           method: "GET",
-          credentials: "include",
+          credentials: "include"
         });
         if (!response.ok) {
           throw new Error("Failed to fetch staff");
@@ -64,8 +67,7 @@ function AdministratorDashboard() {
         const data = await response.json();
         // Filter to include only receptionist and aesthetician roles
         const filteredStaff = data.filter(
-          (user) =>
-            user.role === "receptionist" || user.role === "aesthetician"
+          (user) => user.role === "receptionist" || user.role === "aesthetician"
         );
         setStaffList(filteredStaff);
       } catch (error) {
@@ -127,7 +129,7 @@ function AdministratorDashboard() {
             <UserAdminIcon size={32} />
           </div>
           <h2 className="text-[2rem] leading-[2.8rem] font-semibold bg-gradient-to-r from-lavender-300 to-reflexBlue-400 text-transparent bg-clip-text">
-            WELCOME BACK, ADMINISTRATOR
+            WELCOME BACK, ADMINISTRATOR {userName.toUpperCase()}
           </h2>
         </div>
         <Table className="overflow-x-hidden">
@@ -217,7 +219,11 @@ function AdministratorDashboard() {
           <CreateStaff isOpen={true} onClose={closeModal} />
         )}
         {currentModal === "modifyStaff" && (
-          <ModifyStaff isOpen={true} onClose={closeModal} staffList={staffList} />
+          <ModifyStaff
+            isOpen={true}
+            onClose={closeModal}
+            staffList={staffList}
+          />
         )}
         {currentModal === "deleteStaff" && (
           <DeleteStaff

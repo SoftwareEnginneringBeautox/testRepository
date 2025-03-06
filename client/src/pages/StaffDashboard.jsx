@@ -25,6 +25,9 @@ import DeleteIcon from "@/assets/icons/DeleteIcon";
 import CalendarIcon from "@/assets/icons/CalendarIcon";
 
 function StaffDashboard() {
+  const [userName, setUserName] = useState(
+    localStorage.getItem("username") || ""
+  );
   const [currentDate, setCurrentDate] = useState(new Date());
   const [view, setView] = useState("monthly");
 
@@ -156,7 +159,7 @@ function StaffDashboard() {
             <UserIcon size={32} />
           </div>
           <h2 className="text-[2rem] leading-[2.8rem] font-semibold bg-gradient-to-r from-lavender-300 to-reflexBlue-400 text-transparent bg-clip-text">
-            WELCOME BACK, STAFF
+            WELCOME BACK, {userName.toUpperCase()}
           </h2>
         </div>
         <Table>

@@ -4,13 +4,17 @@ import { useLocation } from "react-router-dom";
 import UserIcon from "@/assets/icons/UserIcon";
 
 const UserProfile = () => {
-  const [userName, setUserName] = useState(localStorage.getItem("username") || "");
+  const [userName, setUserName] = useState(
+    localStorage.getItem("username") || ""
+  );
   const [userRole, setUserRole] = useState(localStorage.getItem("role") || "");
   const location = useLocation();
-  
+
   // Define routes that should hide the user icon
   const hideIconRoutes = ["/login"];
-  const isIconVisible = !hideIconRoutes.includes(location.pathname.toLowerCase());
+  const isIconVisible = !hideIconRoutes.includes(
+    location.pathname.toLowerCase()
+  );
 
   useEffect(() => {
     const updateUserData = () => {

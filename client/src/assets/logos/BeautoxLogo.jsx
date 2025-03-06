@@ -1,11 +1,12 @@
-const BeautoxLogo = ({ size = 100, fill = "currentColor" }) => {
+const BeautoxLogo = ({ size = 100, fill = "currentColor", className = "" }) => {
   const height = (size * 86) / 100;
   return (
     <svg
       width={size}
       height={height}
+      className={className}
       viewBox="0 0 100 86"
-      fill="none"
+      fill={fill}
       xmlns="http://www.w3.org/2000/svg"
       preserveAspectRatio="xMidYMid meet"
     >
