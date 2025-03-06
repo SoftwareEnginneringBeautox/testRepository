@@ -50,7 +50,7 @@ function LandingPage() {
             </Button>
           </div>
           <div className="w-1/2 flex items-center justify-center ">
-            <BeautoxLogo className="h-full w-1/2 text-lavender-400" />
+            <BeautoxLogo className="h-full w-1/2 text-lavender-400 opacity-90" />
           </div>
         </section>
         <footer>

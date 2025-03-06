@@ -25,6 +25,7 @@ import UserIcon from "@/assets/icons/UserIcon";
 import ChevronLeftIcon from "@/assets/icons/ChevronLeftIcon";
 import PlusIcon from "@/assets/icons/PlusIcon";
 import CalendarIcon from "@/assets/icons/CalendarIcon";
+import PasswordIcon from "@/assets/icons/PasswordIcon";
 
 function CreateStaff({ isOpen, onClose }) {
   if (!isOpen) return null;
@@ -49,6 +50,7 @@ function CreateStaff({ isOpen, onClose }) {
                 <Input placeholder="Name of the Staff" />
               </InputTextField>
             </InputContainer>
+
             <InputContainer>
               <InputLabel>STAFF ROLE</InputLabel>
 
@@ -60,6 +62,17 @@ function CreateStaff({ isOpen, onClose }) {
                 <SelectItem value="RECEPTIONIST">RECEPTIONIST</SelectItem>
               </ModalSelect>
             </InputContainer>
+
+            <InputContainer>
+              <InputLabel>STAFF PASSWROD</InputLabel>
+              <InputTextField>
+                <InputIcon>
+                  <PasswordIcon />
+                </InputIcon>
+                <Input placeholder="Password of the Staff" />
+              </InputTextField>
+            </InputContainer>
+
             <InputContainer>
               <InputLabel>DESIGNATED DAY OFF</InputLabel>
               <ModalSelect

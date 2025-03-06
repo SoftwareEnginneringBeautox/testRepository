@@ -44,7 +44,7 @@ function Error404() {
   return (
     <div className="bg-faintingLight-100 flex flex-col justify-center items-center w-screen h-screen">
       <div className="flex gap-[2.25rem]">
-        <QuestionBoxIcon size={180} />
+        <QuestionBoxIcon size={220} />
         <div className="flex flex-col gap-[1.2rem]">
           <div className="flex flex-col text-left">
             <h2 className="font-semibold text-5xl leading-[4.2rem]">
@@ -62,7 +62,9 @@ function Error404() {
             text="RETURN"
             leftIcon={<ChevronLeftIcon />}
             onClick={handleRedirect}
-          >Go Back</Button>
+          >
+            Go Back
+          </Button>
         </div>
       </div>
     </div>
