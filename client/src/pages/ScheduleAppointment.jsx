@@ -19,11 +19,10 @@ import {
 } from "@/components/ui/Input";
 
 function ScheduleAppointment() {
-  const navigate = useNavigate();
-
   const handleReturn = () => {
-    navigate("/");
+    useNavigate("/");
   };
+
   return (
     <div className="flex flex-col items-center justify-center text-left w-full min-h-screen mx-auto ">
       <div className="flex flex-col w-[90%] gap-4">
