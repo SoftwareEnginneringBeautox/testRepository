@@ -45,7 +45,7 @@ function LandingPage() {
               onClick={() => navigate("/scheduleAppointment")}
               // className="bg-gradient-to-r from-reflexBlue-300 to-lavender-300 text-transparent text-white"
             >
-              SET APPOINTMENT
+              SET AN APPOINTMENT
               <CalendarIcon />
             </Button>
           </div>

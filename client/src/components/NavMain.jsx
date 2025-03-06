@@ -9,13 +9,6 @@ import {
   SidebarMenuItem
 } from "@/components/ui/Sidebar";
 
-// Ensure your icons are imported
-import DashboardIcon from "@/assets/icons/DashboardIcon";
-import TreatmentIcon from "@/assets/icons/TreatmentIcon";
-import PatientRecordsIcon from "@/assets/icons/PatientRecordsIcon";
-import BookingsIcon from "@/assets/icons/BookingsIcon";
-import FinancesIcon from "@/assets/icons/FinancesIcon";
-
 export function NavMain({ items }) {
   const { pathname } = useLocation();
   // Define routes where the entire sidebar is hidden

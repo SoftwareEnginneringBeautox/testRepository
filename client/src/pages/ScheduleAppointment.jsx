@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/Button";
 import UserIcon from "../assets/icons/UserIcon";
 import EmailIcon from "../assets/icons/EmailIcon";
@@ -18,6 +19,11 @@ import {
 } from "@/components/ui/Input";
 
 function ScheduleAppointment() {
+  const navigate = useNavigate();
+
+  const handleReturn = () => {
+    navigate("/");
+  };
   return (
     <div className="flex flex-col items-center justify-center text-left w-full min-h-screen mx-auto ">
       <div className="flex flex-col w-[90%] gap-4">
@@ -118,7 +124,12 @@ function ScheduleAppointment() {
             </InputContainer>
           </div>
           <div className="flex flex-row gap-2 w-full">
-            <Button variant="outline" fullWidth={true}>
+            <Button
+              variant="outline"
+              fullWidth={true}
+              type="button"
+              onClick={handleReturn}
+            >
               <ChevronLeftIcon />
               RETURN
             </Button>
