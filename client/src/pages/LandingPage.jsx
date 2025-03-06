@@ -53,6 +53,16 @@ function LandingPage() {
             <BeautoxLogo className="h-full w-1/2 text-lavender-400 opacity-90" />
           </div>
         </section>
+        <section className="w-3/4 flex flex-col items-center justify-center gap-4">
+          <div>[image of BEAUTOX address here]</div>
+          <div>
+            <h3>DON'T KNOW WHERE TO FIND US?</h3>
+            <p>We are locted at [address] near Robinson's Magnolia.</p>
+          </div>
+        </section>
+        <section className="w-3/4 flex flex-col items-center justify-center gap-4">
+          [PRODUCT SECTION]
+        </section>
         <footer>
           <h3 className="text-3xl font-bold text-lavender-400">
             WANT TO LEARN MORE ABOUT US? FIND US HERE
