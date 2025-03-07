@@ -4,6 +4,7 @@ import BeautoxLogo from "@/assets/logos/BeautoxLogo";
 
 import CalendarIcon from "@/assets/icons/CalendarIcon";
 import LoginIcon from "@/assets/icons/LoginIcon";
+import LocationIcon from "@/assets/icons/LocationIcon";
 
 function LandingPage() {
   const navigate = useNavigate();
@@ -64,8 +65,11 @@ function LandingPage() {
           </div>
           <div className="w-1/2 text-end">
             <div className="flex flex-row gap-2 text-end justify-end pb-2">
-              <p className="text-2xl">&#128205;</p>
+              {/* <p className="text-2xl">&#128205;</p> */}
               <h3 className="font-semibold text-2xl bg-gradient-to-r from-lavender-300 to-reflexBlue-400 text-transparent bg-clip-text">
+                <div>
+                  <LocationIcon />
+                </div>
                 DON'T KNOW WHERE TO FIND US?
               </h3>
             </div>
