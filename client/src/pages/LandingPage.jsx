@@ -27,7 +27,7 @@ function LandingPage() {
         >
           <div className="w-1/2 flex flex-col gap-6">
             <div className="flex flex-col gap-2">
-              <h2 className="text-5xl leading-3 font-bold bg-gradient-to-r from-lavender-300 to-reflexBlue-400 text-transparent  bg-clip-text py-4 ">
+              <h2 className="text-4xl leading-2 font-bold bg-gradient-to-r from-lavender-300 to-reflexBlue-400 text-transparent  bg-clip-text ">
                 WELCOME TO BEAUTOX
               </h2>
               <h3 className="font-semibold text-2xl bg-gradient-to-r from-reflexBlue-300 to-lavender-300 text-transparent bg-clip-text">
@@ -43,7 +43,6 @@ function LandingPage() {
             <Button
               fullWidth="true"
               onClick={() => navigate("/scheduleAppointment")}
-              // className="bg-gradient-to-r from-reflexBlue-300 to-lavender-300 text-transparent text-white"
             >
               SET AN APPOINTMENT
               <CalendarIcon />
@@ -53,17 +52,34 @@ function LandingPage() {
             <BeautoxLogo className="h-full w-1/2 text-lavender-400 opacity-90" />
           </div>
         </section>
-        <section className="w-3/4 flex flex-col items-center justify-center gap-4">
-          <div>[image of BEAUTOX address here]</div>
-          <div>
-            <h3>DON'T KNOW WHERE TO FIND US?</h3>
-            <p>We are locted at [address] near Robinson's Magnolia.</p>
+        <section className="w-3/4 flex flex-row items-center justify-center gap-4 min-h-screen">
+          <div className="w-1/2 flex items-center justify-center rounded-half">
+            <iframe
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1043.644141889592!2d121.03651836623278!3d14.614630075990188!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397b7656817cb95%3A0xc3a3721da76b89!2sSonema%20Square!5e0!3m2!1sen!2sph!4v1741322385811!5m2!1sen!2sph"
+              allowFullScreen="true"
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              className="rounded-3xl w-full min-h-10"
+              height={300}
+            ></iframe>
+          </div>
+          <div className="w-1/2 text-end">
+            <div className="flex flex-row gap-2 text-end justify-end pb-2">
+              <p className="text-2xl">&#128205;</p>
+              <h3 className="font-semibold text-2xl bg-gradient-to-r from-lavender-300 to-reflexBlue-400 text-transparent bg-clip-text">
+                DON'T KNOW WHERE TO FIND US?
+              </h3>
+            </div>
+            <p>
+              We are located at J26P+XXR, N. Domingo, Quezon City, 1112 Metro
+              Manila near Robinson's Magnolia.
+            </p>
           </div>
         </section>
-        <section className="w-3/4 flex flex-col items-center justify-center gap-4">
+        <section className="w-3/4 flex flex-col items-center justify-center gap-4 min-h-screen">
           [PRODUCT SECTION]
         </section>
-        <footer>
+        <footer className="w-full">
           <h3 className="text-3xl font-bold text-lavender-400">
             WANT TO LEARN MORE ABOUT US? FIND US HERE
           </h3>
