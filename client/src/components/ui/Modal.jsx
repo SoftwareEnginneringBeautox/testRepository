@@ -5,7 +5,7 @@ const ModalContainer = React.forwardRef(
   ({ className, children, ...props }, ref) => (
     <div
       ref={ref}
-      className="fixed inset-0 z-50 flex items-center justify-center p-16 "
+      className="fixed inset-0 z-50 flex items-start justify-center p-16 overflow-y-auto"
       {...props}
     >
       {/* Overlay */}
@@ -14,7 +14,7 @@ const ModalContainer = React.forwardRef(
       {/* Modal Content */}
       <div
         className={cn(
-          "relative z-50 bg-ash-100 p-8 rounded-lg shadow-lg min-w-[40%]",
+          "my-[10vh] relative z-50 bg-ash-100 p-8 rounded-lg shadow-lg min-w-[40%]",
           className
         )}
       >
@@ -23,6 +23,7 @@ const ModalContainer = React.forwardRef(
     </div>
   )
 );
+
 ModalContainer.displayName = "ModalContainer";
 
 const ModalOverlay = React.forwardRef(({ className, ...props }, ref) => (

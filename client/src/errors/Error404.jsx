@@ -63,7 +63,7 @@ function Error404() {
             leftIcon={<ChevronLeftIcon />}
             onClick={handleRedirect}
           >
-            Go Back
+            GO BACK
           </Button>
         </div>
       </div>

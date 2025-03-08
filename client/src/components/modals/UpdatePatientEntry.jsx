@@ -1,7 +1,5 @@
 import React from "react";
 
-import { RadioGroup, RadioGroupItem } from "@/components/ui/RadioGroup";
-
 import { Checkbox } from "@/components/ui/checkbox";
 
 import {
@@ -27,12 +25,9 @@ import { Button } from "../ui/Button";
 import PesoIcon from "@/assets/icons/PesoIcon";
 import ClockIcon from "@/assets/icons/ClockIcon";
 import ChevronLeftIcon from "@/assets/icons/ChevronLeftIcon";
-import PlusIcon from "@/assets/icons/PlusIcon";
 import CalendarIcon from "@/assets/icons/CalendarIcon";
 import UserIcon from "@/assets/icons/UserIcon";
 import UserIDIcon from "@/assets/icons/UserIDIcon";
-import PackageIcon from "@/assets/icons/PackageIcon";
-import PercentageIcon from "@/assets/icons/PercentageIcon";
 import CircleUserIcon from "@/assets/icons/CircleUserIcon";
 import TreatmentIcon from "@/assets/icons/TreatmentIcon";
 import EditIcon from "@/assets/icons/EditIcon";

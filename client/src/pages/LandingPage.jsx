@@ -66,16 +66,19 @@ function LandingPage() {
           <div className="w-1/2 text-end">
             <div className="flex flex-row gap-2 text-end justify-end pb-2">
               {/* <p className="text-2xl">&#128205;</p> */}
-              <h3 className="font-semibold text-2xl bg-gradient-to-r from-lavender-300 to-reflexBlue-400 text-transparent bg-clip-text">
-                <div>
+              <h3 className="flex flex-row justify-center items-center font-semibold text-2xl bg-gradient-to-r from-lavender-300 to-reflexBlue-400 text-transparent bg-clip-text">
+                <div className="text-lavender-400 h-full pr-1 flex items-center">
                   <LocationIcon />
                 </div>
                 DON'T KNOW WHERE TO FIND US?
               </h3>
             </div>
             <p>
-              We are located at J26P+XXR, N. Domingo, Quezon City, 1112 Metro
-              Manila near Robinson's Magnolia.
+              We are located at{" "}
+              <span className="font-bold">
+                J26P+XXR, N. Domingo, Quezon City, 1112 Metro Manila
+              </span>
+              , near Robinson's Magnolia.
             </p>
           </div>
         </section>

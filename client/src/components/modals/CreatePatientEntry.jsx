@@ -20,6 +20,8 @@ import {
   Input
 } from "@/components/ui/Input";
 
+import { ModalSelect, SelectItem } from "../ui/Select";
+
 import { Button } from "../ui/Button";
 
 import PesoIcon from "@/assets/icons/PesoIcon";
@@ -31,6 +33,7 @@ import UserIcon from "@/assets/icons/UserIcon";
 import UserIDIcon from "@/assets/icons/UserIDIcon";
 import PackageIcon from "@/assets/icons/PackageIcon";
 import PercentageIcon from "@/assets/icons/PercentageIcon";
+import TreatmentIcon from "@/assets/icons/TreatmentIcon";
 
 function CreatePatientEntry({ isOpen, onClose }) {
   // ----------- State Hooks -----------
@@ -183,34 +186,24 @@ function CreatePatientEntry({ isOpen, onClose }) {
             {/* PERSON IN CHARGE */}
             <InputContainer>
               <InputLabel>PERSON IN CHARGE</InputLabel>
-              <InputTextField
-                className={
-                  formSubmitAttempted && formErrors.personInCharge
-                    ? "border-red-500 rounded"
-                    : ""
-                }
+
+              <ModalSelect
+                placeholder="Person in charge of the session"
+                icon={<UserIDIcon className="w-4 h-4" />}
+                value={personInCharge}
+                onChange={(e) => {
+                  const selectedValue = e.target.value;
+                  console.log(
+                    "Selected person in charge (direct):",
+                    selectedValue
+                  );
+                  setPersonInCharge(selectedValue);
+                  setFormErrors({ ...formErrors, personInCharge: null });
+                }}
               >
-                <InputIcon>
-                  <UserIDIcon className="w-4 h-4" />
-                </InputIcon>
-                <select
-                  className="w-full p-2 border rounded bg-[#F5F3F0]"
-                  value={personInCharge}
-                  onChange={(e) => {
-                    const selectedValue = e.target.value;
-                    console.log(
-                      "Selected person in charge (direct):",
-                      selectedValue
-                    );
-                    setPersonInCharge(selectedValue);
-                    setFormErrors({ ...formErrors, personInCharge: null });
-                  }}
-                >
-                  <option value="">Select person in charge</option>
-                  <option value="Jessica">Jessica</option>
-                  <option value="Jimmy">Jimmy</option>
-                </select>
-              </InputTextField>
+                <SelectItem value="Jessica">Jessica</SelectItem>
+                <SelectItem value="Jimmy">Jimmy</SelectItem>
+              </ModalSelect>
               {formSubmitAttempted && formErrors.personInCharge && (
                 <p className="text-red-500 text-sm mt-1">
                   {formErrors.personInCharge}
@@ -221,32 +214,21 @@ function CreatePatientEntry({ isOpen, onClose }) {
             {/* PACKAGE */}
             <InputContainer>
               <InputLabel>PACKAGE</InputLabel>
-              <InputTextField
-                className={
-                  formSubmitAttempted && formErrors.packageName
-                    ? "border-red-500 rounded"
-                    : ""
-                }
+              <ModalSelect
+                placeholder="Select Package"
+                icon={<PackageIcon className="w-4 h-4" />}
+                value={packageName}
+                onChange={(e) => {
+                  const selectedValue = e.target.value;
+                  console.log("Selected package (direct):", selectedValue);
+                  setPackageName(selectedValue);
+                  setFormErrors({ ...formErrors, packageName: null });
+                }}
               >
-                <InputIcon>
-                  <PackageIcon className="w-4 h-4" />
-                </InputIcon>
-                <select
-                  className="w-full p-2 border rounded bg-[#F5F3F0]"
-                  value={packageName}
-                  onChange={(e) => {
-                    const selectedValue = e.target.value;
-                    console.log("Selected package (direct):", selectedValue);
-                    setPackageName(selectedValue);
-                    setFormErrors({ ...formErrors, packageName: null });
-                  }}
-                >
-                  <option value="">Select package</option>
-                  <option value="Package 1">Package 1</option>
-                  <option value="Package 2">Package 2</option>
-                  <option value="Package 3">Package 3</option>
-                </select>
-              </InputTextField>
+                <SelectItem value="Package 1">Package 1</SelectItem>
+                <SelectItem value="Package 2">Package 2</SelectItem>
+                <SelectItem value="Package 3">Package 3</SelectItem>
+              </ModalSelect>
               {formSubmitAttempted && formErrors.packageName && (
                 <p className="text-red-500 text-sm mt-1">
                   {formErrors.packageName}
@@ -257,32 +239,21 @@ function CreatePatientEntry({ isOpen, onClose }) {
             {/* TREATMENT */}
             <InputContainer>
               <InputLabel>TREATMENT</InputLabel>
-              <InputTextField
-                className={
-                  formSubmitAttempted && formErrors.treatment
-                    ? "border-red-500 rounded"
-                    : ""
-                }
+              <ModalSelect
+                placeholder="Select Package"
+                icon={<TreatmentIcon className="w-4 h-4" />}
+                value={treatment}
+                onChange={(e) => {
+                  const selectedValue = e.target.value;
+                  console.log("Selected treatment (direct):", selectedValue);
+                  setTreatment(selectedValue);
+                  setFormErrors({ ...formErrors, treatment: null });
+                }}
               >
-                <InputIcon>
-                  <PackageIcon className="w-4 h-4" />
-                </InputIcon>
-                <select
-                  className="w-full p-2 border rounded bg-[#F5F3F0]"
-                  value={treatment}
-                  onChange={(e) => {
-                    const selectedValue = e.target.value;
-                    console.log("Selected treatment (direct):", selectedValue);
-                    setTreatment(selectedValue);
-                    setFormErrors({ ...formErrors, treatment: null });
-                  }}
-                >
-                  <option value="">Select treatment</option>
-                  <option value="Treatment 1">Treatment 1</option>
-                  <option value="Treatment 2">Treatment 2</option>
-                  <option value="Treatment 3">Treatment 3</option>
-                </select>
-              </InputTextField>
+                <SelectItem value="Treatment 1">Treatment 1</SelectItem>
+                <SelectItem value="Treatment 2">Treatment 2</SelectItem>
+                <SelectItem value="Treatment 3">Treatment 3</SelectItem>
+              </ModalSelect>
               {formSubmitAttempted && formErrors.treatment && (
                 <p className="text-red-500 text-sm mt-1">
                   {formErrors.treatment}
@@ -418,7 +389,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
                 htmlFor="consent"
                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
               >
-                Consent form has been signed
+                CONSENT FORM HAS BEEN SIGNED
               </label>
             </div>
           </div>
