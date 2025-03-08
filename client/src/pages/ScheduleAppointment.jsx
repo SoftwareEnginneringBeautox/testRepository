@@ -20,7 +20,7 @@ import {
 
 function ScheduleAppointment() {
   const handleReturn = () => {
-    useNavigate("/");
+    useNavigate("/ScheduleAppointment");
   };
 
   return (

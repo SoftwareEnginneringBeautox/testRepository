@@ -15,7 +15,7 @@ const app = express();
 app.use(bodyParser.json());
 app.use(express.json());
 app.use(cors({
-  origin: "http://localhost:5175", // Adjust to match your client URL
+  origin: "http://localhost:5173", // Adjust to match your client URL
   credentials: true
 }));
 
