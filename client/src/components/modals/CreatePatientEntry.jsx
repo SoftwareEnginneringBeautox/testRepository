@@ -40,7 +40,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
   const [packageName, setPackageName] = useState("");
   const [treatment, setTreatment] = useState("");
 
-  // Currency/decimal fields (store them as strings)
+  // Currency/decimal fields
   const [amount, setAmount] = useState(""); // Original amount input by the user
   const [packageDiscount, setPackageDiscount] = useState("");
   const [totalAmount, setTotalAmount] = useState(""); // Computed automatically
@@ -54,15 +54,18 @@ function CreatePatientEntry({ isOpen, onClose }) {
 
   // Consent form
   const [consentFormSigned, setConsentFormSigned] = useState(false);
-  
+
   // Form validation
   const [formSubmitAttempted, setFormSubmitAttempted] = useState(false);
   const [formErrors, setFormErrors] = useState({});
 
   // List of aestheticians for "person in charge"
   const [aestheticianList, setAestheticianList] = useState([]);
+  // List for packages and treatments fetched from the database
+  const [packagesList, setPackagesList] = useState([]);
+  const [treatmentsList, setTreatmentsList] = useState([]);
 
-  // Automatically compute total amount whenever amount or discount changes
+  // Compute total amount automatically whenever amount or discount changes
   useEffect(() => {
     const numericAmount = parseFloat(amount) || 0;
     const numericDiscount = parseFloat(packageDiscount) || 0;
@@ -70,14 +73,13 @@ function CreatePatientEntry({ isOpen, onClose }) {
     setTotalAmount(computedTotal.toFixed(2));
   }, [amount, packageDiscount]);
 
-  // Fetch the list of aestheticians from the database
+  // Fetch the list of aestheticians for "person in charge"
   useEffect(() => {
     async function fetchAestheticians() {
       try {
         const response = await axios.get("http://localhost:4000/getusers", {
           withCredentials: true,
         });
-        // Filter users with role "aesthetician" (case-insensitive)
         const aestheticians = response.data.filter(
           (user) => user.role && user.role.toLowerCase() === "aesthetician"
         );
@@ -89,8 +91,38 @@ function CreatePatientEntry({ isOpen, onClose }) {
     fetchAestheticians();
   }, []);
 
+  // Fetch packages list from the database
+  useEffect(() => {
+    async function fetchPackages() {
+      try {
+        const response = await axios.get("http://localhost:4000/api/packages", {
+          withCredentials: true,
+        });
+        setPackagesList(response.data);
+      } catch (error) {
+        console.error("Error fetching packages:", error);
+      }
+    }
+    fetchPackages();
+  }, []);
+
+  // Fetch treatments list from the database
+  useEffect(() => {
+    async function fetchTreatments() {
+      try {
+        const response = await axios.get("http://localhost:4000/api/treatments", {
+          withCredentials: true,
+        });
+        setTreatmentsList(response.data);
+      } catch (error) {
+        console.error("Error fetching treatments:", error);
+      }
+    }
+    fetchTreatments();
+  }, []);
+
   if (!isOpen) return null;
-  
+
   console.log("Current state values:", {
     personInCharge,
     packageName,
@@ -101,16 +133,16 @@ function CreatePatientEntry({ isOpen, onClose }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setFormSubmitAttempted(true);
-    
+
     // Validate required dropdown selections
     const errors = {};
     if (!personInCharge) errors.personInCharge = "Person in charge is required";
     if (!packageName) errors.packageName = "Package is required";
     if (!treatment) errors.treatment = "Treatment is required";
-    
+
     setFormErrors(errors);
-    
-    // If there are validation errors, stop submission
+
+    // Stop submission if there are errors
     if (Object.keys(errors).length > 0) {
       console.error("Form validation failed:", errors);
       return;
@@ -131,7 +163,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
       paymentMethod,
       dateOfSession,
       timeOfSession,
-      consentFormSigned
+      consent_form_signed: consentFormSigned,
     });
 
     // Construct payload matching the server's expected field names and data types
@@ -181,7 +213,6 @@ function CreatePatientEntry({ isOpen, onClose }) {
         </ModalIcon>
         <ModalTitle>CREATE PATIENT RECORD</ModalTitle>
       </ModalHeader>
-
       <ModalBody>
         <form onSubmit={handleSubmit}>
           <div className="flex flex-col gap-4">
@@ -205,11 +236,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
             {/* PERSON IN CHARGE */}
             <InputContainer>
               <InputLabel>PERSON IN CHARGE</InputLabel>
-              <InputTextField
-                className={
-                  formSubmitAttempted && formErrors.personInCharge ? "border-red-500 rounded" : ""
-                }
-              >
+              <InputTextField className={formSubmitAttempted && formErrors.personInCharge ? "border-red-500 rounded" : ""}>
                 <InputIcon>
                   <UserIDIcon className="w-4 h-4" />
                 </InputIcon>
@@ -220,8 +247,8 @@ function CreatePatientEntry({ isOpen, onClose }) {
                     const selectedValue = e.target.value;
                     console.log("Selected person in charge (direct):", selectedValue);
                     setPersonInCharge(selectedValue);
-                    setFormErrors({ ...formErrors, personInCharge: null });
                   }}
+                  required
                 >
                   <option value="">Select person in charge</option>
                   {aestheticianList.map((user) => (
@@ -238,11 +265,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
             {/* PACKAGE */}
             <InputContainer>
               <InputLabel>PACKAGE</InputLabel>
-              <InputTextField
-                className={
-                  formSubmitAttempted && formErrors.packageName ? "border-red-500 rounded" : ""
-                }
-              >
+              <InputTextField className={formSubmitAttempted && formErrors.packageName ? "border-red-500 rounded" : ""}>
                 <InputIcon>
                   <PackageIcon className="w-4 h-4" />
                 </InputIcon>
@@ -253,13 +276,15 @@ function CreatePatientEntry({ isOpen, onClose }) {
                     const selectedValue = e.target.value;
                     console.log("Selected package (direct):", selectedValue);
                     setPackageName(selectedValue);
-                    setFormErrors({ ...formErrors, packageName: null });
                   }}
+                  required
                 >
                   <option value="">Select package</option>
-                  <option value="Package 1">Package 1</option>
-                  <option value="Package 2">Package 2</option>
-                  <option value="Package 3">Package 3</option>
+                  {packagesList.map((pkg) => (
+                    <option key={pkg.id} value={pkg.package_name}>
+                      {pkg.package_name} - ₱{pkg.price}
+                    </option>
+                  ))}
                 </select>
               </InputTextField>
               {formSubmitAttempted && formErrors.packageName && 
@@ -269,11 +294,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
             {/* TREATMENT */}
             <InputContainer>
               <InputLabel>TREATMENT</InputLabel>
-              <InputTextField
-                className={
-                  formSubmitAttempted && formErrors.treatment ? "border-red-500 rounded" : ""
-                }
-              >
+              <InputTextField className={formSubmitAttempted && formErrors.treatment ? "border-red-500 rounded" : ""}>
                 <InputIcon>
                   <PackageIcon className="w-4 h-4" />
                 </InputIcon>
@@ -284,13 +305,15 @@ function CreatePatientEntry({ isOpen, onClose }) {
                     const selectedValue = e.target.value;
                     console.log("Selected treatment (direct):", selectedValue);
                     setTreatment(selectedValue);
-                    setFormErrors({ ...formErrors, treatment: null });
                   }}
+                  required
                 >
                   <option value="">Select treatment</option>
-                  <option value="Treatment 1">Treatment 1</option>
-                  <option value="Treatment 2">Treatment 2</option>
-                  <option value="Treatment 3">Treatment 3</option>
+                  {treatmentsList.map((t) => (
+                    <option key={t.id} value={t.treatment_name}>
+                      {t.treatment_name} - ₱{t.price}
+                    </option>
+                  ))}
                 </select>
               </InputTextField>
               {formSubmitAttempted && formErrors.treatment && 
@@ -432,12 +455,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
 
           {/* ACTION BUTTONS */}
           <div className="flex flex-row gap-4 mt-6 w-full">
-            <Button
-              type="button"
-              variant="outline"
-              className="w-1/2"
-              onClick={onClose}
-            >
+            <Button type="button" variant="outline" className="w-1/2" onClick={onClose}>
               <ChevronLeftIcon />
               CANCEL AND RETURN
             </Button>

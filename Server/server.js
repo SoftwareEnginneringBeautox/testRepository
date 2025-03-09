@@ -262,6 +262,80 @@ app.get('/api/appointments', async (req, res) => {
 });
 
 /* --------------------------------------------
+   TREATMENTS ENDPOINTS
+--------------------------------------------- */
+
+// Create a new treatment
+app.post('/api/treatments', async (req, res) => {
+  try {
+    const { treatment_name, price, duration, description } = req.body;
+    const insertQuery = `
+      INSERT INTO treatments (
+        treatment_name,
+        price,
+        duration,
+        description
+      )
+      VALUES ($1, $2, $3, $4)
+      RETURNING id;
+    `;
+    const result = await pool.query(insertQuery, [treatment_name, price, duration, description]);
+    res.json({ success: true, message: 'Treatment created', treatmentId: result.rows[0].id });
+  } catch (error) {
+    console.error('Error creating treatment:', error);
+    res.status(500).json({ success: false, error: 'Error creating treatment' });
+  }
+});
+
+// Retrieve all treatments
+app.get('/api/treatments', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM treatments ORDER BY id ASC');
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error retrieving treatments:', error);
+    res.status(500).json({ success: false, error: 'Error retrieving treatments' });
+  }
+});
+
+/* --------------------------------------------
+   PACKAGES ENDPOINTS
+--------------------------------------------- */
+
+// Create a new package
+app.post('/api/packages', async (req, res) => {
+  try {
+    const { package_name, treatment, sessions, price } = req.body;
+    const insertQuery = `
+      INSERT INTO packages (
+        package_name,
+        treatment,
+        sessions,
+        price
+      )
+      VALUES ($1, $2, $3, $4)
+      RETURNING id;
+    `;
+    const result = await pool.query(insertQuery, [package_name, treatment, sessions, price]);
+    res.json({ success: true, message: 'Package created', packageId: result.rows[0].id });
+  } catch (error) {
+    console.error('Error creating package:', error);
+    res.status(500).json({ success: false, error: 'Error creating package' });
+  }
+});
+
+// Retrieve all packages
+app.get('/api/packages', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM packages ORDER BY id ASC');
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error retrieving packages:', error);
+    res.status(500).json({ success: false, error: 'Error retrieving packages' });
+  }
+});
+
+/* --------------------------------------------
    START THE SERVER
 --------------------------------------------- */
 app.listen(4000, () => {

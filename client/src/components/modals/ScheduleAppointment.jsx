@@ -40,6 +40,9 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
     e.preventDefault();
 
     try {
+      // Generate timestamp for when the appointment is created
+      const createdAt = new Date().toISOString();
+
       const response = await fetch("http://localhost:4000/api/appointments", {
         method: "POST",
         headers: {
@@ -52,6 +55,7 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
           email: email,
           date_of_session: dateOfSession,
           time_of_session: timeOfSession,
+          created_at: createdAt
         }),
       });
 
@@ -59,7 +63,7 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
       if (response.ok) {
         // On success, you can show a message, reset the form, or close the modal
         alert("Appointment scheduled successfully!");
-        onClose(); 
+        onClose();
       } else {
         // Handle a failed response
         alert(`Error scheduling appointment: ${data.error || data.message}`);

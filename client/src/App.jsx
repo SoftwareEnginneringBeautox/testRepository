@@ -1,5 +1,8 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 
+
+import ProtectedRoute from "./components/ProtectedRoute";
+
 import Layout from "./components/Layout";
 import Login from "./pages/Login";
 import Fin from "./pages/FinancialOverview";
@@ -7,9 +10,7 @@ import AdministratorDashboard from "./pages/AdminDashboard";
 import StaffDashboard from "./pages/StaffDashboard";
 import PatientRecordsDatabase from "./pages/PatientRecordsDatabase";
 import AdministratorServices from "./pages/AdministratorServices";
-//import ScheduleAppointment from "./components/modals/ScheduleAppointment";
 import BookingCalendar from "./pages/BookingCalendar";
-import ProtectedRoute from "./components/ProtectedRoute";
 import ErrorPage from "./errors/Error404";
 import LandingPage from "@/pages/LandingPage";
 
