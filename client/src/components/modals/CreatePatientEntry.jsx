@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import CurrencyInput from "react-currency-input-field";
-
 import { RadioGroup, RadioGroupItem } from "@/components/ui/RadioGroup";
 import { Checkbox } from "@/components/ui/checkbox";
 
@@ -9,7 +8,7 @@ import {
   ModalHeader,
   ModalTitle,
   ModalIcon,
-  ModalBody
+  ModalBody,
 } from "@/components/ui/Modal";
 
 import {
@@ -17,10 +16,8 @@ import {
   InputTextField,
   InputLabel,
   InputIcon,
-  Input
+  Input,
 } from "@/components/ui/Input";
-
-import { ModalSelect, SelectItem } from "../ui/Select";
 
 import { Button } from "../ui/Button";
 
@@ -33,7 +30,8 @@ import UserIcon from "@/assets/icons/UserIcon";
 import UserIDIcon from "@/assets/icons/UserIDIcon";
 import PackageIcon from "@/assets/icons/PackageIcon";
 import PercentageIcon from "@/assets/icons/PercentageIcon";
-import TreatmentIcon from "@/assets/icons/TreatmentIcon";
+
+import axios from "axios";
 
 function CreatePatientEntry({ isOpen, onClose }) {
   // ----------- State Hooks -----------
@@ -56,41 +54,62 @@ function CreatePatientEntry({ isOpen, onClose }) {
 
   // Consent form
   const [consentFormSigned, setConsentFormSigned] = useState(false);
-
+  
   // Form validation
   const [formSubmitAttempted, setFormSubmitAttempted] = useState(false);
   const [formErrors, setFormErrors] = useState({});
+
+  // List of aestheticians for "person in charge"
+  const [aestheticianList, setAestheticianList] = useState([]);
 
   // Automatically compute total amount whenever amount or discount changes
   useEffect(() => {
     const numericAmount = parseFloat(amount) || 0;
     const numericDiscount = parseFloat(packageDiscount) || 0;
-    const computedTotal =
-      numericAmount - (numericAmount * numericDiscount) / 100;
+    const computedTotal = numericAmount - (numericAmount * numericDiscount / 100);
     setTotalAmount(computedTotal.toFixed(2));
   }, [amount, packageDiscount]);
 
-  if (!isOpen) return null;
+  // Fetch the list of aestheticians from the database
+  useEffect(() => {
+    async function fetchAestheticians() {
+      try {
+        const response = await axios.get("http://localhost:4000/getusers", {
+          withCredentials: true,
+        });
+        // Filter users with role "aesthetician" (case-insensitive)
+        const aestheticians = response.data.filter(
+          (user) => user.role && user.role.toLowerCase() === "aesthetician"
+        );
+        setAestheticianList(aestheticians);
+      } catch (error) {
+        console.error("Error fetching aestheticians:", error);
+      }
+    }
+    fetchAestheticians();
+  }, []);
 
+  if (!isOpen) return null;
+  
   console.log("Current state values:", {
     personInCharge,
     packageName,
-    treatment
+    treatment,
   });
 
   // Handle form submission, sending new patient record to the server
   const handleSubmit = async (e) => {
     e.preventDefault();
     setFormSubmitAttempted(true);
-
+    
     // Validate required dropdown selections
     const errors = {};
     if (!personInCharge) errors.personInCharge = "Person in charge is required";
     if (!packageName) errors.packageName = "Package is required";
     if (!treatment) errors.treatment = "Treatment is required";
-
+    
     setFormErrors(errors);
-
+    
     // If there are validation errors, stop submission
     if (Object.keys(errors).length > 0) {
       console.error("Form validation failed:", errors);
@@ -127,7 +146,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
       payment_method: paymentMethod,
       date_of_session: dateOfSession,
       time_of_session: timeOfSession,
-      consent_form_signed: consentFormSigned
+      consent_form_signed: consentFormSigned,
     };
 
     console.log("Payload being sent to API:", payload);
@@ -136,9 +155,9 @@ function CreatePatientEntry({ isOpen, onClose }) {
       const response = await fetch("http://localhost:4000/api/patients", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
       });
 
       if (response.ok) {
@@ -186,84 +205,101 @@ function CreatePatientEntry({ isOpen, onClose }) {
             {/* PERSON IN CHARGE */}
             <InputContainer>
               <InputLabel>PERSON IN CHARGE</InputLabel>
-
-              <ModalSelect
-                placeholder="Person in charge of the session"
-                icon={<UserIDIcon className="w-4 h-4" />}
-                value={personInCharge}
-                onChange={(e) => {
-                  const selectedValue = e.target.value;
-                  console.log(
-                    "Selected person in charge (direct):",
-                    selectedValue
-                  );
-                  setPersonInCharge(selectedValue);
-                  setFormErrors({ ...formErrors, personInCharge: null });
-                }}
+              <InputTextField
+                className={
+                  formSubmitAttempted && formErrors.personInCharge ? "border-red-500 rounded" : ""
+                }
               >
-                <SelectItem value="Jessica">Jessica</SelectItem>
-                <SelectItem value="Jimmy">Jimmy</SelectItem>
-              </ModalSelect>
-              {formSubmitAttempted && formErrors.personInCharge && (
-                <p className="text-red-500 text-sm mt-1">
-                  {formErrors.personInCharge}
-                </p>
-              )}
+                <InputIcon>
+                  <UserIDIcon className="w-4 h-4" />
+                </InputIcon>
+                <select 
+                  className="w-full p-2 border rounded bg-[#F5F3F0]"
+                  value={personInCharge}
+                  onChange={(e) => {
+                    const selectedValue = e.target.value;
+                    console.log("Selected person in charge (direct):", selectedValue);
+                    setPersonInCharge(selectedValue);
+                    setFormErrors({ ...formErrors, personInCharge: null });
+                  }}
+                >
+                  <option value="">Select person in charge</option>
+                  {aestheticianList.map((user) => (
+                    <option key={user.id} value={user.username}>
+                      {user.username}
+                    </option>
+                  ))}
+                </select>
+              </InputTextField>
+              {formSubmitAttempted && formErrors.personInCharge && 
+                <p className="text-red-500 text-sm mt-1">{formErrors.personInCharge}</p>}
             </InputContainer>
 
             {/* PACKAGE */}
             <InputContainer>
               <InputLabel>PACKAGE</InputLabel>
-              <ModalSelect
-                placeholder="Select Package"
-                icon={<PackageIcon className="w-4 h-4" />}
-                value={packageName}
-                onChange={(e) => {
-                  const selectedValue = e.target.value;
-                  console.log("Selected package (direct):", selectedValue);
-                  setPackageName(selectedValue);
-                  setFormErrors({ ...formErrors, packageName: null });
-                }}
+              <InputTextField
+                className={
+                  formSubmitAttempted && formErrors.packageName ? "border-red-500 rounded" : ""
+                }
               >
-                <SelectItem value="Package 1">Package 1</SelectItem>
-                <SelectItem value="Package 2">Package 2</SelectItem>
-                <SelectItem value="Package 3">Package 3</SelectItem>
-              </ModalSelect>
-              {formSubmitAttempted && formErrors.packageName && (
-                <p className="text-red-500 text-sm mt-1">
-                  {formErrors.packageName}
-                </p>
-              )}
+                <InputIcon>
+                  <PackageIcon className="w-4 h-4" />
+                </InputIcon>
+                <select 
+                  className="w-full p-2 border rounded bg-[#F5F3F0]"
+                  value={packageName}
+                  onChange={(e) => {
+                    const selectedValue = e.target.value;
+                    console.log("Selected package (direct):", selectedValue);
+                    setPackageName(selectedValue);
+                    setFormErrors({ ...formErrors, packageName: null });
+                  }}
+                >
+                  <option value="">Select package</option>
+                  <option value="Package 1">Package 1</option>
+                  <option value="Package 2">Package 2</option>
+                  <option value="Package 3">Package 3</option>
+                </select>
+              </InputTextField>
+              {formSubmitAttempted && formErrors.packageName && 
+                <p className="text-red-500 text-sm mt-1">{formErrors.packageName}</p>}
             </InputContainer>
 
             {/* TREATMENT */}
             <InputContainer>
               <InputLabel>TREATMENT</InputLabel>
-              <ModalSelect
-                placeholder="Select Package"
-                icon={<TreatmentIcon className="w-4 h-4" />}
-                value={treatment}
-                onChange={(e) => {
-                  const selectedValue = e.target.value;
-                  console.log("Selected treatment (direct):", selectedValue);
-                  setTreatment(selectedValue);
-                  setFormErrors({ ...formErrors, treatment: null });
-                }}
+              <InputTextField
+                className={
+                  formSubmitAttempted && formErrors.treatment ? "border-red-500 rounded" : ""
+                }
               >
-                <SelectItem value="Treatment 1">Treatment 1</SelectItem>
-                <SelectItem value="Treatment 2">Treatment 2</SelectItem>
-                <SelectItem value="Treatment 3">Treatment 3</SelectItem>
-              </ModalSelect>
-              {formSubmitAttempted && formErrors.treatment && (
-                <p className="text-red-500 text-sm mt-1">
-                  {formErrors.treatment}
-                </p>
-              )}
+                <InputIcon>
+                  <PackageIcon className="w-4 h-4" />
+                </InputIcon>
+                <select 
+                  className="w-full p-2 border rounded bg-[#F5F3F0]"
+                  value={treatment}
+                  onChange={(e) => {
+                    const selectedValue = e.target.value;
+                    console.log("Selected treatment (direct):", selectedValue);
+                    setTreatment(selectedValue);
+                    setFormErrors({ ...formErrors, treatment: null });
+                  }}
+                >
+                  <option value="">Select treatment</option>
+                  <option value="Treatment 1">Treatment 1</option>
+                  <option value="Treatment 2">Treatment 2</option>
+                  <option value="Treatment 3">Treatment 3</option>
+                </select>
+              </InputTextField>
+              {formSubmitAttempted && formErrors.treatment && 
+                <p className="text-red-500 text-sm mt-1">{formErrors.treatment}</p>}
             </InputContainer>
 
-            {/* TOTAL AMOUNT (CURRENCY) - Computed */}
+            {/* AMOUNT (CURRENCY) */}
             <InputContainer>
-              <InputLabel>TOTAL AMOUNT</InputLabel>
+              <InputLabel>AMOUNT</InputLabel>
               <InputTextField>
                 <InputIcon>
                   <PesoIcon />
@@ -274,8 +310,8 @@ function CreatePatientEntry({ isOpen, onClose }) {
                   placeholder="₱0.00"
                   decimalsLimit={2}
                   allowNegativeValue={false}
-                  value={totalAmount}
-                  readOnly
+                  value={amount}
+                  onValueChange={(value) => setAmount(value || "")}
                 />
               </InputTextField>
             </InputContainer>
@@ -299,9 +335,9 @@ function CreatePatientEntry({ isOpen, onClose }) {
               </InputTextField>
             </InputContainer>
 
-            {/* AMOUNT (CURRENCY) */}
+            {/* TOTAL AMOUNT (CURRENCY) - Computed */}
             <InputContainer>
-              <InputLabel>AMOUNT</InputLabel>
+              <InputLabel>TOTAL AMOUNT</InputLabel>
               <InputTextField>
                 <InputIcon>
                   <PesoIcon />
@@ -312,8 +348,8 @@ function CreatePatientEntry({ isOpen, onClose }) {
                   placeholder="₱0.00"
                   decimalsLimit={2}
                   allowNegativeValue={false}
-                  value={amount}
-                  onValueChange={(value) => setAmount(value || "")}
+                  value={totalAmount}
+                  readOnly
                 />
               </InputTextField>
             </InputContainer>
@@ -389,7 +425,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
                 htmlFor="consent"
                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
               >
-                CONSENT FORM HAS BEEN SIGNED
+                Consent form has been signed
               </label>
             </div>
           </div>

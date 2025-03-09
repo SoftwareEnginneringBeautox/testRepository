@@ -1,19 +1,16 @@
-// server.js
-
 const express = require('express');
 const cors = require('cors');
 const pool = require("./config/database.js");
 const session = require('express-session');
-const bodyParser = require('body-parser');
 const bcrypt = require('bcrypt');
 const isAuthenticated = require('./authMiddleware'); // Custom middleware
 
 const app = express();
 
-
-// Middleware Setup
-app.use(bodyParser.json());
+// Use express.json() for parsing JSON bodies
 app.use(express.json());
+
+// Setup CORS to allow credentials from your client origin
 app.use(cors({
   origin: "http://localhost:5173", // Adjust to match your client URL
   credentials: true
@@ -31,27 +28,36 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: false,      // set true if using HTTPS
+    secure: false,      // Set to true if using HTTPS
     httpOnly: true,
     sameSite: 'lax'
   }
 }));
 
-// --------------------
-// User Management Endpoints
-// --------------------
+/* --------------------------------------------
+   USER MANAGEMENT ENDPOINTS
+--------------------------------------------- */
 
 // Register endpoint (for creating new users)
+// Updated to include "role" and "dayoff"
 app.post('/adduser', async (req, res) => {
   try {
-    const { username, password, role } = req.body;
+    // Debug log to inspect the request payload
+    console.log("Received /adduser payload:", req.body);
+    
+    const { username, password, role, dayoff } = req.body;
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
-    const insertst = `INSERT INTO accounts (username, password, role) VALUES ($1, $2, $3) RETURNING id;`;
-    const result = await pool.query(insertst, [username, hashedPassword, role]);
+    const insertst = `
+      INSERT INTO accounts (username, password, role, dayoff)
+      VALUES ($1, $2, $3, $4)
+      RETURNING id;
+    `;
+    const result = await pool.query(insertst, [username, hashedPassword, role, dayoff]);
+    console.log("New user added with ID:", result.rows[0].id);
     res.json({ success: true, message: `User Added with ID: ${result.rows[0].id}` });
   } catch (error) {
-    console.error(error);
+    console.error("Error in /adduser:", error);
     res.status(500).json({ success: false, error: 'Error adding user' });
   }
 });
@@ -64,14 +70,21 @@ app.get('/getusers', isAuthenticated, (req, res) => {
 });
 
 // Protected endpoint to update a user
+// Updated to also update the "dayoff" column
 app.put('/updateuser', isAuthenticated, async (req, res) => {
-  const { id, username, password, role } = req.body;
-  const updatest = `UPDATE accounts SET username = $1, password = $2, role = $3 WHERE id = $4;`;
   try {
-    await pool.query(updatest, [username, password, role, id]);
+    const { id, username, password, role, dayoff } = req.body;
+    // Debug log to inspect update payload
+    console.log("Updating user:", { id, username, role, dayoff });
+    const updatest = `
+      UPDATE accounts
+      SET username = $1, password = $2, role = $3, dayoff = $4
+      WHERE id = $5;
+    `;
+    await pool.query(updatest, [username, password, role, dayoff, id]);
     res.send("User Updated");
   } catch (error) {
-    console.error(error);
+    console.error("Error updating user:", error);
     res.status(500).json({ success: false, error: 'Error updating user' });
   }
 });
@@ -95,7 +108,7 @@ app.post('/login', async (req, res) => {
           message: "Login successful",
           role: user.role,
           token: "dummyToken",
-          username: user.username   // Return username as well
+          username: user.username
         });
       } else {
         res.json({ success: false, message: "Invalid username or password" });
@@ -104,7 +117,7 @@ app.post('/login', async (req, res) => {
       res.json({ success: false, message: "Invalid username or password" });
     }
   } catch (error) {
-    console.error(error);
+    console.error("Error in /login:", error);
     res.status(500).json({ success: false, error: 'Internal Server Error' });
   }
 });
@@ -119,9 +132,9 @@ app.post('/logout', (req, res) => {
   });
 });
 
-// --------------------
-// Patient Records Endpoints
-// --------------------
+/* --------------------------------------------
+   PATIENT RECORDS ENDPOINTS
+--------------------------------------------- */
 
 // Create a new patient record
 app.post('/api/patients', async (req, res) => {
@@ -182,8 +195,7 @@ app.post('/api/patients', async (req, res) => {
   }
 });
 
-// (Optional) Retrieve all patient records
-// You can protect it with isAuthenticated if desired
+// Retrieve all patient records
 app.get('/api/patients', async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM patient_records ORDER BY id DESC');
@@ -194,7 +206,64 @@ app.get('/api/patients', async (req, res) => {
   }
 });
 
-// Start the server
+/* --------------------------------------------
+   APPOINTMENTS ENDPOINTS
+--------------------------------------------- */
+
+// Create a new appointment
+app.post('/api/appointments', async (req, res) => {
+  try {
+    const { full_name, contact_number, age, email, date_of_session, time_of_session } = req.body;
+    const insertQuery = `
+      INSERT INTO appointments (
+        full_name,
+        contact_number,
+        age,
+        email,
+        date_of_session,
+        time_of_session
+      )
+      VALUES ($1, $2, $3, $4, $5, $6)
+      RETURNING id;
+    `;
+    const values = [
+      full_name,
+      contact_number,
+      age,
+      email,
+      date_of_session,
+      time_of_session
+    ];
+
+    const result = await pool.query(insertQuery, values);
+
+    res.json({
+      success: true,
+      message: 'Appointment scheduled',
+      appointmentId: result.rows[0].id
+    });
+  } catch (error) {
+    console.error('Error scheduling appointment:', error);
+    res.status(500).json({ success: false, error: 'Error scheduling appointment' });
+  }
+});
+
+// Retrieve all appointments
+app.get('/api/appointments', async (req, res) => {
+  try {
+    const result = await pool.query(
+      'SELECT * FROM appointments ORDER BY date_of_session ASC, time_of_session ASC'
+    );
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error retrieving appointments:', error);
+    res.status(500).json({ success: false, error: 'Error retrieving appointments' });
+  }
+});
+
+/* --------------------------------------------
+   START THE SERVER
+--------------------------------------------- */
 app.listen(4000, () => {
   console.log('Server is running on port 4000');
 });

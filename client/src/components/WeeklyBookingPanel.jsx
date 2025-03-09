@@ -1,17 +1,34 @@
 import React from "react";
 
-const WeeklyBookingPanel = ({ events = [] }) => {
+const WeeklyBookingPanel = ({ events = [], currentDate }) => {
   const days = ["SUN", "MON", "TUES", "WED", "THURS", "FRI", "SAT"];
   const hours = Array.from({ length: 24 }, (_, i) => {
     return `${i % 12 || 12}:00${i < 12 ? "AM" : "PM"}`;
   });
 
+  // Get the week dates based on current date
+  const getWeekDates = (date) => {
+    const result = [];
+    const startOfWeek = new Date(date);
+    startOfWeek.setDate(date.getDate() - date.getDay()); // Go to the beginning of the week (Sunday)
+    
+    for (let i = 0; i < 7; i++) {
+      const day = new Date(startOfWeek);
+      day.setDate(startOfWeek.getDate() + i);
+      result.push(day);
+    }
+    
+    return result;
+  };
+  
+  const weekDates = getWeekDates(currentDate);
+
   const parseTime = (time) => {
     const [_, hour, minute, period] = time.match(/(\d+):?(\d{2})?(AM|PM)/i);
     const isPM = period.toUpperCase() === "PM";
     return {
-      hours: (hour % 12) + (isPM ? 12 : 0),
-      minutes: +minute || 0
+      hours: parseInt(hour % 12) + (isPM ? 12 : 0),
+      minutes: parseInt(minute || 0)
     };
   };
 
@@ -27,6 +44,19 @@ const WeeklyBookingPanel = ({ events = [] }) => {
     };
   };
 
+  // Format date for display
+  const formatDate = (date) => {
+    return `${date.getDate()}`;
+  };
+
+  // Check if a date is today
+  const isToday = (date) => {
+    const today = new Date();
+    return date.getDate() === today.getDate() &&
+      date.getMonth() === today.getMonth() &&
+      date.getFullYear() === today.getFullYear();
+  };
+
   return (
     <div className="w-full">
       <table className="w-full">
@@ -40,7 +70,10 @@ const WeeklyBookingPanel = ({ events = [] }) => {
                   idx === days.length - 1 ? "rounded-r-[0.5rem]" : ""
                 }`}
               >
-                {day}
+                <div>{day}</div>
+                <div className={`text-sm ${isToday(weekDates[idx]) ? "bg-white text-lavender-400 rounded-full inline-block px-2" : ""}`}>
+                  {formatDate(weekDates[idx])}
+                </div>
               </th>
             ))}
           </tr>
@@ -77,17 +110,25 @@ const WeeklyBookingPanel = ({ events = [] }) => {
 
               {/* Events */}
               {events
-                .filter((event) => event.day === days[dayIdx])
+                .filter((event) => {
+                  // Match the event day with the current column day
+                  return event.day === days[dayIdx] && 
+                         // Also check if it's in the current week
+                         (new Date(event.rawDate)).getDate() === weekDates[dayIdx].getDate() &&
+                         (new Date(event.rawDate)).getMonth() === weekDates[dayIdx].getMonth() &&
+                         (new Date(event.rawDate)).getFullYear() === weekDates[dayIdx].getFullYear();
+                })
                 .map((event, idx) => {
                   const { top, height } = calculateEventPosition(event);
                   return (
                     <button
                       key={idx}
-                      className="absolute left-1 right-1 bg-lavender-400 text-white rounded-md p-2.5 shadow-lg focus:outline-none   text-left flex flex-col justify-end"
+                      className="absolute left-1 right-1 bg-lavender-400 text-white rounded-md p-2.5 shadow-lg focus:outline-none text-left flex flex-col justify-end"
                       style={{ top, height }}
                     >
                       <strong className="block">{event.name}</strong>
                       <p className="text-xs">{event.description}</p>
+                      <p className="text-xs">{event.startTime} - {event.endTime}</p>
                     </button>
                   );
                 })}

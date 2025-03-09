@@ -14,7 +14,7 @@ import {
   AlertDescription,
   AlertTitle,
   AlertText,
-  CloseAlert
+  CloseAlert,
 } from "@/components/ui/Alert";
 import InformationIcon from "@/assets/icons/InformationIcon";
 import EllipsisIcon from "@/assets/icons/EllipsisIcon";
@@ -23,7 +23,7 @@ import {
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuTrigger
+  DropdownMenuTrigger,
 } from "@/components/ui/DropdownMenu";
 import {
   Table,
@@ -31,11 +31,14 @@ import {
   TableCell,
   TableHead,
   TableHeader,
-  TableRow
+  TableRow,
 } from "@/components/ui/table";
 import EditIcon from "@/assets/icons/EditIcon";
 import DeleteIcon from "@/assets/icons/DeleteIcon";
 import CalendarIcon from "@/assets/icons/CalendarIcon";
+
+// 1) Import axios
+import axios from "axios";
 
 function AdministratorDashboard() {
   const [userName, setUserName] = useState(
@@ -53,30 +56,30 @@ function AdministratorDashboard() {
   const [loadingStaff, setLoadingStaff] = useState(true);
   const [errorStaff, setErrorStaff] = useState(null);
 
-  // Fetch staff from the database filtering for receptionist and aesthetician roles
-  useEffect(() => {
-    async function fetchStaff() {
-      try {
-        const response = await fetch("http://localhost:4000/getusers", {
-          method: "GET",
-          credentials: "include"
-        });
-        if (!response.ok) {
-          throw new Error("Failed to fetch staff");
-        }
-        const data = await response.json();
-        // Filter to include only receptionist and aesthetician roles
-        const filteredStaff = data.filter(
-          (user) => user.role === "receptionist" || user.role === "aesthetician"
-        );
-        setStaffList(filteredStaff);
-      } catch (error) {
-        console.error("Error fetching staff:", error);
-        setErrorStaff(error.message);
-      } finally {
-        setLoadingStaff(false);
-      }
+  // Extract the fetch function to be reusable
+  const fetchStaff = async () => {
+    try {
+      setLoadingStaff(true);
+      const response = await axios.get("http://localhost:4000/getusers", {
+        withCredentials: true, // critical for sending session cookies
+      });
+      const data = response.data;
+      // Filter to include only receptionist and aesthetician roles
+      const filteredStaff = data.filter(
+        (user) =>
+          user.role === "receptionist" || user.role === "aesthetician"
+      );
+      setStaffList(filteredStaff);
+      setErrorStaff(null);
+    } catch (error) {
+      console.error("Error fetching staff:", error);
+      setErrorStaff(error.message);
+    } finally {
+      setLoadingStaff(false);
     }
+  };
+
+  useEffect(() => {
     fetchStaff();
   }, []);
 
@@ -210,13 +213,22 @@ function AdministratorDashboard() {
             </div>
           ))
         )}
-        <Button fullWidth="true" onClick={() => openModal("createStaff")}>
+        <Button
+          fullWidth="true"
+          onClick={() => openModal("createStaff")}
+        >
           <PlusIcon />
           ADD NEW STAFF
           <UserIcon />
         </Button>
         {currentModal === "createStaff" && (
-          <CreateStaff isOpen={true} onClose={closeModal} />
+          <CreateStaff
+            isOpen={true}
+            onClose={() => {
+              closeModal();
+              fetchStaff();
+            }}
+          />
         )}
         {currentModal === "modifyStaff" && (
           <ModifyStaff

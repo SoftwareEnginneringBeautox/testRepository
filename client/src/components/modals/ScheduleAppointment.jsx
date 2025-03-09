@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   ModalContainer,
   ModalHeader,
@@ -25,7 +25,50 @@ import {
 } from "@/components/ui/Input";
 
 function ScheduleAppointmentModal({ isOpen, onClose }) {
+  // Track input values
+  const [fullName, setFullName] = useState("");
+  const [contactNumber, setContactNumber] = useState("");
+  const [age, setAge] = useState("");
+  const [email, setEmail] = useState("");
+  const [dateOfSession, setDateOfSession] = useState("");
+  const [timeOfSession, setTimeOfSession] = useState("");
+
   if (!isOpen) return null;
+
+  // Handle form submission
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const response = await fetch("http://localhost:4000/api/appointments", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          full_name: fullName,
+          contact_number: contactNumber,
+          age: parseInt(age, 10),
+          email: email,
+          date_of_session: dateOfSession,
+          time_of_session: timeOfSession,
+        }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        // On success, you can show a message, reset the form, or close the modal
+        alert("Appointment scheduled successfully!");
+        onClose(); 
+      } else {
+        // Handle a failed response
+        alert(`Error scheduling appointment: ${data.error || data.message}`);
+      }
+    } catch (error) {
+      console.error("Error scheduling appointment:", error);
+      alert("An error occurred while scheduling the appointment.");
+    }
+  };
 
   return (
     <ModalContainer>
@@ -33,7 +76,8 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
         <ModalTitle>SCHEDULE APPOINTMENT</ModalTitle>
       </ModalHeader>
       <ModalBody>
-        <form className="flex flex-col gap-5">
+        <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
+          {/* FULL NAME */}
           <InputContainer>
             <InputLabel>FULL NAME</InputLabel>
             <InputTextField>
@@ -42,13 +86,15 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
               </InputIcon>
               <Input
                 type="text"
-                className="text-input"
                 placeholder="Full name"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
                 required
               />
             </InputTextField>
           </InputContainer>
 
+          {/* CONTACT NUMBER */}
           <InputContainer>
             <InputLabel>CONTACT NUMBER</InputLabel>
             <InputTextField>
@@ -57,13 +103,15 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
               </InputIcon>
               <Input
                 type="tel"
-                className="text-input"
                 placeholder="Contact Number"
+                value={contactNumber}
+                onChange={(e) => setContactNumber(e.target.value)}
                 required
               />
             </InputTextField>
           </InputContainer>
 
+          {/* AGE */}
           <InputContainer>
             <InputLabel>AGE</InputLabel>
             <InputTextField>
@@ -72,13 +120,15 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
               </InputIcon>
               <Input
                 type="number"
-                className="text-input"
                 placeholder="Age"
+                value={age}
+                onChange={(e) => setAge(e.target.value)}
                 required
               />
             </InputTextField>
           </InputContainer>
 
+          {/* EMAIL */}
           <InputContainer>
             <InputLabel>EMAIL</InputLabel>
             <InputTextField>
@@ -86,14 +136,16 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
                 <EmailIcon />
               </InputIcon>
               <Input
-                type="text"
-                className="text-input"
+                type="email"
                 placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
               />
             </InputTextField>
           </InputContainer>
 
+          {/* DATE & TIME OF SESSION */}
           <div className="flex flex-row w-full gap-4">
             <InputContainer className="flex-1">
               <InputLabel>DATE OF SESSION</InputLabel>
@@ -103,8 +155,9 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
                 </InputIcon>
                 <Input
                   type="date"
-                  className="text-input"
                   placeholder="Date of Session"
+                  value={dateOfSession}
+                  onChange={(e) => setDateOfSession(e.target.value)}
                   required
                 />
               </InputTextField>
@@ -112,20 +165,22 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
 
             <InputContainer className="flex-1">
               <InputLabel>TIME OF SESSION</InputLabel>
-              <InputTextField className="flex-1">
+              <InputTextField>
                 <InputIcon>
                   <ClockIcon />
                 </InputIcon>
                 <Input
                   type="time"
-                  className="text-input"
                   placeholder="Time of Session"
+                  value={timeOfSession}
+                  onChange={(e) => setTimeOfSession(e.target.value)}
                   required
                 />
               </InputTextField>
             </InputContainer>
           </div>
 
+          {/* ACTION BUTTONS */}
           <div className="flex flex-row gap-2 w-full">
             <Button
               variant="outline"
@@ -136,7 +191,7 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
               <ChevronLeftIcon />
               RETURN
             </Button>
-            <Button fullWidth={true}>
+            <Button fullWidth={true} type="submit">
               <ArrowNorthEastIcon />
               SUBMIT SCHEDULE APPOINTMENT
             </Button>

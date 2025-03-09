@@ -5,6 +5,7 @@ import UserIcon from "../assets/icons/UserIcon";
 import PasswordIcon from "../assets/icons/PasswordIcon";
 import LoginIcon from "../assets/icons/LoginIcon";
 import BeautoxLogo from "../assets/logos/Beautox.svg";
+import axios from "axios";
 
 import {
   InputContainer,
@@ -43,14 +44,13 @@ function Login() {
     const trimmedUsername = username.trim();
 
     try {
-      const response = await fetch("http://localhost:4000/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include", // Include cookies for session management
-        body: JSON.stringify({ username: trimmedUsername, password })
-      });
+      const response = await axios.post(
+        "http://localhost:4000/login",
+        { username: trimmedUsername, password },
+        { withCredentials: true } // Include cookies for session management
+      );
 
-      const data = await response.json();
+      const data = response.data;
 
       if (data.success) {
         setSuccessMessage("Login successful! Redirecting...");
@@ -71,7 +71,10 @@ function Login() {
         // Redirect based on role.
         if (data.role === "admin") {
           navigate("/AdminDashboard");
-        } else if (data.role === "receptionist" || data.role === "aesthetician") {
+        } else if (
+          data.role === "receptionist" ||
+          data.role === "aesthetician"
+        ) {
           navigate("/StaffDashboard");
         } else {
           navigate("/dashboard");
