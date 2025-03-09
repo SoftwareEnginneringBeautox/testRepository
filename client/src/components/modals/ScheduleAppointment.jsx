@@ -1,14 +1,20 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import {
+  ModalContainer,
+  ModalHeader,
+  ModalTitle,
+  ModalBody
+} from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
-import UserIcon from "../assets/icons/UserIcon";
-import EmailIcon from "../assets/icons/EmailIcon";
-import UserIDIcon from "../assets/icons/UserIDIcon";
-import CalendarIcon from "../assets/icons/CalendarIcon";
-import ClockIcon from "../assets/icons/ClockIcon";
-import AgeIcon from "../assets/icons/AgeIcon";
-import ArrowNorthEastIcon from "../assets/icons/ArrowNorthEastIcon";
-import ChevronLeftIcon from "../assets/icons/ChevronLeftIcon";
+
+import UserIcon from "@/assets/icons/UserIcon";
+import EmailIcon from "@/assets/icons/EmailIcon";
+import UserIDIcon from "@/assets/icons/UserIDIcon";
+import CalendarIcon from "@/assets/icons/CalendarIcon";
+import ClockIcon from "@/assets/icons/ClockIcon";
+import AgeIcon from "@/assets/icons/AgeIcon";
+import ArrowNorthEastIcon from "@/assets/icons/ArrowNorthEastIcon";
+import ChevronLeftIcon from "@/assets/icons/ChevronLeftIcon";
 
 import {
   InputContainer,
@@ -18,18 +24,16 @@ import {
   Input
 } from "@/components/ui/Input";
 
-function ScheduleAppointment() {
-  const handleReturn = () => {
-    useNavigate("/scheduleAppointment");
-  };
+function ScheduleAppointmentModal({ isOpen, onClose }) {
+  if (!isOpen) return null;
 
   return (
-    <div className="flex flex-col items-center justify-center text-left w-full min-h-screen mx-auto ">
-      <div className="flex flex-col w-[90%] gap-4">
-        <h4 className="text-[2rem] leading-[44.8px] font-semibold">
-          SCHEDULE APPOINTMENT
-        </h4>
-        <form action="" className="flex flex-col gap-5">
+    <ModalContainer>
+      <ModalHeader>
+        <ModalTitle>SCHEDULE APPOINTMENT</ModalTitle>
+      </ModalHeader>
+      <ModalBody>
+        <form className="flex flex-col gap-5">
           <InputContainer>
             <InputLabel>FULL NAME</InputLabel>
             <InputTextField>
@@ -38,7 +42,6 @@ function ScheduleAppointment() {
               </InputIcon>
               <Input
                 type="text"
-                id="password"
                 className="text-input"
                 placeholder="Full name"
                 required
@@ -116,32 +119,32 @@ function ScheduleAppointment() {
                 <Input
                   type="time"
                   className="text-input"
-                  placeholder="e.g. john_doe123"
+                  placeholder="Time of Session"
                   required
                 />
               </InputTextField>
             </InputContainer>
           </div>
+
           <div className="flex flex-row gap-2 w-full">
             <Button
               variant="outline"
               fullWidth={true}
               type="button"
-              onClick={handleReturn}
+              onClick={onClose}
             >
               <ChevronLeftIcon />
               RETURN
             </Button>
-
             <Button fullWidth={true}>
               <ArrowNorthEastIcon />
               SUBMIT SCHEDULE APPOINTMENT
             </Button>
           </div>
         </form>
-      </div>
-    </div>
+      </ModalBody>
+    </ModalContainer>
   );
 }
 
-export default ScheduleAppointment;
+export default ScheduleAppointmentModal;

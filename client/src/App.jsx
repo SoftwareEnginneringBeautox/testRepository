@@ -7,7 +7,7 @@ import AdministratorDashboard from "./pages/AdminDashboard";
 import StaffDashboard from "./pages/StaffDashboard";
 import PatientRecordsDatabase from "./pages/PatientRecordsDatabase";
 import AdministratorServices from "./pages/AdministratorServices";
-import ScheduleAppointment from "./pages/ScheduleAppointment";
+//import ScheduleAppointment from "./components/modals/ScheduleAppointment";
 import BookingCalendar from "./pages/BookingCalendar";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ErrorPage from "./errors/Error404";
@@ -94,7 +94,7 @@ function App() {
           path="PatientRecordsDatabase"
           element={<PatientRecordsDatabase />}
         />
-        <Route path="ScheduleAppointment" element={<ScheduleAppointment />} />
+        {/* <Route path="ScheduleAppointment" element={<ScheduleAppointment />} /> */}
         <Route path="BookingCalendar" element={<BookingCalendar />} />
 
         {/* Protected route example */}

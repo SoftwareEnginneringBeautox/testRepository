@@ -1,16 +1,18 @@
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/Button";
 import BeautoxLogo from "@/assets/logos/BeautoxLogo";
-
 import CalendarIcon from "@/assets/icons/CalendarIcon";
 import LoginIcon from "@/assets/icons/LoginIcon";
 import LocationIcon from "@/assets/icons/LocationIcon";
+import ScheduleAppointmentModal from "../components/modals/ScheduleAppointment"; // Adjust the import path as needed
 
 function LandingPage() {
   const navigate = useNavigate();
+  const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
 
   return (
-    <div className="w-full bg-[linear-gradient(135deg,_rgba(242,239,238,1)_0%,_rgba(239,218,192,1)_34%,_rgba(201,180,206,1)_67%,_rgba(241,234,228,1)_100%)] ">
+    <div className="w-full bg-[linear-gradient(135deg,_rgba(242,239,238,1)_0%,_rgba(239,218,192,1)_34%,_rgba(201,180,206,1)_67%,_rgba(241,234,228,1)_100%)]">
       <header className="fixed w-full flex justify-end p-4 bg-transparent z-50">
         <Button
           onClick={() => navigate("/login")}
@@ -21,14 +23,14 @@ function LandingPage() {
           LOGIN AS STAFF
         </Button>
       </header>
-      <div className=" flex flex-col items-center justify-center gap-4">
+      <div className="flex flex-col items-center justify-center gap-4">
         <section
           id="hero"
           className="w-3/4 flex flex-row justify-center items-center min-h-screen"
         >
           <div className="w-1/2 flex flex-col gap-6">
             <div className="flex flex-col gap-2">
-              <h2 className="text-4xl leading-2 font-bold bg-gradient-to-r from-lavender-300 to-reflexBlue-400 text-transparent  bg-clip-text ">
+              <h2 className="text-4xl leading-2 font-bold bg-gradient-to-r from-lavender-300 to-reflexBlue-400 text-transparent bg-clip-text">
                 WELCOME TO BEAUTOX
               </h2>
               <h3 className="font-semibold text-2xl bg-gradient-to-r from-reflexBlue-300 to-lavender-300 text-transparent bg-clip-text">
@@ -43,13 +45,13 @@ function LandingPage() {
             </p>
             <Button
               fullWidth="true"
-              onClick={() => navigate("/scheduleAppointment")}
+              onClick={() => setIsScheduleModalOpen(true)}
             >
               SET AN APPOINTMENT
               <CalendarIcon />
             </Button>
           </div>
-          <div className="w-1/2 flex items-center justify-center ">
+          <div className="w-1/2 flex items-center justify-center">
             <BeautoxLogo className="h-full w-1/2 text-lavender-400 opacity-90" />
           </div>
         </section>
@@ -65,7 +67,6 @@ function LandingPage() {
           </div>
           <div className="w-1/2 text-end">
             <div className="flex flex-row gap-2 text-end justify-end pb-2">
-              {/* <p className="text-2xl">&#128205;</p> */}
               <h3 className="flex flex-row justify-center items-center font-semibold text-2xl bg-gradient-to-r from-lavender-300 to-reflexBlue-400 text-transparent bg-clip-text">
                 <div className="text-lavender-400 h-full pr-1 flex items-center">
                   <LocationIcon />
@@ -96,6 +97,11 @@ function LandingPage() {
           </ul>
         </footer>
       </div>
+      {/* Schedule Appointment Modal */}
+      <ScheduleAppointmentModal
+        isOpen={isScheduleModalOpen}
+        onClose={() => setIsScheduleModalOpen(false)}
+      />
     </div>
   );
 }
