@@ -87,7 +87,7 @@ const ModalSelectTrigger = React.forwardRef(
       ref={ref}
       className={cn(
         selectVariants({ variant: "modal" }),
-        "flex items-center justify-between gap-2 w-full px-3 py-2 bg-customNeutral-100 rounded-lg border-2 border-customNeutral-200 data-[placeholder]:text-customNeutral-200 text-neutral-900",
+        "flex items-center justify-between gap-2 w-full px-3 py-2 bg-customNeutral-100 rounded-lg border-2 border-customNeutral-200 text-neutral-900",
         className
       )}
       {...props}
@@ -95,11 +95,8 @@ const ModalSelectTrigger = React.forwardRef(
       <div className="flex items-center gap-2">
         {LeftIcon && <SelectIcon variant="modal">{LeftIcon}</SelectIcon>}
 
-        {/* Pass `value` properly */}
-        <SelectPrimitive.Value
-          placeholder={placeholder}
-          className="truncate text-left text-neutral-900"
-        >
+        {/* Correct way to display selected value or placeholder */}
+        <SelectPrimitive.Value placeholder={placeholder}>
           {value || placeholder}
         </SelectPrimitive.Value>
       </div>
@@ -110,73 +107,44 @@ const ModalSelectTrigger = React.forwardRef(
     </SelectPrimitive.Trigger>
   )
 );
-
 ModalSelectTrigger.displayName = "ModalSelectTrigger";
 
 const ModalSelectContent = React.forwardRef(
-  ({ className, children, isOpen, onClose, ...props }, ref) => {
-    if (!isOpen) return null;
-
-    return (
-      <SelectPrimitive.Portal>
-        <SelectPrimitive.Content
-          ref={ref}
-          className={cn(
-            "relative z-50 max-h-[90vh] w-full min-w-[var(--radix-select-trigger-width)] overflow-hidden rounded-md border bg-customNeutral-100 text-popover-foreground shadow-md text-sm",
-            className
-          )}
-          position="popper"
-          sideOffset={4}
-          align="start"
-          {...props}
-        >
-          <SelectPrimitive.Viewport className="p-1 w-full">
-            {children}
-          </SelectPrimitive.Viewport>
-        </SelectPrimitive.Content>
-      </SelectPrimitive.Portal>
-    );
-  }
+  ({ className, children, ...props }, ref) => (
+    <SelectPrimitive.Portal>
+      <SelectPrimitive.Content
+        ref={ref}
+        className={cn(
+          "relative z-50 max-h-[90vh] w-full min-w-[var(--radix-select-trigger-width)] overflow-hidden rounded-md border bg-customNeutral-100 text-popover-foreground shadow-md text-sm",
+          className
+        )}
+        position="popper"
+        sideOffset={4}
+        align="start"
+        {...props}
+      >
+        <SelectPrimitive.Viewport className="p-1 w-full">
+          {children}
+        </SelectPrimitive.Viewport>
+      </SelectPrimitive.Content>
+    </SelectPrimitive.Portal>
+  )
 );
 
 const ModalSelect = ({ placeholder, icon, children }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [value, setValue] = useState(""); // Keep track of the selected value
-
-  React.useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-      document.body.style.position = "fixed";
-      document.body.style.width = "100%";
-    } else {
-      document.body.style.overflow = "";
-      document.body.style.position = "";
-      document.body.style.width = "";
-    }
-    return () => {
-      document.body.style.overflow = "";
-      document.body.style.position = "";
-      document.body.style.width = "";
-    };
-  }, [isOpen]);
+  const [value, setValue] = useState(""); // Track selected value
 
   return (
-    <Select
-      value={value}
-      onValueChange={(newValue) => {
-        setValue(newValue); // Update selected value
-        setIsOpen(false); // Close the dropdown
-      }}
-      open={isOpen}
-      onOpenChange={setIsOpen}
-    >
-      {/* Pass the selected value to ModalSelectTrigger */}
-      <ModalSelectTrigger placeholder={placeholder} icon={icon} value={value} />
-      <ModalSelectContent isOpen={isOpen}>{children}</ModalSelectContent>
+    <Select value={value} onValueChange={setValue}>
+      <ModalSelectTrigger
+        placeholder={placeholder}
+        icon={icon}
+        value={value} // Pass value properly to trigger
+      />
+      <ModalSelectContent>{children}</ModalSelectContent>
     </Select>
   );
 };
-
 ModalSelect.displayName = "ModalSelect";
 ModalSelect.Content = ModalSelectContent;
 

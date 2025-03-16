@@ -8,7 +8,7 @@ import {
   ModalHeader,
   ModalTitle,
   ModalIcon,
-  ModalBody,
+  ModalBody
 } from "@/components/ui/Modal";
 
 import {
@@ -16,8 +16,10 @@ import {
   InputTextField,
   InputLabel,
   InputIcon,
-  Input,
+  Input
 } from "@/components/ui/Input";
+
+import { ModalSelect, SelectItem } from "@/components/ui/Select";
 
 import { Button } from "../ui/Button";
 
@@ -69,7 +71,8 @@ function CreatePatientEntry({ isOpen, onClose }) {
   useEffect(() => {
     const numericAmount = parseFloat(amount) || 0;
     const numericDiscount = parseFloat(packageDiscount) || 0;
-    const computedTotal = numericAmount - (numericAmount * numericDiscount / 100);
+    const computedTotal =
+      numericAmount - (numericAmount * numericDiscount) / 100;
     setTotalAmount(computedTotal.toFixed(2));
   }, [amount, packageDiscount]);
 
@@ -78,7 +81,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
     async function fetchAestheticians() {
       try {
         const response = await axios.get("http://localhost:4000/getusers", {
-          withCredentials: true,
+          withCredentials: true
         });
         const aestheticians = response.data.filter(
           (user) => user.role && user.role.toLowerCase() === "aesthetician"
@@ -96,7 +99,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
     async function fetchPackages() {
       try {
         const response = await axios.get("http://localhost:4000/api/packages", {
-          withCredentials: true,
+          withCredentials: true
         });
         setPackagesList(response.data);
       } catch (error) {
@@ -110,9 +113,12 @@ function CreatePatientEntry({ isOpen, onClose }) {
   useEffect(() => {
     async function fetchTreatments() {
       try {
-        const response = await axios.get("http://localhost:4000/api/treatments", {
-          withCredentials: true,
-        });
+        const response = await axios.get(
+          "http://localhost:4000/api/treatments",
+          {
+            withCredentials: true
+          }
+        );
         setTreatmentsList(response.data);
       } catch (error) {
         console.error("Error fetching treatments:", error);
@@ -126,7 +132,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
   console.log("Current state values:", {
     personInCharge,
     packageName,
-    treatment,
+    treatment
   });
 
   // Handle form submission, sending new patient record to the server
@@ -163,7 +169,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
       paymentMethod,
       dateOfSession,
       timeOfSession,
-      consent_form_signed: consentFormSigned,
+      consent_form_signed: consentFormSigned
     });
 
     // Construct payload matching the server's expected field names and data types
@@ -178,7 +184,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
       payment_method: paymentMethod,
       date_of_session: dateOfSession,
       time_of_session: timeOfSession,
-      consent_form_signed: consentFormSigned,
+      consent_form_signed: consentFormSigned
     };
 
     console.log("Payload being sent to API:", payload);
@@ -187,9 +193,9 @@ function CreatePatientEntry({ isOpen, onClose }) {
       const response = await fetch("http://localhost:4000/api/patients", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/json"
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(payload)
       });
 
       if (response.ok) {
@@ -236,16 +242,25 @@ function CreatePatientEntry({ isOpen, onClose }) {
             {/* PERSON IN CHARGE */}
             <InputContainer>
               <InputLabel>PERSON IN CHARGE</InputLabel>
-              <InputTextField className={formSubmitAttempted && formErrors.personInCharge ? "border-red-500 rounded" : ""}>
+              <InputTextField
+                className={
+                  formSubmitAttempted && formErrors.personInCharge
+                    ? "border-red-500 rounded"
+                    : ""
+                }
+              >
                 <InputIcon>
                   <UserIDIcon className="w-4 h-4" />
                 </InputIcon>
-                <select 
+                <select
                   className="w-full p-2 border rounded bg-[#F5F3F0]"
                   value={personInCharge}
                   onChange={(e) => {
                     const selectedValue = e.target.value;
-                    console.log("Selected person in charge (direct):", selectedValue);
+                    console.log(
+                      "Selected person in charge (direct):",
+                      selectedValue
+                    );
                     setPersonInCharge(selectedValue);
                   }}
                   required
@@ -258,18 +273,27 @@ function CreatePatientEntry({ isOpen, onClose }) {
                   ))}
                 </select>
               </InputTextField>
-              {formSubmitAttempted && formErrors.personInCharge && 
-                <p className="text-red-500 text-sm mt-1">{formErrors.personInCharge}</p>}
+              {formSubmitAttempted && formErrors.personInCharge && (
+                <p className="text-red-500 text-sm mt-1">
+                  {formErrors.personInCharge}
+                </p>
+              )}
             </InputContainer>
 
             {/* PACKAGE */}
             <InputContainer>
               <InputLabel>PACKAGE</InputLabel>
-              <InputTextField className={formSubmitAttempted && formErrors.packageName ? "border-red-500 rounded" : ""}>
+              <InputTextField
+                className={
+                  formSubmitAttempted && formErrors.packageName
+                    ? "border-red-500 rounded"
+                    : ""
+                }
+              >
                 <InputIcon>
                   <PackageIcon className="w-4 h-4" />
                 </InputIcon>
-                <select 
+                <select
                   className="w-full p-2 border rounded bg-[#F5F3F0]"
                   value={packageName}
                   onChange={(e) => {
@@ -287,18 +311,57 @@ function CreatePatientEntry({ isOpen, onClose }) {
                   ))}
                 </select>
               </InputTextField>
-              {formSubmitAttempted && formErrors.packageName && 
-                <p className="text-red-500 text-sm mt-1">{formErrors.packageName}</p>}
+              {formSubmitAttempted && formErrors.packageName && (
+                <p className="text-red-500 text-sm mt-1">
+                  {formErrors.packageName}
+                </p>
+              )}
+            </InputContainer>
+
+            {/* package but eli's version */}
+            <InputContainer>
+              <InputLabel>ELI'S PACKAGE</InputLabel>
+              <ModalSelect
+                placeholder="Select package"
+                icon={<PackageIcon className="w-4 h-4" />}
+                value={packageName}
+                onValueChange={(selectedValue) => {
+                  console.log("Selected package (modal):", selectedValue);
+                  setPackageName(selectedValue);
+                }}
+                className={
+                  formSubmitAttempted && formErrors.packageName
+                    ? "border-red-500 rounded"
+                    : ""
+                }
+              >
+                {packagesList.map((pkg) => (
+                  <SelectItem key={pkg.id} value={pkg.package_name}>
+                    {pkg.package_name} - ₱{pkg.price}
+                  </SelectItem>
+                ))}
+              </ModalSelect>
+              {formSubmitAttempted && formErrors.packageName && (
+                <p className="text-red-500 text-sm mt-1">
+                  {formErrors.packageName}
+                </p>
+              )}
             </InputContainer>
 
             {/* TREATMENT */}
             <InputContainer>
               <InputLabel>TREATMENT</InputLabel>
-              <InputTextField className={formSubmitAttempted && formErrors.treatment ? "border-red-500 rounded" : ""}>
+              <InputTextField
+                className={
+                  formSubmitAttempted && formErrors.treatment
+                    ? "border-red-500 rounded"
+                    : ""
+                }
+              >
                 <InputIcon>
                   <PackageIcon className="w-4 h-4" />
                 </InputIcon>
-                <select 
+                <select
                   className="w-full p-2 border rounded bg-[#F5F3F0]"
                   value={treatment}
                   onChange={(e) => {
@@ -316,8 +379,11 @@ function CreatePatientEntry({ isOpen, onClose }) {
                   ))}
                 </select>
               </InputTextField>
-              {formSubmitAttempted && formErrors.treatment && 
-                <p className="text-red-500 text-sm mt-1">{formErrors.treatment}</p>}
+              {formSubmitAttempted && formErrors.treatment && (
+                <p className="text-red-500 text-sm mt-1">
+                  {formErrors.treatment}
+                </p>
+              )}
             </InputContainer>
 
             {/* AMOUNT (CURRENCY) */}
@@ -455,7 +521,12 @@ function CreatePatientEntry({ isOpen, onClose }) {
 
           {/* ACTION BUTTONS */}
           <div className="flex flex-row gap-4 mt-6 w-full">
-            <Button type="button" variant="outline" className="w-1/2" onClick={onClose}>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-1/2"
+              onClick={onClose}
+            >
               <ChevronLeftIcon />
               CANCEL AND RETURN
             </Button>
