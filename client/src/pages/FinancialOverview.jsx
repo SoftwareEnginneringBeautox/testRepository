@@ -1,7 +1,7 @@
 import React from "react";
 import "../App.css";
-import { useState } from "react";
 import { useModal } from "@/hooks/useModal";
+import { jsPDF } from "jspdf";
 
 import CreateMonthlySales from "@/components/modals/CreateMonthlySales";
 import EditMonthlySales from "@/components/modals/EditMonthlySales";
@@ -48,7 +48,6 @@ import EllipsisIcon from "@/assets/icons/EllipsisIcon";
 
 function FinancialOverwiew() {
   const { currentModal, openModal, closeModal } = useModal();
-
   return (
     <div className="flex flex-col text-left w-[90%] mx-auto gap-4">
       <div>
@@ -61,7 +60,7 @@ function FinancialOverwiew() {
       <SalesChart />
       <div className=" flex justify-end">
         <Select>
-          <SelectTrigger placeholder="Filter b1y" icon={<FilterIcon />}>
+          <SelectTrigger placeholder="FILTER BY" icon={<FilterIcon />}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -71,53 +70,7 @@ function FinancialOverwiew() {
           </SelectContent>
         </Select>
       </div>
-      <table className="PRISM-table">
-        <thead>
-          <tr>
-            <th>CLIENT</th>
-            <th>PERSON IN CHARGE</th>
-            <th>DATE TRANSACTED</th>
-            <th>PAYMENT METHOD</th>
-            <th>PACKAGES</th>
-            <th>TREATMENT</th>
-            <th>PAYMENT</th>
-            <th>REFERENCE NO.</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Data 1.1</td>
-            <td>Data 1.2</td>
-            <td>Data 1.3</td>
-            <td>Data 1.4</td>
-            <td>Data 1.5</td>
-            <td>Data 1.6</td>
-            <td>Data 1.7</td>
-            <td>Data 1.8</td>
-          </tr>
-          <tr>
-            <td>Data 2.1</td>
-            <td>Data 2.2</td>
-            <td>Data 2.3</td>
-            <td>Data 2.4</td>
-            <td>Data 2.5</td>
-            <td>Data 2.6</td>
-            <td>Data 2.7</td>
-            <td>Data 2.8</td>
-          </tr>
-          <tr>
-            <td>Data 3.1</td>
-            <td>Data 3.2</td>
-            <td>Data 3.3</td>
-            <td>Data 3.4</td>
-            <td>Data 3.5</td>
-            <td>Data 3.6</td>
-            <td>Data 3.7</td>
-            <td>Data 3.8</td>
-          </tr>
-          <tr></tr>
-        </tbody>
-      </table>
+
       <Table>
         <TableHeader>
           <TableRow>
@@ -129,16 +82,42 @@ function FinancialOverwiew() {
             <TableHead className="py-4 text-center">TREATMENT</TableHead>
             <TableHead className="py-4 text-center">PAYMENT</TableHead>
             <TableHead className="py-4 text-center">REFERENCE NO.</TableHead>
-            <TableHead></TableHead>
           </TableRow>
         </TableHeader>
-        <TableBody></TableBody>
+        <TableBody>
+          <TableRow>
+            <TableCell>Data 1.1</TableCell>
+            <TableCell>Data 1.2</TableCell>
+            <TableCell>Data 1.3</TableCell>
+            <TableCell>Data 1.4</TableCell>
+            <TableCell>Data 1.5</TableCell>
+            <TableCell>Data 1.6</TableCell>
+            <TableCell>Data 1.7</TableCell>
+            <TableCell>Data 1.8</TableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell>Data 2.1</TableCell>
+            <TableCell>Data 2.2</TableCell>
+            <TableCell>Data 2.3</TableCell>
+            <TableCell>Data 2.4</TableCell>
+            <TableCell>Data 2.5</TableCell>
+            <TableCell>Data 2.6</TableCell>
+            <TableCell>Data 2.7</TableCell>
+            <TableCell>Data 2.8</TableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell>Data 3.1</TableCell>
+            <TableCell>Data 3.2</TableCell>
+            <TableCell>Data 3.3</TableCell>
+            <TableCell>Data 3.4</TableCell>
+            <TableCell>Data 3.5</TableCell>
+            <TableCell>Data 3.6</TableCell>
+            <TableCell>Data 3.7</TableCell>
+            <TableCell>Data 3.8</TableCell>
+          </TableRow>
+        </TableBody>
       </Table>
       <div className="w-full flex justify-end gap-4">
-        <Button variant="outline">
-          <ChevronLeftIcon />
-          RETURN
-        </Button>
         <Button variant="callToAction">
           <DownloadIcon />
           DOWNLOAD SALES REPORT

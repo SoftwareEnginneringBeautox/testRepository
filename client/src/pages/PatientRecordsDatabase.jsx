@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useModal } from "@/hooks/useModal";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
+
 import { Button } from "@/components/ui/Button";
 import ChevronLeftIcon from "@/assets/icons/ChevronLeftIcon";
 import PlusIcon from "@/assets/icons/PlusIcon";
@@ -7,6 +10,7 @@ import SortIcon from "@/assets/icons/SortIcon";
 import MagnifyingGlassIcon from "@/assets/icons/MagnifyingGlassIcon";
 import EditIcon from "@/assets/icons/EditIcon";
 import ArchiveIcon from "@/assets/icons/ArchiveIcon";
+import DownloadIcon from "@/assets/icons/DownloadIcon";
 
 import {
   Table,
@@ -82,6 +86,90 @@ function PatientRecordsDatabase() {
   const handleOpenDeleteEntry = (record) => {
     setSelectedEntry(record);
     openModal("deleteEntry");
+  };
+
+  const generatePRDReport = () => {
+    if (!records || records.length === 0) {
+      console.error("No records available to generate PDF.");
+      return;
+    }
+
+    // Create a new jsPDF instance (Landscape mode)
+    const doc = new jsPDF({
+      orientation: "landscape",
+      unit: "pt", // Points (1 inch = 72 points)
+      format: "a4"
+    });
+
+    const margin = 36; // 0.5 inch margin (36 pts)
+    const pageWidth = doc.internal.pageSize.width;
+    const startY = margin + 10; // Title spacing
+
+    // Add Title
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(16);
+    doc.text(
+      `BEAUTOX PATIENT RECORDS REPORTS AS OF ${new Date().toLocaleDateString()}`,
+      pageWidth / 2,
+      margin,
+      { align: "center" }
+    );
+
+    // Define table headers
+    const headers = [
+      "CLIENT",
+      "DATE OF SESSION",
+      "TIME OF SESSION",
+      "PERSON IN CHARGE",
+      "PACKAGE",
+      "TREATMENT",
+      "CONSENT STATUS",
+      "PAYMENT METHOD",
+      "TOTAL AMOUNT"
+    ];
+
+    // Format records for the table
+    const tableData = records.map((record) => [
+      record.clientName || "N/A",
+      record.sessionDate || "N/A",
+      record.sessionTime || "N/A",
+      record.personInCharge || "N/A",
+      record.package || "N/A",
+      record.treatment || "N/A",
+      record.consentStatus || "N/A",
+      record.paymentMethod || "N/A",
+      record.totalAmount ? `$${record.totalAmount}` : "N/A"
+    ]);
+
+    // Generate Table with margins
+    doc.autoTable({
+      head: [headers],
+      body: tableData,
+      startY: startY + 20, // Position table below title
+      margin: { top: margin, left: margin, right: margin, bottom: margin },
+      theme: "grid",
+      styles: {
+        fontSize: 10,
+        cellPadding: { top: 2, right: 5, bottom: 2, left: 5 }
+      },
+      headStyles: {
+        fillColor: "#381B4C", // Header background color
+        textColor: "#FFFFFF", // White text
+        fontSize: 12,
+        halign: "center",
+        lineWidth: 0.5,
+        lineColor: "#000000"
+      },
+      bodyStyles: {
+        lineWidth: 0.2, // 2pt borders
+        lineColor: "#000000"
+      }
+    });
+
+    // Save and Download PDF
+    doc.save(
+      "BeautoxPatientRecordsReport_" + Date().toLocaleDateString() + "_.pdf"
+    );
   };
 
   return (
@@ -214,6 +302,10 @@ function PatientRecordsDatabase() {
         <Button onClick={() => openModal("createEntry")}>
           <PlusIcon />
           ADD NEW ENTRY
+        </Button>
+        <Button variant="callToAction" onClick={() => generatePRDReport()}>
+          <DownloadIcon />
+          DOWNLOAD PATIENT RECORDS
         </Button>
       </div>
 

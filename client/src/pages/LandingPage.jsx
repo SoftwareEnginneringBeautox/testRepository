@@ -23,10 +23,10 @@ function LandingPage() {
           LOGIN AS STAFF
         </Button>
       </header>
-      <div className="flex flex-col items-center justify-center gap-4">
+      <div className="flex flex-col items-center justify-center gap-40 min-h-screen">
         <section
           id="hero"
-          className="w-3/4 flex flex-row justify-center items-center min-h-screen"
+          className="w-3/4 flex flex-row justify-center items-center my-60"
         >
           <div className="w-1/2 flex flex-col gap-6">
             <div className="flex flex-col gap-2">
@@ -55,7 +55,7 @@ function LandingPage() {
             <BeautoxLogo className="h-full w-1/2 text-lavender-400 opacity-90" />
           </div>
         </section>
-        <section className="w-3/4 flex flex-row items-center justify-center gap-4 min-h-screen">
+        <section className="w-3/4 flex flex-row items-center justify-center gap-4">
           <div className="w-1/2 flex items-center justify-center rounded-half">
             <iframe
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1043.644141889592!2d121.03651836623278!3d14.614630075990188!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397b7656817cb95%3A0xc3a3721da76b89!2sSonema%20Square!5e0!3m2!1sen!2sph!4v1741322385811!5m2!1sen!2sph"
@@ -83,7 +83,7 @@ function LandingPage() {
             </p>
           </div>
         </section>
-        <section className="w-3/4 flex flex-col items-center justify-center gap-4 min-h-screen">
+        <section className="w-3/4 flex flex-col items-center justify-center gap-4">
           [PRODUCT SECTION]
         </section>
         <footer className="w-full">
