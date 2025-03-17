@@ -1,7 +1,7 @@
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 import React, { useState, useEffect } from "react";
 import { useModal } from "@/hooks/useModal";
-import jsPDF from "jspdf";
-import "jspdf-autotable";
 
 import { Button } from "@/components/ui/Button";
 import ChevronLeftIcon from "@/assets/icons/ChevronLeftIcon";
@@ -53,6 +53,7 @@ function PatientRecordsDatabase() {
         credentials: "include"
       });
       const data = await response.json();
+      console.log("API Response Data:", data); // 🔍 Debugging line
       setRecords(data);
     } catch (error) {
       console.error("Error fetching records:", error);
@@ -88,34 +89,34 @@ function PatientRecordsDatabase() {
     openModal("deleteEntry");
   };
 
-  const generatePRDReport = () => {
+  const generatePRDReport = (records) => {
     if (!records || records.length === 0) {
       console.error("No records available to generate PDF.");
       return;
     }
 
-    // Create a new jsPDF instance (Landscape mode)
     const doc = new jsPDF({
       orientation: "landscape",
-      unit: "pt", // Points (1 inch = 72 points)
+      unit: "pt",
       format: "a4"
     });
 
-    const margin = 36; // 0.5 inch margin (36 pts)
+    // ✅ Use Helvetica font
+    doc.setFont("helvetica");
+
+    const margin = 36;
     const pageWidth = doc.internal.pageSize.width;
-    const startY = margin + 10; // Title spacing
+    const startY = margin + 10;
 
     // Add Title
-    doc.setFont("helvetica", "bold");
     doc.setFontSize(16);
     doc.text(
-      `BEAUTOX PATIENT RECORDS REPORTS AS OF ${new Date().toLocaleDateString()}`,
+      `BEAUTOX PATIENT RECORDS REPORT AS OF ${new Date().toLocaleDateString()}`,
       pageWidth / 2,
       margin,
       { align: "center" }
     );
 
-    // Define table headers
     const headers = [
       "CLIENT",
       "DATE OF SESSION",
@@ -128,7 +129,6 @@ function PatientRecordsDatabase() {
       "TOTAL AMOUNT"
     ];
 
-    // Format records for the table
     const tableData = records.map((record) => [
       record.clientName || "N/A",
       record.sessionDate || "N/A",
@@ -136,39 +136,43 @@ function PatientRecordsDatabase() {
       record.personInCharge || "N/A",
       record.package || "N/A",
       record.treatment || "N/A",
-      record.consentStatus || "N/A",
+      record.consentStatus ? "Signed" : "Not Signed",
       record.paymentMethod || "N/A",
-      record.totalAmount ? `$${record.totalAmount}` : "N/A"
+      record.totalAmount ? `$${record.totalAmount.toFixed(2)}` : "N/A"
     ]);
 
-    // Generate Table with margins
-    doc.autoTable({
+    // ✅ Use autoTable with vertical alignment
+    autoTable(doc, {
       head: [headers],
       body: tableData,
-      startY: startY + 20, // Position table below title
+      startY: startY + 20,
       margin: { top: margin, left: margin, right: margin, bottom: margin },
       theme: "grid",
       styles: {
+        font: "helvetica",
         fontSize: 10,
-        cellPadding: { top: 2, right: 5, bottom: 2, left: 5 }
+        valign: "middle", // ✅ Vertical alignment
+        cellPadding: { top: 5, right: 5, bottom: 5, left: 5 }
       },
       headStyles: {
-        fillColor: "#381B4C", // Header background color
-        textColor: "#FFFFFF", // White text
+        fillColor: "#381B4C",
+        textColor: "#FFFFFF",
         fontSize: 12,
         halign: "center",
+        valign: "middle",
+        fontStyle: "bold",
         lineWidth: 0.5,
         lineColor: "#000000"
       },
       bodyStyles: {
-        lineWidth: 0.2, // 2pt borders
+        valign: "middle", // ✅ Ensure vertical alignment in the body
+        lineWidth: 0.2,
         lineColor: "#000000"
       }
     });
 
-    // Save and Download PDF
     doc.save(
-      "BeautoxPatientRecordsReport_" + Date().toLocaleDateString() + "_.pdf"
+      `BeautoxPatientRecordsReport_${new Date().toLocaleDateString()}_.pdf`
     );
   };
 
@@ -226,10 +230,7 @@ function PatientRecordsDatabase() {
           <TableBody>
             {records.map((record, index) => (
               <TableRow key={index}>
-                <TableCell
-                  onClick={() => handleOpenDisplayEntry(record)}
-                  className="cursor-pointer"
-                >
+                <TableCell onClick={() => handleOpenDisplayEntry(record)}>
                   {record.client || record.patient_name?.toUpperCase() || "N/A"}
                 </TableCell>
                 <TableCell className="text-center">
@@ -303,7 +304,10 @@ function PatientRecordsDatabase() {
           <PlusIcon />
           ADD NEW ENTRY
         </Button>
-        <Button variant="callToAction" onClick={() => generatePRDReport()}>
+        <Button
+          variant="callToAction"
+          onClick={() => generatePRDReport(records)}
+        >
           <DownloadIcon />
           DOWNLOAD PATIENT RECORDS
         </Button>
