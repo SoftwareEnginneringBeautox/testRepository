@@ -89,7 +89,7 @@ function PatientRecordsDatabase() {
     openModal("deleteEntry");
   };
 
-  const generatePRDReport = (records) => {
+  const generatePRDReport = () => {
     if (!records || records.length === 0) {
       console.error("No records available to generate PDF.");
       return;
@@ -101,7 +101,6 @@ function PatientRecordsDatabase() {
       format: "a4"
     });
 
-    // ✅ Use Helvetica font
     doc.setFont("helvetica");
 
     const margin = 36;
@@ -109,6 +108,7 @@ function PatientRecordsDatabase() {
     const startY = margin + 10;
 
     // Add Title
+    doc.setFont("helvetica", "bold");
     doc.setFontSize(16);
     doc.text(
       `BEAUTOX PATIENT RECORDS REPORT AS OF ${new Date().toLocaleDateString()}`,
@@ -117,6 +117,7 @@ function PatientRecordsDatabase() {
       { align: "center" }
     );
 
+    // Standardized column headers
     const headers = [
       "CLIENT",
       "DATE OF SESSION",
@@ -129,19 +130,32 @@ function PatientRecordsDatabase() {
       "TOTAL AMOUNT"
     ];
 
+    // Extract and standardize data for table
     const tableData = records.map((record) => [
-      record.clientName || "N/A",
-      record.sessionDate || "N/A",
-      record.sessionTime || "N/A",
-      record.personInCharge || "N/A",
-      record.package || "N/A",
-      record.treatment || "N/A",
-      record.consentStatus ? "Signed" : "Not Signed",
-      record.paymentMethod || "N/A",
-      record.totalAmount ? `$${record.totalAmount.toFixed(2)}` : "N/A"
+      record.client || record.patient_name?.toUpperCase() || "N/A",
+      record.dateTransacted || record.date_of_session
+        ? format(
+            new Date(record.dateTransacted || record.date_of_session),
+            "yyyy-MM-dd"
+          )
+        : "N/A",
+      record.nextSessionTime || record.time_of_session || "N/A",
+      (record.personInCharge || record.person_in_charge)?.toUpperCase() ||
+        "N/A",
+      (record.package || record.package_name)?.toUpperCase() || "N/A",
+      record.treatment?.toUpperCase() || "N/A",
+      typeof record.consent_form_signed === "boolean"
+        ? record.consent_form_signed
+          ? "SIGNED"
+          : "NOT SIGNED"
+        : record.consentStatus || "N/A",
+      (record.paymentMethod || record.payment_method)?.toUpperCase() || "N/A",
+      record.totalAmount || record.total_amount
+        ? `PHP ${record.totalAmount || record.total_amount}`
+        : "N/A"
     ]);
 
-    // ✅ Use autoTable with vertical alignment
+    // Generate table
     autoTable(doc, {
       head: [headers],
       body: tableData,
@@ -151,7 +165,7 @@ function PatientRecordsDatabase() {
       styles: {
         font: "helvetica",
         fontSize: 10,
-        valign: "middle", // ✅ Vertical alignment
+        valign: "middle",
         cellPadding: { top: 5, right: 5, bottom: 5, left: 5 }
       },
       headStyles: {
@@ -165,14 +179,15 @@ function PatientRecordsDatabase() {
         lineColor: "#000000"
       },
       bodyStyles: {
-        valign: "middle", // ✅ Ensure vertical alignment in the body
+        valign: "middle",
         lineWidth: 0.2,
         lineColor: "#000000"
       }
     });
 
+    // Save the PDF
     doc.save(
-      `BeautoxPatientRecordsReport_${new Date().toLocaleDateString()}_.pdf`
+      `BeautoxPatientRecordsReport_${new Date().toLocaleDateString()}.pdf`
     );
   };
 
@@ -230,7 +245,10 @@ function PatientRecordsDatabase() {
           <TableBody>
             {records.map((record, index) => (
               <TableRow key={index}>
-                <TableCell onClick={() => handleOpenDisplayEntry(record)}>
+                <TableCell
+                  onClick={() => handleOpenDisplayEntry(record)}
+                  className="cursor-pointer"
+                >
                   {record.client || record.patient_name?.toUpperCase() || "N/A"}
                 </TableCell>
                 <TableCell className="text-center">
@@ -304,10 +322,7 @@ function PatientRecordsDatabase() {
           <PlusIcon />
           ADD NEW ENTRY
         </Button>
-        <Button
-          variant="callToAction"
-          onClick={() => generatePRDReport(records)}
-        >
+        <Button variant="callToAction" onClick={generatePRDReport}>
           <DownloadIcon />
           DOWNLOAD PATIENT RECORDS
         </Button>

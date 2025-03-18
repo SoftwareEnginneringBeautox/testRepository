@@ -18,57 +18,42 @@ function DisplayEntry({ isOpen, onClose, entryData }) {
         <ModalIcon>
           <CircleUserIcon className="text-reflexBlue-400" />
         </ModalIcon>
-        <ModalTitle>{entryData.client.toUpperCase()}'S PACKAGE</ModalTitle>
+        <ModalTitle>
+          {entryData.client
+            ? entryData.client.toUpperCase() + "'S PACKAGE"
+            : "CLIENT'S PACKAGE"}
+        </ModalTitle>
         <button className="font-xl rotate-45 ml-auto" onClick={onClose}>
           <PlusIcon />
         </button>
       </ModalHeader>
       <ModalBody>
         <div className="flex flex-col gap-4">
-          <p className="text-xl leading-8 font-semibold">
-            PERSON IN CHARGE:{" "}
-            <span className="font-normal">{entryData.personInCharge}</span>
-          </p>
-          <p className="text-xl leading-8 font-semibold">
-            DATE OF INITIAL SESSION:{" "}
-            <span className="font-normal">{entryData.dateTransacted}</span>
-          </p>
-          <p className="text-xl leading-8 font-semibold">
-            TIME OF NEXT SESSION:{" "}
-            <span className="font-normal">{entryData.nextSessionTime}</span>
-          </p>
-          <p className="text-xl leading-8 font-semibold">
-            PACKAGE: <span className="font-normal">{entryData.package}</span>
-          </p>
-          <p className="text-xl leading-8 font-semibold">
-            TREATMENT:{" "}
-            <span className="font-normal">{entryData.treatment}</span>
-          </p>
-          <p className="text-xl leading-8 font-semibold">
-            PAYMENT METHOD:{" "}
-            <span className="font-normal">{entryData.paymentMethod}</span>
-          </p>
-          <p className="text-xl leading-8 font-semibold">
-            AMOUNT PAID:{" "}
-            <span className="font-normal">PHP {entryData.amountPaid}</span>
-          </p>
-          <p className="text-xl leading-8 font-semibold">
-            REMAINING BALANCE:{" "}
-            <span className="font-normal">
-              PHP {entryData.remainingBalance}
-            </span>
-          </p>
-          <p className="text-xl leading-8 font-semibold">
-            PACKAGE DISCOUNT: <span className="font-normal">-</span>
-          </p>
-          <p className="text-xl leading-8 font-semibold">
-            TOTAL PACKAGE COST:{" "}
-            <span className="font-normal">PHP {entryData.totalAmount}</span>
-          </p>
-          <p className="text-xl leading-8 font-semibold">
-            CONSENT STATUS:{" "}
-            <span className="font-normal">{entryData.consentStatus}</span>
-          </p>
+          {[
+            { label: "PERSON IN CHARGE", value: entryData.personInCharge },
+            {
+              label: "DATE OF INITIAL SESSION",
+              value: entryData.dateTransacted
+            },
+            { label: "TIME OF NEXT SESSION", value: entryData.nextSessionTime },
+            { label: "PACKAGE", value: entryData.package },
+            { label: "TREATMENT", value: entryData.treatment },
+            { label: "PAYMENT METHOD", value: entryData.paymentMethod },
+            { label: "AMOUNT PAID", value: `PHP ${entryData.amountPaid}` },
+            {
+              label: "REMAINING BALANCE",
+              value: `PHP ${entryData.remainingBalance}`
+            },
+            {
+              label: "TOTAL PACKAGE COST",
+              value: `PHP ${entryData.totalAmount}`
+            },
+            { label: "CONSENT STATUS", value: entryData.consentStatus }
+          ].map(({ label, value }) => (
+            <p key={label} className="text-xl leading-8 font-semibold">
+              {label}: <span className="font-normal">{value || "-"}</span>
+            </p>
+          ))}
         </div>
       </ModalBody>
     </ModalContainer>
