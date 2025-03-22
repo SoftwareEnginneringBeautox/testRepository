@@ -6,8 +6,12 @@ import BeautoxLogo from "@/assets/logos/BeautoxLogo";
 import CalendarIcon from "@/assets/icons/CalendarIcon";
 import LoginIcon from "@/assets/icons/LoginIcon";
 import LocationIcon from "@/assets/icons/LocationIcon";
+import FacebookIcon from "@/assets/icons/FacebookIcon";
+import InstagramIcon from "@/assets/icons/InstagramIcon";
+import PhoneIcon from "@/assets/icons/PhoneIcon";
 
 import ScheduleAppointmentModal from "../components/modals/ScheduleAppointment";
+import EmailIcon from "@/assets/icons/EmailIcon";
 
 function LandingPage() {
   const navigate = useNavigate();
@@ -350,20 +354,44 @@ function LandingPage() {
             </Tabs>
           </div>
         </section>
-        <footer className="w-full">
-          <h3 className="text-3xl font-bold text-lavender-400">
-            WANT TO LEARN MORE ABOUT US? FIND US HERE
-          </h3>
-          <ul>
-            <li>
-              <a href="https://www.facebook.com/BeautoxAestheticClinicNewManila">
-                VISIT OUR FACEBOOK
+        <section className="w-3/4 flex flex-row gap-8 justify-center my-60">
+          <ul className="grid grid-cols-2 gap-x-6 gap-y-4 text-lg w-1/2 ">
+            <li className="flex gap-2 justify-center">
+              <FacebookIcon fill="#002B7F" />
+              <a
+                href="https://www.facebook.com/BeautoxAestheticClinicNewManila"
+                target="_blank"
+                rel="noreferrer"
+                className="hover:text-faintingLight-400 transition-colors"
+              >
+                FACEBOOK
               </a>
             </li>
-            <li>twt</li>
-            <li>?</li>
+
+            <li className="flex gap-2 justify-center">
+              <PhoneIcon />
+              0917-895-8825
+            </li>
+            <li className="flex gap-2 justify-center">
+              <InstagramIcon fill="#E1306C" />
+              <a
+                href="https://www.instagram.com/beautoxnewmanila/"
+                target="_blank"
+                rel="noreferrer"
+                className="hover:text-faintingLight-400 transition-colors"
+              >
+                INSTAGRAM
+              </a>
+            </li>
+            <li className="flex gap-2 justify-center">
+              <EmailIcon />
+              beautoxph@gmail.com
+            </li>
           </ul>
-        </footer>
+          <h3 className="w-1/2 text-3xl text-end font-bold bg-gradient-to-r from-lavender-300 to-reflexBlue-400 text-transparent bg-clip-text">
+            WANT TO LEARN MORE ABOUT US? FIND US HERE
+          </h3>
+        </section>
       </div>
       {/* Schedule Appointment Modal */}
       <ScheduleAppointmentModal

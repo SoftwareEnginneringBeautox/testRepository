@@ -1,6 +1,8 @@
 "use client";
 
-import { TrendingUp } from "lucide-react";
+import TrendUpIcon from "@/assets/icons/TrendUpIcon";
+import TrendDownIcon from "@/assets/icons/TrendDownIcon";
+
 import {
   Area,
   AreaChart,
@@ -37,15 +39,35 @@ const chartData = [
 const chartConfig = {
   currentWeek: {
     label: "Current Week",
-    color: "#381B4C" // Lavender-400
+    // Lavender-400
+    color: "#381B4C"
   },
   previousWeek: {
     label: "Previous Week",
-    color: "#002B7F" // ReflexBlue-400
+    // ReflexBlue-400
+    color: "#002B7F"
   }
 };
 
+// Function to calculate percentage change
+const calculatePercentageChange = (data) => {
+  const totalCurrentWeek = data.reduce((acc, day) => acc + day.currentWeek, 0);
+  const totalPreviousWeek = data.reduce(
+    (acc, day) => acc + day.previousWeek,
+    0
+  );
+
+  if (totalPreviousWeek === 0) return 0; // Avoid division by zero
+
+  const percentageChange =
+    ((totalCurrentWeek - totalPreviousWeek) / totalPreviousWeek) * 100;
+  return percentageChange.toFixed(1); // Keep 1 decimal place
+};
+
 const SalesChart = () => {
+  const percentageChange = calculatePercentageChange(chartData);
+  const isIncrease = percentageChange >= 0;
+
   return (
     <Card className="w-full bg-ash-100 shadow-custom">
       <CardHeader>
@@ -153,8 +175,20 @@ const SalesChart = () => {
         <div className="flex w-full items-start gap-2 text-sm">
           <div className="grid gap-2">
             <div className="flex items-center gap-2 font-medium leading-none">
-              Current week up by 35.7%{" "}
-              <TrendingUp className="h-4 w-4 text-success-400" />
+              {isIncrease ? (
+                <>
+                  Current week up by {percentageChange}%
+                  <TrendUpIcon className="h-4 w-4" fill="#4CAF50" />
+                </>
+              ) : (
+                <>
+                  Current week down by {Math.abs(percentageChange)}%
+                  <TrendDownIcon
+                    className="h-4 w-4 text-red-500"
+                    fill="ef4444"
+                  />
+                </>
+              )}
             </div>
             <div className="flex items-center gap-2 leading-none text-customNeutral-300">
               Week of July 10 - July 16, 2023
