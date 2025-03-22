@@ -193,7 +193,7 @@ function LandingPage() {
       <div className="flex flex-col items-center justify-center gap-40 min-h-screen">
         <section
           id="hero"
-          className="w-3/4 flex flex-row justify-center items-center my-6 0"
+          className="w-3/4 flex flex-row justify-center items-center my-60"
         >
           <div className="w-1/2 flex flex-col gap-6">
             <div className="flex flex-col gap-2">
@@ -355,7 +355,11 @@ function LandingPage() {
             WANT TO LEARN MORE ABOUT US? FIND US HERE
           </h3>
           <ul>
-            <li>fb</li>
+            <li>
+              <a href="https://www.facebook.com/BeautoxAestheticClinicNewManila">
+                VISIT OUR FACEBOOK
+              </a>
+            </li>
             <li>twt</li>
             <li>?</li>
           </ul>
