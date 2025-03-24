@@ -4,6 +4,7 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const crypto = require('crypto'); // For generating random tokens
 const pool = require("./config/database.js");
 const session = require('express-session');
 const bcrypt = require('bcrypt');
@@ -100,7 +101,7 @@ app.put('/updateuser', isAuthenticated, async (req, res) => {
   }
 });
 
-// Login endpoint with detailed error logging and input validation
+// Login endpoint with detailed error logging, input validation, and random token generation
 app.post('/login', async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -112,12 +113,15 @@ app.post('/login', async (req, res) => {
       const passwordMatch = await bcrypt.compare(password, user.password);
 
       if (passwordMatch) {
-        req.session.user = { id: user.id, username: user.username, role: user.role };
+        // Generate a random token (256-bit token in hex format)
+        const token = crypto.randomBytes(32).toString('hex');
+        // Save user data along with the token in session
+        req.session.user = { id: user.id, username: user.username, role: user.role, token };
         return res.json({
           success: true,
           message: "Login successful",
           role: user.role,
-          token: "dummyToken",
+          token, // Return the generated token
           username: user.username
         });
       } else {
