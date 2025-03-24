@@ -52,7 +52,7 @@ InputOTPSlot.displayName = "InputOTPSlot";
 
 const InputOTPSeparator = React.forwardRef(({ ...props }, ref) => (
   <div ref={ref} role="separator" {...props}>
-    <p className="font-semibold">-</p>
+    <p className="text-lg font-bold">-</p>
   </div>
 ));
 InputOTPSeparator.displayName = "InputOTPSeparator";
