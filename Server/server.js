@@ -1,11 +1,26 @@
+require('dotenv').config(); // Load environment variables
+
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 const pool = require("./config/database.js");
 const session = require('express-session');
 const bcrypt = require('bcrypt');
-const isAuthenticated = require('./authMiddleware'); // Custom middleware
+const isAuthenticated = require('./middleware/isAuthenticated');
 
 const app = express();
+
+// Use Helmet to set secure HTTP headers
+app.use(helmet());
+
+// Apply rate limiting middleware
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100,
+  message: "Too many requests from this IP, please try again after 15 minutes."
+});
+app.use(limiter);
 
 // Use express.json() for parsing JSON bodies
 app.use(express.json());
@@ -24,11 +39,11 @@ app.use((req, res, next) => {
 
 // Session configuration
 app.use(session({
-  secret: 'yourSecretKey',
+  secret: process.env.SESSION_SECRET || 'yourSecretKey',
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: false,      // Set to true if using HTTPS
+    secure: process.env.NODE_ENV === 'production', // enable in production (HTTPS required)
     httpOnly: true,
     sameSite: 'lax'
   }
@@ -42,9 +57,7 @@ app.use(session({
 // Updated to include "role" and "dayoff"
 app.post('/adduser', async (req, res) => {
   try {
-    // Debug log to inspect the request payload
     console.log("Received /adduser payload:", req.body);
-    
     const { username, password, role, dayoff } = req.body;
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
@@ -69,12 +82,10 @@ app.get('/getusers', isAuthenticated, (req, res) => {
     .catch((error) => res.status(500).json({ success: false, error: 'Error retrieving users' }));
 });
 
-// Protected endpoint to update a user
-// Updated to also update the "dayoff" column
+// Protected endpoint to update a user (including "dayoff")
 app.put('/updateuser', isAuthenticated, async (req, res) => {
   try {
     const { id, username, password, role, dayoff } = req.body;
-    // Debug log to inspect update payload
     console.log("Updating user:", { id, username, role, dayoff });
     const updatest = `
       UPDATE accounts
@@ -89,7 +100,7 @@ app.put('/updateuser', isAuthenticated, async (req, res) => {
   }
 });
 
-// Login endpoint
+// Login endpoint with detailed error logging and input validation
 app.post('/login', async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -101,9 +112,8 @@ app.post('/login', async (req, res) => {
       const passwordMatch = await bcrypt.compare(password, user.password);
 
       if (passwordMatch) {
-        // Save user data in session
         req.session.user = { id: user.id, username: user.username, role: user.role };
-        res.json({
+        return res.json({
           success: true,
           message: "Login successful",
           role: user.role,
@@ -111,13 +121,15 @@ app.post('/login', async (req, res) => {
           username: user.username
         });
       } else {
-        res.json({ success: false, message: "Invalid username or password" });
+        console.log(`Failed login attempt: Incorrect password for username "${username}".`);
+        return res.json({ success: false, message: "Invalid username or password" });
       }
     } else {
-      res.json({ success: false, message: "Invalid username or password" });
+      console.log(`Failed login attempt: Username "${username}" not found.`);
+      return res.json({ success: false, message: "Invalid username or password" });
     }
   } catch (error) {
-    console.error("Error in /login:", error);
+    console.error(`Error in /login for username "${req.body.username}". Error details:`, error);
     res.status(500).json({ success: false, error: 'Internal Server Error' });
   }
 });
@@ -226,14 +238,7 @@ app.post('/api/appointments', async (req, res) => {
       VALUES ($1, $2, $3, $4, $5, $6)
       RETURNING id;
     `;
-    const values = [
-      full_name,
-      contact_number,
-      age,
-      email,
-      date_of_session,
-      time_of_session
-    ];
+    const values = [full_name, contact_number, age, email, date_of_session, time_of_session];
 
     const result = await pool.query(insertQuery, values);
 

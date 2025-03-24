@@ -44,6 +44,7 @@ function Login() {
     const trimmedUsername = username.trim();
 
     try {
+      console.log("Attempting login for:", trimmedUsername);
       const response = await axios.post(
         "http://localhost:4000/login",
         { username: trimmedUsername, password },
@@ -51,10 +52,11 @@ function Login() {
       );
 
       const data = response.data;
+      console.log("Received login response:", data);
 
       if (data.success) {
         setSuccessMessage("Login successful! Redirecting...");
-        console.log("Login successful");
+        console.log("Login successful for:", trimmedUsername);
 
         // Save authentication details in localStorage.
         localStorage.setItem("token", data.token);
@@ -71,19 +73,17 @@ function Login() {
         // Redirect based on role.
         if (data.role === "admin") {
           navigate("/AdminDashboard");
-        } else if (
-          data.role === "receptionist" ||
-          data.role === "aesthetician"
-        ) {
+        } else if (data.role === "receptionist" || data.role === "aesthetician") {
           navigate("/StaffDashboard");
         } else {
           navigate("/dashboard");
         }
       } else {
+        console.log(`Login failed for "${trimmedUsername}":`, data.message);
         setErrorMessage(data.message || "Invalid username or password");
       }
     } catch (error) {
-      console.error("Error:", error);
+      console.error(`Error during login attempt for "${trimmedUsername}":`, error);
       setErrorMessage("An error occurred. Please try again later.");
     }
   };
