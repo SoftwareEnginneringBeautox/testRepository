@@ -185,7 +185,7 @@ const SalesChart = () => {
                   Current week down by {Math.abs(percentageChange)}%
                   <TrendDownIcon
                     className="h-4 w-4 text-red-500"
-                    fill="ef4444"
+                    fill="#ef4444"
                   />
                 </>
               )}

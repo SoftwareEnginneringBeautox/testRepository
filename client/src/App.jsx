@@ -1,6 +1,5 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 
-
 import ProtectedRoute from "./components/ProtectedRoute";
 
 import Layout from "./components/Layout";
@@ -13,6 +12,7 @@ import AdministratorServices from "./pages/AdministratorServices";
 import BookingCalendar from "./pages/BookingCalendar";
 import ErrorPage from "./errors/Error404";
 import LandingPage from "@/pages/LandingPage";
+import ForgotPassword from "@/pages/ForgotPassword";
 
 // PublicRoute prevents logged-in users from accessing login/landing pages.
 function PublicRoute({ children }) {
@@ -97,6 +97,8 @@ function App() {
         />
         {/* <Route path="ScheduleAppointment" element={<ScheduleAppointment />} /> */}
         <Route path="BookingCalendar" element={<BookingCalendar />} />
+
+        <Route path="ForgotPassword" element={<ForgotPassword />} />
 
         {/* Protected route example */}
         <Route
