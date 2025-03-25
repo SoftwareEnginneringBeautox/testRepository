@@ -1,11 +1,22 @@
-// Middleware to check if a user is authenticated
-function isAuthenticated(req, res, next) {
-    if (req.session && req.session.user) {
-      // User is authenticated, proceed to the next middleware/route handler
-      return next();
-    }
-    // User is not authenticated, send an error response
-    return res.status(401).json({ message: "Unauthorized. Please log in." });
+require('dotenv').config();
+
+module.exports = function isAuthenticated(req, res, next) {
+  console.log("🔍 Checking authentication...");
+  console.log("📌 Session Data:", req.session);
+
+  if (req.session && req.session.user) {
+    console.log("✅ User authenticated via session:", req.session.user);
+    return next();
   }
-  
-  module.exports = isAuthenticated;
+
+  const clientApiKey = req.headers['x-api-key'];
+  console.log("🔑 API Key Provided:", clientApiKey);
+
+  if (clientApiKey && clientApiKey === process.env.CLIENT_API_KEY) {
+    console.log("✅ User authenticated via API key.");
+    return next();
+  }
+
+  console.log("❌ Unauthorized access attempt. No session or API key.");
+  return res.status(401).json({ message: "Unauthorized. Please log in." });
+};

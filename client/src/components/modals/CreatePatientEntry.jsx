@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import CurrencyInput from "react-currency-input-field";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/RadioGroup";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Checkbox } from "@/components/ui/Checkbox";
 
 import {
   ModalContainer,

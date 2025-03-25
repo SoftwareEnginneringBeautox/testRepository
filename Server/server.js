@@ -9,6 +9,7 @@ const pool = require("./config/database.js");
 const session = require('express-session');
 const bcrypt = require('bcrypt');
 const isAuthenticated = require('./middleware/isAuthenticated');
+const pgSession = require('connect-pg-simple')(session);
 
 const app = express();
 
@@ -38,8 +39,13 @@ app.use((req, res, next) => {
   next();
 });
 
-// Session configuration
+// Session configuration using connect-pg-simple for production readiness
 app.use(session({
+  store: new pgSession({
+    pool, // Use your PostgreSQL connection pool
+    tableName: 'session',
+    createTableIfMissing: true  // Auto-create the "session" table if it doesn't exist
+  }),
   secret: process.env.SESSION_SECRET || 'yourSecretKey',
   resave: false,
   saveUninitialized: false,
@@ -49,6 +55,13 @@ app.use(session({
     sameSite: 'lax'
   }
 }));
+
+/* --------------------------------------------
+   HEALTH CHECK ENDPOINT
+--------------------------------------------- */
+app.get('/health', (req, res) => {
+  res.status(200).send("Server is healthy");
+});
 
 /* --------------------------------------------
    USER MANAGEMENT ENDPOINTS

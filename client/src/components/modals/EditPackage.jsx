@@ -18,7 +18,7 @@ import {
 
 import { Button } from "../ui/Button";
 
-import { SelectItem, ModalSelect } from "@/components/ui/select";
+import { SelectItem, ModalSelect } from "@/components/ui/Select";
 
 import UserIcon from "@/assets/icons/UserIcon";
 import ChevronLeftIcon from "@/assets/icons/ChevronLeftIcon";

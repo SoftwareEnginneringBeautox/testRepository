@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/Input";
 import { Button } from "../ui/Button";
 
-import { ModalSelect, SelectItem } from "@/components/ui/select";
+import { ModalSelect, SelectItem } from "@/components/ui/Select";
 
 import EditIcon from "@/assets/icons/EditIcon";
 import UserIcon from "@/assets/icons/UserIcon";

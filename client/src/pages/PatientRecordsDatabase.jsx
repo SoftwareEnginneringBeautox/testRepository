@@ -19,7 +19,7 @@ import {
   TableHead,
   TableHeader,
   TableRow
-} from "@/components/ui/table";
+} from "@/components/ui/Table";
 
 import { InputTextField, Input } from "@/components/ui/Input";
 
@@ -30,7 +30,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue
-} from "@/components/ui/select";
+} from "@/components/ui/Select";
 
 import DisplayEntry from "@/components/modals/DisplayEntry";
 import CreatePatientEntry from "@/components/modals/CreatePatientEntry";

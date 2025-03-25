@@ -32,7 +32,7 @@ import {
   TableHead,
   TableHeader,
   TableRow
-} from "@/components/ui/table";
+} from "@/components/ui/Table";
 
 import {
   Select,
@@ -40,7 +40,7 @@ import {
   SelectItem,
   SelectValue,
   SelectTrigger
-} from "@/components/ui/select";
+} from "@/components/ui/Select";
 
 import EditIcon from "@/assets/icons/EditIcon";
 import DeleteIcon from "@/assets/icons/DeleteIcon";

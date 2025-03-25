@@ -26,7 +26,6 @@ function Login() {
   useEffect(() => {
     const syncLogin = (event) => {
       if (event.key === "login") {
-        // Reload the page to pick up the new login state.
         window.location.reload();
       }
     };
@@ -48,7 +47,7 @@ function Login() {
       const response = await axios.post(
         "http://localhost:4000/login",
         { username: trimmedUsername, password },
-        { withCredentials: true } // Include cookies for session management
+        { withCredentials: true } // Ensure cookies are sent
       );
 
       const data = response.data;
@@ -62,12 +61,9 @@ function Login() {
         localStorage.setItem("token", data.token);
         localStorage.setItem("role", data.role);
         localStorage.setItem("username", data.username);
-        // Also record the login time (for session expiry)...
         localStorage.setItem("loginTime", Date.now());
-        // And broadcast a login event to sync other tabs.
         localStorage.setItem("login", Date.now());
 
-        // Dispatch a custom event if needed.
         window.dispatchEvent(new Event("userProfileUpdated"));
 
         // Redirect based on role.
@@ -163,7 +159,7 @@ function Login() {
 
             <p className="text-customNeutral-300 text-xs font-bold leading-5 text-center">
               FORGOT PASSWORD?{" "}
-              <a href="" className="underline">
+              <a href="#" className="underline">
                 CLICK HERE
               </a>
             </p>

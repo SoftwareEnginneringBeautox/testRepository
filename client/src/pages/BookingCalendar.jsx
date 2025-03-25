@@ -14,7 +14,7 @@ import {
   SelectItem,
   SelectValue,
   SelectTrigger
-} from "@/components/ui/select";
+} from "@/components/ui/Select";
 
 function BookingCalendar() {
   const [currentDate, setCurrentDate] = useState(new Date());

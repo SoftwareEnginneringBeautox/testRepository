@@ -20,6 +20,7 @@
     "chokidar": "^3.6.0",
     "concat-map": "^0.0.1",
     "config": "^3.3.12",
+    "connect-pg-simple": "^10.0.0",
     "content-disposition": "^0.5.4",
     "content-type": "^1.0.5",
     "cookie": "^0.7.1",
