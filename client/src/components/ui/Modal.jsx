@@ -1,20 +1,25 @@
 import React from "react";
+import { useRef, useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 
 const ModalContainer = React.forwardRef(
   ({ className, children, ...props }, ref) => (
     <div
       ref={ref}
-      className="fixed inset-0 z-50 flex items-start justify-center p-16 overflow-y-auto"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
       {...props}
     >
-      {/* Overlay */}
       <ModalOverlay />
 
-      {/* Modal Content */}
       <div
         className={cn(
-          "my-[10vh] relative z-50 bg-ash-100 p-8 rounded-lg shadow-lg min-w-[40%]",
+          "relative z-50 bg-ash-100 p-8 rounded-lg shadow-lg min-w-[40%] max-h-[90vh] overflow-y-auto",
+          // Scrollbar-specific styling
+          "[&::-webkit-scrollbar]:w-2",
+          "[&::-webkit-scrollbar-thumb]:bg-gray-400",
+          "[&::-webkit-scrollbar-thumb]:rounded-full",
+          "[&::-webkit-scrollbar-track]:bg-transparent",
+          "[&::-webkit-scrollbar-thumb:hover]:bg-lavender-400",
           className
         )}
       >
@@ -23,7 +28,6 @@ const ModalContainer = React.forwardRef(
     </div>
   )
 );
-
 ModalContainer.displayName = "ModalContainer";
 
 const ModalOverlay = React.forwardRef(({ className, ...props }, ref) => (

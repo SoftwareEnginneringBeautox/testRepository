@@ -4,7 +4,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 
 import Layout from "./components/Layout";
 import Login from "./pages/Login";
-import Fin from "./pages/FinancialOverview";
+import FinancialOverview from "./pages/FinancialOverview";
 import AdministratorDashboard from "./pages/AdminDashboard";
 import StaffDashboard from "./pages/StaffDashboard";
 import PatientRecordsDatabase from "./pages/PatientRecordsDatabase";
@@ -105,7 +105,7 @@ function App() {
           path="FinancialOverview"
           element={
             <ProtectedRoute>
-              <Fin />
+              <FinancialOverview />
             </ProtectedRoute>
           }
         />

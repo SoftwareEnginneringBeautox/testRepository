@@ -45,8 +45,30 @@ import EditIcon from "@/assets/icons/EditIcon";
 import DeleteIcon from "@/assets/icons/DeleteIcon";
 import EllipsisIcon from "@/assets/icons/EllipsisIcon";
 
-function FinancialOverwiew() {
+function FinancialOverview() {
   const { currentModal, openModal, closeModal } = useModal();
+
+  const chartData = [
+    { day: "Mon", currentWeek: 1300, previousWeek: 1100 },
+    { day: "Tue", currentWeek: 1400, previousWeek: 1150 },
+    { day: "Wed", currentWeek: 1500, previousWeek: 1200 },
+    { day: "Thu", currentWeek: 1600, previousWeek: 1250 },
+    { day: "Fri", currentWeek: 1700, previousWeek: 1300 },
+    { day: "Sat", currentWeek: 1800, previousWeek: 1350 },
+    { day: "Sun", currentWeek: 1900, previousWeek: 1400 }
+  ];
+
+  const chartConfig = {
+    currentWeek: {
+      label: "Current Week",
+      color: "#381B4C" // Lavender-400
+    },
+    previousWeek: {
+      label: "Previous Week",
+      color: "#002B7F" // ReflexBlue-400
+    }
+  };
+
   return (
     <div className="flex flex-col text-left w-[90%] mx-auto gap-4">
       <div>
@@ -56,7 +78,7 @@ function FinancialOverwiew() {
         <p>Summary of finances within Beautox</p>
       </div>
       <h2 className="font-bold text-[2rem]">SALES TRACKER</h2>
-      <SalesChart />
+      <SalesChart chartData={chartData} chartConfig={chartConfig} />
       <div className=" flex justify-end">
         <Select>
           <SelectTrigger placeholder="FILTER BY" icon={<FilterIcon />}>
@@ -222,19 +244,16 @@ function FinancialOverwiew() {
         </div>
       </div>
       {currentModal === "createMonthlyExpense" && (
-        <CreateMonthlySales isOpen={true} onClose={closeModal} />
+        <CreateMonthlySales isOpen onClose={closeModal} />
       )}
       {currentModal === "editMonthlyExpense" && (
-        <EditMonthlySales isOpen={true} onClose={closeModal} />
+        <EditMonthlySales isOpen onClose={closeModal} />
       )}
       {currentModal === "deleteMonthlyExpense" && (
-        <DeleteMonthlySales
-          isOpen={currentModal === "deleteMonthlyExpense"}
-          onClose={closeModal}
-        />
+        <DeleteMonthlySales isOpen onClose={closeModal} />
       )}
     </div>
   );
 }
 
-export default FinancialOverwiew;
+export default FinancialOverview;

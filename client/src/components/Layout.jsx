@@ -1,4 +1,5 @@
 import React from "react";
+import { cn } from "@/lib/utils";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/Sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { useLocation, Outlet, useOutlet } from "react-router-dom";
@@ -45,7 +46,16 @@ export default function Layout() {
     >
       {shouldShowSidebar && <AppSidebar />}
 
-      <main className="w-dvw h-screen flex flex-col">
+      <main
+        className={cn(
+          "w-dvw h-screen flex flex-col overflow-y-auto",
+          "[&::-webkit-scrollbar]:w-2.5",
+          "[&::-webkit-scrollbar-thumb]:bg-gray-400",
+          "[&::-webkit-scrollbar-thumb]:rounded-full",
+          "[&::-webkit-scrollbar-track]:bg-transparent",
+          "[&::-webkit-scrollbar-thumb:hover]:bg-lavender-200"
+        )}
+      >
         {/* Use horizontal padding only so nothing pushes down at the top */}
         <header className="relative w-full flex items-center justify-between px-3">
           {shouldShowSidebar && <SidebarTrigger />}

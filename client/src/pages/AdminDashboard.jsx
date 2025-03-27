@@ -14,7 +14,7 @@ import {
   AlertDescription,
   AlertTitle,
   AlertText,
-  CloseAlert,
+  CloseAlert
 } from "@/components/ui/Alert";
 import InformationIcon from "@/assets/icons/InformationIcon";
 import EllipsisIcon from "@/assets/icons/EllipsisIcon";
@@ -23,7 +23,7 @@ import {
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuTrigger,
+  DropdownMenuTrigger
 } from "@/components/ui/DropdownMenu";
 import {
   Table,
@@ -31,7 +31,7 @@ import {
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
+  TableRow
 } from "@/components/ui/Table";
 import EditIcon from "@/assets/icons/EditIcon";
 import DeleteIcon from "@/assets/icons/DeleteIcon";
@@ -61,13 +61,12 @@ function AdministratorDashboard() {
     try {
       setLoadingStaff(true);
       const response = await axios.get("http://localhost:4000/getusers", {
-        withCredentials: true, // critical for sending session cookies
+        withCredentials: true // critical for sending session cookies
       });
       const data = response.data;
       // Filter to include only receptionist and aesthetician roles
       const filteredStaff = data.filter(
-        (user) =>
-          user.role === "receptionist" || user.role === "aesthetician"
+        (user) => user.role === "receptionist" || user.role === "aesthetician"
       );
       setStaffList(filteredStaff);
       setErrorStaff(null);
@@ -109,6 +108,28 @@ function AdministratorDashboard() {
       const newDate = new Date(currentDate);
       newDate.setDate(currentDate.getDate() + 7);
       setCurrentDate(newDate);
+    }
+  };
+
+  // dummy data for sales chart
+  const chartData = [
+    { day: "Mon", currentWeek: 1300, previousWeek: 1100 },
+    { day: "Tue", currentWeek: 1400, previousWeek: 1150 },
+    { day: "Wed", currentWeek: 1500, previousWeek: 1200 },
+    { day: "Thu", currentWeek: 1600, previousWeek: 1250 },
+    { day: "Fri", currentWeek: 1700, previousWeek: 1300 },
+    { day: "Sat", currentWeek: 1800, previousWeek: 1350 },
+    { day: "Sun", currentWeek: 1900, previousWeek: 1400 }
+  ];
+
+  const chartConfig = {
+    currentWeek: {
+      label: "Current Week",
+      color: "#381B4C" // Lavender-400
+    },
+    previousWeek: {
+      label: "Previous Week",
+      color: "#002B7F" // ReflexBlue-400
     }
   };
 
@@ -164,7 +185,7 @@ function AdministratorDashboard() {
             </TableRow>
           </TableBody>
         </Table>
-        <SalesChart />
+        <SalesChart chartData={chartData} chartConfig={chartConfig} />
         <br />
       </div>
       <div className="w-1/4 shadow-custom p-10 bg-ash-100 rounded-lg h-auto flex flex-col items-center gap-4">
@@ -213,10 +234,7 @@ function AdministratorDashboard() {
             </div>
           ))
         )}
-        <Button
-          fullWidth="true"
-          onClick={() => openModal("createStaff")}
-        >
+        <Button fullWidth="true" onClick={() => openModal("createStaff")}>
           <PlusIcon />
           ADD NEW STAFF
           <UserIcon />

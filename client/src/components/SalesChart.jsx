@@ -26,45 +26,30 @@ import {
   ChartTooltipContent
 } from "@/components/ui/Chart";
 
-const chartData = [
-  { day: "Mon", currentWeek: 1300, previousWeek: 1100 },
-  { day: "Tue", currentWeek: 1400, previousWeek: 1150 },
-  { day: "Wed", currentWeek: 1500, previousWeek: 1200 },
-  { day: "Thu", currentWeek: 1600, previousWeek: 1250 },
-  { day: "Fri", currentWeek: 1700, previousWeek: 1300 },
-  { day: "Sat", currentWeek: 1800, previousWeek: 1350 },
-  { day: "Sun", currentWeek: 1900, previousWeek: 1400 }
-];
-
-const chartConfig = {
-  currentWeek: {
-    label: "Current Week",
-    // Lavender-400
-    color: "#381B4C"
-  },
-  previousWeek: {
-    label: "Previous Week",
-    // ReflexBlue-400
-    color: "#002B7F"
+const calculatePercentageChange = (salesData) => {
+  if (!salesData || !Array.isArray(salesData)) {
+    console.error("salesData is missing or not an array", salesData);
+    return 0;
   }
+
+  let totalCurrent = 0,
+    totalPrevious = 0;
+
+  salesData.forEach((entry) => {
+    if (entry?.currentWeek === undefined || entry?.previousWeek === undefined) {
+      console.warn("Entry missing currentWeek or previousWeek", entry);
+      return;
+    }
+    totalCurrent += entry.currentWeek;
+    totalPrevious += entry.previousWeek;
+  });
+
+  if (totalPrevious === 0) return 0;
+
+  return (((totalCurrent - totalPrevious) / totalPrevious) * 100).toFixed(2);
 };
 
-// Function to calculate percentage change
-const calculatePercentageChange = (data) => {
-  const totalCurrentWeek = data.reduce((acc, day) => acc + day.currentWeek, 0);
-  const totalPreviousWeek = data.reduce(
-    (acc, day) => acc + day.previousWeek,
-    0
-  );
-
-  if (totalPreviousWeek === 0) return 0; // Avoid division by zero
-
-  const percentageChange =
-    ((totalCurrentWeek - totalPreviousWeek) / totalPreviousWeek) * 100;
-  return percentageChange.toFixed(1); // Keep 1 decimal place
-};
-
-const SalesChart = () => {
+const SalesChart = ({ chartData, chartConfig }) => {
   const percentageChange = calculatePercentageChange(chartData);
   const isIncrease = percentageChange >= 0;
 
@@ -78,30 +63,16 @@ const SalesChart = () => {
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig}>
-          <div
-            style={{
-              width: "100%",
-              height: "0",
-              paddingBottom: "55%",
-              position: "relative"
-            }}
-          >
-            <div
-              style={{ position: "absolute", width: "100%", height: "100%" }}
-            >
+          <div className="relative w-full h-0 pb-[55%]">
+            <div className="absolute w-full h-full">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart
                   accessibilityLayer
                   data={chartData}
-                  margin={{
-                    left: 8,
-                    right: 8,
-                    top: 20,
-                    bottom: 20
-                  }}
+                  margin={{ left: 8, right: 8, top: 20, bottom: 20 }}
                   style={{ backgroundColor: "#F5F3F0" }} // Ash-100
                 >
-                  <CartesianGrid vertical={false} stroke="#AAAAAA" />{" "}
+                  <CartesianGrid vertical={false} stroke="#AAAAAA" />
                   <XAxis
                     dataKey="day"
                     tickLine={false}
@@ -127,10 +98,14 @@ const SalesChart = () => {
                       x2="0"
                       y2="1"
                     >
-                      <stop offset="5%" stopColor="#381B4C" stopOpacity={0.8} />
+                      <stop
+                        offset="5%"
+                        stopColor={chartConfig.currentWeek.color}
+                        stopOpacity={0.8}
+                      />
                       <stop
                         offset="95%"
-                        stopColor="#381B4C"
+                        stopColor={chartConfig.currentWeek.color}
                         stopOpacity={0.1}
                       />
                     </linearGradient>
@@ -141,10 +116,14 @@ const SalesChart = () => {
                       x2="0"
                       y2="1"
                     >
-                      <stop offset="5%" stopColor="#002B7F" stopOpacity={0.8} />
+                      <stop
+                        offset="5%"
+                        stopColor={chartConfig.previousWeek.color}
+                        stopOpacity={0.8}
+                      />
                       <stop
                         offset="95%"
-                        stopColor="#002B7F"
+                        stopColor={chartConfig.previousWeek.color}
                         stopOpacity={0.1}
                       />
                     </linearGradient>
@@ -154,7 +133,7 @@ const SalesChart = () => {
                     type="monotone"
                     fill="url(#fillPreviousWeek)"
                     fillOpacity={0.4}
-                    stroke="#002B7F"
+                    stroke={chartConfig.previousWeek.color}
                     strokeWidth={2}
                   />
                   <Area
@@ -162,7 +141,7 @@ const SalesChart = () => {
                     type="monotone"
                     fill="url(#fillCurrentWeek)"
                     fillOpacity={0.4}
-                    stroke="#381B4C"
+                    stroke={chartConfig.currentWeek.color}
                     strokeWidth={2}
                   />
                 </AreaChart>

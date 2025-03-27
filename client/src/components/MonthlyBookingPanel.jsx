@@ -1,13 +1,17 @@
 import React from "react";
 
-const MonthlyBookingPanel = ({ calendarDays = [], appointments = [], currentMonth }) => {
+const MonthlyBookingPanel = ({
+  calendarDays = [],
+  appointments = [],
+  currentMonth
+}) => {
   const days = ["SUN", "MON", "TUES", "WED", "THURS", "FRI", "SAT"];
 
   // Helper to check if an appointment is on a specific date
   const getAppointmentsForDate = (date) => {
     if (!date) return [];
-    
-    return appointments.filter(appointment => {
+
+    return appointments.filter((appointment) => {
       const appDate = new Date(appointment.rawDate);
       return (
         appDate.getDate() === date.getDate() &&
@@ -20,7 +24,7 @@ const MonthlyBookingPanel = ({ calendarDays = [], appointments = [], currentMont
   // Check if date is today
   const isToday = (date) => {
     if (!date) return false;
-    
+
     const today = new Date();
     return (
       date.getDate() === today.getDate() &&
@@ -31,10 +35,10 @@ const MonthlyBookingPanel = ({ calendarDays = [], appointments = [], currentMont
 
   // Format time for display
   const formatTimeDisplay = (time) => {
-    if (!time) return '';
-    const [hour, minute] = time.split(':');
+    if (!time) return "";
+    const [hour, minute] = time.split(":");
     const hourInt = parseInt(hour);
-    const ampm = hourInt >= 12 ? 'PM' : 'AM';
+    const ampm = hourInt >= 12 ? "PM" : "AM";
     const hour12 = hourInt % 12 || 12;
     return `${hour12}:${minute} ${ampm}`;
   };
@@ -62,7 +66,7 @@ const MonthlyBookingPanel = ({ calendarDays = [], appointments = [], currentMont
             <tr key={weekIndex} className="h-32">
               {week.map((day, dayIndex) => {
                 const dayAppointments = getAppointmentsForDate(day);
-                
+
                 return (
                   <td
                     key={dayIndex}
@@ -72,7 +76,11 @@ const MonthlyBookingPanel = ({ calendarDays = [], appointments = [], currentMont
                         : isToday(day)
                         ? "bg-lavender-50"
                         : "bg-white"
-                    } ${day && day.getMonth() !== currentMonth ? "text-gray-400" : ""}`}
+                    } ${
+                      day && day.getMonth() !== currentMonth
+                        ? "text-gray-400"
+                        : ""
+                    }`}
                   >
                     {day && (
                       <>
@@ -84,10 +92,16 @@ const MonthlyBookingPanel = ({ calendarDays = [], appointments = [], currentMont
                             <div
                               key={idx}
                               className="text-xs p-1 bg-lavender-400 text-white rounded truncate"
-                              title={`${appointment.name} - ${formatTimeDisplay(appointment.rawTime)}`}
+                              title={`${appointment.name} - ${formatTimeDisplay(
+                                appointment.rawTime
+                              )}`}
                             >
-                              <div className="font-semibold">{appointment.name}</div>
-                              <div>{formatTimeDisplay(appointment.rawTime)}</div>
+                              <div className="font-semibold">
+                                {appointment.name}
+                              </div>
+                              <div>
+                                {formatTimeDisplay(appointment.rawTime)}
+                              </div>
                             </div>
                           ))}
                         </div>
