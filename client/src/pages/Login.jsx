@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useModal } from "@/hooks/useModal";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/Button";
 import UserIcon from "../assets/icons/UserIcon";
@@ -6,6 +7,8 @@ import PasswordIcon from "../assets/icons/PasswordIcon";
 import LoginIcon from "../assets/icons/LoginIcon";
 import BeautoxLogo from "../assets/logos/Beautox.svg";
 import axios from "axios";
+
+import ForgotPassword from "@/components/modals/ForgotPassword";
 
 import {
   InputContainer,
@@ -20,6 +23,9 @@ function Login() {
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+
+  const { currentModal, openModal, closeModal } = useModal();
+
   const navigate = useNavigate();
 
   // Listen for login events from other tabs.
@@ -69,7 +75,10 @@ function Login() {
         // Redirect based on role.
         if (data.role === "admin") {
           navigate("/AdminDashboard");
-        } else if (data.role === "receptionist" || data.role === "aesthetician") {
+        } else if (
+          data.role === "receptionist" ||
+          data.role === "aesthetician"
+        ) {
           navigate("/StaffDashboard");
         } else {
           navigate("/dashboard");
@@ -79,7 +88,10 @@ function Login() {
         setErrorMessage(data.message || "Invalid username or password");
       }
     } catch (error) {
-      console.error(`Error during login attempt for "${trimmedUsername}":`, error);
+      console.error(
+        `Error during login attempt for "${trimmedUsername}":`,
+        error
+      );
       setErrorMessage("An error occurred. Please try again later.");
     }
   };
@@ -159,7 +171,11 @@ function Login() {
 
             <p className="text-customNeutral-300 text-xs font-bold leading-5 text-center">
               FORGOT PASSWORD?{" "}
-              <a href="#" className="underline">
+              <a
+                href="#"
+                className="underline"
+                onClick={() => openModal("forgotPassword")}
+              >
                 CLICK HERE
               </a>
             </p>
@@ -170,6 +186,9 @@ function Login() {
             </Button>
           </form>
         </div>
+        {currentModal === "forgotPassword" && (
+          <ForgotPassword isOpen={true} onClose={closeModal} />
+        )}
       </div>
     </div>
   );

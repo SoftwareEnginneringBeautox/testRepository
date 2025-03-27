@@ -24,7 +24,6 @@ import UserIcon from "@/assets/icons/UserIcon";
 import ChevronLeftIcon from "@/assets/icons/ChevronLeftIcon";
 import DeleteIcon from "@/assets/icons/DeleteIcon";
 import CalendarIcon from "@/assets/icons/CalendarIcon";
-import UserAdminIcon from "@/assets/icons/UserAdminIcon";
 import UserIDIcon from "@/assets/icons/UserIDIcon";
 
 const ModifyStaff = ({ staffList, isOpen, onClose }) => {

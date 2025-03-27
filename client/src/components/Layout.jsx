@@ -33,13 +33,14 @@ export default function Layout() {
 
   // Only show the sidebar if the current route is allowed and it's not the error page
   const shouldShowSidebar =
-    !sidebarlessRoutes.includes(location.pathname.toLowerCase()) && !isErrorPage;
+    !sidebarlessRoutes.includes(location.pathname.toLowerCase()) &&
+    !isErrorPage;
 
   return (
     <SidebarProvider
       style={{
         "--sidebar-width": "18rem",
-        "--sidebar-width-mobile": "18rem",
+        "--sidebar-width-mobile": "18rem"
       }}
     >
       {shouldShowSidebar && <AppSidebar />}

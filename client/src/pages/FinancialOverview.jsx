@@ -11,7 +11,6 @@ import { Button } from "@/components/ui/Button";
 
 import FilterIcon from "../assets/icons/FilterIcon";
 import ChevronLeftIcon from "../assets/icons/ChevronLeftIcon";
-import ChevronDownIcon from "../assets/icons/ChevronDownIcon";
 import DownloadIcon from "../assets/icons/DownloadIcon";
 import BeautoxPieChart from "../components/BeautoxPieChart";
 import SalesChart from "../components/SalesChart";
