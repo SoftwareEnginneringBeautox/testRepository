@@ -18,6 +18,6 @@ RUN echo "DB_HOST=postgres" > .env && \
     echo "CLIENT_API_KEY=superSecretClientKey12345" >> .env && \
    echo "SESSION_SECRET=yourSecretKey" >> .env
 
-EXPOSE 4000
+EXPOSE 5173
 
 CMD ["npm", "start"]

@@ -1,16 +1,36 @@
-require('dotenv').config(); // Load environment variables
-
+ // Load environment variables
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const crypto = require('crypto'); // For generating random tokens
-const pool = require("./config/database.js");
+const { Pool } = require('pg'); // Import Pool from pg package
 const session = require('express-session');
 const bcrypt = require('bcrypt');
 const isAuthenticated = require('./middleware/isAuthenticated');
 const pgSession = require('connect-pg-simple')(session);
+const requiredEnvVars = [
+  'DB_USER', 'DB_PASSWORD', 'DB_HOST', 'DB_PORT', 'DB_NAME', 'SESSION_SECRET', 'CLIENT_ORIGIN'
+];
+console.log("DB Host:", process.env.DB_HOST);
+requiredEnvVars.forEach((key) => {
+  if (!process.env[key]) {
+    console.error(`Missing required environment variable: ${key}`);
+    process.exit(1);
+  }
+});
+const pool = new Pool({
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  host: process.env.DB_HOST,
+  port: process.env.DB_PORT,
+  database: process.env.DB_NAME,
 
+
+});
+  
+// Import Pool from pg package
 const app = express();
 
 // Use Helmet to set secure HTTP headers
@@ -28,10 +48,11 @@ app.use(limiter);
 app.use(express.json());
 
 // Setup CORS to allow credentials from your client origin
-app.use(cors({
-  origin: "http://localhost:5173", // Adjust to match your client URL
-  credentials: true
-}));
+// app.use(cors({
+//   origin: "http://localhost:5173", // Adjust to match your client URL
+//   credentials: true
+// }));
+app.use(cors({ origin: process.env.CLIENT_ORIGIN, credentials: true }));
 
 // Prevent caching of sensitive pages so that the back button won’t show them after logout
 app.use((req, res, next) => {
