@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import axios from "axios";
 
+const API_BASE_URL = process.env.VITE_API_URL;
+
 import {
   ModalContainer,
   ModalHeader,
@@ -46,7 +48,7 @@ function CreateStaff({ isOpen, onClose }) {
 
     try {
       const response = await axios.post(
-        "http://localhost:4000/adduser",
+        `${API_BASE_URL}/adduser`,
         {
           username: staffName,
           password: staffPassword,

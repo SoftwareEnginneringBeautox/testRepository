@@ -10,7 +10,7 @@ import {
 import LogoutIcon from "@/assets/icons/LogoutIcon";
 import ForgotPassword from "@/components/modals/ForgotPassword";
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:4000";
+const API_BASE_URL = process.env.VITE_API_URL || "http://localhost:4000";
 
 export function NavUser({ user }) {
   const { isMobile } = useSidebar();

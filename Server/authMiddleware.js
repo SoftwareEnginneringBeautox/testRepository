@@ -1,22 +1,20 @@
-require('dotenv').config();
+// middleware/isAuthenticated.js
+require('dotenv').config(); // Load environment variables
 
-module.exports = function isAuthenticated(req, res, next) {
-  console.log(" Checking authentication...");
-  console.log(" Session Data:", req.session);
-
+function isAuthenticated(req, res, next) {
+  // Check if a valid user session exists
   if (req.session && req.session.user) {
-    console.log(" User authenticated via session:", req.session.user);
     return next();
   }
 
+  // Check for a valid API key in the request headers
   const clientApiKey = req.headers['x-api-key'];
-  console.log(" API Key Provided:", clientApiKey);
-
   if (clientApiKey && clientApiKey === process.env.CLIENT_API_KEY) {
-    console.log(" User authenticated via API key.");
     return next();
   }
 
-  console.log(" Unauthorized access attempt. No session or API key.");
+  // If neither check passes, return an unauthorized error
   return res.status(401).json({ message: "Unauthorized. Please log in." });
-};
+}
+
+module.exports = isAuthenticated;
