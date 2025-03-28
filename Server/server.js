@@ -10,8 +10,22 @@ const session = require('express-session');
 const bcrypt = require('bcrypt');
 const isAuthenticated = require('./middleware/isAuthenticated');
 const pgSession = require('connect-pg-simple')(session);
+const nodemailer = require("nodemailer");
 
 const app = express();
+
+const generateOTP = () => Math.floor(100000 + Math.random() * 900000).toString();
+
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
+
+// Use express.json() for parsing JSON bodies
+app.use(express.json());
 
 // Use Helmet to set secure HTTP headers
 app.use(helmet());
@@ -24,8 +38,6 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-// Use express.json() for parsing JSON bodies
-app.use(express.json());
 
 // Setup CORS to allow credentials from your client origin
 app.use(cors({
@@ -72,15 +84,15 @@ app.get('/health', (req, res) => {
 app.post('/adduser', async (req, res) => {
   try {
     console.log("Received /adduser payload:", req.body);
-    const { username, password, role, dayoff } = req.body;
+    const { username, password, role, dayoff, email } = req.body;
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
     const insertst = `
-      INSERT INTO accounts (username, password, role, dayoff)
-      VALUES ($1, $2, $3, $4)
+      INSERT INTO accounts (username, password, role, dayoff, email)
+      VALUES ($1, $2, $3, $4, $5)
       RETURNING id;
     `;
-    const result = await pool.query(insertst, [username, hashedPassword, role, dayoff]);
+    const result = await pool.query(insertst, [username, hashedPassword, role, dayoff, email]);
     console.log("New user added with ID:", result.rows[0].id);
     res.json({ success: true, message: `User Added with ID: ${result.rows[0].id}` });
   } catch (error) {
@@ -111,6 +123,23 @@ app.put('/updateuser', isAuthenticated, async (req, res) => {
   } catch (error) {
     console.error("Error updating user:", error);
     res.status(500).json({ success: false, error: 'Error updating user' });
+  }
+});
+
+
+app.delete('/deleteuser/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await pool.query('DELETE FROM accounts WHERE id = $1', [id]);
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    res.json({ success: true, message: `User with ID ${id} deleted` });
+  } catch (error) {
+    console.error('Error deleting user:', error);
+    res.status(500).json({ success: false, error: 'Error deleting user' });
   }
 });
 
@@ -356,6 +385,97 @@ app.get('/api/packages', async (req, res) => {
     res.status(500).json({ success: false, error: 'Error retrieving packages' });
   }
 });
+
+
+
+app.get('/test-email', async (req, res) => {
+  try {
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: "isjasminedeguia@gmail.com",
+      subject: "Test Email",
+      text: "This is a test email from your server"
+    });
+
+    res.send("Email sent successfully!");
+  } catch (err) {
+    console.error("Email failed:", err);
+    res.status(500).send("Email failed to send");
+  }
+});
+
+// POST /api/forgot-password
+app.post("/forgot-password", async (req, res) => {
+  const { email } = req.body;
+  const otp = generateOTP();
+  const otpExpiry = new Date(Date.now() + 5 * 60 * 1000);
+  console.log("Generated OTP:", otp);
+  
+  try {
+  const result = await pool.query(
+    "UPDATE accounts SET otp = $1, otp_expiry = $2 WHERE email = $3 RETURNING *",
+    [otp, otpExpiry, email]
+  );
+
+  if (result.rowCount === 0) {
+        console.log("❌ User not found in DB");
+        return res.status(404).json({ message: "User not found" });
+      }
+  
+      console.log("✅ User found, sending email...");
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: "Your OTP Code",
+      text: `Your OTP is ${otp}`,
+    });
+
+    res.json({ message: "OTP sent to email" });
+  } catch (err) {
+    console.error("❌ Forgot password error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// POST /api/verify-otp
+app.post("/verify-otp", async (req, res) => {
+  const { email, otp } = req.body;
+
+  const result = await pool.query("SELECT otp, otp_expiry FROM accounts WHERE email = $1", [email]);
+  const user = result.rows[0];
+
+  if (!user || user.otp !== otp)
+    return res.status(400).json({ message: "Invalid OTP" });
+
+  if (new Date(user.otp_expiry) < new Date())
+    return res.status(400).json({ message: "OTP expired" });
+
+  res.json({ message: "OTP verified" });
+});
+
+// POST /api/reset-password
+app.post("/reset-password", async (req, res) => {
+  const { email, otp, newPassword } = req.body;
+
+  const result = await pool.query("SELECT otp, otp_expiry FROM accounts WHERE email = $1", [email]);
+  const user = result.rows[0];
+
+  if (!user || user.otp !== otp)
+    return res.status(400).json({ message: "Invalid OTP" });
+
+  if (new Date(user.otp_expiry) < new Date())
+    return res.status(400).json({ message: "OTP expired" });
+
+  const hashed = await bcrypt.hash(newPassword, 10);
+
+  await pool.query(
+    "UPDATE accounts SET password = $1, otp = NULL, otp_expiry = NULL WHERE email = $2",
+    [hashed, email]
+  );
+
+  res.json({ message: "Password reset successful" });
+});
+
 
 /* --------------------------------------------
    START THE SERVER
