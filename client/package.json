@@ -1,10 +1,9 @@
 {
   "name": "tailwindtest1",
-  "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "start": "vite",
+    "start": "serve -s dist -l 3000",
     "dev": "vite --host",
     "build": "vite build",
     "lint": "eslint .",
