@@ -14,6 +14,7 @@ const requiredEnvVars = [
   'DB_USER', 'DB_PASSWORD', 'DB_HOST', 'DB_PORT', 'DB_NAME', 'SESSION_SECRET', 'CLIENT_ORIGIN'
 ];
 console.log("DB Host:", process.env.DB_HOST);
+console.log("DB Host:", process.env.DB_PASSWORD);
 requiredEnvVars.forEach((key) => {
   if (!process.env[key]) {
     console.error(`Missing required environment variable: ${key}`);
@@ -27,7 +28,7 @@ const pool = new Pool({
   port: process.env.DB_PORT,
   database: process.env.DB_NAME,
 
-
+  
 });
   
 // Import Pool from pg package

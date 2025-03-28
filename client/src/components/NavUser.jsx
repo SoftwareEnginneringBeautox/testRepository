@@ -12,12 +12,13 @@ import LogoutIcon from "@/assets/icons/LogoutIcon";
 export function NavUser({ user }) {
   const { isMobile } = useSidebar();
   const navigate = useNavigate();
+  const API_BASE_URL = process.env.REACT_APP_API_URL;
 
   // Function to handle logout (asynchronous)
   const handleLogout = async () => {
     try {
       // Call the logout endpoint
-      const response = await fetch("http://localhost:4000/logout", {
+      const response = await fetch("${API_BASE_URL}/logout", {
         method: "POST",
         credentials: "include", // Include cookies for session management
       });
