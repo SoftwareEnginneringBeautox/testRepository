@@ -18,7 +18,7 @@ import {
 
 function Login() {
   // Use a fallback URL if REACT_APP_API_URL is not defined.
-  const API_BASE_URL = process.env.VITE_API_URL; 
+  const API_BASE_URL = import.meta.env.VITE_API_URL; 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");

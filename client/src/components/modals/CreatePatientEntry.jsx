@@ -3,7 +3,7 @@ import CurrencyInput from "react-currency-input-field";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/RadioGroup";
 import { Checkbox } from "@/components/ui/Checkbox";
 
-const API_BASE_URL = process.env.VITE_API_URL;
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 import {
   ModalContainer,
