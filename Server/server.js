@@ -1,5 +1,6 @@
-// Load environment variables
+// Load environment variables (for local dev; in production, AWS environment variables override these)
 require('dotenv').config();
+
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -10,23 +11,9 @@ const session = require('express-session');
 const bcrypt = require('bcrypt');
 const pgSession = require('connect-pg-simple')(session);
 const nodemailer = require("nodemailer");
+const isAuthenticated = require('./middleware/isAuthenticated'); // Ensure this file exists
 
-const app = express();
-
-const generateOTP = () => Math.floor(100000 + Math.random() * 900000).toString();
-
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
-
-// Use express.json() for parsing JSON bodies
-app.use(express.json());
-const isAuthenticated = require('./middleware/isAuthenticated');
-
+// Check required environment variables
 const requiredEnvVars = [
   'DB_USER',
   'DB_PASSWORD',
@@ -34,11 +21,8 @@ const requiredEnvVars = [
   'DB_PORT',
   'DB_NAME',
   'SESSION_SECRET',
-  'CLIENT_ORIGIN' // Expected production client origin
+  'CLIENT_ORIGIN',  // e.g., "https://iewdmb6vjd.ap-southeast-2.awsapprunner.com"
 ];
-
-console.log("DB Host:", process.env.DB_HOST);
-console.log("DB Password:", process.env.DB_PASSWORD);
 
 requiredEnvVars.forEach((key) => {
   if (!process.env[key]) {
@@ -46,6 +30,9 @@ requiredEnvVars.forEach((key) => {
     process.exit(1);
   }
 });
+
+console.log("DB Host:", process.env.DB_HOST);
+console.log("DB Password:", process.env.DB_PASSWORD);
 
 // Create PostgreSQL pool
 const pool = new Pool({
@@ -56,14 +43,30 @@ const pool = new Pool({
   database: process.env.DB_NAME,
 });
 
+const app = express();
+
+// Generate a 6-digit OTP
+const generateOTP = () => Math.floor(100000 + Math.random() * 900000).toString();
+
+// Configure nodemailer transporter
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
+
+// For parsing JSON bodies
+app.use(express.json());
 
 // Trust the proxy (important if behind a load balancer)
 app.set('trust proxy', 1);
 
-// Use Helmet to set secure HTTP headers
+// Use Helmet for secure HTTP headers
 app.use(helmet());
 
-// Custom key generator for rate limiting to handle x-forwarded-for header safely
+// Custom key generator for rate limiting (handles x-forwarded-for)
 const customKeyGenerator = (req) => {
   const xForwarded = req.headers['x-forwarded-for'];
   if (xForwarded) {
@@ -77,7 +80,7 @@ const customKeyGenerator = (req) => {
   return req.ip;
 };
 
-// Apply rate limiting middleware
+// Apply rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100,
@@ -86,15 +89,16 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-
-// Setup dynamic CORS to allow multiple origins
+// Dynamic CORS setup to allow both production and local dev
 const allowedOrigins = [
-  process.env.CLIENT_ORIGIN,         // e.g. "https://iewdmb6vjd.ap-southeast-2.awsapprunner.com"
-  "http://localhost:3000"            // For local development
+  process.env.CLIENT_ORIGIN,   // e.g. "https://iewdmb6vjd.ap-southeast-2.awsapprunner.com"
+  "http://localhost:3000",     // local dev
+  "https://iewdmb6vjd.ap-southeast-2.awsapprunner.com"
 ];
+
 app.use(cors({
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
+    // Allow requests with no origin (like mobile apps or curl)
     if (!origin) return callback(null, true);
     if (allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
@@ -111,18 +115,18 @@ app.use((req, res, next) => {
   next();
 });
 
-// Session configuration using connect-pg-simple for production readiness
+// Session configuration using connect-pg-simple
 app.use(session({
   store: new pgSession({
-    pool, // Use your PostgreSQL connection pool
+    pool,
     tableName: 'session',
-    createTableIfMissing: true,  // Auto-create the "session" table if it doesn't exist
+    createTableIfMissing: true,
   }),
   secret: process.env.SESSION_SECRET || 'yourSecretKey',
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: process.env.NODE_ENV === 'production', // Enable in production (HTTPS required)
+    secure: process.env.NODE_ENV === 'production', // enable in production (HTTPS required)
     httpOnly: true,
     sameSite: 'lax',
   },
@@ -146,6 +150,7 @@ app.post('/adduser', async (req, res) => {
     const { username, password, role, dayoff, email } = req.body;
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
+
     const insertst = `
       INSERT INTO accounts (username, password, role, dayoff, email)
       VALUES ($1, $2, $3, $4, $5)
@@ -172,6 +177,7 @@ app.put('/updateuser', isAuthenticated, async (req, res) => {
   try {
     const { id, username, password, role, dayoff } = req.body;
     console.log("Updating user:", { id, username, role, dayoff });
+
     const updatest = `
       UPDATE accounts
       SET username = $1, password = $2, role = $3, dayoff = $4
@@ -185,7 +191,7 @@ app.put('/updateuser', isAuthenticated, async (req, res) => {
   }
 });
 
-
+// Delete a user
 app.delete('/deleteuser/:id', async (req, res) => {
   try {
     const { id } = req.params;
@@ -194,7 +200,6 @@ app.delete('/deleteuser/:id', async (req, res) => {
     if (result.rowCount === 0) {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
-
     res.json({ success: true, message: `User with ID ${id} deleted` });
   } catch (error) {
     console.error('Error deleting user:', error);
@@ -202,7 +207,6 @@ app.delete('/deleteuser/:id', async (req, res) => {
   }
 });
 
-// Login endpoint with detailed error logging, input validation, and random token generation
 // Login endpoint
 app.post('/login', async (req, res) => {
   try {
@@ -446,8 +450,9 @@ app.get('/api/packages', async (req, res) => {
   }
 });
 
-
-
+/* --------------------------------------------
+   EMAIL + OTP ENDPOINTS
+--------------------------------------------- */
 app.get('/test-email', async (req, res) => {
   try {
     await transporter.sendMail({
@@ -456,7 +461,6 @@ app.get('/test-email', async (req, res) => {
       subject: "Test Email",
       text: "This is a test email from your server"
     });
-
     res.send("Email sent successfully!");
   } catch (err) {
     console.error("Email failed:", err);
@@ -470,19 +474,19 @@ app.post("/forgot-password", async (req, res) => {
   const otp = generateOTP();
   const otpExpiry = new Date(Date.now() + 5 * 60 * 1000);
   console.log("Generated OTP:", otp);
-  
-  try {
-  const result = await pool.query(
-    "UPDATE accounts SET otp = $1, otp_expiry = $2 WHERE email = $3 RETURNING *",
-    [otp, otpExpiry, email]
-  );
 
-  if (result.rowCount === 0) {
-        console.log("❌ User not found in DB");
-        return res.status(404).json({ message: "User not found" });
-      }
-  
-      console.log("✅ User found, sending email...");
+  try {
+    const result = await pool.query(
+      "UPDATE accounts SET otp = $1, otp_expiry = $2 WHERE email = $3 RETURNING *",
+      [otp, otpExpiry, email]
+    );
+
+    if (result.rowCount === 0) {
+      console.log("❌ User not found in DB");
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    console.log("✅ User found, sending email...");
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
       to: email,
@@ -500,7 +504,6 @@ app.post("/forgot-password", async (req, res) => {
 // POST /api/verify-otp
 app.post("/verify-otp", async (req, res) => {
   const { email, otp } = req.body;
-
   const result = await pool.query("SELECT otp, otp_expiry FROM accounts WHERE email = $1", [email]);
   const user = result.rows[0];
 
@@ -516,7 +519,6 @@ app.post("/verify-otp", async (req, res) => {
 // POST /api/reset-password
 app.post("/reset-password", async (req, res) => {
   const { email, otp, newPassword } = req.body;
-
   const result = await pool.query("SELECT otp, otp_expiry FROM accounts WHERE email = $1", [email]);
   const user = result.rows[0];
 
@@ -527,7 +529,6 @@ app.post("/reset-password", async (req, res) => {
     return res.status(400).json({ message: "OTP expired" });
 
   const hashed = await bcrypt.hash(newPassword, 10);
-
   await pool.query(
     "UPDATE accounts SET password = $1, otp = NULL, otp_expiry = NULL WHERE email = $2",
     [hashed, email]
@@ -535,7 +536,6 @@ app.post("/reset-password", async (req, res) => {
 
   res.json({ message: "Password reset successful" });
 });
-
 
 /* --------------------------------------------
    START THE SERVER

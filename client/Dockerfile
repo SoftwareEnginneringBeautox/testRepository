@@ -22,6 +22,7 @@ FROM node:18 AS runner
 # Set working directory
 WORKDIR /usr/src/app
 
+COPY package.json package-lock.json ./
 
 # Install serve globally to serve the built app
 RUN npm install -g serve

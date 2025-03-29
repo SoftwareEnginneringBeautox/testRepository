@@ -1,9 +1,8 @@
 // middleware/isAuthenticated.js
-require('dotenv').config(); // Load environment variables
 
 function isAuthenticated(req, res, next) {
-  // Check if a valid user session exists
-  if (req.session && req.session.user) {
+  // Check if a valid user session exists using optional chaining
+  if (req.session?.user) {
     return next();
   }
 
@@ -13,7 +12,8 @@ function isAuthenticated(req, res, next) {
     return next();
   }
 
-  // If neither check passes, return an unauthorized error
+  // Log unauthorized access attempts for debugging purposes
+  console.warn(`Unauthorized access attempt. Request IP: ${req.ip}`);
   return res.status(401).json({ message: "Unauthorized. Please log in." });
 }
 

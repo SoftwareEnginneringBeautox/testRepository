@@ -1,4 +1,3 @@
-// Load environment variables
 import React, { useState, useEffect } from "react";
 import "../App.css";
 import { useModal } from "@/hooks/useModal";
@@ -37,11 +36,9 @@ import {
 import EditIcon from "@/assets/icons/EditIcon";
 import DeleteIcon from "@/assets/icons/DeleteIcon";
 import CalendarIcon from "@/assets/icons/CalendarIcon";
-// Ensure dotenv is configured in your environment setup (e.g., a separate setup file or server-side configuration).
-// 1) Import axios
 import axios from "axios";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL;
+const API_BASE_URL = process.env.VITE_API_URL;
 
 function AdministratorDashboard() {
   const [userName, setUserName] = useState(
@@ -54,20 +51,17 @@ function AdministratorDashboard() {
   const month = currentDate.getMonth();
   const year = currentDate.getFullYear();
 
-  // State for dynamic staff list
   const [staffList, setStaffList] = useState([]);
   const [loadingStaff, setLoadingStaff] = useState(true);
   const [errorStaff, setErrorStaff] = useState(null);
 
-  // Extract the fetch function to be reusable
   const fetchStaff = async () => {
     try {
       setLoadingStaff(true);
       const response = await axios.get(`${API_BASE_URL}/getusers`, {
-        withCredentials: true // critical for sending session cookies
+        withCredentials: true
       });
       const data = response.data;
-      // Filter to include only receptionist and aesthetician roles
       const filteredStaff = data.filter(
         (user) => user.role === "receptionist" || user.role === "aesthetician"
       );
@@ -114,7 +108,6 @@ function AdministratorDashboard() {
     }
   };
 
-  // dummy data for sales chart
   const chartData = [
     { day: "Mon", currentWeek: 1300, previousWeek: 1100 },
     { day: "Tue", currentWeek: 1400, previousWeek: 1150 },
@@ -128,16 +121,16 @@ function AdministratorDashboard() {
   const chartConfig = {
     currentWeek: {
       label: "Current Week",
-      color: "#381B4C" // Lavender-400
+      color: "#381B4C"
     },
     previousWeek: {
       label: "Previous Week",
-      color: "#002B7F" // ReflexBlue-400
+      color: "#002B7F"
     }
   };
 
   return (
-    <div className="flex items-start gap-12 justify-center w-[90%] mx-auto mt-10">
+    <div className="flex flex-col md:flex-row items-start gap-6 justify-center w-full p-4 md:w-[90%] mx-auto mt-10">
       {showAlert && (
         <AlertContainer>
           <InformationIcon />
@@ -150,16 +143,18 @@ function AdministratorDashboard() {
           <CloseAlert onClick={() => setShowAlert(false)}>&times;</CloseAlert>
         </AlertContainer>
       )}
-      <div className="w-3/4 flex flex-col gap-8">
+      {/* Left Section */}
+      <div className="w-full md:w-3/4 flex flex-col gap-8">
         <div className="flex items-center rounded-lg gap-4">
           <div className="w-12 h-12 bg-gradient-to-r from-reflexBlue-400 to-lavender-300 text-customNeutral-100 rounded-lg flex items-center justify-center">
             <UserAdminIcon size={32} />
           </div>
-          <h2 className="text-[2rem] leading-[2.8rem] font-semibold bg-gradient-to-r from-lavender-300 to-reflexBlue-400 text-transparent bg-clip-text">
+          {/* Responsive Welcome Message */}
+          <h2 className="text-xl md:text-[2rem] leading-[2.8rem] font-semibold bg-gradient-to-r from-lavender-300 to-reflexBlue-400 text-transparent bg-clip-text">
             WELCOME BACK, ADMINISTRATOR {userName.toUpperCase()}
           </h2>
         </div>
-        <Table className="overflow-x-hidden">
+        <Table className="overflow-x-auto">
           <TableHeader>
             <TableRow>
               <TableHead className="text-xl text-left font-semibold py-4">
@@ -191,8 +186,9 @@ function AdministratorDashboard() {
         <SalesChart chartData={chartData} chartConfig={chartConfig} />
         <br />
       </div>
-      <div className="w-1/4 shadow-custom p-10 bg-ash-100 rounded-lg h-auto flex flex-col items-center gap-4">
-        <h3 className="flex items-center gap-2 text-[2rem] leading-[2.8rem] font-semibold">
+      {/* Right Section */}
+      <div className="w-full md:w-1/4 shadow-custom p-6 md:p-10 bg-ash-100 rounded-lg flex flex-col items-center gap-4">
+        <h3 className="flex items-center gap-2 text-xl md:text-[2rem] leading-[2.8rem] font-semibold">
           <UserIcon size={32} />
           STAFF LIST
         </h3>
