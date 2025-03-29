@@ -1,5 +1,5 @@
 "use client";
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   SidebarMenu,
@@ -8,21 +8,35 @@ import {
   useSidebar
 } from "@/components/ui/Sidebar";
 import LogoutIcon from "@/assets/icons/LogoutIcon";
+import ForgotPassword from "@/components/modals/ForgotPassword";
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
 
 export function NavUser({ user }) {
   const { isMobile } = useSidebar();
   const navigate = useNavigate();
+  const [errorMessage, setErrorMessage] = useState("");
+  const { currentModal, openModal, closeModal } = useSidebar();
 
-  // Function to handle logout (asynchronous)
   const handleLogout = async () => {
     try {
-      // Call the logout endpoint
-      const response = await fetch("http://localhost:4000/logout", {
+      // Using backticks ensures that API_BASE_URL is interpolated correctly.
+      const response = await fetch(`${API_BASE_URL}/logout`, {
         method: "POST",
         credentials: "include", // Include cookies for session management
       });
 
-      const data = await response.json();
+      // For debugging: log the raw response text if needed.
+      const rawText = await response.text();
+      console.log("Raw logout response:", rawText);
+
+      // Try parsing the response as JSON.
+      let data;
+      try {
+        data = JSON.parse(rawText);
+      } catch (err) {
+        throw new Error("Failed to parse JSON from logout response");
+      }
 
       if (data.success) {
         // Clear localStorage items
@@ -30,23 +44,21 @@ export function NavUser({ user }) {
         localStorage.removeItem("role");
         localStorage.removeItem("username");
         localStorage.removeItem("loginTime");
-
-        // Notify other tabs about the logout event
         localStorage.setItem("logout", Date.now());
 
         // Redirect to login page
         navigate("/login");
       } else {
         console.error("Logout failed:", data.message);
-        // Optionally, show an error message to the user
+        setErrorMessage(data.message || "Logout failed");
       }
     } catch (error) {
       console.error("Error during logout:", error);
-      // Optionally, show an error message to the user
+      setErrorMessage("An error occurred. Please try again later.");
     }
   };
 
-  // Listen for logout events from other tabs and force a reload
+  // Listen for logout events from other tabs and force a reload.
   useEffect(() => {
     const syncLogout = (event) => {
       if (event.key === "logout") {
@@ -55,20 +67,16 @@ export function NavUser({ user }) {
     };
 
     window.addEventListener("storage", syncLogout);
-
-    return () => {
-      window.removeEventListener("storage", syncLogout);
-    };
+    return () => window.removeEventListener("storage", syncLogout);
   }, []);
 
-  // Check for 24-hour session expiry on mount
+  // Check for 24-hour session expiry on mount.
   useEffect(() => {
     const loginTime = localStorage.getItem("loginTime");
     if (loginTime) {
       const now = Date.now();
       const twentyFourHours = 24 * 60 * 60 * 1000;
       if (now - parseInt(loginTime, 10) > twentyFourHours) {
-        // Automatically log out the user if session has expired
         handleLogout();
       }
     }
@@ -84,6 +92,12 @@ export function NavUser({ user }) {
           </span>
         </SidebarMenuButton>
       </SidebarMenuItem>
+      {currentModal === "forgotPassword" && (
+        <ForgotPassword isOpen={true} onClose={closeModal} />
+      )}
+      {errorMessage && (
+        <p className="text-red-500 text-sm text-center mt-2">{errorMessage}</p>
+      )}
     </SidebarMenu>
   );
 }

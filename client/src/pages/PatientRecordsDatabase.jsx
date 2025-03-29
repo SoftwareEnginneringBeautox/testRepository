@@ -3,6 +3,8 @@ import autoTable from "jspdf-autotable";
 import React, { useState, useEffect } from "react";
 import { useModal } from "@/hooks/useModal";
 
+const API_BASE_URL = import.meta.env.VITE_API_URL;
+
 import { Button } from "@/components/ui/Button";
 import ChevronLeftIcon from "@/assets/icons/ChevronLeftIcon";
 import PlusIcon from "@/assets/icons/PlusIcon";
@@ -48,7 +50,7 @@ function PatientRecordsDatabase() {
   // Fetch patient records from the API
   const fetchRecords = async () => {
     try {
-      const response = await fetch("http://localhost:4000/api/patients", {
+      const response = await fetch(`${API_BASE_URL}/api/patients`, {
         method: "GET",
         credentials: "include"
       });

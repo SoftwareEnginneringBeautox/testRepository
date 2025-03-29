@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import axios from "axios";
 
 import {
   ModalContainer,
@@ -29,21 +30,42 @@ import ChevronRightIcon from "@/assets/icons/ChevronRightIcon";
 import EmailIcon from "@/assets/icons/EmailIcon";
 
 function ForgotPassword({ isOpen, onClose }) {
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(1); // 1 = email, 2 = otp
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
+  const [message, setMessage] = useState("");
 
-  const handleEmailSubmit = (e) => {
+  const sendOTP = async (e) => {
     e.preventDefault();
-    if (email) {
+    try {
+      await axios.post("http://localhost:4000/forgot-password", { email });
       setStep(2);
+      setMessage("OTP sent to your email.");
+    } catch (err) {
+      console.error("Failed to send OTP:", err);
+      setMessage("Failed to send OTP. Make sure the email is correct.");
     }
   };
 
-  const handleOtpSubmit = (e) => {
+  const verifyOTP = async (e) => {
     e.preventDefault();
-    // Simulate OTP verification
-    console.log("OTP Submitted: ", otp);
+    try {
+      await axios.post("http://localhost:4000/verify-otp", { email, otp });
+      setMessage("OTP verified. Redirect to reset password or continue.");
+      // Optional: Add reset password modal or redirect
+    } catch (err) {
+      console.error("OTP verification failed:", err);
+      setMessage("Invalid or expired OTP.");
+    }
+  };
+
+  const resendOTP = async () => {
+    try {
+      await axios.post("http://localhost:4000/forgot-password", { email });
+      setMessage("A new OTP has been sent.");
+    } catch (err) {
+      setMessage("Failed to resend OTP.");
+    }
   };
 
   if (!isOpen) return null;
@@ -56,7 +78,7 @@ function ForgotPassword({ isOpen, onClose }) {
       <ModalBody>
         {step === 1 ? (
           <form
-            onSubmit={handleEmailSubmit}
+            onSubmit={sendOTP}
             className="w-full flex flex-col justify-center items-center gap-4"
           >
             <p className="text-left">Kindly input the email of your account.</p>
@@ -86,18 +108,21 @@ function ForgotPassword({ isOpen, onClose }) {
                 <ChevronRightIcon />
               </Button>
             </div>
+            {message && (
+              <p className="text-sm text-center text-red-500">{message}</p>
+            )}
           </form>
         ) : (
           <form
-            onSubmit={handleOtpSubmit}
+            onSubmit={verifyOTP}
             className="w-full flex flex-col justify-center items-center gap-4"
           >
-            <p>
+            <p className="text-center">
               Kindly input the{" "}
               <span className="font-semibold">6-digit code</span> we have sent
               to your email.
             </p>
-            <InputOTP maxLength={6}>
+            <InputOTP value={otp} onChange={setOtp} maxLength={6}>
               <InputOTPGroup>
                 <InputOTPSlot index={0} />
                 <InputOTPSlot index={1} />
@@ -112,7 +137,11 @@ function ForgotPassword({ isOpen, onClose }) {
             </InputOTP>
             <p>
               Didn't get the code?{" "}
-              <button className="underline hover:text-reflexBlue-400 font-semibold">
+              <button
+                type="button"
+                onClick={resendOTP}
+                className="underline hover:text-reflexBlue-400 font-semibold"
+              >
                 CLICK HERE TO RESEND
               </button>
             </p>
@@ -129,6 +158,9 @@ function ForgotPassword({ isOpen, onClose }) {
                 <ChevronRightIcon />
               </Button>
             </div>
+            {message && (
+              <p className="text-sm text-center text-red-500">{message}</p>
+            )}
           </form>
         )}
       </ModalBody>

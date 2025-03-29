@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import axios from "axios";
 import CurrencyInput from "react-currency-input-field";
 
+const API_BASE_URL = import.meta.env.VITE_API_URL;
+
 import {
   ModalContainer,
   ModalHeader,
@@ -50,7 +52,7 @@ function CreateTreatment({ isOpen, onClose }) {
 
     try {
       const response = await axios.post(
-        "http://localhost:4000/api/treatments",
+        `${API_BASE_URL}/api/treatments`,
         payload,
         { withCredentials: true }
       );

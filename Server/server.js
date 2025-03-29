@@ -1,39 +1,111 @@
-require('dotenv').config(); // Load environment variables
-
+// Load environment variables
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const crypto = require('crypto'); // For generating random tokens
-const pool = require("./config/database.js");
+const { Pool } = require('pg'); // Import Pool from pg package
 const session = require('express-session');
 const bcrypt = require('bcrypt');
-const isAuthenticated = require('./middleware/isAuthenticated');
 const pgSession = require('connect-pg-simple')(session);
+const nodemailer = require("nodemailer");
 
 const app = express();
 
+const generateOTP = () => Math.floor(100000 + Math.random() * 900000).toString();
+
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
+
+// Use express.json() for parsing JSON bodies
+app.use(express.json());
+const isAuthenticated = require('./middleware/isAuthenticated');
+
+const requiredEnvVars = [
+  'DB_USER',
+  'DB_PASSWORD',
+  'DB_HOST',
+  'DB_PORT',
+  'DB_NAME',
+  'SESSION_SECRET',
+  'CLIENT_ORIGIN' // Expected production client origin
+];
+
+console.log("DB Host:", process.env.DB_HOST);
+console.log("DB Password:", process.env.DB_PASSWORD);
+
+requiredEnvVars.forEach((key) => {
+  if (!process.env[key]) {
+    console.error(`Missing required environment variable: ${key}`);
+    process.exit(1);
+  }
+});
+
+// Create PostgreSQL pool
+const pool = new Pool({
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  host: process.env.DB_HOST,
+  port: process.env.DB_PORT,
+  database: process.env.DB_NAME,
+});
+
+
+// Trust the proxy (important if behind a load balancer)
+app.set('trust proxy', 1);
+
 // Use Helmet to set secure HTTP headers
 app.use(helmet());
+
+// Custom key generator for rate limiting to handle x-forwarded-for header safely
+const customKeyGenerator = (req) => {
+  const xForwarded = req.headers['x-forwarded-for'];
+  if (xForwarded) {
+    if (typeof xForwarded === 'string') {
+      return xForwarded.split(',')[0].trim();
+    }
+    if (Array.isArray(xForwarded)) {
+      return xForwarded[0];
+    }
+  }
+  return req.ip;
+};
 
 // Apply rate limiting middleware
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100,
-  message: "Too many requests from this IP, please try again after 15 minutes."
+  message: "Too many requests from this IP, please try again after 15 minutes.",
+  keyGenerator: customKeyGenerator,
 });
 app.use(limiter);
 
-// Use express.json() for parsing JSON bodies
-app.use(express.json());
 
-// Setup CORS to allow credentials from your client origin
+// Setup dynamic CORS to allow multiple origins
+const allowedOrigins = [
+  process.env.CLIENT_ORIGIN,         // e.g. "https://iewdmb6vjd.ap-southeast-2.awsapprunner.com"
+  "http://localhost:3000"            // For local development
+];
 app.use(cors({
-  origin: "http://localhost:5173", // Adjust to match your client URL
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true
 }));
 
-// Prevent caching of sensitive pages so that the back button won’t show them after logout
+// Prevent caching of sensitive pages
 app.use((req, res, next) => {
   res.set('Cache-Control', 'no-store');
   next();
@@ -44,16 +116,16 @@ app.use(session({
   store: new pgSession({
     pool, // Use your PostgreSQL connection pool
     tableName: 'session',
-    createTableIfMissing: true  // Auto-create the "session" table if it doesn't exist
+    createTableIfMissing: true,  // Auto-create the "session" table if it doesn't exist
   }),
   secret: process.env.SESSION_SECRET || 'yourSecretKey',
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: process.env.NODE_ENV === 'production', // enable in production (HTTPS required)
+    secure: process.env.NODE_ENV === 'production', // Enable in production (HTTPS required)
     httpOnly: true,
-    sameSite: 'lax'
-  }
+    sameSite: 'lax',
+  },
 }));
 
 /* --------------------------------------------
@@ -68,19 +140,18 @@ app.get('/health', (req, res) => {
 --------------------------------------------- */
 
 // Register endpoint (for creating new users)
-// Updated to include "role" and "dayoff"
 app.post('/adduser', async (req, res) => {
   try {
     console.log("Received /adduser payload:", req.body);
-    const { username, password, role, dayoff } = req.body;
+    const { username, password, role, dayoff, email } = req.body;
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
     const insertst = `
-      INSERT INTO accounts (username, password, role, dayoff)
-      VALUES ($1, $2, $3, $4)
+      INSERT INTO accounts (username, password, role, dayoff, email)
+      VALUES ($1, $2, $3, $4, $5)
       RETURNING id;
     `;
-    const result = await pool.query(insertst, [username, hashedPassword, role, dayoff]);
+    const result = await pool.query(insertst, [username, hashedPassword, role, dayoff, email]);
     console.log("New user added with ID:", result.rows[0].id);
     res.json({ success: true, message: `User Added with ID: ${result.rows[0].id}` });
   } catch (error) {
@@ -114,7 +185,25 @@ app.put('/updateuser', isAuthenticated, async (req, res) => {
   }
 });
 
+
+app.delete('/deleteuser/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await pool.query('DELETE FROM accounts WHERE id = $1', [id]);
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    res.json({ success: true, message: `User with ID ${id} deleted` });
+  } catch (error) {
+    console.error('Error deleting user:', error);
+    res.status(500).json({ success: false, error: 'Error deleting user' });
+  }
+});
+
 // Login endpoint with detailed error logging, input validation, and random token generation
+// Login endpoint
 app.post('/login', async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -134,8 +223,8 @@ app.post('/login', async (req, res) => {
           success: true,
           message: "Login successful",
           role: user.role,
-          token, // Return the generated token
-          username: user.username
+          token,
+          username: user.username,
         });
       } else {
         console.log(`Failed login attempt: Incorrect password for username "${username}".`);
@@ -356,6 +445,97 @@ app.get('/api/packages', async (req, res) => {
     res.status(500).json({ success: false, error: 'Error retrieving packages' });
   }
 });
+
+
+
+app.get('/test-email', async (req, res) => {
+  try {
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: "isjasminedeguia@gmail.com",
+      subject: "Test Email",
+      text: "This is a test email from your server"
+    });
+
+    res.send("Email sent successfully!");
+  } catch (err) {
+    console.error("Email failed:", err);
+    res.status(500).send("Email failed to send");
+  }
+});
+
+// POST /api/forgot-password
+app.post("/forgot-password", async (req, res) => {
+  const { email } = req.body;
+  const otp = generateOTP();
+  const otpExpiry = new Date(Date.now() + 5 * 60 * 1000);
+  console.log("Generated OTP:", otp);
+  
+  try {
+  const result = await pool.query(
+    "UPDATE accounts SET otp = $1, otp_expiry = $2 WHERE email = $3 RETURNING *",
+    [otp, otpExpiry, email]
+  );
+
+  if (result.rowCount === 0) {
+        console.log("❌ User not found in DB");
+        return res.status(404).json({ message: "User not found" });
+      }
+  
+      console.log("✅ User found, sending email...");
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: "Your OTP Code",
+      text: `Your OTP is ${otp}`,
+    });
+
+    res.json({ message: "OTP sent to email" });
+  } catch (err) {
+    console.error("❌ Forgot password error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// POST /api/verify-otp
+app.post("/verify-otp", async (req, res) => {
+  const { email, otp } = req.body;
+
+  const result = await pool.query("SELECT otp, otp_expiry FROM accounts WHERE email = $1", [email]);
+  const user = result.rows[0];
+
+  if (!user || user.otp !== otp)
+    return res.status(400).json({ message: "Invalid OTP" });
+
+  if (new Date(user.otp_expiry) < new Date())
+    return res.status(400).json({ message: "OTP expired" });
+
+  res.json({ message: "OTP verified" });
+});
+
+// POST /api/reset-password
+app.post("/reset-password", async (req, res) => {
+  const { email, otp, newPassword } = req.body;
+
+  const result = await pool.query("SELECT otp, otp_expiry FROM accounts WHERE email = $1", [email]);
+  const user = result.rows[0];
+
+  if (!user || user.otp !== otp)
+    return res.status(400).json({ message: "Invalid OTP" });
+
+  if (new Date(user.otp_expiry) < new Date())
+    return res.status(400).json({ message: "OTP expired" });
+
+  const hashed = await bcrypt.hash(newPassword, 10);
+
+  await pool.query(
+    "UPDATE accounts SET password = $1, otp = NULL, otp_expiry = NULL WHERE email = $2",
+    [hashed, email]
+  );
+
+  res.json({ message: "Password reset successful" });
+});
+
 
 /* --------------------------------------------
    START THE SERVER
