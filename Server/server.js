@@ -9,7 +9,6 @@ const { Pool } = require('pg'); // Import Pool from pg package
 const session = require('express-session');
 const bcrypt = require('bcrypt');
 const pgSession = require('connect-pg-simple')(session);
-<<<<<<< HEAD
 const nodemailer = require("nodemailer");
 
 const app = express();
@@ -26,7 +25,6 @@ const transporter = nodemailer.createTransport({
 
 // Use express.json() for parsing JSON bodies
 app.use(express.json());
-=======
 const isAuthenticated = require('./middleware/isAuthenticated');
 
 const requiredEnvVars = [
@@ -58,11 +56,9 @@ const pool = new Pool({
   database: process.env.DB_NAME,
 });
 
-const app = express();
 
 // Trust the proxy (important if behind a load balancer)
 app.set('trust proxy', 1);
->>>>>>> 830e3c83a60361355b600d99b89ba7a4bf5a5ca7
 
 // Use Helmet to set secure HTTP headers
 app.use(helmet());
@@ -189,7 +185,6 @@ app.put('/updateuser', isAuthenticated, async (req, res) => {
   }
 });
 
-<<<<<<< HEAD
 
 app.delete('/deleteuser/:id', async (req, res) => {
   try {
@@ -208,9 +203,7 @@ app.delete('/deleteuser/:id', async (req, res) => {
 });
 
 // Login endpoint with detailed error logging, input validation, and random token generation
-=======
 // Login endpoint
->>>>>>> 830e3c83a60361355b600d99b89ba7a4bf5a5ca7
 app.post('/login', async (req, res) => {
   try {
     const { username, password } = req.body;
