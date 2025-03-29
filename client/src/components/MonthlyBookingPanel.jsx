@@ -2,7 +2,7 @@ import React from "react";
 
 import { useState } from "react";
 import { useModal } from "@/hooks/useModal"; // Ensure the correct path
-import DisplayEntry from "@/components/DisplayEntry";
+import DisplayEntry from "@/components/modals/DisplayEntry";
 
 const MonthlyBookingPanel = ({
   calendarDays = [],
@@ -95,9 +95,7 @@ const MonthlyBookingPanel = ({
                   >
                     {day && (
                       <>
-                        <div className="text-right font-semibold">
-                          {day.getDate()}
-                        </div>
+                        <div className="text-right">{day.getDate()}</div>
                         <div className="mt-2 space-y-1">
                           {dayAppointments.map((appointment, idx) => (
                             <div
@@ -126,6 +124,13 @@ const MonthlyBookingPanel = ({
           ))}
         </tbody>
       </table>
+      {currentModal === "displayEntry" && selectedEntry && (
+        <DisplayEntry
+          isOpen={true}
+          onClose={closeModal}
+          entryData={selectedEntry}
+        />
+      )}
     </div>
   );
 };
