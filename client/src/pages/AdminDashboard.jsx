@@ -1,3 +1,4 @@
+// Load environment variables
 import React, { useState, useEffect } from "react";
 import "../App.css";
 import { useModal } from "@/hooks/useModal";
@@ -36,11 +37,11 @@ import {
 import EditIcon from "@/assets/icons/EditIcon";
 import DeleteIcon from "@/assets/icons/DeleteIcon";
 import CalendarIcon from "@/assets/icons/CalendarIcon";
-
+// Ensure dotenv is configured in your environment setup (e.g., a separate setup file or server-side configuration).
 // 1) Import axios
 import axios from "axios";
 
-const API_BASE_URL = process.env.VITE_API_URL;
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 function AdministratorDashboard() {
   const [userName, setUserName] = useState(

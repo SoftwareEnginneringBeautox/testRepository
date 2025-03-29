@@ -33,7 +33,7 @@ function CreatePackage({ isOpen, onClose }) {
   const [numberOfTreatments, setNumberOfTreatments] = useState("");
   const [amount, setAmount] = useState("");
   const [treatmentsList, setTreatmentsList] = useState([]);
-  const API_BASE_URL = process.env.VITE_API_URL;
+  const API_BASE_URL = import.meta.env.VITE_API_URL;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
