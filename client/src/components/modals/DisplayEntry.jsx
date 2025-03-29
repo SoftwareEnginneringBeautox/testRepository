@@ -20,7 +20,7 @@ function DisplayEntry({ isOpen, onClose, entryData }) {
         </ModalIcon>
         <ModalTitle>
           {entryData.client
-            ? entryData.client.toUpperCase() + "'S PACKAGE"
+            ? entryData.full_name.toUpperCase() + "'S PACKAGE"
             : "CLIENT'S PACKAGE"}
         </ModalTitle>
         <button className="font-xl rotate-45 ml-auto" onClick={onClose}>
@@ -51,7 +51,7 @@ function DisplayEntry({ isOpen, onClose, entryData }) {
             { label: "CONSENT STATUS", value: entryData.consentStatus }
           ].map(({ label, value }) => (
             <p key={label} className="text-xl leading-8 font-semibold">
-              {label}: <span className="font-normal">{value || "-"}</span>
+              {label}: <span className="font-normal">{value || "N/A"}</span>
             </p>
           ))}
         </div>

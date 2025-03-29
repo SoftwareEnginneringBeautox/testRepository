@@ -32,7 +32,6 @@ const MonthlyBookingPanel = ({
     });
   };
 
-  // Check if date is today
   const isToday = (date) => {
     if (!date) return false;
 
@@ -56,15 +55,15 @@ const MonthlyBookingPanel = ({
 
   return (
     <div className="w-full">
-      <table className="w-full border-spacing-y-2 border-separate">
+      <table className="w-full border-spacing-y-2 border-separate table-fixed">
         <thead className="bg-lavender-400 text-customNeutral-100 text-center font-semibold text-[1.25rem] leading-8">
-          <tr>
+          <tr className="rounded-lg">
             {days.map((day, index) => (
               <th
                 key={index}
-                className={`p-2 ${index === 0 ? "rounded-l-[0.5rem]" : ""} ${
-                  index === days.length - 1 ? "rounded-r-[0.5rem]" : ""
-                }`}
+                className={`p-2 w-1/7 ${
+                  index === 0 ? "rounded-l-[0.5rem]" : ""
+                } ${index === days.length - 1 ? "rounded-r-[0.5rem]" : ""}`}
               >
                 {day}
               </th>
@@ -72,31 +71,49 @@ const MonthlyBookingPanel = ({
           </tr>
         </thead>
 
-        <tbody>
+        <tbody className="space-y-2">
           {calendarDays.map((week, weekIndex) => (
-            <tr key={weekIndex} className="h-32">
+            <tr key={weekIndex} className="shadow-sm">
               {week.map((day, dayIndex) => {
                 const dayAppointments = getAppointmentsForDate(day);
+                const isCurrentDay = day && isToday(day);
+                const isFirstCell = dayIndex === 0;
+                const isLastCell = dayIndex === week.length - 1;
 
                 return (
                   <td
                     key={dayIndex}
-                    className={`p-2 align-top ${
+                    className={`p-2 align-top w-1/7 h-32 ${
+                      // Ensure all cells have the same height
                       !day
                         ? "bg-gray-100"
-                        : isToday(day)
-                        ? "bg-lavender-50"
+                        : isCurrentDay
+                        ? "bg-lavender-50 border-2 border-lavender-500 shadow-md"
                         : "bg-white"
                     } ${
                       day && day.getMonth() !== currentMonth
                         ? "text-gray-400"
                         : ""
+                    } ${isFirstCell ? "rounded-l-lg" : ""} ${
+                      isLastCell ? "rounded-r-lg" : ""
                     }`}
                   >
                     {day && (
-                      <>
-                        <div className="text-right">{day.getDate()}</div>
-                        <div className="mt-2 space-y-1">
+                      <div className="flex flex-col justify-between h-full">
+                        {/* Flex container for TODAY label and date number */}
+                        <div className="flex justify-between items-center">
+                          {isCurrentDay && (
+                            <span className="text-lavender-400 text-xs font-semibold">
+                              TODAY
+                            </span>
+                          )}
+                          <span className="text-right font-semibold">
+                            {day.getDate()}
+                          </span>
+                        </div>
+
+                        {/* Appointments Wrapper */}
+                        <div className="mt-2 space-y-1 flex-1 flex flex-col">
                           {dayAppointments.map((appointment, idx) => (
                             <div
                               key={idx}
@@ -115,7 +132,7 @@ const MonthlyBookingPanel = ({
                             </div>
                           ))}
                         </div>
-                      </>
+                      </div>
                     )}
                   </td>
                 );
@@ -124,6 +141,7 @@ const MonthlyBookingPanel = ({
           ))}
         </tbody>
       </table>
+
       {currentModal === "displayEntry" && selectedEntry && (
         <DisplayEntry
           isOpen={true}

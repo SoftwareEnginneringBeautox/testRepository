@@ -6,21 +6,20 @@ const WeeklyBookingPanel = ({ events = [], currentDate }) => {
     return `${i % 12 || 12}:00${i < 12 ? "AM" : "PM"}`;
   });
 
-  // Get the week dates based on current date
   const getWeekDates = (date) => {
     const result = [];
     const startOfWeek = new Date(date);
-    startOfWeek.setDate(date.getDate() - date.getDay()); // Go to the beginning of the week (Sunday)
-    
+    startOfWeek.setDate(date.getDate() - date.getDay());
+
     for (let i = 0; i < 7; i++) {
       const day = new Date(startOfWeek);
       day.setDate(startOfWeek.getDate() + i);
       result.push(day);
     }
-    
+
     return result;
   };
-  
+
   const weekDates = getWeekDates(currentDate);
 
   const parseTime = (time) => {
@@ -44,17 +43,17 @@ const WeeklyBookingPanel = ({ events = [], currentDate }) => {
     };
   };
 
-  // Format date for display
   const formatDate = (date) => {
     return `${date.getDate()}`;
   };
 
-  // Check if a date is today
   const isToday = (date) => {
     const today = new Date();
-    return date.getDate() === today.getDate() &&
+    return (
+      date.getDate() === today.getDate() &&
       date.getMonth() === today.getMonth() &&
-      date.getFullYear() === today.getFullYear();
+      date.getFullYear() === today.getFullYear()
+    );
   };
 
   return (
@@ -71,7 +70,13 @@ const WeeklyBookingPanel = ({ events = [], currentDate }) => {
                 }`}
               >
                 <div>{day}</div>
-                <div className={`text-sm ${isToday(weekDates[idx]) ? "bg-white text-lavender-400 rounded-full inline-block px-2" : ""}`}>
+                <div
+                  className={`text-sm ${
+                    isToday(weekDates[idx])
+                      ? "bg-white text-lavender-400 rounded-full inline-block px-2"
+                      : ""
+                  }`}
+                >
                   {formatDate(weekDates[idx])}
                 </div>
               </th>
@@ -80,9 +85,7 @@ const WeeklyBookingPanel = ({ events = [], currentDate }) => {
         </thead>
       </table>
 
-      {/* Main Content */}
       <div className="flex relative">
-        {/* Time Column */}
         <div className="w-24 flex flex-col">
           {hours.map((hour, idx) => (
             <div
@@ -94,11 +97,9 @@ const WeeklyBookingPanel = ({ events = [], currentDate }) => {
           ))}
         </div>
 
-        {/* Day Columns */}
         <div className="flex-1 flex">
           {days.map((_, dayIdx) => (
             <div key={dayIdx} className="flex-1 relative">
-              {/* Time Slots */}
               <div className="absolute inset-0 flex flex-col">
                 {[...Array(24)].map((_, timeIdx) => (
                   <div
@@ -108,15 +109,17 @@ const WeeklyBookingPanel = ({ events = [], currentDate }) => {
                 ))}
               </div>
 
-              {/* Events */}
               {events
                 .filter((event) => {
-                  // Match the event day with the current column day
-                  return event.day === days[dayIdx] && 
-                         // Also check if it's in the current week
-                         (new Date(event.rawDate)).getDate() === weekDates[dayIdx].getDate() &&
-                         (new Date(event.rawDate)).getMonth() === weekDates[dayIdx].getMonth() &&
-                         (new Date(event.rawDate)).getFullYear() === weekDates[dayIdx].getFullYear();
+                  return (
+                    event.day === days[dayIdx] &&
+                    new Date(event.rawDate).getDate() ===
+                      weekDates[dayIdx].getDate() &&
+                    new Date(event.rawDate).getMonth() ===
+                      weekDates[dayIdx].getMonth() &&
+                    new Date(event.rawDate).getFullYear() ===
+                      weekDates[dayIdx].getFullYear()
+                  );
                 })
                 .map((event, idx) => {
                   const { top, height } = calculateEventPosition(event);
@@ -127,8 +130,9 @@ const WeeklyBookingPanel = ({ events = [], currentDate }) => {
                       style={{ top, height }}
                     >
                       <strong className="block">{event.name}</strong>
-                      <p className="text-xs">{event.description}</p>
-                      <p className="text-xs">{event.startTime} - {event.endTime}</p>
+                      <p className="text-xs">
+                        {event.startTime} - {event.endTime}
+                      </p>
                     </button>
                   );
                 })}

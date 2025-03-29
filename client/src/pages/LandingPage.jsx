@@ -364,6 +364,31 @@ function LandingPage() {
           </div>
         </section>
 
+        {/* test section */}
+        <section className="w-full sm:w-11/12 md:w-5/6 lg:w-3/4 flex flex-col items-center justify-center gap-4 my-12 sm:my-16 md:my-24 lg:my-60">
+          <div className="w-full">
+            <h2 className="text-center md:text-start font-semibold text-xl sm:text-2xl md:text-3xl bg-gradient-to-r from-reflexBlue-300 to-lavender-300 text-transparent bg-clip-text py-2 sm:py-4">
+              HERE'S WHAT WE HAVE IN STORE FOR YOU
+            </h2>
+            <Tabs defaultValue={services[0].category} className="w-full mt-4">
+              <TabsList className="flex flex-wrap justify-center rounded-md shadow-md bg-white/5 backdrop-blur-[3.5px] overflow-x-auto">
+                {services.map((service) => (
+                  <TabsTrigger
+                    key={service.category}
+                    value={service.category}
+                    className="px-2 py-2 sm:px-3 sm:py-3 text-xs sm:text-sm md:text-md font-semibold transition-all rounded-md data-[state=active]:bg-lavender-600 data-[state=active]:text-customNeutral-100"
+                  >
+                    {service.category}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </Tabs>
+            <p>1</p>
+            <p>2</p>
+            <p>3</p>
+          </div>
+        </section>
+
         {/* Contact Section */}
         <section className="w-full sm:w-11/12 md:w-5/6 lg:w-3/4 flex flex-col-reverse md:flex-row gap-8 justify-center my-12 sm:my-16 md:my-24 lg:my-60">
           <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-sm sm:text-base md:text-lg w-full md:w-1/2 mt-6 md:mt-0">
