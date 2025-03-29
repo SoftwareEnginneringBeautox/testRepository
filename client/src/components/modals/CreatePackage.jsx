@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import CurrencyInput from "react-currency-input-field";
 
+
+
 import {
   ModalContainer,
   ModalHeader,
@@ -31,7 +33,7 @@ function CreatePackage({ isOpen, onClose }) {
   const [numberOfTreatments, setNumberOfTreatments] = useState("");
   const [amount, setAmount] = useState("");
   const [treatmentsList, setTreatmentsList] = useState([]);
-
+  const API_BASE_URL = process.env.VITE_API_URL;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -39,7 +41,7 @@ function CreatePackage({ isOpen, onClose }) {
   useEffect(() => {
     async function fetchTreatments() {
       try {
-        const response = await axios.get("http://localhost:4000/api/treatments", {
+        const response = await axios.get(`${API_BASE_URL}/api/treatments`, {
           withCredentials: true,
         });
         setTreatmentsList(response.data);
@@ -79,7 +81,7 @@ function CreatePackage({ isOpen, onClose }) {
     };
 
     try {
-      const response = await axios.post("http://localhost:4000/api/packages", payload, {
+      const response = await axios.post(`${API_BASE_URL}/api/packages`, payload, {
         withCredentials: true,
       });
       if (response.data.success) {

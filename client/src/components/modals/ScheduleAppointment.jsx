@@ -7,6 +7,8 @@ import {
 } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 
+const API_BASE_URL = process.env.VITE_API_URL;
+
 import UserIcon from "@/assets/icons/UserIcon";
 import EmailIcon from "@/assets/icons/EmailIcon";
 import UserIDIcon from "@/assets/icons/UserIDIcon";
@@ -43,7 +45,7 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
       // Generate timestamp for when the appointment is created
       const createdAt = new Date().toISOString();
 
-      const response = await fetch("http://localhost:4000/api/appointments", {
+      const response = await fetch(`${API_BASE_URL}/api/appointments`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

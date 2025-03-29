@@ -7,9 +7,7 @@ import PasswordIcon from "../assets/icons/PasswordIcon";
 import LoginIcon from "../assets/icons/LoginIcon";
 import BeautoxLogo from "../assets/logos/Beautox.svg";
 import axios from "axios";
-
 import ForgotPassword from "@/components/modals/ForgotPassword";
-
 import {
   InputContainer,
   InputTextField,
@@ -19,13 +17,14 @@ import {
 } from "@/components/ui/Input";
 
 function Login() {
+  // Use a fallback URL if REACT_APP_API_URL is not defined.
+  const API_BASE_URL = process.env.VITE_API_URL; 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
   const { currentModal, openModal, closeModal } = useModal();
-
   const navigate = useNavigate();
 
   // Listen for login events from other tabs.
@@ -45,16 +44,22 @@ function Login() {
     e.preventDefault();
     setErrorMessage("");
     setSuccessMessage("");
-
     const trimmedUsername = username.trim();
 
     try {
       console.log("Attempting login for:", trimmedUsername);
       const response = await axios.post(
-        "http://localhost:4000/login",
+        `${API_BASE_URL}/login`,
         { username: trimmedUsername, password },
-        { withCredentials: true } // Ensure cookies are sent
+        { withCredentials: true }
       );
+
+      // If the response is HTML, log the text to help debug.
+      if (typeof response.data === "string" && response.data.startsWith("<!doctype html>")) {
+        console.error("Received unexpected HTML response:", response.data);
+        setErrorMessage("Login failed due to server misconfiguration.");
+        return;
+      }
 
       const data = response.data;
       console.log("Received login response:", data);
@@ -69,16 +74,12 @@ function Login() {
         localStorage.setItem("username", data.username);
         localStorage.setItem("loginTime", Date.now());
         localStorage.setItem("login", Date.now());
-
         window.dispatchEvent(new Event("userProfileUpdated"));
 
         // Redirect based on role.
         if (data.role === "admin") {
           navigate("/AdminDashboard");
-        } else if (
-          data.role === "receptionist" ||
-          data.role === "aesthetician"
-        ) {
+        } else if (data.role === "receptionist" || data.role === "aesthetician") {
           navigate("/StaffDashboard");
         } else {
           navigate("/dashboard");
@@ -88,19 +89,17 @@ function Login() {
         setErrorMessage(data.message || "Invalid username or password");
       }
     } catch (error) {
-      console.error(
-        `Error during login attempt for "${trimmedUsername}":`,
-        error
-      );
+      console.error(`Error during login attempt for "${trimmedUsername}":`, error);
       setErrorMessage("An error occurred. Please try again later.");
     }
   };
 
   return (
     <div className="min-h-screen grid grid-cols-12">
+      {/* Image from the public folder – note the absolute path */}
       <div className="h-screen col-span-7">
         <img
-          src="/src/assets/images/Beautox Login Image.png"
+          src="/images/BeautoxLoginImage.png"
           alt="Beautox Login Image"
           className="h-full w-full object-cover"
         />

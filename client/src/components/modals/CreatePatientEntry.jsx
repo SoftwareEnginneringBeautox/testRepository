@@ -3,6 +3,8 @@ import CurrencyInput from "react-currency-input-field";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/RadioGroup";
 import { Checkbox } from "@/components/ui/Checkbox";
 
+const API_BASE_URL = process.env.VITE_API_URL;
+
 import {
   ModalContainer,
   ModalHeader,
@@ -80,7 +82,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
   useEffect(() => {
     async function fetchAestheticians() {
       try {
-        const response = await axios.get("http://localhost:4000/getusers", {
+        const response = await axios.get(`${API_BASE_URL}/getusers`, {
           withCredentials: true
         });
         const aestheticians = response.data.filter(
@@ -98,7 +100,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
   useEffect(() => {
     async function fetchPackages() {
       try {
-        const response = await axios.get("http://localhost:4000/api/packages", {
+        const response = await axios.get(`${API_BASE_URL}/api/packages`, {
           withCredentials: true
         });
         setPackagesList(response.data);
@@ -114,7 +116,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
     async function fetchTreatments() {
       try {
         const response = await axios.get(
-          "http://localhost:4000/api/treatments",
+          `${API_BASE_URL}/api/treatments`,
           {
             withCredentials: true
           }
@@ -190,7 +192,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
     console.log("Payload being sent to API:", payload);
 
     try {
-      const response = await fetch("http://localhost:4000/api/patients", {
+      const response = await fetch(`${API_BASE_URL}/api/patients`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"

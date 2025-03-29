@@ -1,23 +1,35 @@
+# Use Node.js as the base image for building the app
+FROM node:18 AS builder
 
-FROM node:18
-
+# Set the working directory
 WORKDIR /usr/src/app
 
-COPY package*.json ./
+# Copy package.json and package-lock.json first (to use cache)
+COPY package.json package-lock.json ./
 
+# Install dependencies
 RUN npm install
 
-COPY . .
+# Copy all project files
+COPY . . 
 
+# Build the frontend
+RUN npm run build
 
-RUN echo "DB_HOST=postgres" > .env && \
-    echo "DB_USER=postgres" >> .env && \
-   echo "DB_PASSWORD=yourpassword" >> .env && \
- echo "DB_NAME=usersaccs" >> .env && \
-   echo "DB_PORT=5432" >> .env && \
-    echo "CLIENT_API_KEY=superSecretClientKey12345" >> .env && \
-   echo "SESSION_SECRET=yourSecretKey" >> .env
+# ---- Serve the built app ----
+FROM node:18 AS runner
 
-EXPOSE 4000
+# Install a simple static file server
+RUN npm install -g serve@latest
 
-CMD ["npm", "start"]
+# Set working directory
+WORKDIR /usr/src/app
+
+# Copy built files from builder stage
+COPY --from=builder /usr/src/app/dist ./dist
+
+# Expose port for the frontend
+EXPOSE 3000
+
+# Start the app using serve
+CMD ["serve", "-s", "dist", "-l", "3000"]

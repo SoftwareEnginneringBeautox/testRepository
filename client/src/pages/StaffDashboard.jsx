@@ -1,12 +1,13 @@
 import React from "react";
 import "../App.css";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
+
+const API_BASE_URL = process.env.VITE_API_URL;
 
 import SalesChart from "../components/SalesChart";
 import PlusIcon from "../assets/icons/PlusIcon";
-
 import UserIcon from "../assets/icons/UserIcon";
-
 import UserAdminIcon from "../assets/icons/UserAdminIcon";
 
 import {

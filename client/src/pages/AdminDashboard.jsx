@@ -40,6 +40,8 @@ import CalendarIcon from "@/assets/icons/CalendarIcon";
 // 1) Import axios
 import axios from "axios";
 
+const API_BASE_URL = process.env.VITE_API_URL;
+
 function AdministratorDashboard() {
   const [userName, setUserName] = useState(
     localStorage.getItem("username") || ""
@@ -60,7 +62,7 @@ function AdministratorDashboard() {
   const fetchStaff = async () => {
     try {
       setLoadingStaff(true);
-      const response = await axios.get("http://localhost:4000/getusers", {
+      const response = await axios.get(`${API_BASE_URL}/getusers`, {
         withCredentials: true // critical for sending session cookies
       });
       const data = response.data;

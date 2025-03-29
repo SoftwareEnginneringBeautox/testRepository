@@ -42,6 +42,8 @@ import DeleteIcon from "../assets/icons/DeleteIcon";
 
 import axios from "axios";
 
+const API_BASE_URL = process.env.VITE_API_URL;
+
 function AdministratorServices() {
   const { currentModal, openModal, closeModal } = useModal();
 
@@ -52,7 +54,7 @@ function AdministratorServices() {
   // Fetch Treatments from /api/treatments
   const fetchTreatments = async () => {
     try {
-      const response = await axios.get("http://localhost:4000/api/treatments", {
+      const response = await axios.get(`${API_BASE_URL}/api/treatments`, {
         withCredentials: true,
       });
       setTreatmentsData(response.data);
@@ -64,7 +66,7 @@ function AdministratorServices() {
   // Fetch Packages from /api/packages
   const fetchPackages = async () => {
     try {
-      const response = await axios.get("http://localhost:4000/api/packages", {
+      const response = await axios.get(`${API_BASE_URL}/api/packages`, {
         withCredentials: true,
       });
       setPackagesData(response.data);

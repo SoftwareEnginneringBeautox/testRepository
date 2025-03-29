@@ -1,15 +1,15 @@
-require('dotenv').config(); // Load environment variables
-
+// Load environment variables
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const crypto = require('crypto'); // For generating random tokens
-const pool = require("./config/database.js");
+const { Pool } = require('pg'); // Import Pool from pg package
 const session = require('express-session');
 const bcrypt = require('bcrypt');
-const isAuthenticated = require('./middleware/isAuthenticated');
 const pgSession = require('connect-pg-simple')(session);
+<<<<<<< HEAD
 const nodemailer = require("nodemailer");
 
 const app = express();
@@ -26,26 +26,90 @@ const transporter = nodemailer.createTransport({
 
 // Use express.json() for parsing JSON bodies
 app.use(express.json());
+=======
+const isAuthenticated = require('./middleware/isAuthenticated');
+
+const requiredEnvVars = [
+  'DB_USER',
+  'DB_PASSWORD',
+  'DB_HOST',
+  'DB_PORT',
+  'DB_NAME',
+  'SESSION_SECRET',
+  'CLIENT_ORIGIN' // Expected production client origin
+];
+
+console.log("DB Host:", process.env.DB_HOST);
+console.log("DB Password:", process.env.DB_PASSWORD);
+
+requiredEnvVars.forEach((key) => {
+  if (!process.env[key]) {
+    console.error(`Missing required environment variable: ${key}`);
+    process.exit(1);
+  }
+});
+
+// Create PostgreSQL pool
+const pool = new Pool({
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  host: process.env.DB_HOST,
+  port: process.env.DB_PORT,
+  database: process.env.DB_NAME,
+});
+
+const app = express();
+
+// Trust the proxy (important if behind a load balancer)
+app.set('trust proxy', 1);
+>>>>>>> 830e3c83a60361355b600d99b89ba7a4bf5a5ca7
 
 // Use Helmet to set secure HTTP headers
 app.use(helmet());
+
+// Custom key generator for rate limiting to handle x-forwarded-for header safely
+const customKeyGenerator = (req) => {
+  const xForwarded = req.headers['x-forwarded-for'];
+  if (xForwarded) {
+    if (typeof xForwarded === 'string') {
+      return xForwarded.split(',')[0].trim();
+    }
+    if (Array.isArray(xForwarded)) {
+      return xForwarded[0];
+    }
+  }
+  return req.ip;
+};
 
 // Apply rate limiting middleware
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100,
-  message: "Too many requests from this IP, please try again after 15 minutes."
+  message: "Too many requests from this IP, please try again after 15 minutes.",
+  keyGenerator: customKeyGenerator,
 });
 app.use(limiter);
 
 
-// Setup CORS to allow credentials from your client origin
+// Setup dynamic CORS to allow multiple origins
+const allowedOrigins = [
+  process.env.CLIENT_ORIGIN,         // e.g. "https://iewdmb6vjd.ap-southeast-2.awsapprunner.com"
+  "http://localhost:3000"            // For local development
+];
 app.use(cors({
-  origin: "http://localhost:5173", // Adjust to match your client URL
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true
 }));
 
-// Prevent caching of sensitive pages so that the back button won’t show them after logout
+// Prevent caching of sensitive pages
 app.use((req, res, next) => {
   res.set('Cache-Control', 'no-store');
   next();
@@ -56,16 +120,16 @@ app.use(session({
   store: new pgSession({
     pool, // Use your PostgreSQL connection pool
     tableName: 'session',
-    createTableIfMissing: true  // Auto-create the "session" table if it doesn't exist
+    createTableIfMissing: true,  // Auto-create the "session" table if it doesn't exist
   }),
   secret: process.env.SESSION_SECRET || 'yourSecretKey',
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: process.env.NODE_ENV === 'production', // enable in production (HTTPS required)
+    secure: process.env.NODE_ENV === 'production', // Enable in production (HTTPS required)
     httpOnly: true,
-    sameSite: 'lax'
-  }
+    sameSite: 'lax',
+  },
 }));
 
 /* --------------------------------------------
@@ -80,7 +144,6 @@ app.get('/health', (req, res) => {
 --------------------------------------------- */
 
 // Register endpoint (for creating new users)
-// Updated to include "role" and "dayoff"
 app.post('/adduser', async (req, res) => {
   try {
     console.log("Received /adduser payload:", req.body);
@@ -126,6 +189,7 @@ app.put('/updateuser', isAuthenticated, async (req, res) => {
   }
 });
 
+<<<<<<< HEAD
 
 app.delete('/deleteuser/:id', async (req, res) => {
   try {
@@ -144,6 +208,9 @@ app.delete('/deleteuser/:id', async (req, res) => {
 });
 
 // Login endpoint with detailed error logging, input validation, and random token generation
+=======
+// Login endpoint
+>>>>>>> 830e3c83a60361355b600d99b89ba7a4bf5a5ca7
 app.post('/login', async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -163,8 +230,8 @@ app.post('/login', async (req, res) => {
           success: true,
           message: "Login successful",
           role: user.role,
-          token, // Return the generated token
-          username: user.username
+          token,
+          username: user.username,
         });
       } else {
         console.log(`Failed login attempt: Incorrect password for username "${username}".`);
