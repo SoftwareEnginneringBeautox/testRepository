@@ -32,6 +32,7 @@
     "jspdf": "^3.0.0",
     "jspdf-autotable": "^5.0.2",
     "lucide-react": "^0.469.0",
+    "pg": "^8.14.1",
     "q": "^1.5.1",
     "react": "^18.3.1",
     "react-currency-input-field": "^3.10.0",
