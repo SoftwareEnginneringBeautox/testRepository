@@ -1,11 +1,22 @@
 import React from "react";
 
+import { useState } from "react";
+import { useModal } from "@/hooks/useModal"; // Ensure the correct path
+import DisplayEntry from "@/components/DisplayEntry";
+
 const MonthlyBookingPanel = ({
   calendarDays = [],
   appointments = [],
   currentMonth
 }) => {
+  const { currentModal, openModal, closeModal } = useModal();
+  const [selectedEntry, setSelectedEntry] = useState(null);
   const days = ["SUN", "MON", "TUES", "WED", "THURS", "FRI", "SAT"];
+
+  const handleOpenModal = (appointment) => {
+    setSelectedEntry(appointment);
+    openModal("displayEntry");
+  };
 
   // Helper to check if an appointment is on a specific date
   const getAppointmentsForDate = (date) => {
@@ -70,7 +81,7 @@ const MonthlyBookingPanel = ({
                 return (
                   <td
                     key={dayIndex}
-                    className={`border border-gray-200 p-2 align-top ${
+                    className={`p-2 align-top ${
                       !day
                         ? "bg-gray-100"
                         : isToday(day)
@@ -91,10 +102,11 @@ const MonthlyBookingPanel = ({
                           {dayAppointments.map((appointment, idx) => (
                             <div
                               key={idx}
-                              className="text-xs p-1 bg-lavender-400 text-white rounded truncate"
+                              className="text-xs p-1 bg-lavender-400 text-white rounded truncate cursor-pointer"
                               title={`${appointment.name} - ${formatTimeDisplay(
                                 appointment.rawTime
                               )}`}
+                              onClick={() => handleOpenModal(appointment)}
                             >
                               <div className="font-semibold">
                                 {appointment.name}

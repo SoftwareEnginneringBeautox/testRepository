@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
+import { useModal } from "@/hooks/useModal";
+
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 import ChevronLeftIcon from "@/assets/icons/ChevronLeftIcon";
@@ -23,6 +25,8 @@ function BookingCalendar() {
   const [view, setView] = useState("monthly");
   const [appointments, setAppointments] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const { currentModal, openModal, closeModal } = useModal();
+  const [selectedEntry, setSelectedEntry] = useState(null);
 
   const month = currentDate.getMonth();
   const year = currentDate.getFullYear();
@@ -36,7 +40,7 @@ function BookingCalendar() {
         setAppointments(response.data);
         setIsLoading(false);
       } catch (error) {
-        console.error('Error fetching appointments:', error);
+        console.error("Error fetching appointments:", error);
         setIsLoading(false);
       }
     };
@@ -46,28 +50,30 @@ function BookingCalendar() {
 
   // Process appointments into events for the calendar
   const processAppointments = () => {
-    return appointments.map(appointment => {
+    return appointments.map((appointment) => {
       // Get date object from the appointment
       const appointmentDate = new Date(appointment.date_of_session);
-      
+
       // Extract hours and minutes from time_of_session (format: HH:MM:SS)
-      const [hours, minutes] = appointment.time_of_session.split(':').map(Number);
-      
+      const [hours, minutes] = appointment.time_of_session
+        .split(":")
+        .map(Number);
+
       // Set time on the appointment date
       appointmentDate.setHours(hours);
       appointmentDate.setMinutes(minutes);
-      
+
       // Calculate end time (assume 1 hour duration if not specified)
       const endDate = new Date(appointmentDate);
       endDate.setHours(endDate.getHours() + 1);
-      
+
       // Format times
       const startTime = formatTime(hours, minutes);
       const endTime = formatTime(endDate.getHours(), endDate.getMinutes());
-      
+
       // Get day abbreviation
       const dayAbbreviation = getDayAbbreviation(appointmentDate.getDay());
-      
+
       return {
         id: appointment.id,
         day: dayAbbreviation,
@@ -86,9 +92,9 @@ function BookingCalendar() {
 
   // Helper to format time as "1:30PM" format
   const formatTime = (hours, minutes) => {
-    const period = hours >= 12 ? 'PM' : 'AM';
+    const period = hours >= 12 ? "PM" : "AM";
     const hour = hours % 12 || 12;
-    return `${hour}:${minutes.toString().padStart(2, '0')}${period}`;
+    return `${hour}:${minutes.toString().padStart(2, "0")}${period}`;
   };
 
   // Helper to get day abbreviation
@@ -113,7 +119,11 @@ function BookingCalendar() {
   const calendar = [];
   let currentWeek = [];
 
-  for (let i = new Date(startDate); i <= lastDayOfMonth; i.setDate(i.getDate() + 1)) {
+  for (
+    let i = new Date(startDate);
+    i <= lastDayOfMonth;
+    i.setDate(i.getDate() + 1)
+  ) {
     const dayDate = new Date(i);
     if (dayDate.getMonth() === month) {
       currentWeek.push(dayDate);
@@ -154,20 +164,22 @@ function BookingCalendar() {
   // Filter appointments based on the current view
   const getFilteredAppointments = () => {
     const events = processAppointments();
-    
+
     if (view === "monthly") {
       // For monthly view, filter to current month
-      return events.filter(event => {
+      return events.filter((event) => {
         const eventDate = new Date(event.rawDate);
-        return eventDate.getMonth() === month && eventDate.getFullYear() === year;
+        return (
+          eventDate.getMonth() === month && eventDate.getFullYear() === year
+        );
       });
     } else {
       // For weekly view, filter to current week
       const weekStart = getStartOfWeek(currentDate);
       const weekEnd = new Date(weekStart);
       weekEnd.setDate(weekEnd.getDate() + 7);
-      
-      return events.filter(event => {
+
+      return events.filter((event) => {
         const eventDate = new Date(event.rawDate);
         return eventDate >= weekStart && eventDate < weekEnd;
       });
@@ -237,19 +249,21 @@ function BookingCalendar() {
 
         <div className="w-full flex flex-1">
           {isLoading ? (
-            <div className="w-full py-20 text-center text-lg">Loading appointments...</div>
+            <div className="w-full py-20 text-center text-lg">
+              Loading appointments...
+            </div>
           ) : view === "monthly" ? (
-            <MonthlyBookingPanel 
-              calendarDays={calendar} 
-              appointments={getFilteredAppointments()} 
+            <MonthlyBookingPanel
+              calendarDays={calendar}
+              appointments={getFilteredAppointments()}
               currentMonth={month}
             />
           ) : (
             <div className="w-full flex justify-center">
               <div className="w-full">
-                <WeeklyBookingPanel 
-                  events={getFilteredAppointments()} 
-                  currentDate={currentDate} 
+                <WeeklyBookingPanel
+                  events={getFilteredAppointments()}
+                  currentDate={currentDate}
                 />
               </div>
             </div>

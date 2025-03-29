@@ -30,9 +30,11 @@ import ChevronRightIcon from "@/assets/icons/ChevronRightIcon";
 import EmailIcon from "@/assets/icons/EmailIcon";
 
 function ForgotPassword({ isOpen, onClose }) {
-  const [step, setStep] = useState(1); // 1 = email, 2 = otp
+  const [step, setStep] = useState(1); // 1 = email, 2 = otp, 3 = reset password
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [message, setMessage] = useState("");
 
   const sendOTP = async (e) => {
@@ -50,13 +52,34 @@ function ForgotPassword({ isOpen, onClose }) {
   const verifyOTP = async (e) => {
     e.preventDefault();
     try {
-      await axios.post("http://localhost:4000/verify-otp", { email, otp });
-      setMessage("OTP verified. Redirect to reset password or continue.");
-      // Optional: Add reset password modal or redirect
+      console.log("Verifying OTP:", otp);
+      const response = await axios.post("http://localhost:4000/verify-otp", {
+        email,
+        otp
+      });
+
+      console.log("Server Response:", response.data);
+
+      if (response.data.success) {
+        setStep(3);
+        console.log("Step set to 3");
+        setMessage("OTP verified. Enter your new password.");
+      } else {
+        setMessage("Invalid OTP. Please try again.");
+      }
     } catch (err) {
-      console.error("OTP verification failed:", err);
-      setMessage("Invalid or expired OTP.");
+      console.error("Error verifying OTP:", err);
+      setMessage("Failed to verify OTP. Please try again.");
     }
+  };
+
+  const handleResetPassword = (e) => {
+    e.preventDefault();
+    if (newPassword !== confirmPassword) {
+      setMessage("Passwords do not match.");
+      return;
+    }
+    setMessage("Password reset functionality will be implemented soon.");
   };
 
   const resendOTP = async () => {
@@ -77,11 +100,8 @@ function ForgotPassword({ isOpen, onClose }) {
       </ModalHeader>
       <ModalBody>
         {step === 1 ? (
-          <form
-            onSubmit={sendOTP}
-            className="w-full flex flex-col justify-center items-center gap-4"
-          >
-            <p className="text-left">Kindly input the email of your account.</p>
+          <form onSubmit={sendOTP} className="flex flex-col gap-4 items-center">
+            <p>Kindly input the email of your account.</p>
             <InputContainer>
               <InputLabel>Email</InputLabel>
               <InputTextField>
@@ -91,37 +111,29 @@ function ForgotPassword({ isOpen, onClose }) {
                 <Input
                   type="email"
                   id="email"
-                  className="text-input"
-                  placeholder="Kindly input your email"
+                  placeholder="Enter your email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
                 />
               </InputTextField>
             </InputContainer>
-            <div className="flex flex-row gap-4 mt-4 w-full">
-              <Button variant="outline" className="w-1/2" onClick={onClose}>
+            <div className="flex gap-4 w-full">
+              <Button variant="outline" onClick={onClose}>
                 <ChevronLeftIcon /> BACK
               </Button>
-              <Button type="submit" className="w-1/2">
-                SUBMIT
-                <ChevronRightIcon />
+              <Button type="submit">
+                SUBMIT <ChevronRightIcon />
               </Button>
             </div>
-            {message && (
-              <p className="text-sm text-center text-red-500">{message}</p>
-            )}
+            {message && <p className="text-red-500">{message}</p>}
           </form>
-        ) : (
+        ) : step === 2 ? (
           <form
             onSubmit={verifyOTP}
-            className="w-full flex flex-col justify-center items-center gap-4"
+            className="flex flex-col gap-4 items-center"
           >
-            <p className="text-center">
-              Kindly input the{" "}
-              <span className="font-semibold">6-digit code</span> we have sent
-              to your email.
-            </p>
+            <p>Enter the 6-digit code sent to your email.</p>
             <InputOTP value={otp} onChange={setOtp} maxLength={6}>
               <InputOTPGroup>
                 <InputOTPSlot index={0} />
@@ -135,32 +147,51 @@ function ForgotPassword({ isOpen, onClose }) {
                 <InputOTPSlot index={5} />
               </InputOTPGroup>
             </InputOTP>
-            <p>
-              Didn't get the code?{" "}
-              <button
-                type="button"
-                onClick={resendOTP}
-                className="underline hover:text-reflexBlue-400 font-semibold"
-              >
-                CLICK HERE TO RESEND
-              </button>
-            </p>
-            <div className="flex flex-row gap-4 mt-4 w-full">
-              <Button
-                variant="outline"
-                className="w-1/2"
-                onClick={() => setStep(1)}
-              >
+            <button onClick={resendOTP} className="underline font-semibold">
+              CLICK HERE TO RESEND
+            </button>
+            <div className="flex gap-4 w-full">
+              <Button variant="outline" onClick={() => setStep(1)}>
                 <ChevronLeftIcon /> BACK
               </Button>
-              <Button type="submit" className="w-1/2">
-                SUBMIT
-                <ChevronRightIcon />
+              <Button type="submit">
+                SUBMIT <ChevronRightIcon />
               </Button>
             </div>
-            {message && (
-              <p className="text-sm text-center text-red-500">{message}</p>
-            )}
+            {message && <p className="text-red-500">{message}</p>}
+          </form>
+        ) : (
+          <form
+            onSubmit={handleResetPassword}
+            className="flex flex-col gap-4 items-center"
+          >
+            <p>Enter your new password.</p>
+            <InputContainer>
+              <InputLabel>New Password</InputLabel>
+              <InputTextField>
+                <Input
+                  type="password"
+                  placeholder="New Password"
+                  value={newPassword}
+                  // onChange={(e) => setNewPassword(e.target.value)}
+                  required
+                />
+              </InputTextField>
+            </InputContainer>
+            <InputContainer>
+              <InputLabel>Confirm Password</InputLabel>
+              <InputTextField>
+                <Input
+                  type="password"
+                  placeholder="Confirm Password"
+                  value={confirmPassword}
+                  // onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                />
+              </InputTextField>
+            </InputContainer>
+            <Button type="submit">RESET PASSWORD</Button>
+            {message && <p className="text-red-500">{message}</p>}
           </form>
         )}
       </ModalBody>
