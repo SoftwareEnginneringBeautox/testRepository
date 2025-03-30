@@ -13,6 +13,23 @@ import EmailIcon from "@/assets/icons/EmailIcon";
 
 import ScheduleAppointmentModal from "../components/modals/ScheduleAppointment";
 
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious
+} from "@/components/ui/carousel";
+
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle
+} from "@/components/ui/Card";
+
 function LandingPage() {
   const navigate = useNavigate();
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
@@ -365,7 +382,7 @@ function LandingPage() {
         </section>
 
         {/* test section */}
-        <section className="w-full sm:w-11/12 md:w-5/6 lg:w-3/4 flex flex-col items-center justify-center gap-4 my-12 sm:my-16 md:my-24 lg:my-60">
+        <section className=" w-3/4 flex flex-col items-center justify-center gap-4 my-12 sm:my-16 md:my-24 lg:my-60">
           <div className="w-full">
             <h2 className="text-center md:text-start font-semibold text-xl sm:text-2xl md:text-3xl bg-gradient-to-r from-reflexBlue-300 to-lavender-300 text-transparent bg-clip-text py-2 sm:py-4">
               HERE'S WHAT WE HAVE IN STORE FOR YOU
@@ -383,9 +400,15 @@ function LandingPage() {
                 ))}
               </TabsList>
             </Tabs>
-            <p>1</p>
-            <p>2</p>
-            <p>3</p>
+            <Carousel>
+              <CarouselContent>
+                <CarouselItem>1</CarouselItem>
+                <CarouselItem>2</CarouselItem>
+                <CarouselItem>3</CarouselItem>
+              </CarouselContent>
+              <CarouselPrevious />
+              <CarouselNext />
+            </Carousel>
           </div>
         </section>
 
