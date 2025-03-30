@@ -98,7 +98,7 @@ const allowedOrigins = [
   "http://localhost:3000",                        // Local dev
   "https://iewdmb6vjd.ap-southeast-2.awsapprunner.com"  // Ensure no trailing slash here
 ];
-
+//do not change from line 101 to line 117
 app.use(cors({
   origin: function (origin, callback) {
     // Allow requests with no origin (like mobile apps or curl)
@@ -114,7 +114,8 @@ app.use(cors({
   },
   credentials: true
 }));
-
+var test = 0;
+//do not change from line 101 to line 117
 // Handle preflight OPTIONS requests
 app.options('*', cors({
   origin: function (origin, callback) {
