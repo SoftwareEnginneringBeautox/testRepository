@@ -34,7 +34,6 @@ import {
   SelectValue
 } from "@/components/ui/Select";
 
-import DisplayEntry from "@/components/modals/DisplayEntry";
 import CreatePatientEntry from "@/components/modals/CreatePatientEntry";
 import UpdatePatientEntry from "@/components/modals/UpdatePatientEntry";
 import DeletePatientEntry from "@/components/modals/DeletePatientEntry";
@@ -71,12 +70,6 @@ function PatientRecordsDatabase() {
   const handleModalClose = () => {
     closeModal();
     fetchRecords();
-  };
-
-  // Open display entry modal
-  const handleOpenDisplayEntry = (record) => {
-    setSelectedEntry(record);
-    openModal("displayEntry");
   };
 
   // Open update entry modal
@@ -247,10 +240,7 @@ function PatientRecordsDatabase() {
           <TableBody>
             {records.map((record, index) => (
               <TableRow key={index}>
-                <TableCell
-                  onClick={() => handleOpenDisplayEntry(record)}
-                  className="cursor-pointer"
-                >
+                <TableCell>
                   {record.client || record.patient_name?.toUpperCase() || "N/A"}
                 </TableCell>
                 <TableCell className="text-center">
@@ -259,12 +249,22 @@ function PatientRecordsDatabase() {
                         new Date(
                           record.dateTransacted || record.date_of_session
                         ),
-                        "yyyy-MM-dd"
-                      )
+                        "MMMM dd, yyyy"
+                      ).toUpperCase()
                     : "N/A"}
                 </TableCell>
+
                 <TableCell className="text-center">
-                  {record.nextSessionTime || record.time_of_session}
+                  {record.nextSessionTime || record.time_of_session
+                    ? (() => {
+                        const timeValue =
+                          record.nextSessionTime || record.time_of_session;
+                        const parsedTime = new Date(`1970-01-01T${timeValue}`);
+                        return isNaN(parsedTime.getTime())
+                          ? "Invalid Time"
+                          : format(parsedTime, "hh:mm a");
+                      })()
+                    : "N/A"}
                 </TableCell>
                 <TableCell className="text-center">
                   {(
@@ -291,7 +291,12 @@ function PatientRecordsDatabase() {
                   )?.toUpperCase()}
                 </TableCell>
                 <TableCell className="text-center">
-                  PHP {record.totalAmount || record.total_amount}
+                  {record.totalAmount || record.total_amount
+                    ? new Intl.NumberFormat("en-PH", {
+                        style: "currency",
+                        currency: "PHP"
+                      }).format(record.totalAmount || record.total_amount)
+                    : "N/A"}
                 </TableCell>
                 <TableCell>
                   <div className="flex justify-center gap-2">
@@ -344,13 +349,6 @@ function PatientRecordsDatabase() {
         <DeletePatientEntry
           isOpen={true}
           onClose={handleModalClose}
-          entryData={selectedEntry}
-        />
-      )}
-      {currentModal === "displayEntry" && selectedEntry && (
-        <DisplayEntry
-          isOpen={true}
-          onClose={closeModal}
           entryData={selectedEntry}
         />
       )}

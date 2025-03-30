@@ -1,7 +1,7 @@
 import React from "react";
 
 import { useState } from "react";
-import { useModal } from "@/hooks/useModal"; // Ensure the correct path
+import { useModal } from "@/hooks/useModal";
 import DisplayEntry from "@/components/modals/DisplayEntry";
 
 const MonthlyBookingPanel = ({
