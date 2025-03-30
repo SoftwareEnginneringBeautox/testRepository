@@ -173,30 +173,40 @@ function FinancialOverview() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            <TableRow>
-              <TableCell className="py-4 text-center">1</TableCell>
-              <TableCell className="py-4 text-center">2</TableCell>
-              <TableCell className="py-4 text-center">3</TableCell>
-              <TableCell className="py-4 text-center">
-                <DropdownMenu>
-                  <DropdownMenuTrigger>
-                    <EllipsisIcon />
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    <DropdownMenuGroup>
-                      <DropdownMenuItem onClick={() => openModal("editMonthlyExpense")}>
-                        <EditIcon />
-                        <p className="font-semibold">Edit</p>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => openModal("deleteMonthlyExpense")}>
-                        <DeleteIcon />
-                        <p className="font-semibold">Delete</p>
-                      </DropdownMenuItem>
-                    </DropdownMenuGroup>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </TableCell>
-            </TableRow>
+            {expensesData.length > 0 ? (
+              expensesData.map((expense, index) => (
+                <TableRow key={expense.id || index}>
+                  <TableCell className="py-4 text-center">
+                    {new Date(expense.date).toLocaleDateString()}
+                  </TableCell>
+                  <TableCell className="py-4 text-center">{expense.category}</TableCell>
+                  <TableCell className="py-4 text-center">PHP {expense.expense}</TableCell>
+                  <TableCell className="py-4 text-center">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger>
+                        <EllipsisIcon />
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent>
+                        <DropdownMenuGroup>
+                          <DropdownMenuItem onClick={() => openModal("editMonthlyExpense", expense)}>
+                            <EditIcon />
+                            <p className="font-semibold">Edit</p>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => openModal("deleteMonthlyExpense", expense.id)}>
+                            <DeleteIcon />
+                            <p className="font-semibold">Delete</p>
+                          </DropdownMenuItem>
+                        </DropdownMenuGroup>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan="4" className="text-center">No expenses recorded</TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
 
