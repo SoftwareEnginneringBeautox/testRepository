@@ -1,5 +1,7 @@
 // Load environment variables (for local dev; in production, AWS environment variables override these)
-require('dotenv').config();
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config();
+}
 
 const express = require('express');
 const cors = require('cors');
@@ -11,7 +13,7 @@ const session = require('express-session');
 const bcrypt = require('bcrypt');
 const pgSession = require('connect-pg-simple')(session);
 const nodemailer = require("nodemailer");
-const isAuthenticated = require('./middleware/isAuthenticated'); // Ensure this file exists
+const isAuthenticated = require('./middleware/isAuthenticated');
 
 // Check required environment variables
 const requiredEnvVars = [
@@ -21,7 +23,8 @@ const requiredEnvVars = [
   'DB_PORT',
   'DB_NAME',
   'SESSION_SECRET',
-  'CLIENT_ORIGIN',  // e.g., "https://iewdmb6vjd.ap-southeast-2.awsapprunner.com"
+  'CLIENT_ORIGIN',  // e.g., "https://your-production-domain.com"
+  'CLIENT_API_KEY'  // For API key-based authentication
 ];
 
 requiredEnvVars.forEach((key) => {
@@ -91,16 +94,33 @@ app.use(limiter);
 
 // Dynamic CORS setup to allow both production and local dev
 const allowedOrigins = [
-  process.env.CLIENT_ORIGIN,   // e.g. "https://iewdmb6vjd.ap-southeast-2.awsapprunner.com"
-  "http://localhost:3000",     // local dev
-  "https://iewdmb6vjd.ap-southeast-2.awsapprunner.com"
+  process.env.CLIENT_ORIGIN,                      // e.g., "https://iewdmb6vjd.ap-southeast-2.awsapprunner.com"
+  "http://localhost:3000",                        // Local dev
+  "https://iewdmb6vjd.ap-southeast-2.awsapprunner.com"  // Ensure no trailing slash here
 ];
 
 app.use(cors({
   origin: function (origin, callback) {
     // Allow requests with no origin (like mobile apps or curl)
     if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) !== -1) {
+    
+    // Normalize the origin by removing any trailing slash
+    const normalizedOrigin = origin.endsWith('/') ? origin.slice(0, -1) : origin;
+    if (allowedOrigins.indexOf(normalizedOrigin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true
+}));
+
+// Handle preflight OPTIONS requests
+app.options('*', cors({
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+    const normalizedOrigin = origin.endsWith('/') ? origin.slice(0, -1) : origin;
+    if (allowedOrigins.indexOf(normalizedOrigin) !== -1) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
@@ -128,7 +148,8 @@ app.use(session({
   cookie: {
     secure: process.env.NODE_ENV === 'production', // enable in production (HTTPS required)
     httpOnly: true,
-    sameSite: 'lax',
+    // For production, if your client is on a different domain, use 'none'
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
   },
 }));
 

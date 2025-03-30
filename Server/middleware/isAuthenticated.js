@@ -1,6 +1,9 @@
-// middleware/isAuthenticated.js
-
 function isAuthenticated(req, res, next) {
+  // Bypass authentication for preflight OPTIONS requests
+  if (req.method === 'OPTIONS') {
+    return next();
+  }
+
   // Check if a valid user session exists using optional chaining
   if (req.session?.user) {
     return next();

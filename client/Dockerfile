@@ -1,37 +1,26 @@
-# Use Node.js as the base image for building the app
-FROM node:18 AS builder
+FROM node:18
 
-# Set the working directory
+# Set NODE_ENV to production to ensure production behavior
+ENV NODE_ENV=production
+
+# Create app directory
 WORKDIR /usr/src/app
 
-# Copy package.json and package-lock.json first (to use cache)
-COPY package.json package-lock.json ./
+# Copy package.json and package-lock.json
+COPY package*.json ./
 
-# Install dependencies
-RUN npm install
+# Install dependencies (only production dependencies in production)
+RUN npm install --production
 
-# Copy all project files
-COPY . . 
+# Copy the rest of the application files
+COPY . .
 
-# Build the frontend
-RUN npm run build
+# Expose the port the app runs on
+EXPOSE 4000
 
-# ---- Serve the built app ----
-FROM node:18 AS runner
+# HEALTHCHECK to verify the app is running
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:4000/health || exit 1
 
-# Set working directory
-WORKDIR /usr/src/app
-
-COPY package.json package-lock.json ./
-
-# Install serve globally to serve the built app
-RUN npm install -g serve
-
-# Copy built files from builder stage
-COPY --from=builder /usr/src/app/dist ./dist
-
-# Expose port for the frontend
-EXPOSE 3000
-
-# Start the app using serve
-CMD ["serve", "-s", "dist", "-l", "3000"]
+# Command to run the application
+CMD ["npm", "start"]
