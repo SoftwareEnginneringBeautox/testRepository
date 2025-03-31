@@ -147,11 +147,11 @@ function AdministratorServices() {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
                       <DropdownMenuGroup>
-                        <DropdownMenuItem onClick={() => handleSelectPackageToEdit(pkg)}>
+                        <DropdownMenuItem onClick={() => openModal("editTreatment")}>
                           <EditIcon />
                           <p className="font-semibold">Edit</p>
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleSelectPackageToArchive(pkg)}>
+                        <DropdownMenuItem onClick={() => openModal("deleteTreatment")}>
                           <DeleteIcon />
                           <p className="font-semibold">Archive</p>
                         </DropdownMenuItem>
@@ -257,11 +257,16 @@ function AdministratorServices() {
           }}
         />
       )}
-      {currentModal === "editPackage" && selectedPackage (
-        <EditPackage isOpen={true} onClose={closeModal} />
+      {currentModal === "editPackage" && selectedPackage && (
+        <EditPackage isOpen={true} 
+        onClose={closeModal} />
       )}
-      {currentModal === "deletePackage" && selectedPackage (
-        <DeletePackage isOpen={true} onClose={closeModal} entryData={selectedPackage} onArchive={handleArchive} />
+      {currentModal === "deletePackage" && selectedPackage && (
+        <DeletePackage isOpen={true} 
+        onClose={closeModal} 
+        entryData={selectedPackage} 
+        onArchive={handleArchive} 
+        />
       )}
       {currentModal === "createTreatment" && (
         <CreateTreatment
