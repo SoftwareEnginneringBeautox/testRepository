@@ -8,7 +8,7 @@ import DeleteIcon from "@/assets/icons/DeleteIcon";
 import WarningIcon from "@/assets/icons/WarningIcon";
 import ChevronLeftIcon from "@/assets/icons/ChevronLeftIcon";
 
-function DeleteMonthlySales({ isOpen, onClose }) {
+function DeleteMonthlySales({ isOpen, onClose, onArchive }) {
   if (!isOpen) return null;
 
   return (
@@ -23,7 +23,7 @@ function DeleteMonthlySales({ isOpen, onClose }) {
           <ChevronLeftIcon />
           CANCEL AND RETURN
         </Button>
-        <Button className="w-1/2">
+        <Button className="w-1/2" onClick={onArchive}>
           <DeleteIcon />
           DELETE EXPENSE
         </Button>

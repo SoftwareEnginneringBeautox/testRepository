@@ -32,7 +32,35 @@ import CircleUserIcon from "@/assets/icons/CircleUserIcon";
 import TreatmentIcon from "@/assets/icons/TreatmentIcon";
 import EditIcon from "@/assets/icons/EditIcon";
 
-function UpdatePatientEntry({ isOpen, onClose }) {
+function UpdatePatientEntry({ isOpen, onClose, onSubmit }) {
+  
+  const [formData, setFormData] = useState({
+    patient_name: "",
+    person_in_charge: "",
+    treatment: "",
+    total_amount: "",
+    payment_method: "",
+    date_of_session: "",
+    time_of_session: "",
+    consent_form_signed: false
+  });
+  
+  useEffect(() => {
+    if (entryData) {
+      setFormData({
+        patient_name: entryData.patient_name || "",
+        person_in_charge: entryData.person_in_charge || "",
+        treatment: entryData.treatment || "",
+        total_amount: entryData.total_amount || "",
+        payment_method: entryData.payment_method || "",
+        date_of_session: entryData.date_of_session || "",
+        time_of_session: entryData.time_of_session || "",
+        consent_form_signed: entryData.consent_form_signed || false
+      });
+    }
+  }, [entryData]);
+  
+
   if (!isOpen) return null;
 
   return (
@@ -56,7 +84,10 @@ function UpdatePatientEntry({ isOpen, onClose }) {
                 <InputIcon>
                   <UserIcon />
                 </InputIcon>
-                <Input placeholder="Full name of the patient" />
+                <Input placeholder="Full name of the patient"
+                 value={formData.patient_name}
+                 onChange={(e) => setFormData({ ...formData, patient_name: e.target.value })}
+                 />
               </InputTextField>
             </InputContainer>
 
@@ -161,7 +192,12 @@ function UpdatePatientEntry({ isOpen, onClose }) {
               PATIENT CONSENT FORM
             </h5>
             <div className="flex flex-row gap-3 items-center justify-start">
-              <Checkbox id="consent" />
+              <Checkbox id="consent" 
+              checked={formData.consent_form_signed}
+              onCheckedChange={(checked) =>
+                setFormData({ ...formData, consent_form_signed: checked })
+              }
+              />
               <label
                 htmlFor="consent"
                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
@@ -176,7 +212,7 @@ function UpdatePatientEntry({ isOpen, onClose }) {
               <ChevronLeftIcon />
               CANCEL AND RETURN
             </Button>
-            <Button className="w-1/2">
+            <Button className="w-1/2"  onClick={() => onSubmit({ id: entryData.id, ...formData })}>
               <EditIcon />
               UPDATE ENTRY
             </Button>

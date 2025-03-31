@@ -8,7 +8,7 @@ import WarningIcon from "@/assets/icons/WarningIcon";
 import ChevronLeftIcon from "@/assets/icons/ChevronLeftIcon";
 import ArchiveIcon from "@/assets/icons/ArchiveIcon";
 
-function DeletePatientEntry({ isOpen, onClose }) {
+function DeletePatientEntry({ isOpen, onClose, onArchive }) {
   if (!isOpen) return null;
 
   return (
@@ -28,8 +28,8 @@ function DeletePatientEntry({ isOpen, onClose }) {
           <ChevronLeftIcon />
           CANCEL AND RETURN
         </Button>
-        <Button className="w-1/2">
-          <ArchiveIcon />
+        <Button className="w-1/2" onClick={onArchive}>
+          <ArchiveIcon  />
           ARCHIVE ENTRY
         </Button>
       </div>

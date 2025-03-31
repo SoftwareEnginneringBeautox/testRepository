@@ -53,6 +53,22 @@ const MonthlyBookingPanel = ({
     return `${hour12}:${minute} ${ampm}`;
   };
 
+  const handleArchive = async () => {
+    await fetch("/api/manage-record", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        table: "expenses_tracker",
+        id: selectedExpenseId,
+        action: "archive"
+      }),
+    });
+  
+    onClose(); // Close the modal
+    refreshData(); // Refetch the list if needed
+  };
+  
+
   return (
     <div className="w-full">
       <table className="w-full border-spacing-y-2 border-separate table-fixed">

@@ -50,7 +50,8 @@ function AdministratorServices() {
   // State for treatments and packages loaded from the database
   const [treatmentsData, setTreatmentsData] = useState([]);
   const [packagesData, setPackagesData] = useState([]);
-
+  const [selectedPackage, setSelectedPackage] = useState(null);
+  const [selectedTreatment, setSelectedTreatment] = useState(null);
   // Fetch Treatments from /api/treatments
   const fetchTreatments = async () => {
     try {
@@ -69,10 +70,41 @@ function AdministratorServices() {
       const response = await axios.get(`${API_BASE_URL}/api/packages`, {
         withCredentials: true,
       });
-      setPackagesData(response.data);
+      setPackagesData(response.data.filter((item) => !item.archived));
     } catch (error) {
       console.error("Error fetching packages:", error);
     }
+  };
+
+  const handleSelectPackageToArchive = (pkg) => {
+    setSelectedPackage(pkg);
+    openModal("deletePackage");
+  };
+  
+  const handleSelectPackageToEdit = (pkg) => {
+    setSelectedPackage(pkg);
+    openModal("editPackage");
+  };
+  
+
+  const handleArchive = async () => {
+    console.log("ARCHIVE BUTTON CLICKED", selectedPackage?.id);
+  
+    if (!selectedPackage?.id) return;
+  
+    await fetch(`${API_BASE_URL}/api/manage-record`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({
+        table: "packages",
+        id: selectedPackage.id,
+        action: "archive",
+      }),
+    });
+  
+    closeModal();
+    fetchPackages();
   };
 
   // Initial load for treatments and packages
@@ -115,13 +147,13 @@ function AdministratorServices() {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
                       <DropdownMenuGroup>
-                        <DropdownMenuItem onClick={() => openModal("editTreatment")}>
+                        <DropdownMenuItem onClick={() => handleSelectPackageToEdit(pkg)}>
                           <EditIcon />
                           <p className="font-semibold">Edit</p>
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => openModal("deleteTreatment")}>
+                        <DropdownMenuItem onClick={() => handleSelectPackageToArchive(pkg)}>
                           <DeleteIcon />
-                          <p className="font-semibold">Delete</p>
+                          <p className="font-semibold">Archive</p>
                         </DropdownMenuItem>
                       </DropdownMenuGroup>
                     </DropdownMenuContent>
@@ -179,11 +211,11 @@ function AdministratorServices() {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
                       <DropdownMenuGroup>
-                        <DropdownMenuItem onClick={() => openModal("editPackage")}>
+                        <DropdownMenuItem onClick={() => handleSelectPackageToEdit(pkg)}>
                           <EditIcon />
                           <p className="font-semibold">Edit</p>
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => openModal("deletePackage")}>
+                        <DropdownMenuItem onClick={() => handleSelectPackageToArchive(pkg)}>
                           <DeleteIcon />
                           <p className="font-semibold">Delete</p>
                         </DropdownMenuItem>
@@ -225,11 +257,11 @@ function AdministratorServices() {
           }}
         />
       )}
-      {currentModal === "editPackage" && (
+      {currentModal === "editPackage" && selectedPackage (
         <EditPackage isOpen={true} onClose={closeModal} />
       )}
-      {currentModal === "deletePackage" && (
-        <DeletePackage isOpen={true} onClose={closeModal} />
+      {currentModal === "deletePackage" && selectedPackage (
+        <DeletePackage isOpen={true} onClose={closeModal} entryData={selectedPackage} onArchive={handleArchive} />
       )}
       {currentModal === "createTreatment" && (
         <CreateTreatment

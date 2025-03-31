@@ -55,7 +55,7 @@ function PatientRecordsDatabase() {
       });
       const data = await response.json();
       console.log("API Response Data:", data); // 🔍 Debugging line
-      setRecords(data);
+      setRecords(data.filter((record) => !record.archived)); // only show active records
     } catch (error) {
       console.error("Error fetching records:", error);
     }
@@ -83,6 +83,41 @@ function PatientRecordsDatabase() {
     setSelectedEntry(record);
     openModal("deleteEntry");
   };
+
+  const handleArchive = async () => {
+    console.log("ARCHIVE BUTTON CLICKED", selectedEntry.id);
+    await fetch(`${API_BASE_URL}/api/manage-record`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({
+        table: "patient_records",
+        id: selectedEntry.id,
+        action: "archive"
+      }),
+    });
+  
+    closeModal();   // instead of onClose()
+    fetchRecords(); // instead of refreshData()
+  };
+
+  const handleEditPatientEntry = async (updatedData) => {
+    await fetch(`${API_BASE_URL}/api/manage-record`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({
+        table: "patient_records",
+        id: updatedData.id,
+        action: "edit",
+        data: updatedData
+      }),
+    });
+  
+    closeModal();
+    fetchRecords();
+  };
+  
 
   const generatePRDReport = () => {
     if (!records || records.length === 0) {
@@ -343,6 +378,7 @@ function PatientRecordsDatabase() {
           isOpen={true}
           onClose={handleModalClose}
           entryData={selectedEntry}
+          onSubmit={handleEditPatientEntry} // Pass the handleEditPatientEntry function to the modal
         />
       )}
       {currentModal === "deleteEntry" && selectedEntry && (
@@ -350,6 +386,7 @@ function PatientRecordsDatabase() {
           isOpen={true}
           onClose={handleModalClose}
           entryData={selectedEntry}
+          onArchive={handleArchive} // Pass the handleArchive function to the modal
         />
       )}
     </div>

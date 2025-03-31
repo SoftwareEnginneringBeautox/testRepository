@@ -535,7 +535,7 @@ app.post("/verify-otp", async (req, res) => {
   if (new Date(user.otp_expiry) < new Date())
     return res.status(400).json({ message: "OTP expired" });
 
-  res.json({ message: "OTP verified" });
+  res.json({ success: true, message: "OTP verified" });
 });
 
 // POST /api/reset-password
@@ -558,6 +558,51 @@ app.post("/reset-password", async (req, res) => {
 
   res.json({ message: "Password reset successful" });
 });
+
+
+
+/* --------------------------------------------
+   EDIT + ARCHIVE ENDPOINTS
+--------------------------------------------- */
+
+// POST-based general edit/archive handler
+app.post('/api/manage-record', async (req, res) => {
+  const { table, id, action, data } = req.body; // action: 'edit' or 'archive'
+
+  const editableTables = ['expenses_tracker', 'patient_records', 'accounts', 'packages', 'treatments', 'appointments'];
+  if (!editableTables.includes(table)) {
+    return res.status(400).json({ success: false, message: 'Invalid table name' });
+  }
+
+  try {
+    if (action === 'edit') {
+      if (!data || typeof data !== 'object') {
+        return res.status(400).json({ success: false, message: 'Missing or invalid data' });
+      }
+
+      const fields = Object.keys(data);
+      const values = Object.values(data);
+      const setClause = fields.map((field, idx) => `${field} = $${idx + 1}`).join(', ');
+      const query = `UPDATE ${table} SET ${setClause} WHERE id = $${fields.length + 1}`;
+      await pool.query(query, [...values, id]);
+
+      return res.json({ success: true, message: `${table} record updated` });
+    }
+
+    if (action === 'archive') {
+      const query = `UPDATE ${table} SET archived = TRUE WHERE id = $1`;
+      await pool.query(query, [id]);
+
+      return res.json({ success: true, message: `${table} record archived` });
+    }
+
+    return res.status(400).json({ success: false, message: 'Invalid action' });
+  } catch (err) {
+    console.error(`Error in manage-record (${action}):`, err);
+    return res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
 
 /* --------------------------------------------
    START THE SERVER

@@ -8,7 +8,7 @@ import WarningIcon from "@/assets/icons/WarningIcon";
 import ChevronLeftIcon from "@/assets/icons/ChevronLeftIcon";
 import ArchiveIcon from "@/assets/icons/ArchiveIcon";
 
-function DeletePackage({ isOpen, onClose }) {
+function DeletePackage({ isOpen, onClose, onArchive }) {
   if (!isOpen) return null;
 
   return (
@@ -25,7 +25,7 @@ function DeletePackage({ isOpen, onClose }) {
           <ChevronLeftIcon />
           CANCEL AND RETURN
         </Button>
-        <Button className="w-1/2">
+        <Button className="w-1/2" onClick={onArchive}>
           <ArchiveIcon />
           ARCHIVE PACKAGE
         </Button>
