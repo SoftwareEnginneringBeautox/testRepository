@@ -1,10 +1,20 @@
 import React from "react";
+import { useState } from "react";
+import { useModal } from "@/hooks/useModal";
+import DisplayEntry from "@/components/modals/DisplayEntry";
 
 const WeeklyBookingPanel = ({ events = [], currentDate }) => {
+  const { currentModal, openModal, closeModal } = useModal();
+  const [selectedEntry, setSelectedEntry] = useState(null);
   const days = ["SUN", "MON", "TUES", "WED", "THURS", "FRI", "SAT"];
   const hours = Array.from({ length: 24 }, (_, i) => {
     return `${i % 12 || 12}:00${i < 12 ? "AM" : "PM"}`;
   });
+
+  const handleOpenModal = (appointment) => {
+    setSelectedEntry(appointment);
+    openModal("displayEntry");
+  };
 
   const getWeekDates = (date) => {
     const result = [];
@@ -128,6 +138,7 @@ const WeeklyBookingPanel = ({ events = [], currentDate }) => {
                       key={idx}
                       className="absolute left-1 right-1 bg-lavender-400 text-white rounded-md p-2.5 shadow-lg focus:outline-none text-left flex flex-col justify-end"
                       style={{ top, height }}
+                      onClick={() => handleOpenModal(event)}
                     >
                       <strong className="block">{event.name}</strong>
                       <p className="text-xs">
@@ -139,6 +150,13 @@ const WeeklyBookingPanel = ({ events = [], currentDate }) => {
             </div>
           ))}
         </div>
+        {currentModal === "displayEntry" && selectedEntry && (
+          <DisplayEntry
+            isOpen={true}
+            onClose={closeModal}
+            entryData={selectedEntry}
+          />
+        )}
       </div>
     </div>
   );

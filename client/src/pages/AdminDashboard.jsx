@@ -41,9 +41,7 @@ import axios from "axios";
 const API_BASE_URL = process.env.VITE_API_URL;
 
 function AdministratorDashboard() {
-  const [userName, setUserName] = useState(
-    localStorage.getItem("username") || ""
-  );
+  const [userName, setUserName] = useState(localStorage.getItem("username") || "");
   const { currentModal, openModal, closeModal } = useModal();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [view, setView] = useState("monthly");
@@ -69,7 +67,11 @@ function AdministratorDashboard() {
       setErrorStaff(null);
     } catch (error) {
       console.error("Error fetching staff:", error);
-      setErrorStaff(error.message);
+      if (error.response && error.response.status === 401) {
+        setErrorStaff("Session expired. Please log in again.");
+      } else {
+        setErrorStaff(error.message);
+      }
     } finally {
       setLoadingStaff(false);
     }
@@ -149,7 +151,6 @@ function AdministratorDashboard() {
           <div className="w-12 h-12 bg-gradient-to-r from-reflexBlue-400 to-lavender-300 text-customNeutral-100 rounded-lg flex items-center justify-center">
             <UserAdminIcon size={32} />
           </div>
-          {/* Responsive Welcome Message */}
           <h2 className="text-xl md:text-[2rem] leading-[2.8rem] font-semibold bg-gradient-to-r from-lavender-300 to-reflexBlue-400 text-transparent bg-clip-text">
             WELCOME BACK, ADMINISTRATOR {userName.toUpperCase()}
           </h2>
@@ -206,8 +207,7 @@ function AdministratorDashboard() {
             >
               <div className="flex flex-col">
                 <span className="font-semibold">{staff.username}</span>
-                {(staff.role === "receptionist" ||
-                  staff.role === "aesthetician") && (
+                {(staff.role === "receptionist" || staff.role === "aesthetician") && (
                   <span className="text-sm text-gray-500 capitalize">
                     ({staff.role})
                   </span>

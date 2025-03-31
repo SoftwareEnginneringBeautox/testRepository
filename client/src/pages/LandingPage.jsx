@@ -13,9 +13,37 @@ import EmailIcon from "@/assets/icons/EmailIcon";
 
 import ScheduleAppointmentModal from "../components/modals/ScheduleAppointment";
 
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious
+} from "@/components/ui/Carousel";
+
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerTitle
+} from "@/components/ui/Drawer";
+
 function LandingPage() {
   const navigate = useNavigate();
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
+
+  // Product Section
+  const [selectedService, setSelectedService] = useState(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  const openDrawer = (service) => {
+    setSelectedService(service);
+    setIsDrawerOpen(true);
+  };
 
   const services = [
     {
@@ -364,29 +392,67 @@ function LandingPage() {
           </div>
         </section>
 
-        {/* test section */}
-        <section className="w-full sm:w-11/12 md:w-5/6 lg:w-3/4 flex flex-col items-center justify-center gap-4 my-12 sm:my-16 md:my-24 lg:my-60">
+        {/* test product section */}
+        <section className="w-3/4 flex items-center justify-center gap-4 my-12 sm:my-16 md:my-24 lg:my-60">
           <div className="w-full">
-            <h2 className="text-center md:text-start font-semibold text-xl sm:text-2xl md:text-3xl bg-gradient-to-r from-reflexBlue-300 to-lavender-300 text-transparent bg-clip-text py-2 sm:py-4">
+            <h2 className="text-center md:text-start font-semibold text-xl sm:text-2xl md:text-3xl bg-gradient-to-r from-reflexBlue-300 to-lavender-300 text-transparent bg-clip-text py-2 sm:py-4 ">
               HERE'S WHAT WE HAVE IN STORE FOR YOU
             </h2>
-            <Tabs defaultValue={services[0].category} className="w-full mt-4">
-              <TabsList className="flex flex-wrap justify-center rounded-md shadow-md bg-white/5 backdrop-blur-[3.5px] overflow-x-auto">
-                {services.map((service) => (
-                  <TabsTrigger
-                    key={service.category}
-                    value={service.category}
-                    className="px-2 py-2 sm:px-3 sm:py-3 text-xs sm:text-sm md:text-md font-semibold transition-all rounded-md data-[state=active]:bg-lavender-600 data-[state=active]:text-customNeutral-100"
-                  >
-                    {service.category}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-            </Tabs>
-            <p>1</p>
-            <p>2</p>
-            <p>3</p>
+
+            <div className="relative">
+              <Carousel>
+                <CarouselContent>
+                  {services.flatMap((service, categoryIndex) =>
+                    service.items.map((item, itemIndex) => (
+                      <CarouselItem
+                        key={`${categoryIndex}-${itemIndex}`}
+                        className="md:basis-1/3 lg:basis-1/3 "
+                      >
+                        <Card
+                          className="cursor-pointer transition h-64 flex flex-col rounded-lg"
+                          onClick={() => openDrawer(item)}
+                        >
+                          <CardHeader>
+                            <CardTitle>{item.name}</CardTitle>
+                          </CardHeader>
+                          <CardContent className="flex-grow">
+                            <p className="text-sm font-medium">{item.price}</p>
+                          </CardContent>
+                        </Card>
+                      </CarouselItem>
+                    ))
+                  )}
+                </CarouselContent>
+                <CarouselPrevious />
+                <CarouselNext />
+              </Carousel>
+            </div>
           </div>
+
+          <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
+            <DrawerContent className="p-4">
+              <DrawerHeader>
+                <DrawerTitle>{selectedService?.name}</DrawerTitle>
+                <DrawerDescription className="text-gray-600">
+                  {selectedService?.price}
+                </DrawerDescription>
+              </DrawerHeader>
+
+              {selectedService?.details && (
+                <ul className="mt-2 text-sm text-gray-700">
+                  {selectedService.details.map((detail, index) => (
+                    <li key={index}> • {detail}</li>
+                  ))}
+                </ul>
+              )}
+
+              <DrawerClose asChild>
+                <Button variant="outline" className="mt-4">
+                  RETURN
+                </Button>
+              </DrawerClose>
+            </DrawerContent>
+          </Drawer>
         </section>
 
         {/* Contact Section */}
