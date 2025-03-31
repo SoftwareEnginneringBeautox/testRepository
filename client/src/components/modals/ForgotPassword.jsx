@@ -28,6 +28,8 @@ import { Button } from "@/components/ui/Button";
 import ChevronLeftIcon from "@/assets/icons/ChevronLeftIcon";
 import ChevronRightIcon from "@/assets/icons/ChevronRightIcon";
 import EmailIcon from "@/assets/icons/EmailIcon";
+import PasswordIcon from "@/assets/icons/PasswordIcon";
+import ConfirmIcon from "@/assets/icons/ConfirmIcon";
 
 function ForgotPassword({ isOpen, onClose }) {
   const [step, setStep] = useState(1); // 1 = email, 2 = otp, 3 = reset password
@@ -119,10 +121,10 @@ function ForgotPassword({ isOpen, onClose }) {
               </InputTextField>
             </InputContainer>
             <div className="flex gap-4 w-full">
-              <Button variant="outline" onClick={onClose}>
+              <Button variant="outline" onClick={onClose} className="w-1/2">
                 <ChevronLeftIcon /> BACK
               </Button>
-              <Button type="submit">
+              <Button type="submit" className="w-1/2">
                 SUBMIT <ChevronRightIcon />
               </Button>
             </div>
@@ -151,10 +153,14 @@ function ForgotPassword({ isOpen, onClose }) {
               CLICK HERE TO RESEND
             </button>
             <div className="flex gap-4 w-full">
-              <Button variant="outline" onClick={() => setStep(1)}>
+              <Button
+                variant="outline"
+                onClick={() => setStep(1)}
+                className="w-1/2"
+              >
                 <ChevronLeftIcon /> BACK
               </Button>
-              <Button type="submit">
+              <Button type="submit" className="w-1/2">
                 SUBMIT <ChevronRightIcon />
               </Button>
             </div>
@@ -165,32 +171,54 @@ function ForgotPassword({ isOpen, onClose }) {
             onSubmit={handleResetPassword}
             className="flex flex-col gap-4 items-center"
           >
-            <p>Enter your new password.</p>
+            <p>
+              Enter a new password for your account and retype it to verify.
+            </p>
             <InputContainer>
               <InputLabel>New Password</InputLabel>
               <InputTextField>
+                <InputIcon>
+                  <PasswordIcon />
+                </InputIcon>
                 <Input
                   type="password"
                   placeholder="New Password"
-                  value={newPassword}
+                  // value={newPassword}
                   // onChange={(e) => setNewPassword(e.target.value)}
                   required
                 />
               </InputTextField>
             </InputContainer>
+
             <InputContainer>
               <InputLabel>Confirm Password</InputLabel>
               <InputTextField>
+                <InputIcon>
+                  <ConfirmIcon />
+                </InputIcon>
                 <Input
                   type="password"
                   placeholder="Confirm Password"
-                  value={confirmPassword}
+                  // value={confirmPassword}
                   // onChange={(e) => setConfirmPassword(e.target.value)}
                   required
                 />
               </InputTextField>
             </InputContainer>
-            <Button type="submit">RESET PASSWORD</Button>
+
+            <div className="flex gap-4 w-full">
+              <Button
+                variant="outline"
+                onClick={() => setStep(2)}
+                className="w-1/2"
+              >
+                <ChevronLeftIcon /> BACK
+              </Button>
+              <Button type="submit" className="w-1/2">
+                RESET PASSWORD <ChevronRightIcon />
+              </Button>
+            </div>
+
             {message && <p className="text-red-500">{message}</p>}
           </form>
         )}
