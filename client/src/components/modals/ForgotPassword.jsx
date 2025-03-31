@@ -209,7 +209,7 @@ function ForgotPassword({ isOpen, onClose }) {
             <div className="flex gap-4 w-full">
               <Button
                 variant="outline"
-                onClick={() => setStep(2)}
+                onClick={() => setStep(1)}
                 className="w-1/2"
               >
                 <ChevronLeftIcon /> BACK
