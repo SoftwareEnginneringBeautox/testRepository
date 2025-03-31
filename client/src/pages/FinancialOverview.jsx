@@ -79,7 +79,7 @@ function FinancialOverview() {
 
       {/* Sales Tracker Section */}
       <h2 className="font-bold text-[2rem]">SALES TRACKER</h2>
-      <SalesChart />
+      {/* <SalesChart /> */}
 
       <div className="flex justify-end">
         <Select>
