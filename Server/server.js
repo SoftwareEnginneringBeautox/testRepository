@@ -605,6 +605,46 @@ app.post('/api/manage-record', async (req, res) => {
 
 
 /* --------------------------------------------
+   SALES AND EXPENSES ENDPOINTS
+--------------------------------------------- */
+
+// Fetch Sales Data
+app.get("/sales", async (req, res) => {
+  try {
+    const result = await pool.query("SELECT * FROM sales_tracker ORDER BY date_transacted DESC");
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).send(err.message);
+  }
+});
+
+// Fetch Expenses Data
+app.get("/expenses", async (req, res) => {
+  try {
+    const result = await pool.query("SELECT * FROM expenses_tracker ORDER BY date DESC");
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).send(err.message);
+  }
+});
+
+// Fetch Financial Overview (Total Sales, Expenses, Net Income)
+app.get("/financial-overview", async (req, res) => {
+  try {
+    const totalSalesResult = await pool.query("SELECT SUM(payment) AS total_sales FROM sales_tracker");
+    const totalExpensesResult = await pool.query("SELECT SUM(expense) AS total_expenses FROM expenses_tracker");
+
+    const totalSales = totalSalesResult.rows[0].total_sales || 0;
+    const totalExpenses = totalExpensesResult.rows[0].total_expenses || 0;
+    const netIncome = totalSales - totalExpenses;
+
+    res.json({ totalSales, totalExpenses, netIncome });
+  } catch (err) {
+    res.status(500).send(err.message);
+  }
+});
+
+/* --------------------------------------------
    START THE SERVER
 --------------------------------------------- */
 app.listen(4000, () => {
