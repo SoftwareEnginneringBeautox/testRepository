@@ -2,48 +2,20 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/Button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/Tabs";
-import BeautoxLogo from "@/assets/logos/BeautoxLogo";
+import BeautoxLogo from "../assets/logos/Beautox.svg";
 import CalendarIcon from "@/assets/icons/CalendarIcon";
 import LoginIcon from "@/assets/icons/LoginIcon";
 import LocationIcon from "@/assets/icons/LocationIcon";
 import FacebookIcon from "@/assets/icons/FacebookIcon";
 import InstagramIcon from "@/assets/icons/InstagramIcon";
 import PhoneIcon from "@/assets/icons/PhoneIcon";
-import EmailIcon from "@/assets/icons/EmailIcon";
 
 import ScheduleAppointmentModal from "../components/modals/ScheduleAppointment";
-
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious
-} from "@/components/ui/Carousel";
-
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
-
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerHeader,
-  DrawerTitle
-} from "@/components/ui/Drawer";
+import EmailIcon from "@/assets/icons/EmailIcon";
 
 function LandingPage() {
   const navigate = useNavigate();
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
-
-  // Product Section
-  const [selectedService, setSelectedService] = useState(null);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-
-  const openDrawer = (service) => {
-    setSelectedService(service);
-    setIsDrawerOpen(true);
-  };
 
   const services = [
     {
@@ -212,98 +184,145 @@ function LandingPage() {
 
   return (
     <div className="w-full bg-[linear-gradient(135deg,_rgba(242,239,238,1)_0%,_rgba(239,218,192,1)_34%,_rgba(201,180,206,1)_67%,_rgba(241,234,228,1)_100%)]">
-      {/* Header - Fixed at top */}
-      <header className="fixed w-full flex justify-end p-2 sm:p-4 bg-transparent z-50">
+      <header className="fixed w-full flex justify-end items-center p-4 bg-transparent z-50">
+        <div className="flex items-center gap-8 mr-8">
+          <a href="#services" className="relative inline-block px-2 py-1 font-semibold overflow-hidden group text-gray-800">
+            Services
+            <span className="absolute left-0 bottom-0 block w-0 h-0.5 bg-lavender-400 transition-all duration-300 group-hover:w-full"></span>
+          </a>
+          <a href="#about" className="relative inline-block px-2 py-1 font-semibold overflow-hidden group text-gray-800">
+            About Us
+            <span className="absolute left-0 bottom-0 block w-0 h-0.5 bg-lavender-400 transition-all duration-300 group-hover:w-full"></span>
+          </a>
+        </div>
         <Button
           onClick={() => navigate("/login")}
           variant="outline"
-          className="border-none text-xs sm:text-sm md:text-base"
+          className="border-none"
         >
-          <LoginIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-          <span className="ml-1">LOGIN AS STAFF</span>
+          <LoginIcon />
+          LOGIN AS STAFF
         </Button>
       </header>
 
-      {/* Main Content Container */}
-      <div className="flex flex-col items-center justify-center gap-16 sm:gap-24 md:gap-32 lg:gap-40 min-h-screen py-16 px-4">
-        {/* Hero Section */}
+      <div className="flex flex-col items-center justify-center gap-40 min-h-screen">
+
         <section
           id="hero"
-          className="w-full sm:w-11/12 md:w-5/6 lg:w-3/4 flex flex-col md:flex-row justify-center items-center my-12 sm:my-16 md:my-24 lg:my-60 pt-12"
+          className="relative w-full h-[100vh] flex items-center px-8 md:px-16 lg:px-24"
+          style={{
+            background: "linear-gradient(to right, rgba(221, 213, 225, 0.8) 40%, rgba(230, 210, 240, 0.5) 60%, rgba(240, 230, 250, 0.3) 75%, rgba(255, 255, 255, 0) 100%), url('/images/LandingImage.png')",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat"
+          }}
         >
-          <div className="w-full md:w-1/2 flex flex-col gap-4 sm:gap-6 mb-8 md:mb-0">
+
+          <div className="md:w-1/4 lg:w-6/12 flex flex-col gap-2 relative z-8">
+            <img
+              src={BeautoxLogo}
+              alt="Beautox Logo"
+              className="mb-4 w-32 sm:w-36 md:w-40 lg:w-44 h-auto block mx-auto"
+            />
+
             <div className="flex flex-col gap-2">
-              <h2 className="text-2xl sm:text-3xl md:text-4xl leading-tight font-bold bg-gradient-to-r from-lavender-300 to-reflexBlue-400 text-transparent bg-clip-text">
-                WELCOME TO BEAUTOX
-              </h2>
-              <h3 className="font-semibold text-lg sm:text-xl md:text-2xl bg-gradient-to-r from-reflexBlue-300 to-lavender-300 text-transparent bg-clip-text">
-                Where Beauty meets Innovation
+              <h3
+                className="text-[30px] md:text-[80px] lg:text-[50px] leading-none bg-gradient-to-r from-purple-800 to-reflexBlue-400 text-transparent bg-clip-text font-semibold drop-shadow-lg"
+              >
+                Welcome to Beautox
               </h3>
+              <p className="font-semibold text-2xl bg-gradient-to-r from-reflexBlue-400 to-lavender-200 text-transparent bg-clip-text">
+                Where Beauty meets Innovation
+              </p>
             </div>
-            <p className="text-sm sm:text-base">
-              Discover personalized skincare, non-invasive treatments, and
-              advanced beauty solutions designed to enhance your natural glow.
-              Experience expert care and cutting-edge technology tailored to
-              your unique beauty goals.
+
+
+            <p className="text-lg text-gray-800 leading-relaxed">
+              Experience the pinnacle of skincare luxury with our  <br />personalized treatments.
+              Whether you're seeking a  <br /> rejuvenating facial, targeted acne treatment, or a
+              relaxing massage, our expert team is here to pamper you and address your unique
+              skincare needs.
             </p>
-            <Button
-              fullWidth="true"
-              onClick={() => setIsScheduleModalOpen(true)}
-              className="text-sm sm:text-base py-2 sm:py-3"
-            >
-              SET AN APPOINTMENT
-              <CalendarIcon className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
-            </Button>
           </div>
-          <div className="w-full md:w-1/2 flex items-center justify-center">
-            <BeautoxLogo className="h-full w-2/3 md:w-1/2 text-lavender-400 opacity-90" />
-          </div>
+
+    
+          <button
+            className="absolute bottom-16 left-8 md:left-16 lg:left-24 flex items-center justify-center gap-2 px-6 py-3 bg-purple-950 text-white rounded-lg text-lg font-semibold hover:bg-purple-900 transition w-full md:w-auto shadow-md"
+            onClick={() => setIsScheduleModalOpen(true)}
+          >
+            <CalendarIcon className="h-5 w-5" />
+            SET AN APPOINTMENT
+          </button>
         </section>
 
-        {/* Map Section */}
-        <section className="w-full sm:w-11/12 md:w-5/6 lg:w-3/4 flex flex-col md:flex-row items-center justify-center gap-6 md:gap-4">
-          <div className="w-full md:w-1/2 flex items-center justify-center">
+        <section className="w-3/4 flex flex-row items-center justify-center gap-4">
+          {/* Google Map */}
+          <div className="w-1/2 flex items-center justify-center rounded-half">
             <iframe
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1043.644141889592!2d121.03651836623278!3d14.614630075990188!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397b7656817cb95%3A0xc3a3721da76b89!2sSonema%20Square!5e0!3m2!1sen!2sph!4v1741322385811!5m2!1sen!2sph"
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
-              className="rounded-3xl w-full min-h-64"
+              className="rounded-3xl w-full min-h-10"
               height={300}
-              title="Beautox Location"
             ></iframe>
           </div>
-          <div className="w-full md:w-1/2 text-center md:text-end mt-4 md:mt-0">
-            <div className="flex flex-row gap-2 justify-center md:justify-end pb-2">
-              <h3 className="flex flex-row justify-center items-center font-semibold text-xl sm:text-2xl bg-gradient-to-r from-lavender-300 to-reflexBlue-400 text-transparent bg-clip-text">
-                <div className="text-lavender-400 h-full pr-1 flex items-center">
-                  <LocationIcon className="w-5 h-5" />
-                </div>
+
+          {/* Location & Info - Now Left Justified */}
+          <div className="w-1/2 text-left">
+            <div className="flex flex-row gap-2 items-center pb-2">
+              <div className="text-lavender-400 h-full pr-1 flex items-center">
+                <LocationIcon />
+              </div>
+              <h3 className="font-semibold text-2xl bg-gradient-to-r from-lavender-300 to-reflexBlue-400 text-transparent bg-clip-text">
                 DON'T KNOW WHERE TO FIND US?
               </h3>
             </div>
-            <p className="text-sm sm:text-base">
-              We are located at{" "}
-              <span className="font-bold">
-                J26P+XXR, N. Domingo, Quezon City, 1112 Metro Manila
-              </span>
-              , near Robinson's Magnolia.
+
+            <p className="text-gray-700">
+              Your journey to radiant skin starts here.  <br />
+              Let us pamper you with expert care.
             </p>
+
+            {/* Address */}
+            <div className="mt-3">
+              <p className="text-lg font-semibold">Address:</p>
+              <p className="text-gray-600">
+                J26P+XXR, N. Domingo, Quezon City, 1112 Metro Manila <br />
+                Near Robinson's Magnolia
+              </p>
+            </div>
+
+            {/* Operating Hours */}
+            <div className="mt-3">
+              <p className="text-lg font-semibold">Operating Hours:</p>
+              <p className="text-gray-600">
+                Mon - Fri: <span className="font-semibold">9am - 6pm</span>, Sat: <span className="font-semibold">10am - 4pm</span>
+              </p>
+            </div>
+
+            {/* Contact Information */}
+            <div className="mt-3">
+              <p className="text-lg font-semibold">Contact Us:</p>
+              <p className="text-gray-600">
+                Phone: <span className="font-semibold">0917-895-8825</span> <br />
+                Email: <span className="font-semibold">beautoxph@gmail.com</span>
+              </p>
+            </div>
           </div>
         </section>
 
-        {/* Services Section */}
-        <section className="w-full sm:w-11/12 md:w-5/6 lg:w-3/4 flex flex-col items-center justify-center gap-4 my-12 sm:my-16 md:my-24 lg:my-60">
+        <section id="services" className="w-3/4 flex flex-col items-center justify-center gap-4 my-60">
           <div className="w-full">
-            <h2 className="text-center md:text-start font-semibold text-xl sm:text-2xl md:text-3xl bg-gradient-to-r from-reflexBlue-300 to-lavender-300 text-transparent bg-clip-text py-2 sm:py-4">
+            <h2 className="text-start font-semibold text-3xl bg-gradient-to-r from-reflexBlue-300 to-lavender-300 text-transparent bg-clip-text py-4">
               HERE'S WHAT WE HAVE IN STORE FOR YOU
             </h2>
-            <Tabs defaultValue={services[0].category} className="w-full mt-4">
-              <TabsList className="flex flex-wrap justify-center rounded-md shadow-md bg-white/5 backdrop-blur-[3.5px] overflow-x-auto">
+            <Tabs defaultValue={services[0].category} className="w-full">
+              <TabsList className="flex rounded-md shadow-md bg-white/5 backdrop-blur-[3.5px] ">
                 {services.map((service) => (
                   <TabsTrigger
                     key={service.category}
                     value={service.category}
-                    className="px-2 py-2 sm:px-3 sm:py-3 text-xs sm:text-sm md:text-md font-semibold transition-all rounded-md data-[state=active]:bg-lavender-600 data-[state=active]:text-customNeutral-100"
+                    className="px-3 py-3 text-md font-semibold transition-all rounded-md data-[state=active]:bg-lavender-600 data-[state=active]:text-customNeutral-100"
                   >
                     {service.category}
                   </TabsTrigger>
@@ -316,27 +335,27 @@ function LandingPage() {
                   value={service.category}
                   className="mt-4"
                 >
-                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  <div className="grid gap-4">
                     {service.items.map((item, idx) => (
                       <div
                         key={idx}
-                        className="p-3 sm:p-4 bg-ash-200 shadow-md rounded-md text-sm sm:text-base"
+                        className="p-4 bg-ash-200 shadow-md rounded-md"
                       >
-                        <h4 className="font-semibold text-base sm:text-lg">
+                        <h4 className="font-semibold text-lg">
                           {item.name.toUpperCase()}
                         </h4>
                         <p className="text-lavender-400 font-bold">
                           {item.price}
                         </p>
                         {item.details && (
-                          <ul className="text-xs sm:text-sm text-reflexBlue-300 list-disc pl-4">
+                          <ul className="text-sm text-reflexBlue-300 list-disc pl-4">
                             {item.details.map((detail, i) => (
                               <li key={i}>{detail}</li>
                             ))}
                           </ul>
                         )}
                         {item.perSession && (
-                          <div className="text-xs sm:text-sm text-lavender-400">
+                          <div className="text-sm text-lavender-400">
                             <p className="font-medium">Per Session:</p>
                             <ul className="list-disc pl-4">
                               {Array.isArray(item.perSession) ? (
@@ -355,12 +374,12 @@ function LandingPage() {
                           </div>
                         )}
                         {item.note && (
-                          <p className="text-xs sm:text-sm text-red-500 italic">
+                          <p className="text-sm text-red-500 italic">
                             {item.note}
                           </p>
                         )}
                         {item.discount && (
-                          <p className="text-xs sm:text-sm text-reflexBlue-400 font-bold">
+                          <p className="text-sm text-reflexBlue-400 font-bold">
                             {item.discount}
                           </p>
                         )}
@@ -372,12 +391,12 @@ function LandingPage() {
                                 {sub.price}
                               </p>
                               {sub.details && (
-                                <p className="text-xs sm:text-sm text-gray-600">
+                                <p className="text-sm text-gray-600">
                                   {sub.details.join(", ")}
                                 </p>
                               )}
                               {sub.perSession && (
-                                <p className="text-xs sm:text-sm text-gray-600">
+                                <p className="text-sm text-gray-600">
                                   Per Session: {sub.perSession}
                                 </p>
                               )}
@@ -391,75 +410,10 @@ function LandingPage() {
             </Tabs>
           </div>
         </section>
-
-        {/* test product section */}
-        <section className="w-3/4 flex items-center justify-center gap-4 my-12 sm:my-16 md:my-24 lg:my-60">
-          <div className="w-full">
-            <h2 className="text-center md:text-start font-semibold text-xl sm:text-2xl md:text-3xl bg-gradient-to-r from-reflexBlue-300 to-lavender-300 text-transparent bg-clip-text py-2 sm:py-4 ">
-              HERE'S WHAT WE HAVE IN STORE FOR YOU
-            </h2>
-
-            <div className="relative">
-              <Carousel>
-                <CarouselContent>
-                  {services.flatMap((service, categoryIndex) =>
-                    service.items.map((item, itemIndex) => (
-                      <CarouselItem
-                        key={`${categoryIndex}-${itemIndex}`}
-                        className="md:basis-1/3 lg:basis-1/3 "
-                      >
-                        <Card
-                          className="cursor-pointer transition h-64 flex flex-col rounded-lg"
-                          onClick={() => openDrawer(item)}
-                        >
-                          <CardHeader>
-                            <CardTitle>{item.name}</CardTitle>
-                          </CardHeader>
-                          <CardContent className="flex-grow">
-                            <p className="text-sm font-medium">{item.price}</p>
-                          </CardContent>
-                        </Card>
-                      </CarouselItem>
-                    ))
-                  )}
-                </CarouselContent>
-                <CarouselPrevious />
-                <CarouselNext />
-              </Carousel>
-            </div>
-          </div>
-
-          <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-            <DrawerContent className="p-4">
-              <DrawerHeader>
-                <DrawerTitle>{selectedService?.name}</DrawerTitle>
-                <DrawerDescription className="text-gray-600">
-                  {selectedService?.price}
-                </DrawerDescription>
-              </DrawerHeader>
-
-              {selectedService?.details && (
-                <ul className="mt-2 text-sm text-gray-700">
-                  {selectedService.details.map((detail, index) => (
-                    <li key={index}> • {detail}</li>
-                  ))}
-                </ul>
-              )}
-
-              <DrawerClose asChild>
-                <Button variant="outline" className="mt-4">
-                  RETURN
-                </Button>
-              </DrawerClose>
-            </DrawerContent>
-          </Drawer>
-        </section>
-
-        {/* Contact Section */}
-        <section className="w-full sm:w-11/12 md:w-5/6 lg:w-3/4 flex flex-col-reverse md:flex-row gap-8 justify-center my-12 sm:my-16 md:my-24 lg:my-60">
-          <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-sm sm:text-base md:text-lg w-full md:w-1/2 mt-6 md:mt-0">
-            <li className="flex gap-2 justify-center sm:justify-start">
-              <FacebookIcon fill="#002B7F" className="w-5 h-5" />
+        <section className="w-3/4 flex flex-row gap-8 justify-center my-60">
+          <ul className="grid grid-cols-2 gap-x-6 gap-y-4 text-lg w-1/2 ">
+            <li className="flex gap-2 justify-center">
+              <FacebookIcon fill="#002B7F" />
               <a
                 href="https://www.facebook.com/BeautoxAestheticClinicNewManila"
                 target="_blank"
@@ -470,12 +424,12 @@ function LandingPage() {
               </a>
             </li>
 
-            <li className="flex gap-2 justify-center sm:justify-start">
-              <PhoneIcon className="w-5 h-5" />
+            <li className="flex gap-2 justify-center">
+              <PhoneIcon />
               0917-895-8825
             </li>
-            <li className="flex gap-2 justify-center sm:justify-start">
-              <InstagramIcon fill="#E1306C" className="w-5 h-5" />
+            <li className="flex gap-2 justify-center">
+              <InstagramIcon fill="#E1306C" />
               <a
                 href="https://www.instagram.com/beautoxnewmanila/"
                 target="_blank"
@@ -485,17 +439,16 @@ function LandingPage() {
                 INSTAGRAM
               </a>
             </li>
-            <li className="flex gap-2 justify-center sm:justify-start">
-              <EmailIcon className="w-5 h-5" />
+            <li className="flex gap-2 justify-center">
+              <EmailIcon />
               beautoxph@gmail.com
             </li>
           </ul>
-          <h3 className="w-full md:w-1/2 text-xl sm:text-2xl md:text-3xl text-center md:text-end font-bold bg-gradient-to-r from-lavender-300 to-reflexBlue-400 text-transparent bg-clip-text">
+          <h3 className="w-1/2 text-3xl text-end font-bold bg-gradient-to-r from-lavender-300 to-reflexBlue-400 text-transparent bg-clip-text">
             WANT TO LEARN MORE ABOUT US? FIND US HERE
           </h3>
         </section>
       </div>
-
       {/* Schedule Appointment Modal */}
       <ScheduleAppointmentModal
         isOpen={isScheduleModalOpen}
