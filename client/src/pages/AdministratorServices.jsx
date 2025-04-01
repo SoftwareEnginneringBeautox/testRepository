@@ -86,6 +86,23 @@ function AdministratorServices() {
     openModal("editPackage");
   };
   
+  const handleEditPackage = async (updatedData) => {
+    await fetch(`${API_BASE_URL}/api/manage-record`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({
+        table: "packages",
+        id: updatedData.id,
+        action: "edit",
+        data: updatedData
+      }),
+    });
+  
+    closeModal();
+    fetchPackages();
+  };
+  
 
   const handleArchive = async () => {
     console.log("ARCHIVE BUTTON CLICKED", selectedPackage?.id);
@@ -259,7 +276,10 @@ function AdministratorServices() {
       )}
       {currentModal === "editPackage" && selectedPackage && (
         <EditPackage isOpen={true} 
-        onClose={closeModal} />
+        onClose={closeModal}
+        entryData={selectedPackage}
+        onSubmit={handleEditPackage}
+     />
       )}
       {currentModal === "deletePackage" && selectedPackage && (
         <DeletePackage isOpen={true} 

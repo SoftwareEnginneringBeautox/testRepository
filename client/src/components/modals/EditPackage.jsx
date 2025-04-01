@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 
 import {
   ModalContainer,
@@ -28,8 +28,42 @@ import HashtagIcon from "@/assets/icons/HashtagIcon";
 import PesoIcon from "@/assets/icons/PesoIcon";
 import EditIcon from "@/assets/icons/EditIcon";
 
-function EditPackage({ isOpen, onClose }) {
+function EditPackage({ isOpen, onClose, entryData, onSubmit }) {
+  const [formData, setFormData] = useState({
+    package_name: "",
+    treatment: "",
+    sessions: "",
+    price: ""
+  });
+
+  useEffect(() => {
+    if (entryData) {
+      setFormData({
+        package_name: entryData.package_name || "",
+        treatment: entryData.treatment || "",
+        sessions: entryData.sessions || "",
+        price: entryData.price || ""
+      });
+    }
+  }, [entryData]);
+
+  
   if (!isOpen) return null;
+  
+  const handleSubmit = () => {
+    if (!entryData?.id) {
+      console.error("entryData is missing or invalid");
+      return;
+    }
+    
+    const cleanedData = { ...originalData, ...formData };
+    Object.keys(cleanedData).forEach((key) => {
+      if (cleanedData[key] === "") delete cleanedData[key];
+    });
+    
+    onSubmit({ id: entryData.id, ...cleanedData });
+    
+  };
 
   return (
     <ModalContainer>
@@ -40,7 +74,7 @@ function EditPackage({ isOpen, onClose }) {
         <ModalTitle>EDIT PACKAGE</ModalTitle>
       </ModalHeader>
       <ModalBody>
-        <form action="">
+        <form onSubmit={(e) => e.preventDefault()}>
           <div className="flex flex-col gap-4">
             <InputContainer>
               <InputLabel>PACKAGE NAME</InputLabel>
@@ -48,7 +82,13 @@ function EditPackage({ isOpen, onClose }) {
                 <InputIcon>
                   <UserIcon />
                 </InputIcon>
-                <Input placeholder="Name of the Package" />
+                <Input
+                  placeholder="Name of the Package"
+                  value={formData.package_name}
+                  onChange={(e) =>
+                    setFormData({ ...formData, package_name: e.target.value })
+                  }
+                />
               </InputTextField>
             </InputContainer>
             <InputContainer>
@@ -57,6 +97,10 @@ function EditPackage({ isOpen, onClose }) {
               <ModalSelect
                 placeholder="Treatments chosen"
                 icon={<TreatmentIcon className="w-4 h-4 " />}
+                value={formData.treatment}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, treatment: value })
+                }
               >
                 <SelectItem value="AESTHETICIAN">AESTHETICIAN</SelectItem>
                 <SelectItem value="RECEPTIONIST">RECEPTIONIST</SelectItem>
@@ -71,11 +115,11 @@ function EditPackage({ isOpen, onClose }) {
                 </InputIcon>
                 <Input
                   placeholder="Number of treatments to be taken"
-                  type="text"
-                  inputMode="decimal"
-                  pattern="\\d+(\\.\\d{0,2})?"
-                  min="0"
-                  step="0.01"
+                  type="number"
+                  value={formData.sessions}
+                  onChange={(e) =>
+                    setFormData({ ...formData, sessions: e.target.value })
+                  }
                 />
               </InputTextField>
             </InputContainer>
@@ -88,11 +132,11 @@ function EditPackage({ isOpen, onClose }) {
                 </InputIcon>
                 <Input
                   placeholder="Total amount to pay"
-                  type="text"
-                  inputMode="decimal"
-                  pattern="\\d+(\\.\\d{0,2})?"
-                  min="0"
-                  step="0.01"
+                  type="number"
+                  value={formData.price}
+                  onChange={(e) =>
+                    setFormData({ ...formData, price: e.target.value })
+                  }
                 />
               </InputTextField>
             </InputContainer>
@@ -102,7 +146,7 @@ function EditPackage({ isOpen, onClose }) {
               <ChevronLeftIcon />
               CANCEL AND RETURN
             </Button>
-            <Button className="w-1/2">
+            <Button className="w-1/2" onClick={handleSubmit}>
               <EditIcon />
               EDIT PACKAGE
             </Button>
