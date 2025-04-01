@@ -101,7 +101,18 @@ function PatientRecordsDatabase() {
     fetchRecords(); // instead of refreshData()
   };
 
-  const handleEditPatientEntry = async (updatedData) => {
+  const sanitizeData = (data) => {
+    const cleaned = { ...data };
+    if (cleaned.total_amount === "") cleaned.total_amount = null;
+    if (cleaned.payment_method === "") cleaned.payment_method = null;
+    if (cleaned.treatment === "") cleaned.treatment = null;
+    if (cleaned.person_in_charge === "") cleaned.person_in_charge = null;
+    return cleaned;
+  };
+
+  const handleEditPatientEntry = async (updatedData) => {  
+    const safeData = sanitizeData(updatedData);
+    console.log("✏️ Sent data:", safeData);
     await fetch(`${API_BASE_URL}/api/manage-record`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -110,7 +121,7 @@ function PatientRecordsDatabase() {
         table: "patient_records",
         id: updatedData.id,
         action: "edit",
-        data: updatedData
+        data: safeData
       }),
     });
   
@@ -386,7 +397,7 @@ function PatientRecordsDatabase() {
           isOpen={true}
           onClose={handleModalClose}
           entryData={selectedEntry}
-          onArchive={handleArchive} // Pass the handleArchive function to the modal
+          onArchive={handleArchive} // Pass the handleArchive function to update the modal
         />
       )}
     </div>

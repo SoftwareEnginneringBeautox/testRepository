@@ -585,7 +585,8 @@ app.post('/api/manage-record', async (req, res) => {
       const setClause = fields.map((field, idx) => `${field} = $${idx + 1}`).join(', ');
       const query = `UPDATE ${table} SET ${setClause} WHERE id = $${fields.length + 1}`;
       await pool.query(query, [...values, id]);
-
+      console.log("🔧 Incoming update fields:", fields);
+      console.log("🧾 Incoming update values:", values);
       return res.json({ success: true, message: `${table} record updated` });
     }
 
