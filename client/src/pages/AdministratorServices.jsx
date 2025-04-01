@@ -3,7 +3,7 @@ import "../App.css";
 import { useModal } from "@/hooks/useModal";
 import CreatePackage from "@/components/modals/CreatePackage";
 import EditPackage from "@/components/modals/EditPackage";
-import DeletePackage from "@/components/modals/DeletePackage";
+import ArchivePackage from "@/components/modals/ArchivePackage";
 import CreateTreatment from "@/components/modals/CreateTreatment";
 // (Optional: Import EditTreatment and DeleteTreatment modals if implemented)
 // import EditTreatment from "@/components/modals/EditTreatment";
@@ -15,7 +15,7 @@ import {
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
+  TableRow
 } from "@/components/ui/Table";
 
 import {
@@ -23,7 +23,7 @@ import {
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuTrigger,
+  DropdownMenuTrigger
 } from "@/components/ui/DropdownMenu";
 
 import { Button } from "@/components/ui/Button";
@@ -56,7 +56,7 @@ function AdministratorServices() {
   const fetchTreatments = async () => {
     try {
       const response = await axios.get(`${API_BASE_URL}/api/treatments`, {
-        withCredentials: true,
+        withCredentials: true
       });
       setTreatmentsData(response.data);
     } catch (error) {
@@ -68,7 +68,7 @@ function AdministratorServices() {
   const fetchPackages = async () => {
     try {
       const response = await axios.get(`${API_BASE_URL}/api/packages`, {
-        withCredentials: true,
+        withCredentials: true
       });
       setPackagesData(response.data.filter((item) => !item.archived));
     } catch (error) {
@@ -80,12 +80,12 @@ function AdministratorServices() {
     setSelectedPackage(pkg);
     openModal("deletePackage");
   };
-  
+
   const handleSelectPackageToEdit = (pkg) => {
     setSelectedPackage(pkg);
     openModal("editPackage");
   };
-  
+
   const handleEditPackage = async (updatedData) => {
     await fetch(`${API_BASE_URL}/api/manage-record`, {
       method: "POST",
@@ -96,19 +96,18 @@ function AdministratorServices() {
         id: updatedData.id,
         action: "edit",
         data: updatedData
-      }),
+      })
     });
-  
+
     closeModal();
     fetchPackages();
   };
-  
 
   const handleArchive = async () => {
     console.log("ARCHIVE BUTTON CLICKED", selectedPackage?.id);
-  
+
     if (!selectedPackage?.id) return;
-  
+
     await fetch(`${API_BASE_URL}/api/manage-record`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -116,10 +115,10 @@ function AdministratorServices() {
       body: JSON.stringify({
         table: "packages",
         id: selectedPackage.id,
-        action: "archive",
-      }),
+        action: "archive"
+      })
     });
-  
+
     closeModal();
     fetchPackages();
   };
@@ -154,9 +153,15 @@ function AdministratorServices() {
           {treatmentsData.length > 0 ? (
             treatmentsData.map((treatment) => (
               <TableRow key={treatment.id}>
-                <TableCell className="py-4 text-center">{treatment.id}</TableCell>
-                <TableCell className="py-4 text-center">{treatment.treatment_name}</TableCell>
-                <TableCell className="py-4 text-center">₱{treatment.price}</TableCell>
+                <TableCell className="py-4 text-center">
+                  {treatment.id}
+                </TableCell>
+                <TableCell className="py-4 text-center">
+                  {treatment.treatment_name}
+                </TableCell>
+                <TableCell className="py-4 text-center">
+                  ₱{treatment.price}
+                </TableCell>
                 <TableCell className="py-4 text-center">
                   <DropdownMenu>
                     <DropdownMenuTrigger>
@@ -164,12 +169,16 @@ function AdministratorServices() {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
                       <DropdownMenuGroup>
-                        <DropdownMenuItem onClick={() => openModal("editTreatment")}>
+                        <DropdownMenuItem
+                          onClick={() => openModal("editTreatment")}
+                        >
                           <EditIcon />
                           <p className="font-semibold">Edit</p>
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => openModal("deleteTreatment")}>
-                          <DeleteIcon />
+                        <DropdownMenuItem
+                          onClick={() => openModal("archiveTreatment")}
+                        >
+                          <ArchiveIcon />
                           <p className="font-semibold">Archive</p>
                         </DropdownMenuItem>
                       </DropdownMenuGroup>
@@ -217,9 +226,15 @@ function AdministratorServices() {
             packagesData.map((pkg) => (
               <TableRow key={pkg.id}>
                 <TableCell className="py-4 text-center">{pkg.id}</TableCell>
-                <TableCell className="py-4 text-center">{pkg.package_name}</TableCell>
-                <TableCell className="py-4 text-center">{pkg.treatment}</TableCell>
-                <TableCell className="py-4 text-center">{pkg.sessions}</TableCell>
+                <TableCell className="py-4 text-center">
+                  {pkg.package_name}
+                </TableCell>
+                <TableCell className="py-4 text-center">
+                  {pkg.treatment}
+                </TableCell>
+                <TableCell className="py-4 text-center">
+                  {pkg.sessions}
+                </TableCell>
                 <TableCell className="py-4 text-center">₱{pkg.price}</TableCell>
                 <TableCell className="py-4 text-center">
                   <DropdownMenu>
@@ -228,11 +243,15 @@ function AdministratorServices() {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
                       <DropdownMenuGroup>
-                        <DropdownMenuItem onClick={() => handleSelectPackageToEdit(pkg)}>
+                        <DropdownMenuItem
+                          onClick={() => handleSelectPackageToEdit(pkg)}
+                        >
                           <EditIcon />
                           <p className="font-semibold">Edit</p>
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleSelectPackageToArchive(pkg)}>
+                        <DropdownMenuItem
+                          onClick={() => handleSelectPackageToArchive(pkg)}
+                        >
                           <DeleteIcon />
                           <p className="font-semibold">Delete</p>
                         </DropdownMenuItem>
@@ -275,17 +294,19 @@ function AdministratorServices() {
         />
       )}
       {currentModal === "editPackage" && selectedPackage && (
-        <EditPackage isOpen={true} 
-        onClose={closeModal}
-        entryData={selectedPackage}
-        onSubmit={handleEditPackage}
-     />
+        <EditPackage
+          isOpen={true}
+          onClose={closeModal}
+          entryData={selectedPackage}
+          onSubmit={handleEditPackage}
+        />
       )}
       {currentModal === "deletePackage" && selectedPackage && (
-        <DeletePackage isOpen={true} 
-        onClose={closeModal} 
-        entryData={selectedPackage} 
-        onArchive={handleArchive} 
+        <DeletePackage
+          isOpen={true}
+          onClose={closeModal}
+          entryData={selectedPackage}
+          onArchive={handleArchive}
         />
       )}
       {currentModal === "createTreatment" && (
@@ -301,7 +322,7 @@ function AdministratorServices() {
       {/* {currentModal === "editTreatment" && (
         <EditTreatment isOpen={true} onClose={closeModal} />
       )}
-      {currentModal === "deleteTreatment" && (
+      {currentModal === "archiveTreatmentTreatment" && (
         <DeleteTreatment isOpen={true} onClose={closeModal} />
       )} */}
     </div>

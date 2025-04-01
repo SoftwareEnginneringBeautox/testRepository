@@ -8,6 +8,10 @@ import CreateMonthlySales from "@/components/modals/CreateMonthlySales";
 import EditMonthlySales from "@/components/modals/EditMonthlySales";
 import DeleteMonthlySales from "@/components/modals/DeleteMonthlySales";
 
+import CreateCategory from "@/components/modals/CreateCategory";
+import EditCategory from "@/components/modals/EditCategory";
+import ArchiveCategory from "@/components/modals/ArchiveCategory";
+
 import { Button } from "@/components/ui/Button";
 
 import FilterIcon from "../assets/icons/FilterIcon";
@@ -15,8 +19,8 @@ import ChevronLeftIcon from "../assets/icons/ChevronLeftIcon";
 import DownloadIcon from "../assets/icons/DownloadIcon";
 import PlusIcon from "../assets/icons/PlusIcon";
 import EditIcon from "@/assets/icons/EditIcon";
-import DeleteIcon from "@/assets/icons/DeleteIcon";
 import EllipsisIcon from "@/assets/icons/EllipsisIcon";
+import ArchiveIcon from "@/assets/icons/ArchiveIcon";
 
 import SalesChart from "../components/SalesChart";
 import BeautoxPieChart from "../components/BeautoxPieChart";
@@ -58,7 +62,6 @@ function FinancialOverview() {
   const [salesData, setSalesData] = useState([]);
   const [expensesData, setExpensesData] = useState([]);
 
-  // Modal hook from the second file
   const { currentModal, openModal, closeModal } = useModal();
 
   // Static chart data and config from the second file
@@ -489,18 +492,73 @@ function FinancialOverview() {
               </TableHeader>
               <TableBody>
                 <TableRow>
-                  <TableCell className="flex items-center justify-between gap-4 h-full">
-                    CHECK 1 <DeleteIcon />
+                  <TableCell className="flex items-center justify-between gap-4 h-full w-full">
+                    CHECK 1
+                    <DropdownMenu>
+                      <DropdownMenuTrigger>
+                        <EllipsisIcon />
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent>
+                        <DropdownMenuGroup>
+                          <DropdownMenuItem
+                            onClick={() => {
+                              openModal("editCategory");
+                            }}
+                          >
+                            <EditIcon />
+                            <p className="font-semibold">Edit</p>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => {
+                              openModal("archiveCategory");
+                            }}
+                          >
+                            <ArchiveIcon />
+                            <p className="font-semibold">Archive</p>
+                          </DropdownMenuItem>
+                        </DropdownMenuGroup>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell className="flex items-center justify-between gap-4 h-full">
-                    CHECK 2 <DeleteIcon />
+                  <TableCell className="flex items-center justify-between gap-4 h-full w-full">
+                    CHECK 2
+                    <DropdownMenu>
+                      <DropdownMenuTrigger>
+                        <EllipsisIcon />
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent>
+                        <DropdownMenuGroup>
+                          <DropdownMenuItem
+                            onClick={() => {
+                              openModal("editCategory");
+                            }}
+                          >
+                            <EditIcon />
+                            <p className="font-semibold">Edit</p>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => {
+                              openModal("archiveCategory");
+                            }}
+                          >
+                            <ArchiveIcon />
+                            <p className="font-semibold">Archive</p>
+                          </DropdownMenuItem>
+                        </DropdownMenuGroup>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </TableCell>
                 </TableRow>
               </TableBody>
             </Table>
-            <Button fullWidth={true}>
+            <Button
+              fullWidth={true}
+              onClick={() => {
+                openModal("createCategory");
+              }}
+            >
               <PlusIcon />
               ADD NEW CATEGORY
             </Button>
@@ -557,8 +615,8 @@ function FinancialOverview() {
                               openModal("deleteMonthlyExpense"); // Match your modal name
                             }}
                           >
-                            <DeleteIcon />
-                            <p className="font-semibold">Delete</p>
+                            <ArchiveIcon />
+                            <p className="font-semibold">Archive</p>
                           </DropdownMenuItem>
                         </DropdownMenuGroup>
                       </DropdownMenuContent>
@@ -625,6 +683,15 @@ function FinancialOverview() {
           onClose={closeModal}
           onArchive={handleArchiveExpense}
         />
+      )}
+      {currentModal === "createCategory" && (
+        <CreateCategory isOpen onClose={closeModal} />
+      )}
+      {currentModal === "editCategory" && (
+        <EditCategory isOpen onClose={closeModal} />
+      )}
+      {currentModal === "archiveCategory" && (
+        <ArchiveCategory isOpen onClose={closeModal} />
       )}
     </div>
   );

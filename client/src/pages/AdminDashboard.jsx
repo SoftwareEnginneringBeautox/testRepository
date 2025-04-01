@@ -4,7 +4,7 @@ import { useModal } from "@/hooks/useModal";
 import { Button } from "@/components/ui/Button";
 import CreateStaff from "@/components/modals/CreateStaff";
 import ModifyStaff from "@/components/modals/ModifyStaff";
-import DeleteStaff from "@/components/modals/DeleteStaff";
+import ArchiveStaff from "@/components/modals/ArchiveStaff";
 import SalesChart from "../components/SalesChart";
 import PlusIcon from "../assets/icons/PlusIcon";
 import UserIcon from "../assets/icons/UserIcon";
@@ -41,7 +41,9 @@ import axios from "axios";
 const API_BASE_URL = process.env.VITE_API_URL;
 
 function AdministratorDashboard() {
-  const [userName, setUserName] = useState(localStorage.getItem("username") || "");
+  const [userName, setUserName] = useState(
+    localStorage.getItem("username") || ""
+  );
   const { currentModal, openModal, closeModal } = useModal();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [view, setView] = useState("monthly");
@@ -207,7 +209,8 @@ function AdministratorDashboard() {
             >
               <div className="flex flex-col">
                 <span className="font-semibold">{staff.username}</span>
-                {(staff.role === "receptionist" || staff.role === "aesthetician") && (
+                {(staff.role === "receptionist" ||
+                  staff.role === "aesthetician") && (
                   <span className="text-sm text-gray-500 capitalize">
                     ({staff.role})
                   </span>

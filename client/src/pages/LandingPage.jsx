@@ -186,11 +186,17 @@ function LandingPage() {
     <div className="w-full bg-[linear-gradient(135deg,_rgba(242,239,238,1)_0%,_rgba(239,218,192,1)_34%,_rgba(201,180,206,1)_67%,_rgba(241,234,228,1)_100%)]">
       <header className="fixed w-full flex justify-end items-center p-4 bg-transparent z-50">
         <div className="flex items-center gap-8 mr-8">
-          <a href="#services" className="relative inline-block px-2 py-1 font-semibold overflow-hidden group text-gray-800">
+          <a
+            href="#services"
+            className="relative inline-block px-2 py-1 font-semibold overflow-hidden group text-gray-800"
+          >
             Services
             <span className="absolute left-0 bottom-0 block w-0 h-0.5 bg-lavender-400 transition-all duration-300 group-hover:w-full"></span>
           </a>
-          <a href="#about" className="relative inline-block px-2 py-1 font-semibold overflow-hidden group text-gray-800">
+          <a
+            href="#about"
+            className="relative inline-block px-2 py-1 font-semibold overflow-hidden group text-gray-800"
+          >
             About Us
             <span className="absolute left-0 bottom-0 block w-0 h-0.5 bg-lavender-400 transition-all duration-300 group-hover:w-full"></span>
           </a>
@@ -206,18 +212,17 @@ function LandingPage() {
       </header>
 
       <div className="flex flex-col items-center justify-center gap-40 min-h-screen">
-
         <section
           id="hero"
           className="relative w-full h-[100vh] flex items-center px-8 md:px-16 lg:px-24"
           style={{
-            background: "linear-gradient(to right, rgba(221, 213, 225, 0.8) 40%, rgba(230, 210, 240, 0.5) 60%, rgba(240, 230, 250, 0.3) 75%, rgba(255, 255, 255, 0) 100%), url('/images/LandingImage.png')",
+            background:
+              "linear-gradient(to right, rgba(221, 213, 225, 0.8) 40%, rgba(230, 210, 240, 0.5) 60%, rgba(240, 230, 250, 0.3) 75%, rgba(255, 255, 255, 0) 100%), url('/images/LandingImage.png')",
             backgroundSize: "cover",
             backgroundPosition: "center",
             backgroundRepeat: "no-repeat"
           }}
         >
-
           <div className="md:w-1/4 lg:w-6/12 flex flex-col gap-2 relative z-8">
             <img
               src={BeautoxLogo}
@@ -226,9 +231,7 @@ function LandingPage() {
             />
 
             <div className="flex flex-col gap-2">
-              <h3
-                className="text-[30px] md:text-[80px] lg:text-[50px] leading-none bg-gradient-to-r from-purple-800 to-reflexBlue-400 text-transparent bg-clip-text font-semibold drop-shadow-lg"
-              >
+              <h3 className="text-[30px] md:text-[80px] lg:text-[50px] leading-none bg-gradient-to-r from-purple-800 to-reflexBlue-400 text-transparent bg-clip-text font-semibold drop-shadow-lg">
                 Welcome to Beautox
               </h3>
               <p className="font-semibold text-2xl bg-gradient-to-r from-reflexBlue-400 to-lavender-200 text-transparent bg-clip-text">
@@ -236,16 +239,15 @@ function LandingPage() {
               </p>
             </div>
 
-
             <p className="text-lg text-gray-800 leading-relaxed">
-              Experience the pinnacle of skincare luxury with our  <br />personalized treatments.
-              Whether you're seeking a  <br /> rejuvenating facial, targeted acne treatment, or a
-              relaxing massage, our expert team is here to pamper you and address your unique
-              skincare needs.
+              Experience the pinnacle of skincare luxury with our <br />
+              personalized treatments. Whether you're seeking a <br />{" "}
+              rejuvenating facial, targeted acne treatment, or a relaxing
+              massage, our expert team is here to pamper you and address your
+              unique skincare needs.
             </p>
           </div>
 
-    
           <button
             className="absolute bottom-16 left-8 md:left-16 lg:left-24 flex items-center justify-center gap-2 px-6 py-3 bg-purple-950 text-white rounded-lg text-lg font-semibold hover:bg-purple-900 transition w-full md:w-auto shadow-md"
             onClick={() => setIsScheduleModalOpen(true)}
@@ -268,7 +270,7 @@ function LandingPage() {
           </div>
 
           {/* Location & Info - Now Left Justified */}
-          <div className="w-1/2 text-left">
+          <div className="w-1/2 text-left flex flex-row gap-4">
             <div className="flex flex-row gap-2 items-center pb-2">
               <div className="text-lavender-400 h-full pr-1 flex items-center">
                 <LocationIcon />
@@ -279,7 +281,7 @@ function LandingPage() {
             </div>
 
             <p className="text-gray-700">
-              Your journey to radiant skin starts here.  <br />
+              Your journey to radiant skin starts here. <br />
               Let us pamper you with expert care.
             </p>
 
@@ -296,22 +298,17 @@ function LandingPage() {
             <div className="mt-3">
               <p className="text-lg font-semibold">Operating Hours:</p>
               <p className="text-gray-600">
-                Mon - Fri: <span className="font-semibold">9am - 6pm</span>, Sat: <span className="font-semibold">10am - 4pm</span>
-              </p>
-            </div>
-
-            {/* Contact Information */}
-            <div className="mt-3">
-              <p className="text-lg font-semibold">Contact Us:</p>
-              <p className="text-gray-600">
-                Phone: <span className="font-semibold">0917-895-8825</span> <br />
-                Email: <span className="font-semibold">beautoxph@gmail.com</span>
+                Mon - Fri: <span className="font-semibold">9am - 6pm</span>,
+                Sat: <span className="font-semibold">10am - 4pm</span>
               </p>
             </div>
           </div>
         </section>
 
-        <section id="services" className="w-3/4 flex flex-col items-center justify-center gap-4 my-60">
+        <section
+          id="services"
+          className="w-3/4 flex flex-col items-center justify-center gap-4 my-60"
+        >
           <div className="w-full">
             <h2 className="text-start font-semibold text-3xl bg-gradient-to-r from-reflexBlue-300 to-lavender-300 text-transparent bg-clip-text py-4">
               HERE'S WHAT WE HAVE IN STORE FOR YOU

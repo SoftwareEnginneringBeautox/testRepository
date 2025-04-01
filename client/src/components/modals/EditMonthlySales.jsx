@@ -6,34 +6,41 @@ import {
   ModalIcon,
   ModalBody
 } from "@/components/ui/Modal";
+
 import {
   InputContainer,
   InputTextField,
   InputLabel,
-  InputIcon,
-  ModalSelect,
-  SelectItem
+  InputIcon
 } from "@/components/ui/Input";
+
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem
+} from "@/components/ui/Select";
+
 import { Button } from "../ui/Button";
 import PesoIcon from "@/assets/icons/PesoIcon";
 import CoinsIcon from "@/assets/icons/CoinsIcon";
 import ChevronLeftIcon from "@/assets/icons/ChevronLeftIcon";
 import EditIcon from "@/assets/icons/EditIcon";
-import ExpenseTypeIcon from "@/assets/icons/ExpenseTypeIcon";
 
 function EditMonthlySales({ isOpen, onClose, onEditSuccess, initialData }) {
   const [formData, setFormData] = useState({
-    amount: '',
-    category: '',
-    date: ''
+    amount: "",
+    category: "",
+    date: ""
   });
 
   useEffect(() => {
     if (initialData) {
       setFormData({
-        amount: initialData.amount || '',
-        category: initialData.category || '',
-        date: initialData.date || ''
+        amount: initialData.amount || "",
+        category: initialData.category || "",
+        date: initialData.date || ""
       });
     }
   }, [initialData]);
@@ -42,7 +49,7 @@ function EditMonthlySales({ isOpen, onClose, onEditSuccess, initialData }) {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [name]: value
     }));
@@ -92,12 +99,18 @@ function EditMonthlySales({ isOpen, onClose, onEditSuccess, initialData }) {
               <Select
                 name="category"
                 value={formData.category}
-                onValueChange={(value) => handleChange({ target: { name: "category", value } })}
+                onValueChange={(value) =>
+                  handleChange({ target: { name: "category", value } })
+                }
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select category" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="DAILY EXPENSE">DAILY EXPENSE</SelectItem>
+                  <SelectItem value="MONTHLY PURCHASE ORDER">
+                    MONTHLY PURCHASE ORDER
+                  </SelectItem>
                   <SelectItem value="SALARY">SALARY</SelectItem>
                   <SelectItem value="COMMISSIONS">COMMISSIONS</SelectItem>
                   <SelectItem value="ELECTRICITY">ELECTRICITY</SelectItem>
@@ -128,7 +141,12 @@ function EditMonthlySales({ isOpen, onClose, onEditSuccess, initialData }) {
             </InputContainer>
           </div>
           <div className="flex flex-row gap-4 mt-6 w-full">
-            <Button variant="outline" className="w-1/2" onClick={onClose} type="button">
+            <Button
+              variant="outline"
+              className="w-1/2"
+              onClick={onClose}
+              type="button"
+            >
               <ChevronLeftIcon />
               CANCEL AND RETURN
             </Button>

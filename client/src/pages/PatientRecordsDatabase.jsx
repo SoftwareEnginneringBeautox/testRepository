@@ -36,7 +36,7 @@ import {
 
 import CreatePatientEntry from "@/components/modals/CreatePatientEntry";
 import UpdatePatientEntry from "@/components/modals/UpdatePatientEntry";
-import DeletePatientEntry from "@/components/modals/DeletePatientEntry";
+import ArchivePatientEntry from "@/components/modals/ArchivePatientEntry";
 
 // Import date-fns for date formatting
 import { format } from "date-fns";
@@ -79,9 +79,9 @@ function PatientRecordsDatabase() {
   };
 
   // Open delete entry modal
-  const handleOpenDeleteEntry = (record) => {
+  const handleOpenArchiveEntry = (record) => {
     setSelectedEntry(record);
-    openModal("deleteEntry");
+    openModal("archiveEntry");
   };
 
   const handleArchive = async () => {
@@ -367,7 +367,7 @@ function PatientRecordsDatabase() {
                     </button>
                     <button
                       className="text-reflexBlue-400"
-                      onClick={() => handleOpenDeleteEntry(record)}
+                      onClick={() => handleOpenArchiveEntry(record)}
                     >
                       <ArchiveIcon />
                     </button>
@@ -408,8 +408,8 @@ function PatientRecordsDatabase() {
           onSubmit={handleEditPatientEntry} // Pass the handleEditPatientEntry function to the modal
         />
       )}
-      {currentModal === "deleteEntry" && selectedEntry && (
-        <DeletePatientEntry
+      {currentModal === "archiveEntry" && selectedEntry && (
+        <ArchivePatientEntry
           isOpen={true}
           onClose={handleModalClose}
           entryData={selectedEntry}
