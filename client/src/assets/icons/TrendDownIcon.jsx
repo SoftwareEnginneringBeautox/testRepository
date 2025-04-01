@@ -1,9 +1,10 @@
-const TrendDownIcon = ({ size = 24, fill = "currentColor" }) => (
+const TrendDownIcon = ({ size = 24, fill = "currentColor", className }) => (
   <svg
+    className={className}
     width={size}
     height={size}
     viewBox="0 0 24 24"
-    fill="none"
+    fill={fill}
     xmlns="http://www.w3.org/2000/svg"
   >
     <mask

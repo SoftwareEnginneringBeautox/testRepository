@@ -49,8 +49,13 @@ const ChartContainer = React.forwardRef(
 ChartContainer.displayName = "Chart";
 
 const ChartStyle = ({ id, config }) => {
+  if (!config) {
+    console.error("Chart config is undefined or null");
+    return null;
+  }
+
   const colorConfig = Object.entries(config).filter(
-    ([, config]) => config.theme || config.color
+    ([, itemConfig]) => itemConfig.theme || itemConfig.color
   );
 
   if (!colorConfig.length) {
@@ -78,7 +83,6 @@ ${colorConfig
     />
   );
 };
-
 const ChartTooltip = RechartsPrimitive.Tooltip;
 
 const ChartTooltipContent = React.forwardRef(

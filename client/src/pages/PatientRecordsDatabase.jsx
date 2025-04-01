@@ -94,10 +94,10 @@ function PatientRecordsDatabase() {
         table: "patient_records",
         id: selectedEntry.id,
         action: "archive"
-      }),
+      })
     });
-  
-    closeModal();   // instead of onClose()
+
+    closeModal(); // instead of onClose()
     fetchRecords(); // instead of refreshData()
   };
 
@@ -110,7 +110,7 @@ function PatientRecordsDatabase() {
     return cleaned;
   };
 
-  const handleEditPatientEntry = async (updatedData) => {  
+  const handleEditPatientEntry = async (updatedData) => {
     const safeData = sanitizeData(updatedData);
     console.log("✏️ Sent data:", safeData);
     await fetch(`${API_BASE_URL}/api/manage-record`, {
@@ -122,16 +122,15 @@ function PatientRecordsDatabase() {
         id: updatedData.id,
         action: "edit",
         data: safeData
-      }),
+      })
     });
-  
+
     closeModal();
     fetchRecords();
   };
-  
 
-  const generatePRDReport = () => {
-    if (!records || records.length === 0) {
+  const generatePRDReport = (patientRecords) => {
+    if (!patientRecords || patientRecords.length === 0) {
       console.error("No records available to generate PDF.");
       return;
     }
@@ -148,17 +147,25 @@ function PatientRecordsDatabase() {
     const pageWidth = doc.internal.pageSize.width;
     const startY = margin + 10;
 
+    // Get formatted current date
+    const currentDate = new Date();
+    const formattedCurrentDate = format(
+      currentDate,
+      "MMMM dd, yyyy"
+    ).toUpperCase(); // REPORT: ALL CAPS
+    const formattedDateForFilename = format(currentDate, "MMMM dd, yyyy"); // Filename: Only first letter capitalized
+
     // Add Title
     doc.setFont("helvetica", "bold");
     doc.setFontSize(16);
     doc.text(
-      `BEAUTOX PATIENT RECORDS REPORT AS OF ${new Date().toLocaleDateString()}`,
+      `BEAUTOX PATIENT RECORDS REPORT AS OF ${formattedCurrentDate}`,
       pageWidth / 2,
       margin,
       { align: "center" }
     );
 
-    // Standardized column headers
+    // Column headers
     const headers = [
       "CLIENT",
       "DATE OF SESSION",
@@ -171,16 +178,20 @@ function PatientRecordsDatabase() {
       "TOTAL AMOUNT"
     ];
 
+    // Format Date & Time properly
+    const formatDate = (date) =>
+      date ? format(new Date(date), "MMMM dd, yyyy").toUpperCase() : "N/A";
+    const formatTime = (time) => {
+      if (!time) return "N/A";
+      const dateObj = new Date(`1970-01-01T${time}`);
+      return format(dateObj, "hh:mm a").toUpperCase(); // Convert to 12-hour format with AM/PM
+    };
+
     // Extract and standardize data for table
-    const tableData = records.map((record) => [
+    const tableData = patientRecords.map((record) => [
       record.client || record.patient_name?.toUpperCase() || "N/A",
-      record.dateTransacted || record.date_of_session
-        ? format(
-            new Date(record.dateTransacted || record.date_of_session),
-            "yyyy-MM-dd"
-          )
-        : "N/A",
-      record.nextSessionTime || record.time_of_session || "N/A",
+      formatDate(record.dateTransacted || record.date_of_session),
+      formatTime(record.nextSessionTime || record.time_of_session),
       (record.personInCharge || record.person_in_charge)?.toUpperCase() ||
         "N/A",
       (record.package || record.package_name)?.toUpperCase() || "N/A",
@@ -226,9 +237,11 @@ function PatientRecordsDatabase() {
       }
     });
 
-    // Save the PDF
+    // Save the PDF with only the first letter capitalized in the month
     doc.save(
-      `BeautoxPatientRecordsReport_${new Date().toLocaleDateString()}.pdf`
+      `Beautox_PatientRecordsReport_${formattedDateForFilename
+        .replace(/,\s/g, "_")
+        .replace(/\s/g, "_")}.pdf`
     );
   };
 
@@ -375,7 +388,10 @@ function PatientRecordsDatabase() {
           <PlusIcon />
           ADD NEW ENTRY
         </Button>
-        <Button variant="callToAction" onClick={generatePRDReport}>
+        <Button
+          variant="callToAction"
+          onClick={() => generatePRDReport(records)}
+        >
           <DownloadIcon />
           DOWNLOAD PATIENT RECORDS
         </Button>

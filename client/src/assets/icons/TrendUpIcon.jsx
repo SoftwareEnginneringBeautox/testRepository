@@ -1,5 +1,6 @@
-const CalendarIcon = ({ size = 24, fill = "currentColor" }) => (
+const CalendarIcon = ({ size = 24, fill = "currentColor", className }) => (
   <svg
+    className={className}
     width={size}
     height={size}
     viewBox="0 0 24 24"
@@ -15,7 +16,7 @@ const CalendarIcon = ({ size = 24, fill = "currentColor" }) => (
       width="24"
       height="24"
     >
-      <rect width="24" height="24" fill="#D9D9D9" />
+      <rect width="24" height="24" fill={fill} />
     </mask>
     <g mask="url(#mask0_1739_5277)">
       <path
