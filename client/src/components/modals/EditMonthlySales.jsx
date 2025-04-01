@@ -11,13 +11,15 @@ import {
   InputTextField,
   InputLabel,
   InputIcon,
-  Input
+  ModalSelect,
+  SelectItem
 } from "@/components/ui/Input";
 import { Button } from "../ui/Button";
 import PesoIcon from "@/assets/icons/PesoIcon";
 import CoinsIcon from "@/assets/icons/CoinsIcon";
 import ChevronLeftIcon from "@/assets/icons/ChevronLeftIcon";
 import EditIcon from "@/assets/icons/EditIcon";
+import ExpenseTypeIcon from "@/assets/icons/ExpenseTypeIcon";
 
 function EditMonthlySales({ isOpen, onClose, onEditSuccess, initialData }) {
   const [formData, setFormData] = useState({
@@ -26,7 +28,6 @@ function EditMonthlySales({ isOpen, onClose, onEditSuccess, initialData }) {
     date: ''
   });
 
-  // Initialize form when modal opens or initialData changes
   useEffect(() => {
     if (initialData) {
       setFormData({
@@ -49,7 +50,6 @@ function EditMonthlySales({ isOpen, onClose, onEditSuccess, initialData }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Convert amount to number before passing up
     onEditSuccess({
       ...formData,
       amount: parseFloat(formData.amount)
@@ -73,7 +73,7 @@ function EditMonthlySales({ isOpen, onClose, onEditSuccess, initialData }) {
                 <InputIcon>
                   <CoinsIcon />
                 </InputIcon>
-                <Input
+                <input
                   name="amount"
                   value={formData.amount}
                   onChange={handleChange}
@@ -81,31 +81,49 @@ function EditMonthlySales({ isOpen, onClose, onEditSuccess, initialData }) {
                   type="number"
                   inputMode="decimal"
                   min="0"
-                  step="0.01"
                   required
+                  className="w-full bg-transparent outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
               </InputTextField>
             </InputContainer>
 
             <InputContainer>
               <InputLabel>CATEGORY</InputLabel>
-              <Input
+              <Select
                 name="category"
                 value={formData.category}
-                onChange={handleChange}
-                placeholder="Category"
-                required
-              />
+                onValueChange={(value) => handleChange({ target: { name: "category", value } })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="SALARY">SALARY</SelectItem>
+                  <SelectItem value="COMMISSIONS">COMMISSIONS</SelectItem>
+                  <SelectItem value="ELECTRICITY">ELECTRICITY</SelectItem>
+                  <SelectItem value="WATER">WATER</SelectItem>
+                  <SelectItem value="ACCOUNTING/TAX">ACCOUNTING/TAX</SelectItem>
+                  <SelectItem value="RENTAL">RENTAL</SelectItem>
+                  <SelectItem value="BUSINESS PHONE">BUSINESS PHONE</SelectItem>
+                  <SelectItem value="RENOVATIONS">RENOVATIONS</SelectItem>
+                  <SelectItem value="INTERNET">INTERNET</SelectItem>
+                  <SelectItem value="MARKETING TEAM">MARKETING TEAM</SelectItem>
+                  <SelectItem value="SOCIAL MEDIA ADVERTISEMENTS">
+                    SOCIAL MEDIA ADVERTISEMENTS
+                  </SelectItem>
+                </SelectContent>
+              </Select>
             </InputContainer>
 
             <InputContainer>
               <InputLabel>DATE</InputLabel>
-              <Input
+              <input
                 name="date"
                 type="date"
                 value={formData.date}
                 onChange={handleChange}
                 required
+                className="w-full bg-transparent outline-none"
               />
             </InputContainer>
           </div>
