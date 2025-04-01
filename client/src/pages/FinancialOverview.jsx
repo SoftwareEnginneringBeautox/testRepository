@@ -341,6 +341,53 @@ function FinancialOverview() {
     doc.save(filename);
   };
 
+  const [expenseToEdit, setExpenseToEdit] = useState(null);
+
+  const handleEditExpense = async (updatedData) => {
+    try {
+      const response = await fetch("/api/manage-record", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          table: "expenses_tracker",
+          id: expenseToEdit.id,
+          action: "edit",
+          data: updatedData
+        })
+      });
+
+      if (response.ok) {
+        refreshExpensesData(); // Refresh the table
+        closeModal();
+      }
+    } catch (error) {
+      console.error("Edit error:", error);
+    }
+  };
+
+  const [selectedExpense, setSelectedExpense] = useState(null);
+
+  const handleArchiveExpense = async () => {
+    try {
+      const response = await fetch("/api/manage-record", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          table: "expenses_tracker",
+          id: selectedExpense.id,
+          action: "archive"
+        })
+      });
+
+      if (response.ok) {
+        refreshExpensesData(); // Your existing refresh function
+        closeModal();
+      }
+    } catch (error) {
+      console.error("Archive error:", error);
+    }
+  };
+
   return (
     <div className="flex flex-col text-left w-[90%] mx-auto gap-4">
       {/* Header */}
@@ -496,17 +543,19 @@ function FinancialOverview() {
                       <DropdownMenuContent>
                         <DropdownMenuGroup>
                           <DropdownMenuItem
-                            onClick={() =>
-                              openModal("editMonthlyExpense", expense)
-                            }
+                            onClick={() => {
+                              setExpenseToEdit(expense); // Store the expense to be edited
+                              openModal("editMonthlyExpense");
+                            }}
                           >
                             <EditIcon />
                             <p className="font-semibold">Edit</p>
                           </DropdownMenuItem>
                           <DropdownMenuItem
-                            onClick={() =>
-                              openModal("deleteMonthlyExpense", expense.id)
-                            }
+                            onClick={() => {
+                              setSelectedExpense(expense); // Store the expense to be archived
+                              openModal("deleteMonthlyExpense"); // Match your modal name
+                            }}
                           >
                             <DeleteIcon />
                             <p className="font-semibold">Delete</p>
@@ -558,11 +607,24 @@ function FinancialOverview() {
       {currentModal === "createMonthlyExpense" && (
         <CreateMonthlySales isOpen onClose={closeModal} />
       )}
-      {currentModal === "editMonthlyExpense" && (
-        <EditMonthlySales isOpen onClose={closeModal} />
+      {currentModal === "editMonthlyExpense" && expenseToEdit && (
+        <EditMonthlySales
+          isOpen={true}
+          onClose={closeModal}
+          onEditSuccess={handleEditExpense}
+          initialData={{
+            amount: expenseToEdit.expense,
+            category: expenseToEdit.category,
+            date: expenseToEdit.date.split("T")[0] // Format date for input
+          }}
+        />
       )}
       {currentModal === "deleteMonthlyExpense" && (
-        <DeleteMonthlySales isOpen onClose={closeModal} />
+        <DeleteMonthlySales
+          isOpen={true}
+          onClose={closeModal}
+          onArchive={handleArchiveExpense}
+        />
       )}
     </div>
   );
