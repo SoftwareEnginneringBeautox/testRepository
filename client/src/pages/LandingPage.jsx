@@ -183,25 +183,61 @@ function LandingPage() {
     }
   ];
 
+  const handleScroll = (e, id) => {
+    e.preventDefault();
+    const section = document.getElementById(id);
+    if (section) {
+      section.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
   return (
     <div className="w-full bg-[linear-gradient(135deg,_rgba(242,239,238,1)_0%,_rgba(239,218,192,1)_34%,_rgba(201,180,206,1)_67%,_rgba(241,234,228,1)_100%)]">
       <header className="fixed w-full flex justify-end items-center p-4 bg-transparent z-50">
-        <div className="flex items-center gap-8 mr-8">
-          <a
-            href="#services"
-            className="relative inline-block px-2 py-1 font-semibold overflow-hidden group text-gray-800"
-          >
-            Services
-            <span className="absolute left-0 bottom-0 block w-0 h-0.5 bg-lavender-400 transition-all duration-300 group-hover:w-full"></span>
-          </a>
-          <a
-            href="#about"
-            className="relative inline-block px-2 py-1 font-semibold overflow-hidden group text-gray-800"
-          >
-            About Us
-            <span className="absolute left-0 bottom-0 block w-0 h-0.5 bg-lavender-400 transition-all duration-300 group-hover:w-full"></span>
-          </a>
-        </div>
+        <nav className="flex flex-row items-center gap-8 mr-8">
+          <ul className="flex flex-row text-lg font-semibold gap-4">
+            <li className="mt-2">
+              <a
+                href="#hero"
+                onClick={(e) => handleScroll(e, "hero")}
+                className="relative inline-block px-2 py-1 font-semibold overflow-hidden group "
+              >
+                ABOUT US
+                <span className="absolute left-0 bottom-0 block w-0 h-0.5 bg-lavender-400 transition-all duration-300 group-hover:w-full"></span>
+              </a>
+            </li>
+            <li className="mt-2">
+              <a
+                href="#services"
+                onClick={(e) => handleScroll(e, "services")}
+                className="relative inline-block px-2 py-1 font-semibold overflow-hidden group "
+              >
+                SERVICES
+                <span className="absolute left-0 bottom-0 block w-0 h-0.5 bg-lavender-400 transition-all duration-300 group-hover:w-full"></span>
+              </a>
+            </li>
+            <li className="mt-2">
+              <a
+                href="#location"
+                onClick={(e) => handleScroll(e, "location")}
+                className="relative inline-block px-2 py-1 font-semibold overflow-hidden group "
+              >
+                FIND US
+                <span className="absolute left-0 bottom-0 block w-0 h-0.5 bg-lavender-400 transition-all duration-300 group-hover:w-full"></span>
+              </a>
+            </li>
+            <li className="mt-2">
+              <a
+                href="#contact"
+                onClick={(e) => handleScroll(e, "contact")}
+                className="relative inline-block px-2 py-1 font-semibold overflow-hidden group "
+              >
+                CONTACT US
+                <span className="absolute left-0 bottom-0 block w-0 h-0.5 bg-lavender-400 transition-all duration-300 group-hover:w-full"></span>
+              </a>
+            </li>
+          </ul>
+        </nav>
         <Button
           onClick={() => navigate("/login")}
           variant="outline"
@@ -255,55 +291,6 @@ function LandingPage() {
             <CalendarIcon className="h-5 w-5" />
             SET AN APPOINTMENT
           </button>
-        </section>
-
-        <section className="w-3/4 flex flex-row items-center justify-center gap-4">
-          {/* Google Map */}
-          <div className="w-1/2 flex items-center justify-center rounded-half">
-            <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1043.644141889592!2d121.03651836623278!3d14.614630075990188!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397b7656817cb95%3A0xc3a3721da76b89!2sSonema%20Square!5e0!3m2!1sen!2sph!4v1741322385811!5m2!1sen!2sph"
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-              className="rounded-3xl w-full min-h-10"
-              height={300}
-            ></iframe>
-          </div>
-
-          {/* Location & Info - Now Left Justified */}
-          <div className="w-1/2 text-left flex flex-row gap-4">
-            <div className="flex flex-col gap-2 items-start">
-              <div className="flex flex-row gap-2 items-center pb-2">
-                <div className="text-lavender-400 h-full pr-1 flex items-center">
-                  <LocationIcon />
-                </div>
-                <h3 className="font-semibold text-2xl bg-gradient-to-r from-lavender-300 to-reflexBlue-400 text-transparent bg-clip-text">
-                  DON'T KNOW WHERE TO FIND US?
-                </h3>
-              </div>
-              <p className="text-gray-700">
-                Your journey to radiant skin starts here. <br />
-                Let us pamper you with expert care.
-              </p>
-
-              {/* Address */}
-              <div className="mt-3">
-                <p className="text-lg font-semibold">Address:</p>
-                <p className="text-gray-600">
-                  J26P+XXR, N. Domingo, Quezon City, 1112 Metro Manila <br />
-                  Near Robinson's Magnolia
-                </p>
-              </div>
-
-              {/* Operating Hours */}
-              <div className="mt-3">
-                <p className="text-lg font-semibold">Operating Hours:</p>
-                <p className="text-gray-600">
-                  Mon - Fri: <span className="font-semibold">9am - 6pm</span>,
-                  Sat: <span className="font-semibold">10am - 4pm</span>
-                </p>
-              </div>
-            </div>
-          </div>
         </section>
 
         {/* <section
@@ -548,7 +535,59 @@ function LandingPage() {
           </div>
         </section>
 
-        <section className="w-3/4 flex flex-row gap-8 justify-center my-60">
+        <section className="w-3/4 flex flex-row items-center justify-center gap-4">
+          {/* Google Map */}
+          <div className="w-1/2 flex items-center justify-center rounded-half">
+            <iframe
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1043.644141889592!2d121.03651836623278!3d14.614630075990188!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397b7656817cb95%3A0xc3a3721da76b89!2sSonema%20Square!5e0!3m2!1sen!2sph!4v1741322385811!5m2!1sen!2sph"
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              className="rounded-3xl w-full min-h-10"
+              height={300}
+            ></iframe>
+          </div>
+
+          {/* Location & Info - Now Left Justified */}
+          <div id="location" className="w-1/2 text-left flex flex-row gap-4">
+            <div className="flex flex-col gap-2 items-start">
+              <div className="flex flex-row gap-2 items-center pb-2">
+                <div className="text-lavender-400 h-full pr-1 flex items-center">
+                  <LocationIcon />
+                </div>
+                <h3 className="font-semibold text-2xl bg-gradient-to-r from-lavender-300 to-reflexBlue-400 text-transparent bg-clip-text">
+                  DON'T KNOW WHERE TO FIND US?
+                </h3>
+              </div>
+              <p className="text-gray-700">
+                Your journey to radiant skin starts here. <br />
+                Let us pamper you with expert care.
+              </p>
+
+              {/* Address */}
+              <div className="mt-3">
+                <p className="text-lg font-semibold">Address:</p>
+                <p className="text-gray-600">
+                  J26P+XXR, N. Domingo, Quezon City, 1112 Metro Manila <br />
+                  Near Robinson's Magnolia
+                </p>
+              </div>
+
+              {/* Operating Hours */}
+              <div className="mt-3">
+                <p className="text-lg font-semibold">Operating Hours:</p>
+                <p className="text-gray-600">
+                  Mon - Fri: <span className="font-semibold">9am - 6pm</span>,
+                  Sat: <span className="font-semibold">10am - 4pm</span>
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section
+          id="contact"
+          className="w-3/4 flex flex-row gap-8 justify-center my-60"
+        >
           <ul className="grid grid-cols-2 gap-x-6 gap-y-4 text-lg w-1/2 ">
             <li className="flex gap-2 justify-center">
               <FacebookIcon fill="#002B7F" />
