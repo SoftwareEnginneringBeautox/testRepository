@@ -10,6 +10,7 @@ import FacebookIcon from "@/assets/icons/FacebookIcon";
 import InstagramIcon from "@/assets/icons/InstagramIcon";
 import PhoneIcon from "@/assets/icons/PhoneIcon";
 
+import ProductCard from "@/components/ProductCard";
 import ScheduleAppointmentModal from "../components/modals/ScheduleAppointment";
 import EmailIcon from "@/assets/icons/EmailIcon";
 
@@ -216,8 +217,7 @@ function LandingPage() {
           id="hero"
           className="relative w-full h-[100vh] flex items-center px-8 md:px-16 lg:px-24"
           style={{
-            background:
-              "linear-gradient(to right, rgba(221, 213, 225, 0.8) 40%, rgba(230, 210, 240, 0.5) 60%, rgba(240, 230, 250, 0.3) 75%, rgba(255, 255, 255, 0) 100%), url('/images/LandingImage.png')",
+            background: "url('/images/BeautoxHero3.png')",
             backgroundSize: "cover",
             backgroundPosition: "center",
             backgroundRepeat: "no-repeat"
@@ -271,42 +271,43 @@ function LandingPage() {
 
           {/* Location & Info - Now Left Justified */}
           <div className="w-1/2 text-left flex flex-row gap-4">
-            <div className="flex flex-row gap-2 items-center pb-2">
-              <div className="text-lavender-400 h-full pr-1 flex items-center">
-                <LocationIcon />
+            <div className="flex flex-col gap-2 items-start">
+              <div className="flex flex-row gap-2 items-center pb-2">
+                <div className="text-lavender-400 h-full pr-1 flex items-center">
+                  <LocationIcon />
+                </div>
+                <h3 className="font-semibold text-2xl bg-gradient-to-r from-lavender-300 to-reflexBlue-400 text-transparent bg-clip-text">
+                  DON'T KNOW WHERE TO FIND US?
+                </h3>
               </div>
-              <h3 className="font-semibold text-2xl bg-gradient-to-r from-lavender-300 to-reflexBlue-400 text-transparent bg-clip-text">
-                DON'T KNOW WHERE TO FIND US?
-              </h3>
-            </div>
-
-            <p className="text-gray-700">
-              Your journey to radiant skin starts here. <br />
-              Let us pamper you with expert care.
-            </p>
-
-            {/* Address */}
-            <div className="mt-3">
-              <p className="text-lg font-semibold">Address:</p>
-              <p className="text-gray-600">
-                J26P+XXR, N. Domingo, Quezon City, 1112 Metro Manila <br />
-                Near Robinson's Magnolia
+              <p className="text-gray-700">
+                Your journey to radiant skin starts here. <br />
+                Let us pamper you with expert care.
               </p>
-            </div>
 
-            {/* Operating Hours */}
-            <div className="mt-3">
-              <p className="text-lg font-semibold">Operating Hours:</p>
-              <p className="text-gray-600">
-                Mon - Fri: <span className="font-semibold">9am - 6pm</span>,
-                Sat: <span className="font-semibold">10am - 4pm</span>
-              </p>
+              {/* Address */}
+              <div className="mt-3">
+                <p className="text-lg font-semibold">Address:</p>
+                <p className="text-gray-600">
+                  J26P+XXR, N. Domingo, Quezon City, 1112 Metro Manila <br />
+                  Near Robinson's Magnolia
+                </p>
+              </div>
+
+              {/* Operating Hours */}
+              <div className="mt-3">
+                <p className="text-lg font-semibold">Operating Hours:</p>
+                <p className="text-gray-600">
+                  Mon - Fri: <span className="font-semibold">9am - 6pm</span>,
+                  Sat: <span className="font-semibold">10am - 4pm</span>
+                </p>
+              </div>
             </div>
           </div>
         </section>
 
-        <section
-          id="services"
+        {/* <section
+          id="services1"
           className="w-3/4 flex flex-col items-center justify-center gap-4 my-60"
         >
           <div className="w-full">
@@ -406,7 +407,147 @@ function LandingPage() {
               ))}
             </Tabs>
           </div>
+          <Card className="border shadow-sm overflow-hidden relative bg-gradient-to-br from-purple-100 via-pink-50 to-purple-100">
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-100/80 via-pink-100/80 to-purple-200/80 backdrop-blur-[1px]"></div>
+
+            <CardHeader className="pb-4 relative z-10">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-xl font-medium">Pro</CardTitle>
+                <span className="bg-yellow-300 text-yellow-800 text-xs px-2 py-0.5 rounded-full">
+                  Most Popular
+                </span>
+              </div>
+              <p className="text-sm text-gray-600">
+                A single license. Perfect for freelance designers or developers.
+              </p>
+            </CardHeader>
+
+            <CardContent className="space-y-6 relative z-10">
+              <div className="flex items-baseline">
+                <span className="text-3xl font-bold">$39</span>
+                <span className="text-sm text-gray-600 ml-1">/ Month</span>
+                <span className="ml-auto bg-purple-200 text-purple-800 text-xs px-2 py-1 rounded">
+                  Save $30
+                </span>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex items-start gap-3">
+                  <div className="flex-shrink-0 w-6 h-6 rounded-full bg-purple-200 flex items-center justify-center text-xs">
+                    1
+                  </div>
+                  <div>
+                    <p className="font-medium">Unlimited viewers</p>
+                    <p className="text-sm text-gray-600">
+                      Easily customizable global styles
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="flex-shrink-0 w-6 h-6 rounded-full bg-purple-200 flex items-center justify-center text-xs">
+                    2
+                  </div>
+                  <div>
+                    <p className="font-medium">Up to 2 editors</p>
+                    <p className="text-sm text-gray-600">
+                      Easily customizable global styles
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="flex-shrink-0 w-6 h-6 rounded-full bg-purple-200 flex items-center justify-center text-xs">
+                    3
+                  </div>
+                  <div>
+                    <p className="font-medium">Up to 3 editors</p>
+                    <p className="text-sm text-gray-600">
+                      Easily customizable global styles
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <Button className="w-full bg-purple-500 hover:bg-purple-600 text-white uppercase">
+                GET STARTED
+              </Button>
+            </CardContent>
+          </Card>
+        </section> */}
+
+        <section
+          id="services"
+          className="w-3/4 flex flex-col items-center justify-center gap-4 my-60"
+        >
+          <div className="w-full">
+            <h2 className="text-start font-semibold text-3xl bg-gradient-to-r from-reflexBlue-300 to-lavender-300 text-transparent bg-clip-text py-4">
+              HERE'S WHAT WE HAVE IN STORE FOR YOU
+            </h2>
+
+            {services.map((category, index) => (
+              <div key={index} className="mb-16">
+                <h3 className="text-2xl font-semibold mb-6 bg-gradient-to-r from-purple-600 to-pink-500 text-transparent bg-clip-text">
+                  {category.category}
+                </h3>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {category.items.map((item, itemIndex) => (
+                    <ProductCard
+                      key={itemIndex}
+                      product={item}
+                      category={category.category}
+                    />
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
         </section>
+
+        <section
+          id="services"
+          className="w-3/4 flex flex-col items-center justify-center gap-4 my-60"
+        >
+          <div className="w-full">
+            <h2 className="text-start font-semibold text-3xl bg-gradient-to-r from-reflexBlue-300 to-lavender-300 text-transparent bg-clip-text py-4">
+              HERE'S WHAT WE HAVE IN STORE FOR YOU
+            </h2>
+            <Tabs defaultValue={services[0].category} className="w-full">
+              <TabsList className="flex rounded-md shadow-md bg-white/5 backdrop-blur-[3.5px]">
+                {services.map((service) => (
+                  <TabsTrigger
+                    key={service.category}
+                    value={service.category}
+                    className="px-3 py-3 text-md font-semibold transition-all rounded-md data-[state=active]:bg-lavender-600 data-[state=active]:text-customNeutral-100"
+                  >
+                    {service.category}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+
+              {services.map((service) => (
+                <TabsContent
+                  key={service.category}
+                  value={service.category}
+                  className="mt-4"
+                >
+                  {/* Grid layout for the cards */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {service.items.map((item, idx) => (
+                      <ProductCard
+                        key={idx}
+                        product={item}
+                        category={service.category}
+                      />
+                    ))}
+                  </div>
+                </TabsContent>
+              ))}
+            </Tabs>
+          </div>
+        </section>
+
         <section className="w-3/4 flex flex-row gap-8 justify-center my-60">
           <ul className="grid grid-cols-2 gap-x-6 gap-y-4 text-lg w-1/2 ">
             <li className="flex gap-2 justify-center">
