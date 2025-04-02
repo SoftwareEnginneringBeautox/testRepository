@@ -1,5 +1,4 @@
 import * as React from "react";
-import { useState } from "react";
 import * as SelectPrimitive from "@radix-ui/react-select";
 import { Check, ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -82,7 +81,7 @@ const SelectIcon = ({ children, className, variant }) => (
 SelectIcon.displayName = "SelectIcon";
 
 const ModalSelectTrigger = React.forwardRef(
-  ({ className, placeholder, icon: LeftIcon, value, ...props }, ref) => (
+  ({ className, placeholder, icon: LeftIcon, ...props }, ref) => (
     <SelectPrimitive.Trigger
       ref={ref}
       className={cn(
@@ -95,10 +94,8 @@ const ModalSelectTrigger = React.forwardRef(
       <div className="flex items-center gap-2">
         {LeftIcon && <SelectIcon variant="modal">{LeftIcon}</SelectIcon>}
 
-        {/* Correct way to display selected value or placeholder */}
-        <SelectPrimitive.Value placeholder={placeholder}>
-          {value || placeholder}
-        </SelectPrimitive.Value>
+        {/* Use the proper SelectValue component */}
+        <SelectValue placeholder={placeholder} />
       </div>
 
       <SelectIcon variant="modal">
@@ -130,23 +127,7 @@ const ModalSelectContent = React.forwardRef(
     </SelectPrimitive.Portal>
   )
 );
-
-const ModalSelect = ({ placeholder, icon, children }) => {
-  const [value, setValue] = useState(""); // Track selected value
-
-  return (
-    <Select value={value} onValueChange={setValue}>
-      <ModalSelectTrigger
-        placeholder={placeholder}
-        icon={icon}
-        value={value} // Pass value properly to trigger
-      />
-      <ModalSelectContent>{children}</ModalSelectContent>
-    </Select>
-  );
-};
-ModalSelect.displayName = "ModalSelect";
-ModalSelect.Content = ModalSelectContent;
+ModalSelectContent.displayName = "ModalSelectContent";
 
 const SelectScrollUpButton = React.forwardRef(
   ({ className, ...props }, ref) => (
@@ -196,6 +177,7 @@ const SelectContent = React.forwardRef(
         position={position}
         sideOffset={4}
         align="start"
+        {...props}
       >
         <SelectScrollUpButton />
         <SelectPrimitive.Viewport className="p-1 w-full">
@@ -240,10 +222,15 @@ SelectItem.displayName = SelectPrimitive.Item.displayName;
 
 export {
   Select,
-  ModalSelect,
+  SelectGroup,
   SelectTrigger,
+  ModalSelectTrigger,
   SelectContent,
+  ModalSelectContent,
   SelectItem,
+  SelectLabel,
   SelectIcon,
-  SelectValue
+  SelectValue,
+  SelectScrollUpButton,
+  SelectScrollDownButton
 };

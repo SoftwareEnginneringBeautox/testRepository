@@ -5,6 +5,11 @@ const Table = React.forwardRef(({ className, ...props }, ref) => (
   <div
     className={cn(
       "w-full max-w-full overflow-x-auto rounded-md flex-1",
+      "[&::-webkit-scrollbar]:h-2.5",
+      "[&::-webkit-scrollbar-thumb]:bg-gray-400",
+      "[&::-webkit-scrollbar-thumb]:rounded-full",
+      "[&::-webkit-scrollbar-track]:!bg-transparent",
+      "[&::-webkit-scrollbar-thumb:hover]:bg-lavender-200",
       className
     )}
   >

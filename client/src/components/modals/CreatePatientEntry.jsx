@@ -21,7 +21,12 @@ import {
   Input
 } from "@/components/ui/Input";
 
-import { ModalSelect, SelectItem } from "@/components/ui/Select";
+import {
+  Select,
+  SelectItem,
+  ModalSelectTrigger,
+  ModalSelectContent
+} from "@/components/ui/Select";
 
 import { Button } from "../ui/Button";
 
@@ -34,17 +39,16 @@ import UserIcon from "@/assets/icons/UserIcon";
 import UserIDIcon from "@/assets/icons/UserIDIcon";
 import PackageIcon from "@/assets/icons/PackageIcon";
 import PercentageIcon from "@/assets/icons/PercentageIcon";
+import TreatmentIcon from "@/assets/icons/TreatmentIcon";
 
 import axios from "axios";
 
 function CreatePatientEntry({ isOpen, onClose }) {
-  // ----------- State Hooks -----------
   const [patientName, setPatientName] = useState("");
   const [personInCharge, setPersonInCharge] = useState("");
   const [packageName, setPackageName] = useState("");
   const [treatment, setTreatment] = useState("");
 
-  // Currency/decimal fields
   const [amount, setAmount] = useState(""); // Original amount input by the user
   const [packageDiscount, setPackageDiscount] = useState("");
   const [totalAmount, setTotalAmount] = useState(""); // Computed automatically
@@ -115,12 +119,9 @@ function CreatePatientEntry({ isOpen, onClose }) {
   useEffect(() => {
     async function fetchTreatments() {
       try {
-        const response = await axios.get(
-          `${API_BASE_URL}/api/treatments`,
-          {
-            withCredentials: true
-          }
-        );
+        const response = await axios.get(`${API_BASE_URL}/api/treatments`, {
+          withCredentials: true
+        });
         setTreatmentsList(response.data);
       } catch (error) {
         console.error("Error fetching treatments:", error);
@@ -244,37 +245,30 @@ function CreatePatientEntry({ isOpen, onClose }) {
             {/* PERSON IN CHARGE */}
             <InputContainer>
               <InputLabel>PERSON IN CHARGE</InputLabel>
-              <InputTextField
-                className={
-                  formSubmitAttempted && formErrors.personInCharge
-                    ? "border-red-500 rounded"
-                    : ""
-                }
+              <Select
+                value={personInCharge}
+                onValueChange={(value) => {
+                  console.log("Selected person in charge:", value);
+                  setPersonInCharge(value);
+                }}
               >
-                <InputIcon>
-                  <UserIDIcon className="w-4 h-4" />
-                </InputIcon>
-                <select
-                  className="w-full p-2 border rounded bg-[#F5F3F0]"
-                  value={personInCharge}
-                  onChange={(e) => {
-                    const selectedValue = e.target.value;
-                    console.log(
-                      "Selected person in charge (direct):",
-                      selectedValue
-                    );
-                    setPersonInCharge(selectedValue);
-                  }}
-                  required
-                >
-                  <option value="">Select person in charge</option>
+                <ModalSelectTrigger
+                  icon={<UserIDIcon className="w-4 h-4" />}
+                  placeholder="Select person in charge"
+                  className={
+                    formSubmitAttempted && formErrors.personInCharge
+                      ? "border-red-500"
+                      : ""
+                  }
+                />
+                <ModalSelectContent>
                   {aestheticianList.map((user) => (
-                    <option key={user.id} value={user.username}>
+                    <SelectItem key={user.id} value={user.username}>
                       {user.username}
-                    </option>
+                    </SelectItem>
                   ))}
-                </select>
-              </InputTextField>
+                </ModalSelectContent>
+              </Select>
               {formSubmitAttempted && formErrors.personInCharge && (
                 <p className="text-red-500 text-sm mt-1">
                   {formErrors.personInCharge}
@@ -285,64 +279,31 @@ function CreatePatientEntry({ isOpen, onClose }) {
             {/* PACKAGE */}
             <InputContainer>
               <InputLabel>PACKAGE</InputLabel>
-              <InputTextField
-                className={
-                  formSubmitAttempted && formErrors.packageName
-                    ? "border-red-500 rounded"
-                    : ""
-                }
-              >
-                <InputIcon>
-                  <PackageIcon className="w-4 h-4" />
-                </InputIcon>
-                <select
-                  className="w-full p-2 border rounded bg-[#F5F3F0]"
-                  value={packageName}
-                  onChange={(e) => {
-                    const selectedValue = e.target.value;
-                    console.log("Selected package (direct):", selectedValue);
-                    setPackageName(selectedValue);
-                  }}
-                  required
-                >
-                  <option value="">Select package</option>
-                  {packagesList.map((pkg) => (
-                    <option key={pkg.id} value={pkg.package_name}>
-                      {pkg.package_name} - ₱{pkg.price}
-                    </option>
-                  ))}
-                </select>
-              </InputTextField>
-              {formSubmitAttempted && formErrors.packageName && (
-                <p className="text-red-500 text-sm mt-1">
-                  {formErrors.packageName}
-                </p>
-              )}
-            </InputContainer>
 
-            {/* package but eli's version */}
-            <InputContainer>
-              <InputLabel>ELI'S PACKAGE</InputLabel>
-              <ModalSelect
-                placeholder="Select package"
-                icon={<PackageIcon className="w-4 h-4" />}
+              <Select
                 value={packageName}
-                onValueChange={(selectedValue) => {
-                  console.log("Selected package (modal):", selectedValue);
-                  setPackageName(selectedValue);
+                onValueChange={(value) => {
+                  console.log("Selected package:", value);
+                  setPackageName(value);
                 }}
-                className={
-                  formSubmitAttempted && formErrors.packageName
-                    ? "border-red-500 rounded"
-                    : ""
-                }
               >
-                {packagesList.map((pkg) => (
-                  <SelectItem key={pkg.id} value={pkg.package_name}>
-                    {pkg.package_name} - ₱{pkg.price}
-                  </SelectItem>
-                ))}
-              </ModalSelect>
+                <ModalSelectTrigger
+                  icon={<PackageIcon className="w-4 h-4" />}
+                  placeholder="Select package"
+                  className={
+                    formSubmitAttempted && formErrors.packageName
+                      ? "border-red-500"
+                      : ""
+                  }
+                />
+                <ModalSelectContent>
+                  {packagesList.map((pkg) => (
+                    <SelectItem key={pkg.id} value={pkg.package_name}>
+                      {pkg.package_name} - ₱{pkg.price}
+                    </SelectItem>
+                  ))}
+                </ModalSelectContent>
+              </Select>
               {formSubmitAttempted && formErrors.packageName && (
                 <p className="text-red-500 text-sm mt-1">
                   {formErrors.packageName}
@@ -353,34 +314,31 @@ function CreatePatientEntry({ isOpen, onClose }) {
             {/* TREATMENT */}
             <InputContainer>
               <InputLabel>TREATMENT</InputLabel>
-              <InputTextField
-                className={
-                  formSubmitAttempted && formErrors.treatment
-                    ? "border-red-500 rounded"
-                    : ""
-                }
+
+              <Select
+                value={treatment}
+                onValueChange={(value) => {
+                  console.log("Selected treatment:", value);
+                  setTreatment(value);
+                }}
               >
-                <InputIcon>
-                  <PackageIcon className="w-4 h-4" />
-                </InputIcon>
-                <select
-                  className="w-full p-2 border rounded bg-[#F5F3F0]"
-                  value={treatment}
-                  onChange={(e) => {
-                    const selectedValue = e.target.value;
-                    console.log("Selected treatment (direct):", selectedValue);
-                    setTreatment(selectedValue);
-                  }}
-                  required
-                >
-                  <option value="">Select treatment</option>
+                <ModalSelectTrigger
+                  icon={<TreatmentIcon className="w-4 h-4" />}
+                  placeholder="Select treatment"
+                  className={
+                    formSubmitAttempted && formErrors.treatment
+                      ? "border-red-500"
+                      : ""
+                  }
+                />
+                <ModalSelectContent>
                   {treatmentsList.map((t) => (
-                    <option key={t.id} value={t.treatment_name}>
+                    <SelectItem key={t.id} value={t.treatment_name}>
                       {t.treatment_name} - ₱{t.price}
-                    </option>
+                    </SelectItem>
                   ))}
-                </select>
-              </InputTextField>
+                </ModalSelectContent>
+              </Select>
               {formSubmitAttempted && formErrors.treatment && (
                 <p className="text-red-500 text-sm mt-1">
                   {formErrors.treatment}

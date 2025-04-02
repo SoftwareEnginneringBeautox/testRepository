@@ -35,7 +35,7 @@ import {
 } from "@/components/ui/Select";
 
 import CreatePatientEntry from "@/components/modals/CreatePatientEntry";
-import UpdatePatientEntry from "@/components/modals/UpdatePatientEntry";
+import EditPatientEntry from "@/components/modals/EditPatientEntry";
 import ArchivePatientEntry from "@/components/modals/ArchivePatientEntry";
 
 // Import date-fns for date formatting
@@ -73,9 +73,9 @@ function PatientRecordsDatabase() {
   };
 
   // Open update entry modal
-  const handleOpenUpdateEntry = (record) => {
+  const handleOpenEditEntry = (record) => {
     setSelectedEntry(record);
-    openModal("updateEntry");
+    openModal("editEntry");
   };
 
   // Open delete entry modal
@@ -361,7 +361,7 @@ function PatientRecordsDatabase() {
                   <div className="flex justify-center gap-2">
                     <button
                       className="text-reflexBlue-400"
-                      onClick={() => handleOpenUpdateEntry(record)}
+                      onClick={() => handleOpenEditEntry(record)}
                     >
                       <EditIcon />
                     </button>
@@ -400,8 +400,8 @@ function PatientRecordsDatabase() {
       {currentModal === "createEntry" && (
         <CreatePatientEntry isOpen={true} onClose={handleModalClose} />
       )}
-      {currentModal === "updateEntry" && selectedEntry && (
-        <UpdatePatientEntry
+      {currentModal === "editEntry" && selectedEntry && (
+        <EditPatientEntry
           isOpen={true}
           onClose={handleModalClose}
           entryData={selectedEntry}

@@ -18,7 +18,7 @@ import {
 
 import { Button } from "../ui/Button";
 
-import { SelectItem, ModalSelect } from "@/components/ui/Select";
+import { SelectItem } from "@/components/ui/Select";
 
 import UserIcon from "@/assets/icons/UserIcon";
 import ChevronLeftIcon from "@/assets/icons/ChevronLeftIcon";
@@ -47,22 +47,20 @@ function EditPackage({ isOpen, onClose, entryData, onSubmit }) {
     }
   }, [entryData]);
 
-  
   if (!isOpen) return null;
-  
+
   const handleSubmit = () => {
     if (!entryData?.id) {
       console.error("entryData is missing or invalid");
       return;
     }
-    
+
     const cleanedData = { ...originalData, ...formData };
     Object.keys(cleanedData).forEach((key) => {
       if (cleanedData[key] === "") delete cleanedData[key];
     });
-    
+
     onSubmit({ id: entryData.id, ...cleanedData });
-    
   };
 
   return (

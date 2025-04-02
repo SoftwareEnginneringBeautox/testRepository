@@ -10,7 +10,6 @@ import {
   ModalBody
 } from "@/components/ui/Modal";
 
-//import { ModalSelect, SelectItem } from "../ui/Select";
 import {
   Select,
   SelectTrigger,
@@ -18,6 +17,8 @@ import {
   SelectContent,
   SelectItem,
   SelectIcon,
+  ModalSelectTrigger,
+  ModalSelectContent
 } from "@/components/ui/Select";
 
 import {
@@ -40,7 +41,7 @@ import CircleUserIcon from "@/assets/icons/CircleUserIcon";
 import TreatmentIcon from "@/assets/icons/TreatmentIcon";
 import EditIcon from "@/assets/icons/EditIcon";
 
-function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
+function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
   const [originalData, setOriginalData] = useState({});
   const [formData, setFormData] = useState({});
 
@@ -54,7 +55,7 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
     time_of_session: "",
     consent_form_signed: false
   });*/
-  
+
   useEffect(() => {
     if (entryData) {
       /*setFormData({
@@ -71,7 +72,6 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
       setFormData({});
     }
   }, [entryData]);
-  
 
   if (!isOpen) return null;
 
@@ -81,14 +81,18 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
         <ModalIcon>
           <CircleUserIcon />
         </ModalIcon>
-        <ModalTitle>UPDATE PATIENT RECORD</ModalTitle>
+        <ModalTitle>EDIT PATIENT RECORD</ModalTitle>
       </ModalHeader>
       <ModalBody>
         <form onSubmit={(e) => e.preventDefault()}>
           <div className="flex flex-col gap-4">
-            <p>{originalData.patient_name?.toUpperCase() || "UNKNOWN"}'S PATIENT RECORD</p>
             <p>
-              <span>CURRENT PACKAGE</span> {entryData?.package_name?.toUpperCase() || "N/A"}
+              {originalData.patient_name?.toUpperCase() || "UNKNOWN"}'S PATIENT
+              RECORD
+            </p>
+            <p>
+              <span>CURRENT PACKAGE</span>{" "}
+              {entryData?.package_name?.toUpperCase() || "N/A"}
             </p>
             <InputContainer>
               <InputLabel>PATIENT NAME</InputLabel>
@@ -96,10 +100,15 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
                 <InputIcon>
                   <UserIcon />
                 </InputIcon>
-                <Input placeholder={originalData.patient_name || "Full name of the patient"}
-                 value={formData.patient_name ?? ""}
-                 onChange={(e) => setFormData({ ...formData, patient_name: e.target.value })}
-                 />
+                <Input
+                  placeholder={
+                    originalData.patient_name || "Full name of the patient"
+                  }
+                  value={formData.patient_name ?? ""}
+                  onChange={(e) =>
+                    setFormData({ ...formData, patient_name: e.target.value })
+                  }
+                />
               </InputTextField>
             </InputContainer>
 
@@ -107,55 +116,49 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
               <InputLabel>PERSON IN CHARGE</InputLabel>
 
               <Select
-                value={formData.person_in_charge ?? originalData.person_in_charge}
+                value={
+                  formData.person_in_charge ?? originalData.person_in_charge
+                }
                 onValueChange={(value) =>
                   setFormData({ ...formData, person_in_charge: value })
                 }
               >
-                <SelectTrigger>
-                  <UserIDIcon className="w-4 h-4 mr-2" />
-                  <SelectValue placeholder="Person in charge of the session" />
-                  <SelectIcon />
-                </SelectTrigger>
-                <SelectContent>
+                <ModalSelectTrigger
+                  icon={<UserIDIcon className="w-4 h-4" />}
+                  placeholder="Person in charge of the session"
+                />
+                <ModalSelectContent>
                   <SelectItem value="Jessica">Jessica</SelectItem>
                   <SelectItem value="Jimmy">Jimmy</SelectItem>
-                </SelectContent>
+                </ModalSelectContent>
               </Select>
-
             </InputContainer>
 
             <InputContainer>
               <InputLabel>TREATMENT</InputLabel>
-
               <Select
                 value={formData.treatment ?? originalData.treatment}
                 onValueChange={(value) =>
                   setFormData({ ...formData, treatment: value })
                 }
               >
-                <SelectTrigger>
-                  <TreatmentIcon className="w-4 h-4" />
-                  <SelectValue placeholder="Chosen treatment" />
-                </SelectTrigger>
-                <SelectContent>
+                <ModalSelectTrigger
+                  icon={<TreatmentIcon className="w-4 h-4" />}
+                  placeholder="Chosen treatment"
+                />
+                <ModalSelectContent>
                   <SelectItem value="Treatment 1">Treatment 1</SelectItem>
                   <SelectItem value="Treatment 2">Treatment 2</SelectItem>
                   <SelectItem value="Treatment 3">Treatment 3</SelectItem>
-                </SelectContent>
+                </ModalSelectContent>
               </Select>
-
-
             </InputContainer>
 
             <h5 className="my-4 font-semibold">
-              TOTAL AMOUNT <span>
-                ₱
-                {formData.total_amount ??
-                  originalData.total_amount ??
-                  "0.00"}
+              TOTAL AMOUNT{" "}
+              <span>
+                ₱{formData.total_amount ?? originalData.total_amount ?? "0.00"}
               </span>
-
             </h5>
 
             <InputContainer>
@@ -171,36 +174,35 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
                   pattern="\\d+(\\.\\d{0,2})?"
                   min="0"
                   step="0.01"
-                  value={formData.total_amount ?? originalData.total_amount ?? ""}
+                  value={
+                    formData.total_amount ?? originalData.total_amount ?? ""
+                  }
                   onChange={(e) =>
                     setFormData({ ...formData, total_amount: e.target.value })
-                  } 
+                  }
                 />
               </InputTextField>
             </InputContainer>
 
             <InputContainer>
-            <InputLabel>PAYMENT METHOD</InputLabel>
-            <Select
-              value={formData.payment_method ?? originalData.payment_method}
-              onValueChange={(value) =>
-                setFormData({ ...formData, payment_method: value })
-              }
-            >
-              <SelectTrigger>
-                <PesoIcon className="w-4 h-4 mr-2" />
-                <SelectValue placeholder="Select payment method" />
-                <SelectIcon />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Cash">Cash</SelectItem>
-                <SelectItem value="Card">Card</SelectItem>
-                <SelectItem value="GCash">GCash</SelectItem>
-              </SelectContent>
-            </Select>
-
-          </InputContainer>
-
+              <InputLabel>PAYMENT METHOD</InputLabel>
+              <Select
+                value={formData.payment_method ?? originalData.payment_method}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, payment_method: value })
+                }
+              >
+                <ModalSelectTrigger
+                  icon={<PesoIcon className="w-4 h-4" />}
+                  placeholder="Select payment method"
+                />
+                <ModalSelectContent>
+                  <SelectItem value="Cash">Cash</SelectItem>
+                  <SelectItem value="Card">Card</SelectItem>
+                  <SelectItem value="GCash">GCash</SelectItem>
+                </ModalSelectContent>
+              </Select>
+            </InputContainer>
           </div>
 
           <div className="flex flex-row w-full gap-4">
@@ -215,9 +217,16 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
                   className="text-input"
                   placeholder="Date of Session"
                   required
-                  value={formData.date_of_session ?? originalData.date_of_session ?? ""}
+                  value={
+                    formData.date_of_session ??
+                    originalData.date_of_session ??
+                    ""
+                  }
                   onChange={(e) =>
-                    setFormData({ ...formData, date_of_session: e.target.value })
+                    setFormData({
+                      ...formData,
+                      date_of_session: e.target.value
+                    })
                   }
                 />
               </InputTextField>
@@ -233,12 +242,18 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
                   type="time"
                   className="text-input"
                   required
-                  value={formData.time_of_session ?? originalData.time_of_session ?? ""}
+                  value={
+                    formData.time_of_session ??
+                    originalData.time_of_session ??
+                    ""
+                  }
                   onChange={(e) =>
-                    setFormData({ ...formData, time_of_session: e.target.value })
+                    setFormData({
+                      ...formData,
+                      time_of_session: e.target.value
+                    })
                   }
                 />
-
               </InputTextField>
             </InputContainer>
           </div>
@@ -252,17 +267,15 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
                   setFormData({ ...formData, next_treatment: value })
                 }
               >
-                <SelectTrigger>
-                  <TreatmentIcon className="w-4 h-4 mr-2" />
-                  <SelectValue placeholder="Next treatment chosen" />
-                  <SelectIcon />
-                </SelectTrigger>
-                <SelectContent>
+                <ModalSelectTrigger
+                  icon={<TreatmentIcon className="w-4 h-4" />}
+                  placeholder="Next treatment chosen"
+                />
+                <ModalSelectContent>
                   <SelectItem value="AESTHETICIAN">AESTHETICIAN</SelectItem>
                   <SelectItem value="RECEPTIONIST">RECEPTIONIST</SelectItem>
-                </SelectContent>
+                </ModalSelectContent>
               </Select>
-
             </InputContainer>
           </div>
 
@@ -271,11 +284,12 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
               PATIENT CONSENT FORM
             </h5>
             <div className="flex flex-row gap-3 items-center justify-start">
-              <Checkbox id="consent" 
-              checked={formData.consent_form_signed}
-              onCheckedChange={(checked) =>
-                setFormData({ ...formData, consent_form_signed: checked })
-              }
+              <Checkbox
+                id="consent"
+                checked={formData.consent_form_signed}
+                onCheckedChange={(checked) =>
+                  setFormData({ ...formData, consent_form_signed: checked })
+                }
               />
               <label
                 htmlFor="consent"
@@ -287,7 +301,12 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
           </div>
 
           <div className="flex flex-row gap-4 mt-6 w-full">
-            <Button type="button" variant="outline" className="w-1/2" onClick={onClose}>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-1/2"
+              onClick={onClose}
+            >
               <ChevronLeftIcon />
               CANCEL AND RETURN
             </Button>
@@ -303,9 +322,8 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
               }}
             >
               <EditIcon />
-              UPDATE ENTRY
+              EDIT ENTRY
             </Button>
-
           </div>
         </form>
       </ModalBody>
@@ -313,4 +331,4 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
   );
 }
 
-export default UpdatePatientEntry;
+export default EditPatientEntry;

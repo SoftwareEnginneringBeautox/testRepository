@@ -36,7 +36,7 @@ import EllipsisIcon from "../assets/icons/EllipsisIcon";
 import UserIcon from "../assets/icons/UserIcon";
 import UserIDIcon from "../assets/icons/UserIDIcon";
 import CalendarIcon from "../assets/icons/CalendarIcon";
-import ClockIcon from "../assets/icons/ClockIcon";
+import ArchiveIcon from "../assets/icons/ArchiveIcon";
 import EditIcon from "../assets/icons/EditIcon";
 import DeleteIcon from "../assets/icons/DeleteIcon";
 

@@ -11,14 +11,14 @@ import {
   InputContainer,
   InputTextField,
   InputLabel,
-  InputIcon
+  InputIcon,
+  Input
 } from "@/components/ui/Input";
 
 import {
   Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
+  ModalSelectTrigger,
+  ModalSelectContent,
   SelectItem
 } from "@/components/ui/Select";
 
@@ -27,6 +27,8 @@ import PesoIcon from "@/assets/icons/PesoIcon";
 import CoinsIcon from "@/assets/icons/CoinsIcon";
 import ChevronLeftIcon from "@/assets/icons/ChevronLeftIcon";
 import EditIcon from "@/assets/icons/EditIcon";
+import ExpenseTypeIcon from "@/assets/icons/ExpenseTypeIcon";
+import CalendarIcon from "@/assets/icons/CalendarIcon";
 
 function EditMonthlySales({ isOpen, onClose, onEditSuccess, initialData }) {
   const [formData, setFormData] = useState({
@@ -80,7 +82,7 @@ function EditMonthlySales({ isOpen, onClose, onEditSuccess, initialData }) {
                 <InputIcon>
                   <CoinsIcon />
                 </InputIcon>
-                <input
+                <Input
                   name="amount"
                   value={formData.amount}
                   onChange={handleChange}
@@ -97,16 +99,16 @@ function EditMonthlySales({ isOpen, onClose, onEditSuccess, initialData }) {
             <InputContainer>
               <InputLabel>CATEGORY</InputLabel>
               <Select
-                name="category"
                 value={formData.category}
                 onValueChange={(value) =>
                   handleChange({ target: { name: "category", value } })
                 }
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select category" />
-                </SelectTrigger>
-                <SelectContent>
+                <ModalSelectTrigger
+                  icon={<ExpenseTypeIcon />}
+                  placeholder="Select category"
+                />
+                <ModalSelectContent>
                   <SelectItem value="DAILY EXPENSE">DAILY EXPENSE</SelectItem>
                   <SelectItem value="MONTHLY PURCHASE ORDER">
                     MONTHLY PURCHASE ORDER
@@ -124,20 +126,26 @@ function EditMonthlySales({ isOpen, onClose, onEditSuccess, initialData }) {
                   <SelectItem value="SOCIAL MEDIA ADVERTISEMENTS">
                     SOCIAL MEDIA ADVERTISEMENTS
                   </SelectItem>
-                </SelectContent>
+                </ModalSelectContent>
               </Select>
             </InputContainer>
 
             <InputContainer>
               <InputLabel>DATE</InputLabel>
-              <input
-                name="date"
-                type="date"
-                value={formData.date}
-                onChange={handleChange}
-                required
-                className="w-full bg-transparent outline-none"
-              />
+              <InputTextField>
+                <InputIcon>
+                  <CalendarIcon />
+                </InputIcon>
+                <Input
+                  name="date"
+                  type="date"
+                  placeholder="Date of Session"
+                  required
+                  value={formData.date}
+                  onChange={handleChange}
+                  className="text-input"
+                />
+              </InputTextField>
             </InputContainer>
           </div>
           <div className="flex flex-row gap-4 mt-6 w-full">
