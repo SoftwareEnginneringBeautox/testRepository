@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-
 import {
   ModalContainer,
   ModalHeader,
@@ -18,7 +17,7 @@ import {
 
 import { Button } from "../ui/Button";
 
-import { Select, SelectTrigger, SelectValue, SelectContent,SelectItem } from "@/components/ui/Select";
+import { Select, ModalSelectTrigger, SelectValue, ModalSelectContent,SelectItem } from "@/components/ui/Select";
 
 import UserIcon from "@/assets/icons/UserIcon";
 import ChevronLeftIcon from "@/assets/icons/ChevronLeftIcon";
@@ -29,12 +28,38 @@ import PesoIcon from "@/assets/icons/PesoIcon";
 import EditIcon from "@/assets/icons/EditIcon";
 
 function EditPackage({ isOpen, onClose, entryData, onSubmit }) {
+  const API_BASE_URL = import.meta.env.VITE_API_URL;
   const [formData, setFormData] = useState({
     package_name: "",
     treatment: "",
     sessions: "",
     price: ""
   });
+
+  const [treatments, setTreatments] = useState([]);
+
+  useEffect(() => {
+    const fetchTreatments = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/treatments`, {
+          credentials: "include",
+        });
+        const data = await res.json();
+
+        // Only non-archived treatments
+        const activeTreatments = Array.isArray(data)
+          ? data.filter((t) => !t.is_archived)
+          : [];
+
+        setTreatments(activeTreatments);
+      } catch (error) {
+        console.error("Failed to fetch treatments:", error);
+      }
+    };
+
+    fetchTreatments();
+  }, []);
+
 
   useEffect(() => {
     if (entryData) {
@@ -55,7 +80,7 @@ function EditPackage({ isOpen, onClose, entryData, onSubmit }) {
       return;
     }
 
-    const cleanedData = { ...originalData, ...formData };
+    const cleanedData = { ...formData };
     Object.keys(cleanedData).forEach((key) => {
       if (cleanedData[key] === "") delete cleanedData[key];
     });
@@ -96,14 +121,17 @@ function EditPackage({ isOpen, onClose, entryData, onSubmit }) {
                 value={formData.treatment}
                 onValueChange={(value) => setFormData({ ...formData, treatment: value })}
               >
-                <SelectTrigger className="w-full">
+                <ModalSelectTrigger className="w-full">
                   <TreatmentIcon className="w-4 h-4 mr-2" />
                   <SelectValue placeholder="Treatments chosen" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="AESTHETICIAN">AESTHETICIAN</SelectItem>
-                  <SelectItem value="RECEPTIONIST">RECEPTIONIST</SelectItem>
-                </SelectContent>
+                </ModalSelectTrigger>
+                <ModalSelectContent>
+                  {treatments.map((treatment) => (
+                    <SelectItem key={treatment.id} value={treatment.treatment_name}>
+                      {treatment.treatment_name}
+                    </SelectItem>
+                  ))}
+                </ModalSelectContent>
               </Select>
             </InputContainer>
 
