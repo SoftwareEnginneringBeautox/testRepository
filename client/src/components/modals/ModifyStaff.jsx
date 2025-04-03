@@ -128,8 +128,8 @@ const ModifyStaff = ({ isOpen, onClose, entryData, onSubmit }) => {
                 <SelectValue placeholder="Role of the Staff" />
               </ModalSelectTrigger>
               <ModalSelectContent>
-                <SelectItem value="aesthetician">AESTHETICIAN</SelectItem>
-                <SelectItem value="receptionist">RECEPTIONIST</SelectItem>
+                <SelectItem data-cy="role-aesthetician" value="aesthetician">Aesthetician</SelectItem>
+                <SelectItem data-cy="role-receptionist" value="receptionist">Receptionist</SelectItem>
               </ModalSelectContent>
             </Select>
           </InputContainer>

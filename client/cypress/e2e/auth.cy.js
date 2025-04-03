@@ -4,23 +4,35 @@ describe('Login Page', () => {
     })
   
     it('Displays the login form', () => {
-      cy.contains('Welcome to PRISM').should('exist')
-      cy.get('input#username').should('exist')
-      cy.get('input#password').should('exist')
-      cy.get('button[type=submit]').contains('LOGIN').should('exist')
+      cy.get('[data-cy=login-form]').should('exist')
+      cy.get('[data-cy=login-username]').should('exist')
+      cy.get('[data-cy=login-password]').should('exist')
+      cy.get('[data-cy=login-submit]').should('exist')
     })
   
-    it('Shows error on empty submit', () => {
-      cy.get('button[type=submit]').click()
-      cy.contains('required', { matchCase: false }) // if native validation doesn't block first
+    it('Fails login with empty credentials (HTML5 validation)', () => {
+      // This just triggers native validation. No error text in DOM.
+      cy.get('[data-cy=login-submit]').click()
+      cy.get('[data-cy=login-username]').then(($input) => {
+        expect($input[0].checkValidity()).to.be.false
+      })
+    })
+
+    it('Fails login with invalid credentials', () => {
+      cy.get('[data-cy=login-username]').type('wronguser')
+      cy.get('[data-cy=login-password]').type('wrongpass')
+      cy.get('[data-cy=login-submit]').click()
+  
+      // Check for error message
+      cy.contains('Invalid username or password').should('exist')
     })
   
-    it('Logs in successfully as admin', () => {
-      cy.get('input#username').type('lawrence')
-      cy.get('input#password').type('12345')
-      cy.get('button[type=submit]').click()
+    it('Logs in as admin and redirects to dashboard', () => {
+      cy.get('[data-cy=login-username]').type('lawrence')
+      cy.get('[data-cy=login-password]').type('12345')
+      cy.get('[data-cy=login-submit]').click()
   
-      // Wait for redirect based on role
+      // Assert redirect
       cy.url().should('include', '/AdminDashboard')
     })
   /*
@@ -32,16 +44,9 @@ describe('Login Page', () => {
       cy.url().should('include', '/StaffDashboard')
     }) */
   
-    it('Shows error on invalid credentials', () => {
-      cy.get('input#username').type('fakeuser')
-      cy.get('input#password').type('wrongpass')
-      cy.get('button[type=submit]').click()
-  
-      cy.contains('Invalid username or password').should('exist')
-    })
   
     it('Opens forgot password modal', () => {
-      cy.contains('CLICK HERE').click()
+      cy.get('[data-cy=forgot-password-link]').click()
       cy.get('[data-cy=forgot-password-modal]').should('exist')
     })
   })
