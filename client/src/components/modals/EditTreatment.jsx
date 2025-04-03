@@ -5,7 +5,7 @@ import {
   ModalHeader,
   ModalTitle,
   ModalIcon,
-  ModalBody,
+  ModalBody
 } from "@/components/ui/Modal";
 
 import {
@@ -14,6 +14,8 @@ import {
   InputLabel,
   InputIcon,
   Input,
+  InputArea,
+  InputAreaField
 } from "@/components/ui/Input";
 
 import { Button } from "../ui/Button";
@@ -22,18 +24,19 @@ import ChevronLeftIcon from "@/assets/icons/ChevronLeftIcon";
 import EditIcon from "@/assets/icons/EditIcon";
 import TreatmentIcon from "@/assets/icons/TreatmentIcon";
 import PesoIcon from "@/assets/icons/PesoIcon";
+import ClockIcon from "@/assets/icons/ClockIcon";
 
 function EditTreatment({ isOpen, onClose, entryData, onSubmit }) {
   const [formData, setFormData] = useState({
     treatment_name: "",
-    price: "",
+    price: ""
   });
 
   useEffect(() => {
     if (entryData) {
       setFormData({
         treatment_name: entryData.treatment_name || "",
-        price: entryData.price || "",
+        price: entryData.price || ""
       });
     }
   }, [entryData]);
@@ -63,7 +66,10 @@ function EditTreatment({ isOpen, onClose, entryData, onSubmit }) {
         <ModalTitle>EDIT TREATMENT</ModalTitle>
       </ModalHeader>
       <ModalBody>
-        <form onSubmit={(e) => e.preventDefault()} data-cy="edit-treatment-form">
+        <form
+          onSubmit={(e) => e.preventDefault()}
+          data-cy="edit-treatment-form"
+        >
           <div className="flex flex-col gap-4">
             <InputContainer>
               <InputLabel>TREATMENT NAME</InputLabel>
@@ -100,6 +106,34 @@ function EditTreatment({ isOpen, onClose, entryData, onSubmit }) {
               </InputTextField>
             </InputContainer>
           </div>
+
+          <InputContainer>
+            <InputLabel>DURATION (MINUTES)</InputLabel>
+            <InputTextField>
+              <InputIcon>
+                <ClockIcon />
+              </InputIcon>
+              <Input
+                data-cy="treatment-duration"
+                placeholder="Duration in minutes"
+                type="number"
+                min="0"
+                step="1"
+                required
+              />
+            </InputTextField>
+          </InputContainer>
+
+          {/* Description */}
+          <InputContainer>
+            <InputLabel>DESCRIPTION</InputLabel>
+            <InputAreaField>
+              <InputArea
+                data-cy="treatment-description"
+                placeholder="Brief description of the treatment"
+              />
+            </InputAreaField>
+          </InputContainer>
 
           <div className="flex flex-row gap-4 mt-6 w-full">
             <Button

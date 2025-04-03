@@ -112,7 +112,7 @@ const ModalSelectContent = React.forwardRef(
       <SelectPrimitive.Content
         ref={ref}
         className={cn(
-          "relative z-50 max-h-[90vh] w-full min-w-[var(--radix-select-trigger-width)] overflow-hidden rounded-md border bg-customNeutral-100 text-popover-foreground shadow-md text-sm",
+          "relative z-50 max-h-[90vh] w-full min-w-[var(--radix-select-trigger-width)] overflow-y-auto rounded-md border bg-customNeutral-100 text-popover-foreground shadow-md text-sm",
           className
         )}
         position="popper"
@@ -120,7 +120,7 @@ const ModalSelectContent = React.forwardRef(
         align="start"
         {...props}
       >
-        <SelectPrimitive.Viewport className="p-1 w-full">
+        <SelectPrimitive.Viewport className="p-1 w-full max-h-60 overflow-y-auto">
           {children}
         </SelectPrimitive.Viewport>
       </SelectPrimitive.Content>
@@ -168,7 +168,7 @@ const SelectContent = React.forwardRef(
       <SelectPrimitive.Content
         ref={ref}
         className={cn(
-          "relative z-50 max-h-96 w-full min-w-[var(--radix-select-trigger-width)] overflow-hidden rounded-md border bg-customNeutral-100 text-popover-foreground shadow-md",
+          "relative z-50 max-h-96 w-full min-w-[var(--radix-select-trigger-width)] overflow-y-auto rounded-md border bg-customNeutral-100 text-popover-foreground shadow-md",
           position === "popper" &&
             "data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1",
           variant === "modal" && "text-sm",
@@ -180,7 +180,7 @@ const SelectContent = React.forwardRef(
         {...props}
       >
         <SelectScrollUpButton />
-        <SelectPrimitive.Viewport className="p-1 w-full">
+        <SelectPrimitive.Viewport className="p-1 w-full max-h-60 overflow-y-auto">
           {children}
         </SelectPrimitive.Viewport>
         <SelectScrollDownButton />
@@ -188,6 +188,7 @@ const SelectContent = React.forwardRef(
     </SelectPrimitive.Portal>
   )
 );
+
 SelectContent.displayName = SelectPrimitive.Content.displayName;
 
 const SelectLabel = React.forwardRef(({ className, ...props }, ref) => (

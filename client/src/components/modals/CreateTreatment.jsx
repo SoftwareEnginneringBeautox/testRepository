@@ -9,7 +9,7 @@ import {
   ModalHeader,
   ModalTitle,
   ModalIcon,
-  ModalBody,
+  ModalBody
 } from "@/components/ui/Modal";
 
 import {
@@ -18,6 +18,8 @@ import {
   InputLabel,
   InputIcon,
   Input,
+  InputArea,
+  InputAreaField
 } from "@/components/ui/Input";
 
 import { Button } from "../ui/Button";
@@ -47,7 +49,7 @@ function CreateTreatment({ isOpen, onClose }) {
       treatment_name: treatmentName,
       price: parseFloat(price) || 0,
       duration: parseInt(duration, 10) || 0,
-      description,
+      description
     };
 
     try {
@@ -78,7 +80,7 @@ function CreateTreatment({ isOpen, onClose }) {
         <ModalTitle>CREATE NEW TREATMENT</ModalTitle>
       </ModalHeader>
       <ModalBody>
-        <form  data-cy="treatment-form" onSubmit={handleSubmit}>
+        <form data-cy="treatment-form" onSubmit={handleSubmit}>
           <div className="flex flex-col gap-4">
             {/* Treatment Name */}
             <InputContainer>
@@ -135,26 +137,38 @@ function CreateTreatment({ isOpen, onClose }) {
                 />
               </InputTextField>
             </InputContainer>
+
             {/* Description */}
             <InputContainer>
               <InputLabel>DESCRIPTION</InputLabel>
-              <InputTextField>
-                <Input
+              <InputAreaField>
+                <InputArea
                   data-cy="treatment-description"
                   placeholder="Brief description of the treatment"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                 />
-              </InputTextField>
+              </InputAreaField>
             </InputContainer>
             {error && <p className="text-red-500">{error}</p>}
           </div>
           <div className="flex flex-row gap-4 mt-6 w-full">
-            <Button data-cy="cancel-treatment-btn" variant="outline" className="w-1/2" onClick={onClose} disabled={loading}>
+            <Button
+              data-cy="cancel-treatment-btn"
+              variant="outline"
+              className="w-1/2"
+              onClick={onClose}
+              disabled={loading}
+            >
               <ChevronLeftIcon />
               CANCEL AND RETURN
             </Button>
-            <Button data-cy="save-treatment-btn" type="submit" className="w-1/2" disabled={loading}>
+            <Button
+              data-cy="save-treatment-btn"
+              type="submit"
+              className="w-1/2"
+              disabled={loading}
+            >
               <PlusIcon />
               {loading ? "CREATING..." : "CREATE TREATMENT"}
             </Button>
