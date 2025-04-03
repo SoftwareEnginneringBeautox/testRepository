@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-
 import { useModal } from "@/hooks/useModal";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
@@ -187,55 +186,74 @@ function BookingCalendar() {
   };
 
   return (
-    <div className="w-full flex flex-col items-center justify-center">
-      <h3 className="text-4xl leading-[3.75rem] font-semibold my-4 w-[90%]">
+    <div className="w-full flex flex-col items-center justify-center px-4 sm:px-6 md:px-8">
+      <h3 className="text-2xl sm:text-3xl md:text-4xl leading-tight sm:leading-[3.75rem] font-semibold my-2 sm:my-4 w-full md:w-[90%]">
         BOOKING CALENDAR
       </h3>
       <div
         id="booking-container"
-        className="flex flex-col shadow-custom items-center rounded-lg p-8 bg-ash-100 w-[90%] mb-8"
+        className="flex flex-col shadow-custom items-center rounded-lg p-3 sm:p-4 md:p-6 lg:p-8 bg-ash-100 w-full md:w-[90%] mb-4 sm:mb-8"
       >
         {/* Header Section */}
-        <div className="flex flex-row justify-between w-full">
+        <div className="flex flex-col sm:flex-row justify-between w-full gap-4 sm:gap-0">
           <div className="flex flex-row items-center gap-2">
             <button
               className="border border-transparent p-1 rounded hover:border-lavender-400 text-lavender-400"
               onClick={handlePrevious}
+              aria-label="Previous"
             >
-              <ChevronLeftIcon />
+              <ChevronLeftIcon className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
-            <h2 className="text-xl font-semibold">
+            <h2 className="text-base sm:text-lg md:text-xl font-semibold">
               {currentDate.toLocaleString("default", { month: "long" })} {year}
             </h2>
             <button
               className="border border-transparent p-1 rounded hover:border-lavender-400 text-lavender-400"
               onClick={handleNext}
+              aria-label="Next"
             >
-              <ChevronRightIcon />
+              <ChevronRightIcon className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
           </div>
-          <div className="flex flex-row gap-4 items-center">
-            <div className="flex gap-2 p-4 text-xl">
+          
+          <div className="flex flex-row gap-2 sm:gap-4 items-center justify-between sm:justify-end w-full sm:w-auto">
+            <div className="flex gap-2 text-sm sm:text-base md:text-lg lg:text-xl">
               {/* Toggle Buttons with previous styling */}
               <button
                 onClick={() => setView("monthly")}
-                className="relative inline-block px-2 py-1 font-semibold overflow-hidden group"
+                className={`relative inline-block px-1 sm:px-2 py-1 font-semibold overflow-hidden group ${
+                  view === "monthly" ? "text-lavender-500" : ""
+                }`}
               >
                 MONTHLY
-                <span className="absolute left-0 bottom-0 block w-0 h-0.5 bg-lavender-400 transition-all duration-300 group-hover:w-full"></span>
+                <span 
+                  className={`absolute left-0 bottom-0 block h-0.5 bg-lavender-400 transition-all duration-300 ${
+                    view === "monthly" ? "w-full" : "w-0 group-hover:w-full"
+                  }`}
+                ></span>
               </button>
 
               <button
                 onClick={() => setView("weekly")}
-                className="relative inline-block px-2 py-1 font-semibold overflow-hidden group"
+                className={`relative inline-block px-1 sm:px-2 py-1 font-semibold overflow-hidden group ${
+                  view === "weekly" ? "text-lavender-500" : ""
+                }`}
               >
                 WEEKLY
-                <span className="absolute left-0 bottom-0 block w-0 h-0.5 bg-lavender-400 transition-all duration-300 group-hover:w-full"></span>
+                <span 
+                  className={`absolute left-0 bottom-0 block h-0.5 bg-lavender-400 transition-all duration-300 ${
+                    view === "weekly" ? "w-full" : "w-0 group-hover:w-full"
+                  }`}
+                ></span>
               </button>
             </div>
 
             <Select>
-              <SelectTrigger placeholder="FILTER" icon={<FilterIcon />}>
+              <SelectTrigger 
+                placeholder="FILTER" 
+                icon={<FilterIcon className="w-4 h-4 sm:w-5 sm:h-5" />}
+                className="text-xs sm:text-sm md:text-base p-1 sm:p-2"
+              >
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -247,19 +265,21 @@ function BookingCalendar() {
           </div>
         </div>
 
-        <div className="w-full flex flex-1">
+        <div className="w-full flex flex-1 mt-4">
           {isLoading ? (
-            <div className="w-full py-20 text-center text-lg">
+            <div className="w-full py-10 sm:py-20 text-center text-base sm:text-lg">
               Loading appointments...
             </div>
           ) : view === "monthly" ? (
-            <MonthlyBookingPanel
-              calendarDays={calendar}
-              appointments={getFilteredAppointments()}
-              currentMonth={month}
-            />
+            <div className="w-full overflow-x-auto">
+              <MonthlyBookingPanel
+                calendarDays={calendar}
+                appointments={getFilteredAppointments()}
+                currentMonth={month}
+              />
+            </div>
           ) : (
-            <div className="w-full flex justify-center">
+            <div className="w-full flex justify-center overflow-x-auto">
               <div className="w-full">
                 <WeeklyBookingPanel
                   events={getFilteredAppointments()}
