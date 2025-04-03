@@ -6,8 +6,8 @@ import EditPackage from "@/components/modals/EditPackage";
 import ArchivePackage from "@/components/modals/ArchivePackage";
 import CreateTreatment from "@/components/modals/CreateTreatment";
 // (Optional: Import EditTreatment and DeleteTreatment modals if implemented)
-// import EditTreatment from "@/components/modals/EditTreatment";
-// import DeleteTreatment from "@/components/modals/DeleteTreatment";
+import EditTreatment from "@/components/modals/EditTreatment";
+import ArchiveTreatment from "@/components/modals/ArchiveTreatment";
 
 import {
   Table,
@@ -57,7 +57,7 @@ function AdministratorServices() {
       const response = await axios.get(`${API_BASE_URL}/api/treatments`, {
         withCredentials: true
       });
-      setTreatmentsData(response.data);
+      setTreatmentsData(response.data.filter((item) => !item.archived));
     } catch (error) {
       console.error("Error fetching treatments:", error);
     }
@@ -85,6 +85,16 @@ function AdministratorServices() {
     openModal("editPackage");
   };
 
+  const handleSelectTreatmentToArchive = (treatment) => {
+    setSelectedTreatment(treatment);
+    openModal("archiveTreatment");
+  };
+
+  const handleSelectTreatmentToEdit = (treatment) => {
+    setSelectedTreatment(treatment);
+    openModal("editTreatment");
+  };
+
   const handleEditPackage = async (updatedData) => {
     await fetch(`${API_BASE_URL}/api/manage-record`, {
       method: "POST",
@@ -102,7 +112,7 @@ function AdministratorServices() {
     fetchPackages();
   };
 
-  const handleArchive = async () => {
+  const handleArchivePackage = async () => {
     console.log("ARCHIVE BUTTON CLICKED", selectedPackage?.id);
 
     if (!selectedPackage?.id) return;
@@ -121,6 +131,44 @@ function AdministratorServices() {
     closeModal();
     fetchPackages();
   };
+
+  const handleEditTreatment = async (updatedData) => {
+    await fetch(`${API_BASE_URL}/api/manage-record`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({
+        table: "treatments",
+        id: updatedData.id,
+        action: "edit",
+        data: updatedData,
+      }),
+    });
+  
+    closeModal();
+    fetchTreatments();
+  };
+  
+  const handleArchiveTreatment = async () => {
+    console.log("ARCHIVE BUTTON CLICKED", selectedTreatment?.id);
+  
+    if (!selectedTreatment?.id) return;
+  
+    await fetch(`${API_BASE_URL}/api/manage-record`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({
+        table: "treatments",
+        id: selectedTreatment.id,
+        action: "archive",
+      }),
+    });
+  
+    closeModal();
+    fetchTreatments();
+  };
+  
 
   // Initial load for treatments and packages
   useEffect(() => {
@@ -169,13 +217,13 @@ function AdministratorServices() {
                     <DropdownMenuContent>
                       <DropdownMenuGroup>
                         <DropdownMenuItem
-                          onClick={() => openModal("editTreatment")}
+                          onClick={() => handleSelectTreatmentToEdit(treatment)}
                         >
                           <EditIcon />
                           <p className="font-semibold">Edit</p>
                         </DropdownMenuItem>
                         <DropdownMenuItem
-                          onClick={() => openModal("archiveTreatment")}
+                          onClick={() => handleSelectTreatmentToArchive(treatment)}
                         >
                           <ArchiveIcon />
                           <p className="font-semibold">Archive</p>
@@ -305,7 +353,7 @@ function AdministratorServices() {
           isOpen={true}
           onClose={closeModal}
           entryData={selectedPackage}
-          onArchive={handleArchive}
+          onArchive={handleArchivePackage}
         />
       )}
       {currentModal === "createTreatment" && (
@@ -317,13 +365,24 @@ function AdministratorServices() {
           }}
         />
       )}
-      {/* Optionally, add modals for editing/deleting treatments */}
-      {/* {currentModal === "editTreatment" && (
-        <EditTreatment isOpen={true} onClose={closeModal} />
+      {currentModal === "archiveTreatment" && selectedTreatment && (
+        <ArchiveTreatment
+          isOpen={true}
+          onClose={closeModal}
+          entryData={selectedTreatment}
+          onArchive={handleArchiveTreatment}
+        />
       )}
-      {currentModal === "archiveTreatmentTreatment" && (
-        <DeleteTreatment isOpen={true} onClose={closeModal} />
-      )} */}
+     
+      {currentModal === "editTreatment" && selectedTreatment && (
+        <EditTreatment
+          isOpen={true}
+          onClose={closeModal}
+          entryData={selectedTreatment}
+          onSubmit={handleEditTreatment}
+        />
+      )}
+      
     </div>
   );
 }

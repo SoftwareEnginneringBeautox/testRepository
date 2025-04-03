@@ -1,0 +1,118 @@
+import React, { useState, useEffect } from "react";
+
+import {
+  ModalContainer,
+  ModalHeader,
+  ModalTitle,
+  ModalIcon,
+  ModalBody,
+} from "@/components/ui/Modal";
+
+import {
+  InputContainer,
+  InputTextField,
+  InputLabel,
+  InputIcon,
+  Input,
+} from "@/components/ui/Input";
+
+import { Button } from "../ui/Button";
+
+import ChevronLeftIcon from "@/assets/icons/ChevronLeftIcon";
+import EditIcon from "@/assets/icons/EditIcon";
+import TreatmentIcon from "@/assets/icons/TreatmentIcon";
+import PesoIcon from "@/assets/icons/PesoIcon";
+
+function EditTreatment({ isOpen, onClose, entryData, onSubmit }) {
+  const [formData, setFormData] = useState({
+    treatment_name: "",
+    price: "",
+  });
+
+  useEffect(() => {
+    if (entryData) {
+      setFormData({
+        treatment_name: entryData.treatment_name || "",
+        price: entryData.price || "",
+      });
+    }
+  }, [entryData]);
+
+  if (!isOpen) return null;
+
+  const handleSubmit = () => {
+    if (!entryData?.id) {
+      console.error("entryData is missing or invalid");
+      return;
+    }
+
+    const cleanedData = { ...formData };
+    Object.keys(cleanedData).forEach((key) => {
+      if (cleanedData[key] === "") delete cleanedData[key];
+    });
+
+    onSubmit({ id: entryData.id, ...cleanedData });
+  };
+
+  return (
+    <ModalContainer>
+      <ModalHeader>
+        <ModalIcon>
+          <EditIcon />
+        </ModalIcon>
+        <ModalTitle>EDIT TREATMENT</ModalTitle>
+      </ModalHeader>
+      <ModalBody>
+        <form onSubmit={(e) => e.preventDefault()}>
+          <div className="flex flex-col gap-4">
+            <InputContainer>
+              <InputLabel>TREATMENT NAME</InputLabel>
+              <InputTextField>
+                <InputIcon>
+                  <TreatmentIcon />
+                </InputIcon>
+                <Input
+                  placeholder="Name of the Treatment"
+                  value={formData.treatment_name}
+                  onChange={(e) =>
+                    setFormData({ ...formData, treatment_name: e.target.value })
+                  }
+                />
+              </InputTextField>
+            </InputContainer>
+
+            <InputContainer>
+              <InputLabel>PRICE</InputLabel>
+              <InputTextField>
+                <InputIcon>
+                  <PesoIcon />
+                </InputIcon>
+                <Input
+                  placeholder="₱"
+                  type="number"
+                  value={formData.price}
+                  onChange={(e) =>
+                    setFormData({ ...formData, price: e.target.value })
+                  }
+                />
+              </InputTextField>
+            </InputContainer>
+          </div>
+
+          <div className="flex flex-row gap-4 mt-6 w-full">
+            <Button variant="outline" className="w-1/2" onClick={onClose}>
+              <ChevronLeftIcon />
+              CANCEL AND RETURN
+            </Button>
+            <Button className="w-1/2" onClick={handleSubmit}>
+              <EditIcon />
+              EDIT TREATMENT
+            </Button>
+          </div>
+        </form>
+      </ModalBody>
+    </ModalContainer>
+  );
+}
+
+export default EditTreatment;
