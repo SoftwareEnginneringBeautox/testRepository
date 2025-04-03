@@ -11,18 +11,18 @@ function ArchiveStaff({ isOpen, onClose, onArchive }) {
   if (!isOpen) return null;
 
   return (
-    <ModalContainer className="flex flex-col gap-4">
+    <ModalContainer data-cy="archive-staff-modal" className="flex flex-col gap-4">
       <div className="flex w-full flex-1 items-center justify-center text-warning-300">
         <WarningIcon size={48} />
       </div>
       <ModalTitle className="text-center">ARCHIVE STAFF INFORMATION?</ModalTitle>
       <p>This will archive the staff’s information within the system.</p>
       <div className="flex flex-row gap-4 w-full">
-        <Button variant="outline" className="w-1/2" onClick={onClose}>
+        <Button data-cy="cancel-archive-staff" variant="outline" className="w-1/2" onClick={onClose}>
           <ChevronLeftIcon />
           CANCEL AND RETURN
         </Button>
-        <Button className="w-1/2" onClick={onArchive}>
+        <Button data-cy="confirm-archive-staff" className="w-1/2" onClick={onArchive}>
           <ArchiveIcon />
           ARCHIVE STAFF
         </Button>

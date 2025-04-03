@@ -183,7 +183,7 @@ function AdministratorServices() {
       </h4>
 
       {/* Treatments Table */}
-      <Table>
+      <Table data-cy="treatment-table">
         <TableHeader>
           <TableRow>
             <TableHead className="py-4 text-center">TREATMENT ID</TableHead>
@@ -199,7 +199,7 @@ function AdministratorServices() {
         <TableBody>
           {treatmentsData.length > 0 ? (
             treatmentsData.map((treatment) => (
-              <TableRow key={treatment.id}>
+              <TableRow data-cy="treatment-row" key={treatment.id}>
                 <TableCell className="py-4 text-center">
                   {treatment.id}
                 </TableCell>
@@ -217,12 +217,14 @@ function AdministratorServices() {
                     <DropdownMenuContent>
                       <DropdownMenuGroup>
                         <DropdownMenuItem
+                          data-cy="edit-treatment-btn"
                           onClick={() => handleSelectTreatmentToEdit(treatment)}
                         >
                           <EditIcon />
                           <p className="font-semibold">Edit</p>
                         </DropdownMenuItem>
                         <DropdownMenuItem
+                          data-cy="archive-treatment-btn"
                           onClick={() => handleSelectTreatmentToArchive(treatment)}
                         >
                           <ArchiveIcon />
@@ -246,14 +248,14 @@ function AdministratorServices() {
 
       {/* Button for Adding Treatments */}
       <div className="w-full flex justify-end gap-4 mb-[2%]">
-        <Button onClick={() => openModal("createTreatment")}>
+        <Button data-cy="add-treatment-btn" onClick={() => openModal("createTreatment")}>
           <PlusIcon />
           ADD NEW TREATMENT
         </Button>
       </div>
 
       {/* Packages Table */}
-      <Table>
+      <Table data-cy="package-table">
         <TableHeader>
           <TableRow>
             <TableHead className="py-4 text-center">PRODUCT ID</TableHead>
@@ -271,7 +273,7 @@ function AdministratorServices() {
         <TableBody>
           {packagesData.length > 0 ? (
             packagesData.map((pkg) => (
-              <TableRow key={pkg.id}>
+              <TableRow data-cy="package-row" key={pkg.id}>
                 <TableCell className="py-4 text-center">{pkg.id}</TableCell>
                 <TableCell className="py-4 text-center">
                   {pkg.package_name}
@@ -291,12 +293,14 @@ function AdministratorServices() {
                     <DropdownMenuContent>
                       <DropdownMenuGroup>
                         <DropdownMenuItem
+                          data-cy="edit-package-btn"
                           onClick={() => handleSelectPackageToEdit(pkg)}
                         >
                           <EditIcon />
                           <p className="font-semibold">Edit</p>
                         </DropdownMenuItem>
                         <DropdownMenuItem
+                          data-cy="archive-package-btn"
                           onClick={() => handleSelectPackageToArchive(pkg)}
                         >
                           <ArchiveIcon />
@@ -323,7 +327,7 @@ function AdministratorServices() {
           <ChevronLeftIcon />
           CHECK
         </Button>
-        <Button onClick={() => openModal("createPackage")}>
+        <Button data-cy="add-package-btn" onClick={() => openModal("createPackage")}>
           <PlusIcon />
           ADD NEW PACKAGE
           <PackageIcon />

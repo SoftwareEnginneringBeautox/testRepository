@@ -70,7 +70,7 @@ const ModifyStaff = ({ isOpen, onClose, entryData, onSubmit }) => {
   };
 
   return (
-    <ModalContainer>
+    <ModalContainer data-cy="edit-staff-modal">
       <ModalHeader>
         <ModalIcon>
           <UserIDIcon />
@@ -87,6 +87,7 @@ const ModifyStaff = ({ isOpen, onClose, entryData, onSubmit }) => {
                   <UserIcon />
                 </InputIcon>
                 <Input
+                  data-cy="edit-staff-name"
                   placeholder="New Name of the Staff"
                   value={formData.username}
                   onChange={(e) =>
@@ -103,6 +104,7 @@ const ModifyStaff = ({ isOpen, onClose, entryData, onSubmit }) => {
                   <EmailIcon />
                 </InputIcon>
                 <Input
+                  data-cy="edit-staff-email"
                   placeholder="Email of the Staff"
                   type="email"
                   value={formData.email}
@@ -121,7 +123,7 @@ const ModifyStaff = ({ isOpen, onClose, entryData, onSubmit }) => {
                 setFormData({ ...formData, role: value })
               }
             >
-              <ModalSelectTrigger className="w-full">
+              <ModalSelectTrigger data-cy="edit-staff-role" className="w-full">
                 <UserIDIcon className="w-4 h-4 mr-2" />
                 <SelectValue placeholder="Role of the Staff" />
               </ModalSelectTrigger>
@@ -140,7 +142,7 @@ const ModifyStaff = ({ isOpen, onClose, entryData, onSubmit }) => {
                 setFormData({ ...formData, dayoff: value })
               }
             >
-              <ModalSelectTrigger className="w-full">
+              <ModalSelectTrigger data-cy="edit-staff-dayoff" className="w-full">
                 <CalendarIcon className="w-4 h-4 mr-2" />
                 <SelectValue placeholder="Day Off of the Staff" />
               </ModalSelectTrigger>
@@ -159,11 +161,11 @@ const ModifyStaff = ({ isOpen, onClose, entryData, onSubmit }) => {
           </div>
 
           <div className="flex flex-row gap-4 mt-6 w-full">
-            <Button variant="outline" className="w-1/2" onClick={onClose}>
+            <Button data-cy="cancel-edit-staff" variant="outline" className="w-1/2" onClick={onClose}>
               <ChevronLeftIcon />
               CANCEL AND RETURN
             </Button>
-            <Button className="w-1/2" onClick={handleSubmit}>
+            <Button data-cy="submit-edit-staff" className="w-1/2" onClick={handleSubmit}>
               <EditIcon />
               EDIT STAFF
             </Button>

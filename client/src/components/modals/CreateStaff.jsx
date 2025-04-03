@@ -85,7 +85,7 @@ function CreateStaff({ isOpen, onClose }) {
   };
 
   return (
-    <ModalContainer>
+    <ModalContainer data-cy="create-staff-modal">
       <ModalHeader>
         <ModalIcon>
           <UserIDIcon />
@@ -103,6 +103,7 @@ function CreateStaff({ isOpen, onClose }) {
                   <UserIcon />
                 </InputIcon>
                 <Input
+                  data-cy="staff-name"
                   placeholder="Name of the Staff"
                   value={staffName}
                   onChange={(e) => setStaffName(e.target.value)}
@@ -121,6 +122,7 @@ function CreateStaff({ isOpen, onClose }) {
                 }}
               >
                 <ModalSelectTrigger
+                  data-cy="staff-role"
                   icon={<UserIDIcon className="w-4 h-4" />}
                   placeholder="Select staff role"
                 />
@@ -139,6 +141,7 @@ function CreateStaff({ isOpen, onClose }) {
                   <PasswordIcon />
                 </InputIcon>
                 <Input
+                  data-cy="staff-password"
                   type="password"
                   placeholder="Password of the Staff"
                   value={staffPassword}
@@ -158,6 +161,7 @@ function CreateStaff({ isOpen, onClose }) {
                 }}
               >
                 <ModalSelectTrigger
+                  data-cy="staff-dayoff"
                   icon={<CalendarIcon className="w-4 h-4" />}
                   placeholder="Select day off"
                 />
@@ -177,11 +181,11 @@ function CreateStaff({ isOpen, onClose }) {
           </div>
 
           <div className="flex flex-row gap-4 mt-6 w-full">
-            <Button variant="outline" className="w-1/2" onClick={onClose}>
+            <Button data-cy="cancel-create-staff" variant="outline" className="w-1/2" onClick={onClose}>
               <ChevronLeftIcon />
               CANCEL AND RETURN
             </Button>
-            <Button type="submit" className="w-1/2" disabled={loading}>
+            <Button data-cy="submit-create-staff" type="submit" className="w-1/2" disabled={loading}>
               <PlusIcon />
               {loading ? "CREATING..." : "CREATE STAFF"}
             </Button>

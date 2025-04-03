@@ -150,7 +150,7 @@ function Login() {
           )}
 
           {/* Login form */}
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4 sm:gap-5">
+          <form data-cy="login-form" onSubmit={handleSubmit} className="flex flex-col gap-4 sm:gap-5">
             <InputContainer className="transition-all duration-200">
               <InputLabel className="text-xs sm:text-sm">Username</InputLabel>
               <InputTextField className="mt-1 sm:mt-2">
@@ -158,6 +158,7 @@ function Login() {
                   <UserIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                 </InputIcon>
                 <Input
+                  data-cy="login-username"
                   type="text"
                   id="username"
                   className="text-input text-sm sm:text-base py-2 sm:py-3"
@@ -176,6 +177,7 @@ function Login() {
                   <PasswordIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                 </InputIcon>
                 <Input
+                  data-cy="login-password"
                   type="password"
                   id="password"
                   className="text-input text-sm sm:text-base py-2 sm:py-3"
@@ -191,6 +193,7 @@ function Login() {
             <p className="text-customNeutral-300 text-xs font-bold leading-5 text-center transition-all duration-200 hover:text-customNeutral-400">
               FORGOT PASSWORD?{" "}
               <a
+                data-cy="forgot-password-link"
                 href="#"
                 className="underline focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 rounded"
                 onClick={(e) => {
@@ -206,6 +209,7 @@ function Login() {
             <Button 
               className="mt-2 py-2 sm:py-3 text-sm sm:text-base transition-all duration-200 flex items-center justify-center gap-2"
               type="submit"
+              data-cy="login-submit"
             >
               <LoginIcon size={20} className="w-5 h-5 sm:w-6 sm:h-6" />
               <span>LOGIN</span>

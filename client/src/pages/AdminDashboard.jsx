@@ -212,26 +212,26 @@ function AdministratorDashboard() {
           </TableHeader>
           <TableBody>
             <TableRow>
-              <TableCell className="flex items-center gap-4">
+              <TableCell className="flex items-center gap-4" data-cy="reminder-item">
                 <CalendarIcon />
                 Check 1
               </TableCell>
-              <TableCell className="flex items-center gap-4">
+              <TableCell className="flex items-center gap-4" data-cy="reminder-item">
                 <CalendarIcon />
                 Check 2
               </TableCell>
-              <TableCell className="flex items-center gap-4">
+              <TableCell className="flex items-center gap-4" data-cy="reminder-item">
                 <CalendarIcon />
                 Check 3
               </TableCell>
-              <TableCell className="flex items-center gap-4">
+              <TableCell className="flex items-center gap-4" data-cy="reminder-item">
                 <CalendarIcon />
                 Check 4
               </TableCell>
             </TableRow>
           </TableBody>
         </Table>
-        <SalesChart chartData={chartData} chartConfig={chartConfig} />
+        <SalesChart data-cy="sales-chart" chartData={chartData} chartConfig={chartConfig} />
         <br />
       </div>
       {/* Right Section */}
@@ -251,6 +251,7 @@ function AdministratorDashboard() {
             <div
               key={index}
               className="w-full flex justify-between border-2 border-reflexBlue-400 px-4 py-3 rounded-md"
+              data-cy="staff-card"
             >
               <div className="flex flex-col">
                 <span className="font-semibold">{staff.username}</span>
@@ -268,6 +269,7 @@ function AdministratorDashboard() {
                 <DropdownMenuContent>
                   <DropdownMenuGroup>
                   <DropdownMenuItem
+                    data-cy="edit-staff-btn"
                     onClick={() => {
                       setSelectedStaff(staff);
                       openModal("modifyStaff");
@@ -278,6 +280,7 @@ function AdministratorDashboard() {
                   </DropdownMenuItem>
 
                   <DropdownMenuItem
+                    data-cy="archive-staff-btn"
                     onClick={() => {
                       setSelectedStaff(staff);
                       openModal("archiveStaff");
@@ -293,7 +296,7 @@ function AdministratorDashboard() {
             </div>
           ))
         )}
-        <Button fullWidth="true" onClick={() => openModal("createStaff")}>
+        <Button data-cy="add-staff-btn" fullWidth="true" onClick={() => openModal("createStaff")}>
           <PlusIcon />
           ADD NEW STAFF
           <UserIcon />
