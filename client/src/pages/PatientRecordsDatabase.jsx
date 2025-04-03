@@ -293,6 +293,11 @@ function PatientRecordsDatabase() {
               </TableHead>
               <TableHead className="py-4 text-center">PAYMENT METHOD</TableHead>
               <TableHead className="py-4 text-center">TOTAL AMOUNT</TableHead>
+              <TableHead className="py-4 text-center">AMOUNT PAID</TableHead>
+              <TableHead className="py-4 text-center">
+                REMAINING BALANCE
+              </TableHead>
+              <TableHead className="py-4 text-center">REFERENCE NO.</TableHead>
               <TableHead></TableHead>
             </TableRow>
           </TableHeader>
@@ -357,6 +362,9 @@ function PatientRecordsDatabase() {
                       }).format(record.totalAmount || record.total_amount)
                     : "N/A"}
                 </TableCell>
+                <TableCell>RANDOM INT</TableCell>
+                <TableCell>RANDOM INT</TableCell>
+                <TableCell>REF 123456</TableCell>
                 <TableCell>
                   <div className="flex justify-center gap-2">
                     <button
