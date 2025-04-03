@@ -38,7 +38,7 @@ import DeleteIcon from "@/assets/icons/DeleteIcon";
 import CalendarIcon from "@/assets/icons/CalendarIcon";
 import axios from "axios";
 
-const API_BASE_URL = process.env.VITE_API_URL;
+const API_BASE_URL = import.meta.env.VITE_API_URL
 
 function AdministratorDashboard() {
   const [userName, setUserName] = useState(
@@ -59,8 +59,10 @@ function AdministratorDashboard() {
     try {
       setLoadingStaff(true);
       const response = await axios.get(`${API_BASE_URL}/getusers`, {
-        withCredentials: true
+        withCredentials: true,
       });
+      console.log("Raw staff response:", response.data);
+      
       const data = response.data;
       const filteredStaff = data.filter(
         (user) => user.role === "receptionist" || user.role === "aesthetician"
