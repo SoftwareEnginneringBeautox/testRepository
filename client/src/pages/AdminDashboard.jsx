@@ -34,7 +34,7 @@ import {
   TableRow
 } from "@/components/ui/Table";
 import EditIcon from "@/assets/icons/EditIcon";
-import DeleteIcon from "@/assets/icons/DeleteIcon";
+import ArchiveIcon from "@/assets/icons/ArchiveIcon";
 import CalendarIcon from "@/assets/icons/CalendarIcon";
 import axios from "axios";
 
@@ -55,6 +55,46 @@ function AdministratorDashboard() {
   const [loadingStaff, setLoadingStaff] = useState(true);
   const [errorStaff, setErrorStaff] = useState(null);
 
+  const [selectedStaff, setSelectedStaff] = useState(null);
+  const handleEditStaff = async (updatedData) => {
+    console.log("Sending to backend:", updatedData); 
+    try {
+      await axios.post(`${API_BASE_URL}/api/manage-record`, {
+        table: "accounts",
+        id: updatedData.id,
+        action: "edit",
+        data: updatedData,
+      }, {
+        withCredentials: true,
+      });
+  
+      closeModal();
+      fetchStaff();
+    } catch (error) {
+      console.error("Error editing staff:", error);
+    }
+  };
+  
+  const handleArchiveStaff = async () => {
+    if (!selectedStaff?.id) return;
+  
+    try {
+      await axios.post(`${API_BASE_URL}/api/manage-record`, {
+        table: "accounts",
+        id: selectedStaff.id,
+        action: "archive",
+      }, {
+        withCredentials: true,
+      });
+  
+      closeModal();
+      fetchStaff();
+    } catch (error) {
+      console.error("Error archiving staff:", error);
+    }
+  };
+  
+
   const fetchStaff = async () => {
     try {
       setLoadingStaff(true);
@@ -65,8 +105,11 @@ function AdministratorDashboard() {
       
       const data = response.data;
       const filteredStaff = data.filter(
-        (user) => user.role === "receptionist" || user.role === "aesthetician"
+        (user) =>
+          (user.role === "receptionist" || user.role === "aesthetician") &&
+          !user.archived // ✅ only include unarchived staff
       );
+      
       setStaffList(filteredStaff);
       setErrorStaff(null);
     } catch (error) {
@@ -224,14 +267,26 @@ function AdministratorDashboard() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
                   <DropdownMenuGroup>
-                    <DropdownMenuItem onClick={() => openModal("modifyStaff")}>
-                      <EditIcon />
-                      <p className="font-semibold">Edit</p>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => openModal("deleteStaff")}>
-                      <DeleteIcon />
-                      <p className="font-semibold">Delete</p>
-                    </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => {
+                      setSelectedStaff(staff);
+                      openModal("modifyStaff");
+                    }}
+                  >
+                    <EditIcon />
+                    <p className="font-semibold">Edit</p>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem
+                    onClick={() => {
+                      setSelectedStaff(staff);
+                      openModal("archiveStaff");
+                    }}
+                  >
+                    <ArchiveIcon />
+                    <p className="font-semibold">Archive</p>
+                  </DropdownMenuItem>
+
                   </DropdownMenuGroup>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -252,17 +307,20 @@ function AdministratorDashboard() {
             }}
           />
         )}
-        {currentModal === "modifyStaff" && (
+        {currentModal === "modifyStaff" && selectedStaff && (
           <ModifyStaff
             isOpen={true}
             onClose={closeModal}
-            staffList={staffList}
+            entryData={selectedStaff}
+            onSubmit={handleEditStaff}
           />
         )}
-        {currentModal === "deleteStaff" && (
-          <DeleteStaff
-            isOpen={currentModal === "deleteStaff"}
+
+        {currentModal === "archiveStaff" && selectedStaff && (
+          <ArchiveStaff
+            isOpen={true}
             onClose={closeModal}
+            onArchive={handleArchiveStaff}
           />
         )}
       </div>
