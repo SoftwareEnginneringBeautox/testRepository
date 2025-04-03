@@ -191,6 +191,7 @@ function BookingCalendar() {
         BOOKING CALENDAR
       </h3>
       <div
+        data-cy="calendar-view" 
         id="booking-container"
         className="flex flex-col shadow-custom items-center rounded-lg p-3 sm:p-4 md:p-6 lg:p-8 bg-ash-100 w-full md:w-[90%] mb-4 sm:mb-8"
       >
@@ -198,16 +199,18 @@ function BookingCalendar() {
         <div className="flex flex-col sm:flex-row justify-between w-full gap-4 sm:gap-0">
           <div className="flex flex-row items-center gap-2">
             <button
+              data-cy="previous-month-btn"
               className="border border-transparent p-1 rounded hover:border-lavender-400 text-lavender-400"
               onClick={handlePrevious}
               aria-label="Previous"
             >
               <ChevronLeftIcon className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
-            <h2 className="text-base sm:text-lg md:text-xl font-semibold">
+            <h2 data-cy="calendar-month-label" className="text-base sm:text-lg md:text-xl font-semibold">
               {currentDate.toLocaleString("default", { month: "long" })} {year}
             </h2>
             <button
+              data-cy="next-month-btn"
               className="border border-transparent p-1 rounded hover:border-lavender-400 text-lavender-400"
               onClick={handleNext}
               aria-label="Next"
@@ -220,6 +223,7 @@ function BookingCalendar() {
             <div className="flex gap-2 text-sm sm:text-base md:text-lg lg:text-xl">
               {/* Toggle Buttons with previous styling */}
               <button
+                data-cy="calendar-view-monthly"
                 onClick={() => setView("monthly")}
                 className={`relative inline-block px-1 sm:px-2 py-1 font-semibold overflow-hidden group ${
                   view === "monthly" ? "text-lavender-500" : ""
@@ -234,6 +238,7 @@ function BookingCalendar() {
               </button>
 
               <button
+                data-cy="calendar-view-weekly"
                 onClick={() => setView("weekly")}
                 className={`relative inline-block px-1 sm:px-2 py-1 font-semibold overflow-hidden group ${
                   view === "weekly" ? "text-lavender-500" : ""
@@ -249,7 +254,8 @@ function BookingCalendar() {
             </div>
 
             <Select>
-              <SelectTrigger 
+              <SelectTrigger
+                data-cy="filter-bookings-btn" 
                 placeholder="FILTER" 
                 icon={<FilterIcon className="w-4 h-4 sm:w-5 sm:h-5" />}
                 className="text-xs sm:text-sm md:text-base p-1 sm:p-2"
@@ -271,7 +277,7 @@ function BookingCalendar() {
               Loading appointments...
             </div>
           ) : view === "monthly" ? (
-            <div className="w-full overflow-x-auto">
+            <div data-cy="calendar-booking" className="w-full overflow-x-auto">
               <MonthlyBookingPanel
                 calendarDays={calendar}
                 appointments={getFilteredAppointments()}
@@ -279,7 +285,7 @@ function BookingCalendar() {
               />
             </div>
           ) : (
-            <div className="w-full flex justify-center overflow-x-auto">
+            <div data-cy="calendar-booking" className="w-full flex justify-center overflow-x-auto">
               <div className="w-full">
                 <WeeklyBookingPanel
                   events={getFilteredAppointments()}
