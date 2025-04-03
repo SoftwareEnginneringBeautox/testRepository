@@ -12,7 +12,10 @@ function ArchivePackage({ isOpen, onClose, onArchive }) {
   if (!isOpen) return null;
 
   return (
-    <ModalContainer className="flex flex-col gap-4">
+    <ModalContainer
+      data-cy="archive-package-modal"
+      className="flex flex-col gap-4"
+    >
       <div className="flex w-full flex-1 items-center justify-center text-warning-300">
         <WarningIcon size={48} />
       </div>
@@ -20,12 +23,21 @@ function ArchivePackage({ isOpen, onClose, onArchive }) {
         ARCHIVE PACKAGE INFORMATION?
       </ModalTitle>
       <p>This will archive the package’s information within the system.</p>
-      <div className=" flex flex-row gap-4 w-full">
-        <Button variant="outline" className="w-1/2" onClick={onClose}>
+      <div className="flex flex-row gap-4 w-full">
+        <Button
+          data-cy="cancel-archive-btn"
+          variant="outline"
+          className="w-1/2"
+          onClick={onClose}
+        >
           <ChevronLeftIcon />
           CANCEL AND RETURN
         </Button>
-        <Button className="w-1/2" onClick={onArchive}>
+        <Button
+          data-cy="confirm-archive-btn"
+          className="w-1/2"
+          onClick={onArchive}
+        >
           <ArchiveIcon />
           ARCHIVE PACKAGE
         </Button>
@@ -33,5 +45,6 @@ function ArchivePackage({ isOpen, onClose, onArchive }) {
     </ModalContainer>
   );
 }
+
 
 export default ArchivePackage;

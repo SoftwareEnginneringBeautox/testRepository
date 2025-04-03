@@ -55,7 +55,7 @@ function EditTreatment({ isOpen, onClose, entryData, onSubmit }) {
   };
 
   return (
-    <ModalContainer>
+    <ModalContainer data-cy="edit-treatment-modal">
       <ModalHeader>
         <ModalIcon>
           <EditIcon />
@@ -63,7 +63,7 @@ function EditTreatment({ isOpen, onClose, entryData, onSubmit }) {
         <ModalTitle>EDIT TREATMENT</ModalTitle>
       </ModalHeader>
       <ModalBody>
-        <form onSubmit={(e) => e.preventDefault()}>
+        <form onSubmit={(e) => e.preventDefault()} data-cy="edit-treatment-form">
           <div className="flex flex-col gap-4">
             <InputContainer>
               <InputLabel>TREATMENT NAME</InputLabel>
@@ -72,6 +72,7 @@ function EditTreatment({ isOpen, onClose, entryData, onSubmit }) {
                   <TreatmentIcon />
                 </InputIcon>
                 <Input
+                  data-cy="treatment-name"
                   placeholder="Name of the Treatment"
                   value={formData.treatment_name}
                   onChange={(e) =>
@@ -88,6 +89,7 @@ function EditTreatment({ isOpen, onClose, entryData, onSubmit }) {
                   <PesoIcon />
                 </InputIcon>
                 <Input
+                  data-cy="treatment-price"
                   placeholder="₱"
                   type="number"
                   value={formData.price}
@@ -100,11 +102,20 @@ function EditTreatment({ isOpen, onClose, entryData, onSubmit }) {
           </div>
 
           <div className="flex flex-row gap-4 mt-6 w-full">
-            <Button variant="outline" className="w-1/2" onClick={onClose}>
+            <Button
+              data-cy="cancel-treatment-btn"
+              variant="outline"
+              className="w-1/2"
+              onClick={onClose}
+            >
               <ChevronLeftIcon />
               CANCEL AND RETURN
             </Button>
-            <Button className="w-1/2" onClick={handleSubmit}>
+            <Button
+              data-cy="save-treatment-btn"
+              className="w-1/2"
+              onClick={handleSubmit}
+            >
               <EditIcon />
               EDIT TREATMENT
             </Button>

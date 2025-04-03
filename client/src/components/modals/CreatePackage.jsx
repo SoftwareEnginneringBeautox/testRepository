@@ -98,7 +98,7 @@ function CreatePackage({ isOpen, onClose }) {
   };
 
   return (
-    <ModalContainer>
+    <ModalContainer data-cy="create-package-modal">
       <ModalHeader>
         <ModalIcon>
           <PackageIcon />
@@ -106,7 +106,7 @@ function CreatePackage({ isOpen, onClose }) {
         <ModalTitle>CREATE NEW PACKAGE</ModalTitle>
       </ModalHeader>
       <ModalBody>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} data-cy="create-package-form">
           <div className="flex flex-col gap-4">
             {/* Package Name */}
             <InputContainer>
@@ -116,6 +116,7 @@ function CreatePackage({ isOpen, onClose }) {
                   <PackageIcon />
                 </InputIcon>
                 <Input
+                  data-cy="package-name"
                   placeholder="Name of the Package"
                   value={packageName}
                   onChange={(e) => setPackageName(e.target.value)}
@@ -130,6 +131,7 @@ function CreatePackage({ isOpen, onClose }) {
               <InputLabel>TREATMENTS</InputLabel>
               <InputTextField className="bg-[#F5F3F0] border rounded p-2">
                 <select
+                  data-cy="package-treatment"
                   className="w-full"
                   value={selectedTreatmentId}
                   onChange={(e) => setSelectedTreatmentId(e.target.value)}
@@ -153,6 +155,7 @@ function CreatePackage({ isOpen, onClose }) {
                   <PackageIcon />
                 </InputIcon>
                 <Input
+                  data-cy="package-sessions"
                   placeholder="Number of treatments to be taken"
                   type="number"
                   min="0"
@@ -173,6 +176,7 @@ function CreatePackage({ isOpen, onClose }) {
                   <PesoIcon />
                 </InputIcon>
                 <CurrencyInput
+                  data-cy="package-price"
                   className="outline-none flex-1 bg-[#F5F3F0]"
                   prefix="₱"
                   placeholder="₱0.00"
@@ -185,16 +189,27 @@ function CreatePackage({ isOpen, onClose }) {
             </InputContainer>
           </div>
           <div className="flex flex-row gap-4 mt-6 w-full">
-            <Button variant="outline" className="w-1/2" onClick={onClose} disabled={loading}>
+            <Button
+              data-cy="cancel-package-btn"
+              variant="outline"
+              className="w-1/2"
+              onClick={onClose}
+              disabled={loading}
+            >
               <ChevronLeftIcon />
               CANCEL AND RETURN
             </Button>
-            <Button type="submit" className="w-1/2" disabled={loading}>
+            <Button
+              data-cy="save-package-btn"
+              type="submit"
+              className="w-1/2"
+              disabled={loading}
+            >
               <PlusIcon />
               {loading ? "CREATING..." : "CREATE PACKAGE"}
             </Button>
           </div>
-          {error && <p className="text-red-500 mt-2">{error}</p>}
+          {error && <p className="text-red-500 mt-2" data-cy="error-message">{error}</p>}
         </form>
       </ModalBody>
     </ModalContainer>

@@ -70,7 +70,7 @@ function CreateTreatment({ isOpen, onClose }) {
   };
 
   return (
-    <ModalContainer>
+    <ModalContainer data-cy="create-treatment-modal">
       <ModalHeader>
         <ModalIcon>
           <TreatmentIcon />
@@ -78,7 +78,7 @@ function CreateTreatment({ isOpen, onClose }) {
         <ModalTitle>CREATE NEW TREATMENT</ModalTitle>
       </ModalHeader>
       <ModalBody>
-        <form onSubmit={handleSubmit}>
+        <form  data-cy="treatment-form" onSubmit={handleSubmit}>
           <div className="flex flex-col gap-4">
             {/* Treatment Name */}
             <InputContainer>
@@ -88,6 +88,7 @@ function CreateTreatment({ isOpen, onClose }) {
                   <TreatmentIcon />
                 </InputIcon>
                 <Input
+                  data-cy="treatment-name"
                   placeholder="Name of the Treatment"
                   value={treatmentName}
                   onChange={(e) => setTreatmentName(e.target.value)}
@@ -103,6 +104,7 @@ function CreateTreatment({ isOpen, onClose }) {
                   <PesoIcon />
                 </InputIcon>
                 <CurrencyInput
+                  data-cy="treatment-price"
                   className="outline-none flex-1 bg-[#F5F3F0]"
                   prefix="₱"
                   placeholder="₱0.00"
@@ -122,6 +124,7 @@ function CreateTreatment({ isOpen, onClose }) {
                   <ClockIcon />
                 </InputIcon>
                 <Input
+                  data-cy="treatment-duration"
                   placeholder="Duration in minutes"
                   type="number"
                   min="0"
@@ -137,6 +140,7 @@ function CreateTreatment({ isOpen, onClose }) {
               <InputLabel>DESCRIPTION</InputLabel>
               <InputTextField>
                 <Input
+                  data-cy="treatment-description"
                   placeholder="Brief description of the treatment"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
@@ -146,11 +150,11 @@ function CreateTreatment({ isOpen, onClose }) {
             {error && <p className="text-red-500">{error}</p>}
           </div>
           <div className="flex flex-row gap-4 mt-6 w-full">
-            <Button variant="outline" className="w-1/2" onClick={onClose} disabled={loading}>
+            <Button data-cy="cancel-treatment-btn" variant="outline" className="w-1/2" onClick={onClose} disabled={loading}>
               <ChevronLeftIcon />
               CANCEL AND RETURN
             </Button>
-            <Button type="submit" className="w-1/2" disabled={loading}>
+            <Button data-cy="save-treatment-btn" type="submit" className="w-1/2" disabled={loading}>
               <PlusIcon />
               {loading ? "CREATING..." : "CREATE TREATMENT"}
             </Button>

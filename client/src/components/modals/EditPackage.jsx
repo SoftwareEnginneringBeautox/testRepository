@@ -89,7 +89,7 @@ function EditPackage({ isOpen, onClose, entryData, onSubmit }) {
   };
 
   return (
-    <ModalContainer>
+    <ModalContainer data-cy="edit-package-modal">
       <ModalHeader>
         <ModalIcon>
           <PackageIcon />
@@ -97,7 +97,7 @@ function EditPackage({ isOpen, onClose, entryData, onSubmit }) {
         <ModalTitle>EDIT PACKAGE</ModalTitle>
       </ModalHeader>
       <ModalBody>
-        <form onSubmit={(e) => e.preventDefault()}>
+        <form onSubmit={(e) => e.preventDefault()} data-cy="edit-package-form">
           <div className="flex flex-col gap-4">
             <InputContainer>
               <InputLabel>PACKAGE NAME</InputLabel>
@@ -106,6 +106,7 @@ function EditPackage({ isOpen, onClose, entryData, onSubmit }) {
                   <UserIcon />
                 </InputIcon>
                 <Input
+                  data-cy="package-name"
                   placeholder="Name of the Package"
                   value={formData.package_name}
                   onChange={(e) =>
@@ -114,20 +115,25 @@ function EditPackage({ isOpen, onClose, entryData, onSubmit }) {
                 />
               </InputTextField>
             </InputContainer>
+
             <InputContainer>
               <InputLabel>TREATMENTS</InputLabel>
-
               <Select
                 value={formData.treatment}
-                onValueChange={(value) => setFormData({ ...formData, treatment: value })}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, treatment: value })
+                }
               >
-                <ModalSelectTrigger className="w-full">
+                <ModalSelectTrigger className="w-full" data-cy="package-treatment">
                   <TreatmentIcon className="w-4 h-4 mr-2" />
                   <SelectValue placeholder="Treatments chosen" />
                 </ModalSelectTrigger>
                 <ModalSelectContent>
                   {treatments.map((treatment) => (
-                    <SelectItem key={treatment.id} value={treatment.treatment_name}>
+                    <SelectItem
+                      key={treatment.id}
+                      value={treatment.treatment_name}
+                    >
                       {treatment.treatment_name}
                     </SelectItem>
                   ))}
@@ -142,6 +148,7 @@ function EditPackage({ isOpen, onClose, entryData, onSubmit }) {
                   <HashtagIcon />
                 </InputIcon>
                 <Input
+                  data-cy="package-sessions"
                   placeholder="Number of treatments to be taken"
                   type="number"
                   value={formData.sessions}
@@ -159,6 +166,7 @@ function EditPackage({ isOpen, onClose, entryData, onSubmit }) {
                   <PesoIcon />
                 </InputIcon>
                 <Input
+                  data-cy="package-price"
                   placeholder="Total amount to pay"
                   type="number"
                   value={formData.price}
@@ -170,11 +178,20 @@ function EditPackage({ isOpen, onClose, entryData, onSubmit }) {
             </InputContainer>
           </div>
           <div className="flex flex-row gap-4 mt-6 w-full">
-            <Button variant="outline" className="w-1/2" onClick={onClose}>
+            <Button
+              data-cy="cancel-package-btn"
+              variant="outline"
+              className="w-1/2"
+              onClick={onClose}
+            >
               <ChevronLeftIcon />
               CANCEL AND RETURN
             </Button>
-            <Button className="w-1/2" onClick={handleSubmit}>
+            <Button
+              data-cy="save-package-btn"
+              className="w-1/2"
+              onClick={handleSubmit}
+            >
               <EditIcon />
               EDIT PACKAGE
             </Button>
