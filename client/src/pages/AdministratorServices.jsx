@@ -38,7 +38,6 @@ import UserIDIcon from "../assets/icons/UserIDIcon";
 import CalendarIcon from "../assets/icons/CalendarIcon";
 import ArchiveIcon from "../assets/icons/ArchiveIcon";
 import EditIcon from "../assets/icons/EditIcon";
-import DeleteIcon from "../assets/icons/DeleteIcon";
 
 import axios from "axios";
 
@@ -78,7 +77,7 @@ function AdministratorServices() {
 
   const handleSelectPackageToArchive = (pkg) => {
     setSelectedPackage(pkg);
-    openModal("deletePackage");
+    openModal("archivePackage");
   };
 
   const handleSelectPackageToEdit = (pkg) => {
@@ -252,8 +251,8 @@ function AdministratorServices() {
                         <DropdownMenuItem
                           onClick={() => handleSelectPackageToArchive(pkg)}
                         >
-                          <DeleteIcon />
-                          <p className="font-semibold">Delete</p>
+                          <ArchiveIcon />
+                          <p className="font-semibold">Archive</p>
                         </DropdownMenuItem>
                       </DropdownMenuGroup>
                     </DropdownMenuContent>
@@ -301,8 +300,8 @@ function AdministratorServices() {
           onSubmit={handleEditPackage}
         />
       )}
-      {currentModal === "deletePackage" && selectedPackage && (
-        <DeletePackage
+      {currentModal === "archivePackage" && selectedPackage && (
+        <ArchivePackage
           isOpen={true}
           onClose={closeModal}
           entryData={selectedPackage}
