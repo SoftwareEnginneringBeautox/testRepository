@@ -13,16 +13,18 @@ function ProductCard({ product, category }) {
 
   return (
     <div className="group h-full">
-      <div className="relative h-full rounded-xl overflow-hidden shadow-md transition-all duration-300 group-hover:shadow-xl bg-gradient-to-br from-purple-100 via-pink-50 to-purple-100">
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-100/80 via-pink-100/80 to-purple-200/80 backdrop-blur-[1px]"></div>
-
+      <div className="relative h-full rounded-xl overflow-hidden shadow-md transition-all duration-300 group-hover:shadow-xl"
+        style={{
+          backgroundColor: '#E5BDF6',
+          backgroundImage: 'linear-gradient(45deg, rgba(229, 189, 246, 0.9) 0%, rgba(243, 232, 246, 0.95) 100%)'
+        }}>
         <div className="relative z-10 p-6 flex flex-col h-full">
           {/* Header */}
           <div className="mb-4 flex justify-between items-start">
             <div>
               <h3 className="text-lg font-bold">{product.name}</h3>
               {category && (
-                <span className="text-xs font-medium text-purple-600 block mt-1">
+                <span className="text-xs font-medium text-purple-700 block mt-1">
                   {category}
                 </span>
               )}
@@ -42,7 +44,7 @@ function ProductCard({ product, category }) {
               <div className="space-y-2 mb-4">
                 {product.details.map((detail, idx) => (
                   <div key={idx} className="flex items-start gap-2">
-                    <div className="flex-shrink-0 w-5 h-5 rounded-full bg-purple-200 flex items-center justify-center text-xs">
+                    <div className="flex-shrink-0 w-5 h-5 rounded-full bg-white/40 flex items-center justify-center text-xs text-purple-700">
                       ✓
                     </div>
                     <p className="text-sm">{detail}</p>
@@ -71,7 +73,7 @@ function ProductCard({ product, category }) {
                       : null;
 
                   return (
-                    <div key={idx} className="bg-white/50 rounded-lg p-3">
+                    <div key={idx} className="bg-white/40 rounded-lg p-3">
                       <h4 className="font-medium">
                         {sub.name}{" "}
                         {sessionCount && `(${sessionCount} Sessions)`}
