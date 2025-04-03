@@ -134,6 +134,41 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
               </Select>
             </InputContainer>
 
+            {/* PACKAGE */}
+            <InputContainer>
+              <InputLabel>PACKAGE</InputLabel>
+
+              <Select
+                value={packageName}
+                onValueChange={(value) => {
+                  console.log("Selected package:", value);
+                  setPackageName(value);
+                }}
+              >
+                <ModalSelectTrigger
+                  icon={<PackageIcon className="w-4 h-4" />}
+                  placeholder="Select package"
+                  className={
+                    formSubmitAttempted && formErrors.packageName
+                      ? "border-red-500"
+                      : ""
+                  }
+                />
+                <ModalSelectContent>
+                  {packagesList.map((pkg) => (
+                    <SelectItem key={pkg.id} value={pkg.package_name}>
+                      {pkg.package_name} - ₱{pkg.price}
+                    </SelectItem>
+                  ))}
+                </ModalSelectContent>
+              </Select>
+              {formSubmitAttempted && formErrors.packageName && (
+                <p className="text-red-500 text-sm mt-1">
+                  {formErrors.packageName}
+                </p>
+              )}
+            </InputContainer>
+
             <InputContainer>
               <InputLabel>TREATMENT</InputLabel>
               <Select
@@ -258,6 +293,7 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
             </InputContainer>
           </div>
 
+          {/* 
           <div className="flex flex-col gap-4 mt-4">
             <InputContainer>
               <InputLabel>TREATMENTS</InputLabel>
@@ -277,7 +313,7 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
                 </ModalSelectContent>
               </Select>
             </InputContainer>
-          </div>
+          </div> */}
 
           <div className="flex flex-col gap-4 my-4">
             <h5 className="text-xl leading-8 font-semibold">
