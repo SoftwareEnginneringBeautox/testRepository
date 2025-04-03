@@ -96,7 +96,7 @@ function ForgotPassword({ isOpen, onClose }) {
   if (!isOpen) return null;
 
   return (
-    <ModalContainer>
+    <ModalContainer data-cy="forgot-password-modal">
       <ModalHeader>
         <ModalTitle>FORGOT YOUR PASSWORD?</ModalTitle>
       </ModalHeader>
@@ -104,9 +104,9 @@ function ForgotPassword({ isOpen, onClose }) {
         {step === 1 ? (
           <form onSubmit={sendOTP} className="flex flex-col gap-4 items-center">
             <p>Kindly input the email of your account.</p>
-            <InputContainer>
+            <InputContainer data-cy="forgot-email-container">
               <InputLabel>Email</InputLabel>
-              <InputTextField>
+              <InputTextField >
                 <InputIcon>
                   <EmailIcon />
                 </InputIcon>
@@ -117,6 +117,7 @@ function ForgotPassword({ isOpen, onClose }) {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
+                  data-cy="forgot-email"
                 />
               </InputTextField>
             </InputContainer>
@@ -124,7 +125,7 @@ function ForgotPassword({ isOpen, onClose }) {
               <Button variant="outline" onClick={onClose} className="w-1/2">
                 <ChevronLeftIcon /> BACK
               </Button>
-              <Button type="submit" className="w-1/2">
+              <Button data-cy="submit-email" type="submit" className="w-1/2">
                 SUBMIT <ChevronRightIcon />
               </Button>
             </div>
@@ -136,7 +137,7 @@ function ForgotPassword({ isOpen, onClose }) {
             className="flex flex-col gap-4 items-center"
           >
             <p>Enter the 6-digit code sent to your email.</p>
-            <InputOTP value={otp} onChange={setOtp} maxLength={6}>
+            <InputOTP data-cy="otp-input" value={otp} onChange={setOtp} maxLength={6}>
               <InputOTPGroup>
                 <InputOTPSlot index={0} />
                 <InputOTPSlot index={1} />
@@ -160,7 +161,7 @@ function ForgotPassword({ isOpen, onClose }) {
               >
                 <ChevronLeftIcon /> BACK
               </Button>
-              <Button type="submit" className="w-1/2">
+              <Button data-cy="submit-otp" type="submit" className="w-1/2">
                 SUBMIT <ChevronRightIcon />
               </Button>
             </div>
@@ -181,6 +182,7 @@ function ForgotPassword({ isOpen, onClose }) {
                   <PasswordIcon />
                 </InputIcon>
                 <Input
+                  data-cy="new-password"
                   type="password"
                   placeholder="New Password"
                   // value={newPassword}
@@ -197,6 +199,7 @@ function ForgotPassword({ isOpen, onClose }) {
                   <ConfirmIcon />
                 </InputIcon>
                 <Input
+                  data-cy="confirm-password"
                   type="password"
                   placeholder="Confirm Password"
                   // value={confirmPassword}
@@ -214,7 +217,7 @@ function ForgotPassword({ isOpen, onClose }) {
               >
                 <ChevronLeftIcon /> BACK
               </Button>
-              <Button type="submit" className="w-1/2">
+              <Button data-cy="submit-reset" type="submit" className="w-1/2">
                 RESET PASSWORD <ChevronRightIcon />
               </Button>
             </div>

@@ -231,7 +231,10 @@ function AdministratorDashboard() {
             </TableRow>
           </TableBody>
         </Table>
-        <SalesChart data-cy="sales-chart" chartData={chartData} chartConfig={chartConfig} />
+        <div data-cy="sales-chart">
+          <SalesChart chartData={chartData} chartConfig={chartConfig} />
+        </div>
+        
         <br />
       </div>
       {/* Right Section */}
