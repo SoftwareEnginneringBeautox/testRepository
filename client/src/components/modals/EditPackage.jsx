@@ -18,7 +18,7 @@ import {
 
 import { Button } from "../ui/Button";
 
-import { SelectItem } from "@/components/ui/Select";
+import { Select, SelectTrigger, SelectValue, SelectContent,SelectItem } from "@/components/ui/Select";
 
 import UserIcon from "@/assets/icons/UserIcon";
 import ChevronLeftIcon from "@/assets/icons/ChevronLeftIcon";
@@ -92,17 +92,19 @@ function EditPackage({ isOpen, onClose, entryData, onSubmit }) {
             <InputContainer>
               <InputLabel>TREATMENTS</InputLabel>
 
-              <ModalSelect
-                placeholder="Treatments chosen"
-                icon={<TreatmentIcon className="w-4 h-4 " />}
+              <Select
                 value={formData.treatment}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, treatment: value })
-                }
+                onValueChange={(value) => setFormData({ ...formData, treatment: value })}
               >
-                <SelectItem value="AESTHETICIAN">AESTHETICIAN</SelectItem>
-                <SelectItem value="RECEPTIONIST">RECEPTIONIST</SelectItem>
-              </ModalSelect>
+                <SelectTrigger className="w-full">
+                  <TreatmentIcon className="w-4 h-4 mr-2" />
+                  <SelectValue placeholder="Treatments chosen" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="AESTHETICIAN">AESTHETICIAN</SelectItem>
+                  <SelectItem value="RECEPTIONIST">RECEPTIONIST</SelectItem>
+                </SelectContent>
+              </Select>
             </InputContainer>
 
             <InputContainer>

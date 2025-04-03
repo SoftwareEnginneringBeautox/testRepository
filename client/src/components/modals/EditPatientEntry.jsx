@@ -123,14 +123,14 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
                   setFormData({ ...formData, person_in_charge: value })
                 }
               >
-                <ModalSelectTrigger
+                <SelectTrigger
                   icon={<UserIDIcon className="w-4 h-4" />}
                   placeholder="Person in charge of the session"
                 />
-                <ModalSelectContent>
+                <SelectContent>
                   <SelectItem value="Jessica">Jessica</SelectItem>
                   <SelectItem value="Jimmy">Jimmy</SelectItem>
-                </ModalSelectContent>
+                </SelectContent>
               </Select>
             </InputContainer>
 
@@ -142,15 +142,15 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
                   setFormData({ ...formData, treatment: value })
                 }
               >
-                <ModalSelectTrigger
+                <SelectTrigger
                   icon={<TreatmentIcon className="w-4 h-4" />}
                   placeholder="Chosen treatment"
                 />
-                <ModalSelectContent>
+                <SelectContent>
                   <SelectItem value="Treatment 1">Treatment 1</SelectItem>
                   <SelectItem value="Treatment 2">Treatment 2</SelectItem>
                   <SelectItem value="Treatment 3">Treatment 3</SelectItem>
-                </ModalSelectContent>
+                </SelectContent>
               </Select>
             </InputContainer>
 
@@ -192,15 +192,15 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
                   setFormData({ ...formData, payment_method: value })
                 }
               >
-                <ModalSelectTrigger
+                <SelectTrigger
                   icon={<PesoIcon className="w-4 h-4" />}
                   placeholder="Select payment method"
                 />
-                <ModalSelectContent>
+                <SelectContent>
                   <SelectItem value="Cash">Cash</SelectItem>
                   <SelectItem value="Card">Card</SelectItem>
                   <SelectItem value="GCash">GCash</SelectItem>
-                </ModalSelectContent>
+                </SelectContent>
               </Select>
             </InputContainer>
           </div>
@@ -267,14 +267,14 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
                   setFormData({ ...formData, next_treatment: value })
                 }
               >
-                <ModalSelectTrigger
+                <SelectTrigger
                   icon={<TreatmentIcon className="w-4 h-4" />}
                   placeholder="Next treatment chosen"
                 />
-                <ModalSelectContent>
+                <SelectContent>
                   <SelectItem value="AESTHETICIAN">AESTHETICIAN</SelectItem>
                   <SelectItem value="RECEPTIONIST">RECEPTIONIST</SelectItem>
-                </ModalSelectContent>
+                </SelectContent>
               </Select>
             </InputContainer>
           </div>
