@@ -45,6 +45,7 @@ function PatientRecordsDatabase() {
   const { currentModal, openModal, closeModal } = useModal();
   const [selectedEntry, setSelectedEntry] = useState(null);
   const [records, setRecords] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
 
   // Fetch patient records from the API
   const fetchRecords = async () => {
@@ -129,6 +130,11 @@ function PatientRecordsDatabase() {
     fetchRecords();
   };
 
+  const filteredRecords = records.filter((record) => {
+    const name = record.client || record.patient_name || "";
+    return name.toLowerCase().includes(searchTerm.toLowerCase());
+  });
+  
   const generatePRDReport = (patientRecords) => {
     if (!patientRecords || patientRecords.length === 0) {
       console.error("No records available to generate PDF.");
@@ -253,7 +259,14 @@ function PatientRecordsDatabase() {
         </h4>
         <div className="flex items-center justify-center gap-4 min-w-9">
           <InputTextField>
-            <Input type="text" id="search" placeholder="Search..." />
+          <Input
+            type="text"
+            id="search"
+            placeholder="Search..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+
             <MagnifyingGlassIcon />
           </InputTextField>
 
@@ -302,7 +315,7 @@ function PatientRecordsDatabase() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {records.map((record, index) => (
+            {filteredRecords.map((record, index) => (
               <TableRow key={index}>
                 <TableCell>
                   {record.client || record.patient_name?.toUpperCase() || "N/A"}
