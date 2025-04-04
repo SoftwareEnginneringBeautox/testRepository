@@ -6,7 +6,7 @@ const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 import ChevronLeftIcon from "@/assets/icons/ChevronLeftIcon";
 import ChevronRightIcon from "@/assets/icons/ChevronRightIcon";
-import FilterIcon from "@/assets/icons/FilterIcon";
+import SortIcon from "@/assets/icons/SortIcon";
 
 import MonthlyBookingPanel from "@/components/MonthlyBookingPanel";
 import WeeklyBookingPanel from "@/components/WeeklyBookingPanel";
@@ -191,7 +191,7 @@ function BookingCalendar() {
         BOOKING CALENDAR
       </h3>
       <div
-        data-cy="calendar-view" 
+        data-cy="calendar-view"
         id="booking-container"
         className="flex flex-col shadow-custom items-center rounded-lg p-3 sm:p-4 md:p-6 lg:p-8 bg-ash-100 w-full md:w-[90%] mb-4 sm:mb-8"
       >
@@ -206,7 +206,10 @@ function BookingCalendar() {
             >
               <ChevronLeftIcon className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
-            <h2 data-cy="calendar-month-label" className="text-base sm:text-lg md:text-xl font-semibold">
+            <h2
+              data-cy="calendar-month-label"
+              className="text-base sm:text-lg md:text-xl font-semibold"
+            >
               {currentDate.toLocaleString("default", { month: "long" })} {year}
             </h2>
             <button
@@ -218,7 +221,7 @@ function BookingCalendar() {
               <ChevronRightIcon className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
           </div>
-          
+
           <div className="flex flex-row gap-2 sm:gap-4 items-center justify-between sm:justify-end w-full sm:w-auto">
             <div className="flex gap-2 text-sm sm:text-base md:text-lg lg:text-xl">
               {/* Toggle Buttons with previous styling */}
@@ -230,7 +233,7 @@ function BookingCalendar() {
                 }`}
               >
                 MONTHLY
-                <span 
+                <span
                   className={`absolute left-0 bottom-0 block h-0.5 bg-lavender-400 transition-all duration-300 ${
                     view === "monthly" ? "w-full" : "w-0 group-hover:w-full"
                   }`}
@@ -245,7 +248,7 @@ function BookingCalendar() {
                 }`}
               >
                 WEEKLY
-                <span 
+                <span
                   className={`absolute left-0 bottom-0 block h-0.5 bg-lavender-400 transition-all duration-300 ${
                     view === "weekly" ? "w-full" : "w-0 group-hover:w-full"
                   }`}
@@ -255,9 +258,9 @@ function BookingCalendar() {
 
             <Select>
               <SelectTrigger
-                data-cy="filter-bookings-btn" 
-                placeholder="FILTER" 
-                icon={<FilterIcon className="w-4 h-4 sm:w-5 sm:h-5" />}
+                data-cy="filter-bookings-btn"
+                placeholder="FILTER"
+                icon={<SortIcon className="w-4 h-4 sm:w-5 sm:h-5" />}
                 className="text-xs sm:text-sm md:text-base p-1 sm:p-2"
               >
                 <SelectValue />
@@ -285,7 +288,10 @@ function BookingCalendar() {
               />
             </div>
           ) : (
-            <div data-cy="calendar-booking" className="w-full flex justify-center overflow-x-auto">
+            <div
+              data-cy="calendar-booking"
+              className="w-full flex justify-center overflow-x-auto"
+            >
               <div className="w-full">
                 <WeeklyBookingPanel
                   events={getFilteredAppointments()}

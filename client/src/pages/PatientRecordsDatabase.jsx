@@ -134,7 +134,7 @@ function PatientRecordsDatabase() {
     const name = record.client || record.patient_name || "";
     return name.toLowerCase().includes(searchTerm.toLowerCase());
   });
-  
+
   const generatePRDReport = (patientRecords) => {
     if (!patientRecords || patientRecords.length === 0) {
       console.error("No records available to generate PDF.");
@@ -259,23 +259,20 @@ function PatientRecordsDatabase() {
         </h4>
         <div className="flex items-center justify-center gap-4 min-w-9">
           <InputTextField>
-          <Input
-            type="text"
-            id="search"
-            placeholder="Search..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+            <Input
+              type="text"
+              id="search"
+              placeholder="Search..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
 
             <MagnifyingGlassIcon />
           </InputTextField>
 
           <Select>
-            <SelectTrigger>
-              <SelectValue placeholder="SORT BY" />
-              <SelectIcon>
-                <SortIcon />
-              </SelectIcon>
+            <SelectTrigger placeholder="SORT BY" icon={<SortIcon />}>
+              <SelectValue />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="alphabetical">ALPHABETICAL</SelectItem>
