@@ -117,7 +117,7 @@ function FinancialOverview() {
   };
 
 
-
+  // REPORT GENERATING FUNCTIONS
   const generateWeeklySalesReport = (salesData) => {
     if (!salesData || salesData.length === 0) {
       console.error("No sales data available to generate PDF.");
@@ -355,6 +355,7 @@ function FinancialOverview() {
     // Save the PDF
     doc.save(filename);
   };
+  // REPORT GENERATING FUNCTIONS END HERE
 
   // State for the expense to edit
   const [expenseToEdit, setExpenseToEdit] = useState(null);
@@ -420,9 +421,12 @@ function FinancialOverview() {
 
   const [selectedExpense, setSelectedExpense] = useState(null);
 
+  // Handler for archive/delete action
   const handleArchiveExpense = async () => {
     try {
-      const response = await fetch("/api/manage-record", {
+      console.log("Archiving expense with ID:", selectedExpense.id);
+
+      const response = await fetch("http://localhost:4000/api/manage-record", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -432,9 +436,18 @@ function FinancialOverview() {
         })
       });
 
+      console.log("Archive response status:", response.status);
+
       if (response.ok) {
-        await refreshExpensesData(); // Now this will work
+        // remove the archived expense immediately
+        setExpensesData(prevExpenses => 
+          prevExpenses.filter(expense => expense.id !== selectedExpense.id)
+        );
+        
         closeModal();
+      } else {
+        const errorData = await response.json();
+        console.error("Archive error response:", errorData);
       }
     } catch (error) {
       console.error("Archive error:", error);
@@ -558,7 +571,10 @@ function FinancialOverview() {
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={() => {
-                              openModal("archiveCategory");
+                              const expense = expensesData[index];
+                              console.log("Setting expense to archive:", expense);
+                              setSelectedExpense(expense);
+                              openModal("deleteMonthlyExpense");
                             }}
                           >
                             <ArchiveIcon />
@@ -734,13 +750,14 @@ function FinancialOverview() {
         />
       )}
 
-      {currentModal === "deleteMonthlyExpense" && (
+      {currentModal === "deleteMonthlyExpense" && selectedExpense && (
         <DeleteMonthlySales
           isOpen={true}
           onClose={closeModal}
           onArchive={handleArchiveExpense}
         />
       )}
+
       {currentModal === "createCategory" && (
         <CreateCategory isOpen onClose={closeModal} />
       )}
