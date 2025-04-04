@@ -98,6 +98,7 @@ function CreateTreatment({ isOpen, onClose }) {
                 />
               </InputTextField>
             </InputContainer>
+
             {/* Price */}
             <InputContainer>
               <InputLabel>PRICE</InputLabel>
@@ -118,6 +119,7 @@ function CreateTreatment({ isOpen, onClose }) {
                 />
               </InputTextField>
             </InputContainer>
+
             {/* Duration */}
             <InputContainer>
               <InputLabel>DURATION (MINUTES)</InputLabel>
