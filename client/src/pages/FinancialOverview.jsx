@@ -357,6 +357,51 @@ function FinancialOverview() {
   };
   // REPORT GENERATING FUNCTIONS END HERE
 
+  // Create new expense function
+  const handleCreateExpense = async (expenseData) => {
+    try {
+      console.log("Creating new expense:", expenseData);
+
+      // Call the new dedicated endpoint
+      const response = await fetch("http://localhost:4000/api/expenses", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(expenseData)
+      });
+
+      console.log("Create response status:", response.status);
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log("Create result:", result);
+
+        if (result.success) {
+          // Add the new expense to the UI with the correct ID from the server
+          const newExpense = {
+            id: result.id,
+            ...expenseData,
+            archived: false
+          };
+
+          // Add the new expense to the beginning of the list
+          setExpensesData(prevExpenses => [newExpense, ...prevExpenses]);
+
+          // Close the modal
+          closeModal();
+        } else {
+          alert(result.message || "Error creating expense");
+        }
+      } else {
+        const errorData = await response.json();
+        console.error("Create error response:", errorData);
+        alert(errorData.message || "Error creating expense. Please try again.");
+      }
+    } catch (error) {
+      console.error("Create expense error:", error);
+      alert("An error occurred. Please try again.");
+    }
+  };
+
   // State for the expense to edit
   const [expenseToEdit, setExpenseToEdit] = useState(null);
 
@@ -440,10 +485,10 @@ function FinancialOverview() {
 
       if (response.ok) {
         // remove the archived expense immediately
-        setExpensesData(prevExpenses => 
+        setExpensesData(prevExpenses =>
           prevExpenses.filter(expense => expense.id !== selectedExpense.id)
         );
-        
+
         closeModal();
       } else {
         const errorData = await response.json();
@@ -733,8 +778,13 @@ function FinancialOverview() {
         </div>
       </div>
 
+     
       {currentModal === "createMonthlyExpense" && (
-        <CreateMonthlySales isOpen onClose={closeModal} />
+        <CreateMonthlySales
+          isOpen={true}
+          onClose={closeModal}
+          onCreateSuccess={handleCreateExpense}
+        />
       )}
 
       {currentModal === "editMonthlyExpense" && expenseToEdit && (

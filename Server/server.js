@@ -619,12 +619,56 @@ app.get("/sales", async (req, res) => {
   }
 });
 
+// Create a new expense
+app.post("/api/expenses", async (req, res) => {
+  try {
+    const { category, expense, date } = req.body;
+    
+    // Validate required fields
+    if (!category || !expense || !date) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "Missing required fields: category, expense, and date are required" 
+      });
+    }
+
+    // Insert the expense into the database
+    const insertQuery = `
+      INSERT INTO expenses_tracker (
+        category,
+        expense,
+        date,
+        archived
+      )
+      VALUES ($1, $2, $3, $4)
+      RETURNING id;
+    `;
+    
+    const result = await pool.query(insertQuery, [category, expense, date, false]);
+    
+    // Return success with the new expense ID
+    res.status(201).json({
+      success: true,
+      message: 'Expense created successfully',
+      id: result.rows[0].id
+    });
+  } catch (error) {
+    console.error('Error creating expense:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Error creating expense', 
+      error: error.message 
+    });
+  }
+});
+
 // Fetch Expenses Data
 app.get("/expenses", async (req, res) => {
   try {
-    const result = await pool.query("SELECT * FROM expenses_tracker ORDER BY date DESC");
+    const result = await pool.query("SELECT * FROM expenses_tracker WHERE archived IS NOT TRUE ORDER BY date DESC");
     res.json(result.rows);
   } catch (err) {
+    console.error("Error fetching expenses:", err);
     res.status(500).send(err.message);
   }
 });
