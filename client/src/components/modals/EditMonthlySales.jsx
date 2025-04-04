@@ -77,26 +77,6 @@ function EditMonthlySales({ isOpen, onClose, onEditSuccess, initialData }) {
         <form onSubmit={handleSubmit}>
           <div className="flex flex-col gap-4">
             <InputContainer>
-              <InputLabel>AMOUNT</InputLabel>
-              <InputTextField>
-                <InputIcon>
-                  <CoinsIcon />
-                </InputIcon>
-                <Input
-                  name="amount"
-                  value={formData.amount}
-                  onChange={handleChange}
-                  placeholder="Amount"
-                  type="number"
-                  inputMode="decimal"
-                  min="0"
-                  required
-                  className="w-full bg-transparent outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                />
-              </InputTextField>
-            </InputContainer>
-
-            <InputContainer>
               <InputLabel>CATEGORY</InputLabel>
               <Select
                 value={formData.category}
@@ -128,6 +108,26 @@ function EditMonthlySales({ isOpen, onClose, onEditSuccess, initialData }) {
                   </SelectItem>
                 </ModalSelectContent>
               </Select>
+            </InputContainer>
+
+            <InputContainer>
+              <InputLabel>AMOUNT</InputLabel>
+              <InputTextField>
+                <InputIcon>
+                  <CoinsIcon />
+                </InputIcon>
+                <Input
+                  name="amount"
+                  value={formData.amount}
+                  onChange={handleChange}
+                  placeholder="Amount"
+                  type="number"
+                  inputMode="decimal"
+                  min="0"
+                  required
+                  className="w-full bg-transparent outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                />
+              </InputTextField>
             </InputContainer>
 
             <InputContainer>

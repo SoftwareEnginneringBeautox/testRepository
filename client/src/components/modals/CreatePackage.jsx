@@ -2,14 +2,12 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import CurrencyInput from "react-currency-input-field";
 
-
-
 import {
   ModalContainer,
   ModalHeader,
   ModalTitle,
   ModalIcon,
-  ModalBody,
+  ModalBody
 } from "@/components/ui/Modal";
 
 import {
@@ -17,10 +15,11 @@ import {
   InputTextField,
   InputLabel,
   InputIcon,
-  Input,
+  Input
 } from "@/components/ui/Input";
 
 import { Button } from "../ui/Button";
+import { MultiSelectCheckbox } from "@/components/ui/MultiSelectCheckbox";
 
 import ChevronLeftIcon from "@/assets/icons/ChevronLeftIcon";
 import PlusIcon from "@/assets/icons/PlusIcon";
@@ -29,7 +28,7 @@ import PesoIcon from "@/assets/icons/PesoIcon";
 
 function CreatePackage({ isOpen, onClose }) {
   const [packageName, setPackageName] = useState("");
-  const [selectedTreatmentId, setSelectedTreatmentId] = useState("");
+  const [selectedTreatmentIds, setSelectedTreatmentIds] = useState([]);
   const [numberOfTreatments, setNumberOfTreatments] = useState("");
   const [amount, setAmount] = useState("");
   const [treatmentsList, setTreatmentsList] = useState([]);
@@ -42,7 +41,7 @@ function CreatePackage({ isOpen, onClose }) {
     async function fetchTreatments() {
       try {
         const response = await axios.get(`${API_BASE_URL}/api/treatments`, {
-          withCredentials: true,
+          withCredentials: true
         });
         setTreatmentsList(response.data);
       } catch (err) {
@@ -52,38 +51,62 @@ function CreatePackage({ isOpen, onClose }) {
     fetchTreatments();
   }, []);
 
-  // Compute total amount automatically based on the selected treatment price and number of treatments
+  // Compute total amount based on selected treatments
   useEffect(() => {
-    const treatment = treatmentsList.find(
-      (t) => String(t.id) === selectedTreatmentId
-    );
-    if (treatment && numberOfTreatments) {
-      const total = treatment.price * parseInt(numberOfTreatments, 10);
+    if (selectedTreatmentIds.length > 0 && numberOfTreatments) {
+      // Get the total price of all selected treatments
+      const selectedTreatments = treatmentsList.filter((t) =>
+        selectedTreatmentIds.includes(String(t.id))
+      );
+
+      const totalPerSession = selectedTreatments.reduce(
+        (sum, treatment) => sum + treatment.price,
+        0
+      );
+
+      const total = totalPerSession * parseInt(numberOfTreatments, 10);
       setAmount(total.toFixed(2));
     } else {
       setAmount("");
     }
-  }, [selectedTreatmentId, numberOfTreatments, treatmentsList]);
+  }, [selectedTreatmentIds, numberOfTreatments, treatmentsList]);
 
   if (!isOpen) return null;
+
+  // Format treatments for the multi-select dropdown
+  const treatmentOptions = treatmentsList.map((treatment) => ({
+    value: String(treatment.id),
+    label: `${treatment.treatment_name} - ₱${treatment.price}`
+  }));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
+    // Get the names of selected treatments
+    const selectedTreatmentNames = treatmentsList
+      .filter((t) => selectedTreatmentIds.includes(String(t.id)))
+      .map((t) => t.treatment_name);
+
     const payload = {
       package_name: packageName,
-      // Optionally, you can store treatment id; here we store treatment name from lookup:
-      treatment: treatmentsList.find(t => String(t.id) === selectedTreatmentId)?.treatment_name || "",
+      // Now we store multiple treatments
+      treatments: selectedTreatmentNames,
       sessions: parseInt(numberOfTreatments, 10) || 0,
       price: parseFloat(amount) || 0,
+      // You may need to adjust your API to handle multiple treatments
+      treatment_ids: selectedTreatmentIds
     };
 
     try {
-      const response = await axios.post(`${API_BASE_URL}/api/packages`, payload, {
-        withCredentials: true,
-      });
+      const response = await axios.post(
+        `${API_BASE_URL}/api/packages`,
+        payload,
+        {
+          withCredentials: true
+        }
+      );
       if (response.data.success) {
         onClose();
       } else {
@@ -126,25 +149,17 @@ function CreatePackage({ isOpen, onClose }) {
               </InputTextField>
             </InputContainer>
 
-            {/* Treatments Dropdown */}
+            {/* Multi-Select Treatments Dropdown */}
             <InputContainer>
               <InputLabel>TREATMENTS</InputLabel>
-              <InputTextField className="bg-[#F5F3F0] border rounded p-2">
-                <select
-                  data-cy="package-treatment"
-                  className="w-full"
-                  value={selectedTreatmentId}
-                  onChange={(e) => setSelectedTreatmentId(e.target.value)}
-                  required
-                >
-                  <option value="">Select treatment</option>
-                  {treatmentsList.map((treatment) => (
-                    <option key={treatment.id} value={treatment.id}>
-                      {treatment.treatment_name} - ₱{treatment.price}
-                    </option>
-                  ))}
-                </select>
-              </InputTextField>
+              <MultiSelectCheckbox
+                data-cy="package-treatments"
+                options={treatmentOptions}
+                value={selectedTreatmentIds}
+                onChange={setSelectedTreatmentIds}
+                placeholder="Select treatments"
+                className="bg-[#F5F3F0]"
+              />
             </InputContainer>
 
             {/* Number of Treatments */}
@@ -209,7 +224,11 @@ function CreatePackage({ isOpen, onClose }) {
               {loading ? "CREATING..." : "CREATE PACKAGE"}
             </Button>
           </div>
-          {error && <p className="text-red-500 mt-2" data-cy="error-message">{error}</p>}
+          {error && (
+            <p className="text-red-500 mt-2" data-cy="error-message">
+              {error}
+            </p>
+          )}
         </form>
       </ModalBody>
     </ModalContainer>

@@ -30,7 +30,6 @@ import { Button } from "@/components/ui/Button";
 
 import ChevronLeftIcon from "../assets/icons/ChevronLeftIcon";
 import PlusIcon from "../assets/icons/PlusIcon";
-import SettingsIcon from "../assets/icons/SettingsIcon";
 import PackageIcon from "../assets/icons/PackageIcon";
 import EllipsisIcon from "../assets/icons/EllipsisIcon";
 import UserIcon from "../assets/icons/UserIcon";
@@ -141,19 +140,19 @@ function AdministratorServices() {
         table: "treatments",
         id: updatedData.id,
         action: "edit",
-        data: updatedData,
-      }),
+        data: updatedData
+      })
     });
-  
+
     closeModal();
     fetchTreatments();
   };
-  
+
   const handleArchiveTreatment = async () => {
     console.log("ARCHIVE BUTTON CLICKED", selectedTreatment?.id);
-  
+
     if (!selectedTreatment?.id) return;
-  
+
     await fetch(`${API_BASE_URL}/api/manage-record`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -161,14 +160,13 @@ function AdministratorServices() {
       body: JSON.stringify({
         table: "treatments",
         id: selectedTreatment.id,
-        action: "archive",
-      }),
+        action: "archive"
+      })
     });
-  
+
     closeModal();
     fetchTreatments();
   };
-  
 
   // Initial load for treatments and packages
   useEffect(() => {
@@ -189,11 +187,7 @@ function AdministratorServices() {
             <TableHead className="py-4 text-center">TREATMENT ID</TableHead>
             <TableHead className="py-4 text-center">TREATMENT NAME</TableHead>
             <TableHead className="py-4 text-center">PRICE</TableHead>
-            <TableHead className="py-4 text-center">
-              <button className="flex items-center justify-center h-8 w-full">
-                <SettingsIcon />
-              </button>
-            </TableHead>
+            <TableHead className="py-4 text-center"></TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -225,7 +219,9 @@ function AdministratorServices() {
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           data-cy="archive-treatment-btn"
-                          onClick={() => handleSelectTreatmentToArchive(treatment)}
+                          onClick={() =>
+                            handleSelectTreatmentToArchive(treatment)
+                          }
                         >
                           <ArchiveIcon />
                           <p className="font-semibold">Archive</p>
@@ -248,7 +244,10 @@ function AdministratorServices() {
 
       {/* Button for Adding Treatments */}
       <div className="w-full flex justify-end gap-4 mb-[2%]">
-        <Button data-cy="add-treatment-btn" onClick={() => openModal("createTreatment")}>
+        <Button
+          data-cy="add-treatment-btn"
+          onClick={() => openModal("createTreatment")}
+        >
           <PlusIcon />
           ADD NEW TREATMENT
         </Button>
@@ -263,11 +262,7 @@ function AdministratorServices() {
             <TableHead className="py-4 text-center">TREATMENT</TableHead>
             <TableHead className="py-4 text-center">SESSIONS</TableHead>
             <TableHead className="py-4 text-center">PRICE</TableHead>
-            <TableHead className="py-4 text-center">
-              <button className="flex items-center justify-center h-8 w-full">
-                <SettingsIcon />
-              </button>
-            </TableHead>
+            <TableHead className="py-4 text-center"></TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -327,7 +322,10 @@ function AdministratorServices() {
           <ChevronLeftIcon />
           CHECK
         </Button>
-        <Button data-cy="add-package-btn" onClick={() => openModal("createPackage")}>
+        <Button
+          data-cy="add-package-btn"
+          onClick={() => openModal("createPackage")}
+        >
           <PlusIcon />
           ADD NEW PACKAGE
           <PackageIcon />
@@ -377,7 +375,7 @@ function AdministratorServices() {
           onArchive={handleArchiveTreatment}
         />
       )}
-     
+
       {currentModal === "editTreatment" && selectedTreatment && (
         <EditTreatment
           isOpen={true}
@@ -386,7 +384,6 @@ function AdministratorServices() {
           onSubmit={handleEditTreatment}
         />
       )}
-      
     </div>
   );
 }

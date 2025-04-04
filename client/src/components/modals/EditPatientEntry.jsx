@@ -189,12 +189,22 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
               </Select>
             </InputContainer>
 
-            <h5 className="my-4 font-semibold">
-              TOTAL AMOUNT{" "}
-              <span>
-                ₱{formData.total_amount ?? originalData.total_amount ?? "0.00"}
-              </span>
-            </h5>
+            <InputContainer>
+              <InputLabel>TOTAL AMOUNT</InputLabel>
+              <InputTextField>
+                <InputIcon>
+                  <PesoIcon />
+                </InputIcon>
+                <Input
+                  placeholder="Amount already paid"
+                  type="text"
+                  inputMode="decimal"
+                  pattern="\\d+(\\.\\d{0,2})?"
+                  min="0"
+                  step="0.01"
+                />
+              </InputTextField>
+            </InputContainer>
 
             <InputContainer>
               <InputLabel>AMOUNT PAID</InputLabel>

@@ -17,6 +17,9 @@ const InputContainer = React.forwardRef(
       if (React.isValidElement(child) && child.type === Input) {
         return React.cloneElement(child, { id: generatedId });
       }
+      if (React.isValidElement(child) && child.type === InputArea) {
+        return React.cloneElement(child, { id: generatedId });
+      }
       return child;
     });
 
@@ -52,7 +55,7 @@ const InputTextField = ({ children, className }) => {
   return (
     <div
       className={cn(
-        "flex items-center gap-2 w-full bg-customNeutral-100 rounded-lg border-2 border-customNeutral-200 focus-within:border-lavender-400 dark:border-neutral-800 dark:bg-neutral-950 dark:ring-offset-neutral-950 dark:file:text-neutral-50 dark:placeholder:text-neutral-400 px-3 py-2 max-h-12",
+        "flex items-center gap-2 w-full bg-customNeutral-100 rounded-lg border-2 border-customNeutral-200 focus-within:border-lavender-400 dark:border-neutral-800 dark:bg-neutral-950 dark:ring-offset-neutral-950 dark:file:text-neutral-50 dark:placeholder:text-neutral-400 px-3 py-2",
         className
       )}
     >
@@ -82,4 +85,40 @@ const Input = React.forwardRef(({ className, type, ...props }, ref) => {
 });
 Input.displayName = "Input";
 
-export { InputContainer, InputTextField, InputLabel, InputIcon, Input };
+const InputArea = React.forwardRef(({ className, rows = 4, ...props }, ref) => (
+  <textarea
+    ref={ref}
+    rows={rows}
+    className={cn(
+      "w-full flex-1 outline-none bg-inherit file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-neutral-950 placeholder:text-customNeutral-300 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm resize-none",
+      className
+    )}
+    {...props}
+  />
+));
+InputArea.displayName = "InputArea";
+
+// New component for textarea container
+const InputAreaField = ({ children, className }) => {
+  return (
+    <div
+      className={cn(
+        "flex w-full bg-customNeutral-100 rounded-lg border-2 border-customNeutral-200 focus-within:border-lavender-400 dark:border-neutral-800 dark:bg-neutral-950 dark:ring-offset-neutral-950 dark:file:text-neutral-50 dark:placeholder:text-neutral-400 px-3 py-2",
+        className
+      )}
+    >
+      {children}
+    </div>
+  );
+};
+InputAreaField.displayName = "InputAreaField";
+
+export {
+  InputContainer,
+  InputTextField,
+  InputLabel,
+  InputIcon,
+  Input,
+  InputArea,
+  InputAreaField
+};
