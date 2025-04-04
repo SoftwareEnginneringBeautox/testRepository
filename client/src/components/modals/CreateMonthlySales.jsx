@@ -30,11 +30,14 @@ import CoinsIcon from "@/assets/icons/CoinsIcon";
 import ChevronLeftIcon from "@/assets/icons/ChevronLeftIcon";
 import PlusIcon from "@/assets/icons/PlusIcon";
 import ExpenseTypeIcon from "@/assets/icons/ExpenseTypeIcon";
+import CalendarIcon from "@/assets/icons/CalendarIcon";
+
 
 function CreateMonthlySales({ isOpen, onClose, onCreateSuccess }) {
   const [formData, setFormData] = useState({
     expenseType: "",
-    amount: ""
+    amount: "",
+    date: new Date().toISOString().split('T')[0]
   });
 
   if (!isOpen) return null;
@@ -58,16 +61,22 @@ function CreateMonthlySales({ isOpen, onClose, onCreateSuccess }) {
     e.preventDefault();
 
     // Validate form data
-    if (!formData.expenseType || !formData.amount) {
+    if (!formData.expenseType || !formData.amount || !formData.date) {
       alert("Please fill in all required fields");
       return;
     }
 
+    // Format data to match server expectations
+    const formattedData = {
+      category: formData.expenseType,
+      expense: parseFloat(formData.amount),
+      date: formData.date
+    };
+
+    console.log("Submitting expense data:", formattedData);
+
     // Call the callback with form data
-    onCreateSuccess({
-      ...formData,
-      amount: parseFloat(formData.amount)
-    });
+    onCreateSuccess(formattedData);
 
     // Close the modal
     onClose();
@@ -133,6 +142,24 @@ function CreateMonthlySales({ isOpen, onClose, onCreateSuccess }) {
                   min="0"
                   step="0.01"
                   required
+                />
+              </InputTextField>
+            </InputContainer>
+
+            <InputContainer>
+              <InputLabel>DATE</InputLabel>
+              <InputTextField>
+                <InputIcon>
+                  <CalendarIcon />
+                </InputIcon>
+                <Input
+                  name="date"
+                  type="date"
+                  placeholder="Date"
+                  value={formData.date}
+                  onChange={handleChange}
+                  required
+                  className="text-input"
                 />
               </InputTextField>
             </InputContainer>

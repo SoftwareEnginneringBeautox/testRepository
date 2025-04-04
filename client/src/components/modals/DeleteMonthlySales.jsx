@@ -16,8 +16,8 @@ function DeleteMonthlySales({ isOpen, onClose, onArchive }) {
       <div className="flex w-full flex-1 items-center justify-center text-warning-300">
         <WarningIcon size={48} />
       </div>
-      <ModalTitle className="text-center">DELETE MONTHLY EXPENSE?</ModalTitle>
-      <p>This will permanently delete the expense within the system.</p>
+      <ModalTitle className="text-center">ARCHIVE MONTHLY EXPENSE?</ModalTitle>
+      <p>This will archive the expense within the system.</p>
       <div className=" flex flex-row gap-4 w-full">
         <Button variant="outline" className="w-1/2" onClick={onClose}>
           <ChevronLeftIcon />
