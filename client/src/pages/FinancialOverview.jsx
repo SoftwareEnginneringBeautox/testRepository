@@ -106,6 +106,18 @@ function FinancialOverview() {
       .catch((error) => console.error("Error fetching expenses data:", error));
   }, []);
 
+  const refreshExpensesData = async () => {
+    try {
+      const response = await fetch("http://localhost:4000/expenses");
+      const data = await response.json();
+      setExpensesData(data);
+    } catch (error) {
+      console.error("Error refreshing expenses data:", error);
+    }
+  };
+
+
+
   const generateWeeklySalesReport = (salesData) => {
     if (!salesData || salesData.length === 0) {
       console.error("No sales data available to generate PDF.");
@@ -344,29 +356,67 @@ function FinancialOverview() {
     doc.save(filename);
   };
 
+  // State for the expense to edit
   const [expenseToEdit, setExpenseToEdit] = useState(null);
+
+  // Handler for clicking the edit button
+  const handleEditClick = (expense) => {
+    // Format the expense data for the modal
+    const formattedExpense = {
+      amount: expense.expense,
+      category: expense.category,
+      date: expense.date.split('T')[0] // Format date for input element
+    };
+
+    // Set the expense state with both the formatted data and the original ID
+    setExpenseToEdit({
+      ...formattedExpense,
+      id: expense.id
+    });
+
+    // Open the edit modal
+    openModal("editMonthlyExpense");
+  };
 
   const handleEditExpense = async (updatedData) => {
     try {
-      const response = await fetch("/api/manage-record", {
+      console.log("Submitting updated expense data:", updatedData);
+
+      // Format the data to match API expectations
+      const formattedData = {
+        expense: parseFloat(updatedData.amount),
+        category: updatedData.category,
+        date: updatedData.date
+      };
+
+      console.log("Formatted data for API:", formattedData);
+      console.log("Expense ID being edited:", expenseToEdit.id);
+
+      const response = await fetch("http://localhost:4000/api/manage-record", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           table: "expenses_tracker",
           id: expenseToEdit.id,
           action: "edit",
-          data: updatedData
+          data: formattedData
         })
       });
 
+      console.log("API response status:", response.status);
+
       if (response.ok) {
-        refreshExpensesData(); // Refresh the table
+        await refreshExpensesData();
         closeModal();
+      } else {
+        const errorData = await response.json();
+        console.error("Edit error response:", errorData);
       }
     } catch (error) {
       console.error("Edit error:", error);
     }
   };
+
 
   const [selectedExpense, setSelectedExpense] = useState(null);
 
@@ -383,7 +433,7 @@ function FinancialOverview() {
       });
 
       if (response.ok) {
-        refreshExpensesData(); // Your existing refresh function
+        await refreshExpensesData(); // Now this will work
         closeModal();
       }
     } catch (error) {
@@ -501,9 +551,7 @@ function FinancialOverview() {
                       <DropdownMenuContent>
                         <DropdownMenuGroup>
                           <DropdownMenuItem
-                            onClick={() => {
-                              openModal("editCategory");
-                            }}
+                            onClick={() => handleEditClick(expense)}
                           >
                             <EditIcon />
                             <p className="font-semibold">Edit</p>
@@ -602,7 +650,14 @@ function FinancialOverview() {
                         <DropdownMenuGroup>
                           <DropdownMenuItem
                             onClick={() => {
-                              setExpenseToEdit(expense); // Store the expense to be edited
+                              const expense = expensesData[index];
+                              console.log("Setting expense to edit:", expense);
+                              setExpenseToEdit({
+                                id: expense.id,
+                                expense: expense.expense,
+                                category: expense.category,
+                                date: expense.date.split('T')[0]
+                              });
                               openModal("editMonthlyExpense");
                             }}
                           >
@@ -665,18 +720,20 @@ function FinancialOverview() {
       {currentModal === "createMonthlyExpense" && (
         <CreateMonthlySales isOpen onClose={closeModal} />
       )}
+
       {currentModal === "editMonthlyExpense" && expenseToEdit && (
         <EditMonthlySales
           isOpen={true}
           onClose={closeModal}
           onEditSuccess={handleEditExpense}
           initialData={{
-            amount: expenseToEdit.expense,
+            amount: expenseToEdit.expense, // Make sure these property names match
             category: expenseToEdit.category,
-            date: expenseToEdit.date.split("T")[0] // Format date for input
+            date: expenseToEdit.date
           }}
         />
       )}
+
       {currentModal === "deleteMonthlyExpense" && (
         <DeleteMonthlySales
           isOpen={true}
@@ -696,5 +753,6 @@ function FinancialOverview() {
     </div>
   );
 }
+
 
 export default FinancialOverview;

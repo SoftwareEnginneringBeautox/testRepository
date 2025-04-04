@@ -39,13 +39,14 @@ function EditMonthlySales({ isOpen, onClose, onEditSuccess, initialData }) {
 
   useEffect(() => {
     if (initialData) {
+      console.log("Setting form data with initialData:", initialData);
       setFormData({
-        amount: initialData.amount || "",
+        amount: initialData.amount?.toString() || "",
         category: initialData.category || "",
         date: initialData.date || ""
       });
     }
-  }, [initialData]);
+  }, [initialData, isOpen]); 
 
   if (!isOpen) return null;
 
@@ -59,9 +60,11 @@ function EditMonthlySales({ isOpen, onClose, onEditSuccess, initialData }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    console.log("Form submitted with data:", formData);
+    // Call the onEditSuccess function with the form data
     onEditSuccess({
       ...formData,
-      amount: parseFloat(formData.amount)
+      amount: parseFloat(formData.amount) || 0
     });
   };
 
@@ -81,7 +84,7 @@ function EditMonthlySales({ isOpen, onClose, onEditSuccess, initialData }) {
               <Select
                 value={formData.category}
                 onValueChange={(value) =>
-                  handleChange({ target: { name: "category", value } })
+                  setFormData(prev => ({...prev, category: value}))
                 }
               >
                 <ModalSelectTrigger

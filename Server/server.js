@@ -1,7 +1,7 @@
 // Load environment variables (for local dev; in production, AWS environment variables override these)
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config();
-}
+} 
 
 const express = require('express');
 const cors = require('cors');
