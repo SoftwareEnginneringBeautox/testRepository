@@ -160,8 +160,9 @@ function CreatePatientEntry({ isOpen, onClose }) {
     // Validate required dropdown selections
     const errors = {};
     if (!personInCharge) errors.personInCharge = "Person in charge is required";
-    if (!packageName) errors.packageName = "Package is required";
-    if (!treatment) errors.treatment = "Treatment is required";
+    if (!packageName && !treatment) {
+      errors.packageOrTreatment = "Select either a package or a treatment";
+    }
 
     setFormErrors(errors);
 
@@ -306,7 +307,9 @@ function CreatePatientEntry({ isOpen, onClose }) {
                 onValueChange={(value) => {
                   console.log("Selected package:", value);
                   setPackageName(value);
+                  if (value) setTreatment(""); 
                 }}
+                disabled={!!treatment}
               >
                 <ModalSelectTrigger
                   icon={<PackageIcon className="w-4 h-4" />}
@@ -341,7 +344,9 @@ function CreatePatientEntry({ isOpen, onClose }) {
                 onValueChange={(value) => {
                   console.log("Selected treatment:", value);
                   setTreatment(value);
+                  if (value) setPackageName(""); 
                 }}
+                disabled={!!packageName}
               >
                 <ModalSelectTrigger
                   icon={<TreatmentIcon className="w-4 h-4" />}
