@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 
 import { Checkbox } from "@/components/ui/Checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/RadioGroup";
 
 import {
   ModalContainer,
@@ -73,12 +74,17 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
         time_of_session: entryData.time_of_session || "",
         consent_form_signed: entryData.consent_form_signed || false
       });*/
-      setOriginalData(entryData);
+      setOriginalData({
+        ...entryData,
+        package_name: entryData.package_name || "",
+        treatment: entryData.treatment || "",
+        payment_method: entryData.payment_method || "",
+      });
       setFormData({});
     }
     const fetchAestheticians = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/getusers?archived=false`, {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/getusers?archived!=notTrue`, {
           credentials: "include"
         });
     
@@ -102,7 +108,7 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
     
     const fetchPackages = async () => {
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/packages?archived=false`, {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/packages?archived=notTrue`, {
           credentials: "include"
         });
         const data = await res.json();
@@ -114,7 +120,7 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
 
     const fetchTreatments = async () => {
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/treatments?archived=false`, {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/treatments?archived!=notTrue`, {
           credentials: "include"
         });
         const data = await res.json();
@@ -183,7 +189,7 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
 
               <Select
                 value={
-                  formData.person_in_charge ?? originalData.person_in_charge
+                  formData.person_in_charge ?? originalData.person_in_charge ?? ""
                 }
                 onValueChange={(value) =>
                   setFormData({ ...formData, person_in_charge: value })
@@ -208,10 +214,15 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
             <InputContainer>
               <InputLabel>PACKAGE</InputLabel>
               <Select
-                value={formData.packageName ?? originalData.package_name}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, package_name: value })
-                }
+                value={formData.package_name ?? originalData.package_name ?? ""}
+                onValueChange={(value) => {
+                  setFormData((prev) => ({
+                    ...prev,
+                    package_name: value === "CLEAR" ? "" : value,
+                    treatment: value === "CLEAR" ? prev.treatment : "", // mutually exclusive
+                  }));
+                }}
+                
               >
                 <ModalSelectTrigger
                   icon={<PackageIcon className="w-4 h-4" />}
@@ -219,7 +230,10 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
             
                 />
                 <ModalSelectContent>
-                  {packagesList.map((pkg) => (
+                  <SelectItem value="CLEAR">Clear Selection</SelectItem>
+
+                  {!Boolean(formData.treatment ?? originalData.treatment) && 
+                    packagesList.map((pkg) => (
                     <SelectItem key={pkg.id} value={pkg.package_name}>
                       {pkg.package_name} - ₱{pkg.price}
                     </SelectItem>
@@ -232,17 +246,24 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
             <InputContainer>
               <InputLabel>TREATMENT</InputLabel>
               <Select
-                value={formData.treatment ?? originalData.treatment}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, treatment: value })
-                }
+                value={formData.treatment ?? originalData.treatment ?? ""}
+                onValueChange={(value) => {
+                  setFormData((prev) => ({
+                    ...prev,
+                    treatment: value === "CLEAR" ? "" : value,
+                    package_name: value === "CLEAR" ? prev.package_name : "", // mutually exclusive
+                  }));
+                }}
+                
               >
                 <ModalSelectTrigger
                   icon={<TreatmentIcon className="w-4 h-4" />}
                   placeholder="Chosen treatment"
                 />
                <ModalSelectContent>
-                  {treatmentsList.map((treatment) => (
+                  <SelectItem value="CLEAR">Clear Selection</SelectItem>
+                  {!Boolean(formData.package_name ?? originalData.package_name) &&
+                    treatmentsList.map((treatment) => (
                     <SelectItem
                       key={treatment.id}
                       value={treatment.treatment_name}
@@ -319,23 +340,36 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
 
 
             <InputContainer>
-              <InputLabel>PAYMENT METHOD</InputLabel>
-              <Select
-                value={formData.payment_method ?? originalData.payment_method}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, payment_method: value })
-                }
-              >
-                <ModalSelectTrigger
-                  icon={<PesoIcon className="w-4 h-4" />}
-                  placeholder="Select payment method"
+            <InputLabel>PAYMENT METHOD</InputLabel>
+            <RadioGroup
+              value={formData.payment_method ?? originalData.payment_method ?? ""}
+              onValueChange={(value) =>
+                setFormData({ ...formData, payment_method: value })
+              }
+              className="flex flex-col gap-2 mt-2"
+            >
+              <div className="flex items-center gap-2">
+                <RadioGroupItem
+                  value="full-payment"
+                  id="full-payment"
                 />
-                <ModalSelectContent>
-                  <SelectItem value="Full Payment">Full Payment</SelectItem>
-                  <SelectItem value="Installment">Installment</SelectItem>
-                </ModalSelectContent>
-              </Select>
-            </InputContainer>
+                <label htmlFor="full-payment" className="text-sm">
+                  FULL PAYMENT
+                </label>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <RadioGroupItem
+                  value="installment"
+                  id="installment"
+                />
+                <label htmlFor="installment" className="text-sm">
+                  INSTALLMENT
+                </label>
+              </div>
+            </RadioGroup>
+          </InputContainer>
+
           </div>
 
           <div className="flex flex-row w-full gap-4">
@@ -352,8 +386,9 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
                   required
                   value={
                     formData.date_of_session ??
-                    originalData.date_of_session ??
-                    ""
+                    (originalData.date_of_session
+                      ? originalData.date_of_session.slice(0, 10) // format: YYYY-MM-DD
+                      : "")
                   }
                   onChange={(e) =>
                     setFormData({
@@ -377,8 +412,9 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
                   required
                   value={
                     formData.time_of_session ??
-                    originalData.time_of_session ??
-                    ""
+                    (originalData.time_of_session
+                      ? originalData.time_of_session.slice(0, 5) // format: HH:MM
+                      : "")
                   }
                   onChange={(e) =>
                     setFormData({
@@ -448,9 +484,11 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
               type="button"
               className="w-1/2"
               onClick={() => {
-                const cleanedData = { ...originalData, ...formData };
+                const cleanedData = { ...formData };
                 Object.keys(cleanedData).forEach((key) => {
-                  if (cleanedData[key] === "") delete cleanedData[key];
+                  if (cleanedData[key] === "") {
+                    cleanedData[key] = null; // force null to override DB
+                  }
                 });
                 onSubmit({ id: entryData.id, ...cleanedData });
               }}

@@ -306,8 +306,12 @@ function CreatePatientEntry({ isOpen, onClose }) {
                 value={packageName}
                 onValueChange={(value) => {
                   console.log("Selected package:", value);
-                  setPackageName(value);
-                  if (value) setTreatment(""); 
+                  if (value === "CLEAR") {
+                    setPackageName("");
+                  } else {
+                    setPackageName(value);
+                    setTreatment(""); // Clear treatment if package is selected
+                  }; 
                 }}
                 disabled={!!treatment}
               >
@@ -315,12 +319,13 @@ function CreatePatientEntry({ isOpen, onClose }) {
                   icon={<PackageIcon className="w-4 h-4" />}
                   placeholder="Select package"
                   className={
-                    formSubmitAttempted && formErrors.packageName
+                    formSubmitAttempted && formErrors.packageOrTreatment
                       ? "border-red-500"
                       : ""
                   }
                 />
                 <ModalSelectContent>
+                  <SelectItem value="CLEAR">Clear Selection</SelectItem>
                   {packagesList.map((pkg) => (
                     <SelectItem key={pkg.id} value={pkg.package_name}>
                       {pkg.package_name} - ₱{pkg.price}
@@ -328,9 +333,9 @@ function CreatePatientEntry({ isOpen, onClose }) {
                   ))}
                 </ModalSelectContent>
               </Select>
-              {formSubmitAttempted && formErrors.packageName && (
+              {formSubmitAttempted && formErrors.packageOrTreatment && (
                 <p className="text-red-500 text-sm mt-1">
-                  {formErrors.packageName}
+                  {formErrors.packageOrTreatment}
                 </p>
               )}
             </InputContainer>
@@ -343,8 +348,12 @@ function CreatePatientEntry({ isOpen, onClose }) {
                 value={treatment}
                 onValueChange={(value) => {
                   console.log("Selected treatment:", value);
-                  setTreatment(value);
-                  if (value) setPackageName(""); 
+                  if (value === "CLEAR") {
+                    setTreatment("");
+                  } else {
+                    setTreatment(value);
+                    setPackageName(""); // Clear package if treatment is selected
+                  }
                 }}
                 disabled={!!packageName}
               >
@@ -352,12 +361,13 @@ function CreatePatientEntry({ isOpen, onClose }) {
                   icon={<TreatmentIcon className="w-4 h-4" />}
                   placeholder="Select treatment"
                   className={
-                    formSubmitAttempted && formErrors.treatment
+                    formSubmitAttempted && formErrors.packageOrTreatment
                       ? "border-red-500"
                       : ""
                   }
                 />
                 <ModalSelectContent>
+                  <SelectItem value="CLEAR">Clear Selection</SelectItem>
                   {treatmentsList.map((t) => (
                     <SelectItem key={t.id} value={t.treatment_name}>
                       {t.treatment_name} - ₱{t.price}
@@ -365,9 +375,9 @@ function CreatePatientEntry({ isOpen, onClose }) {
                   ))}
                 </ModalSelectContent>
               </Select>
-              {formSubmitAttempted && formErrors.treatment && (
+              {formSubmitAttempted && formErrors.packageOrTreatment && (
                 <p className="text-red-500 text-sm mt-1">
-                  {formErrors.treatment}
+                  {formErrors.packageOrTreatment}
                 </p>
               )}
             </InputContainer>
@@ -472,21 +482,29 @@ function CreatePatientEntry({ isOpen, onClose }) {
           </div>
 
           {/* PAYMENT METHOD RADIO */}
-          <div className="flex flex-col my-4">
-            <h5 className="text-xl leading-8 font-semibold">PAYMENT METHOD</h5>
-            <RadioGroup
-              value={paymentMethod}
-              onValueChange={(val) => setPaymentMethod(val)}
-            >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="full-payment" id="full-payment" />
-                <label htmlFor="full-payment">FULL PAYMENT</label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="installment" id="installment" />
-                <label htmlFor="installment">INSTALLMENT</label>
-              </div>
-            </RadioGroup>
+          <div className="flex flex-col gap-2 mt-2">
+          <InputContainer>
+            <InputLabel>PAYMENT METHOD</InputLabel>
+            
+              <RadioGroup
+                value={paymentMethod}
+                onValueChange={(val) => setPaymentMethod(val)}
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="full-payment" id="full-payment" />
+                  <label htmlFor="full-payment" className="text-sm">
+                    FULL PAYMENT
+                  </label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="installment" id="installment" />
+                  <label htmlFor="installment" className="text-sm">
+                    INSTALLMENT
+                  </label>
+                </div>
+              </RadioGroup>
+            
+          </InputContainer>
           </div>
 
           {/* DATE AND TIME OF SESSION */}
