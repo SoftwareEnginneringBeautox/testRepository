@@ -1,0 +1,309 @@
+import React, { useState, useEffect } from "react";
+import { format } from "date-fns";
+import { Checkbox } from "@/components/ui/Checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/RadioGroup";
+
+import {
+  ModalContainer,
+  ModalHeader,
+  ModalTitle,
+  ModalIcon,
+  ModalBody
+} from "@/components/ui/Modal";
+
+import {
+  InputContainer,
+  InputTextField,
+  InputLabel,
+  InputIcon,
+  Input
+} from "@/components/ui/Input";
+
+import { Button } from "../ui/Button";
+
+import PesoIcon from "@/assets/icons/PesoIcon";
+import ClockIcon from "@/assets/icons/ClockIcon";
+import ChevronLeftIcon from "@/assets/icons/ChevronLeftIcon";
+import CalendarIcon from "@/assets/icons/CalendarIcon";
+import UserIcon from "@/assets/icons/UserIcon";
+import UserIDIcon from "@/assets/icons/UserIDIcon";
+import CircleUserIcon from "@/assets/icons/CircleUserIcon";
+import PackageIcon from "@/assets/icons/PackageIcon";
+import UpdateIcon from "@/assets/icons/UpdateIcon";
+
+function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
+  const [originalData, setOriginalData] = useState({});
+  const [formData, setFormData] = useState({});
+
+  const [packagesList, setPackagesList] = useState([]);
+  const [treatmentsList, setTreatmentsList] = useState([]);
+  const [aestheticianList, setAestheticianList] = useState([]);
+
+  useEffect(() => {
+    if (entryData) {
+      /*setFormData({
+          patient_name: entryData.patient_name || "",
+          person_in_charge: entryData.person_in_charge || "",
+          treatment: entryData.treatment || "",
+          total_amount: entryData.total_amount || "",
+          payment_method: entryData.payment_method || "",
+          date_of_session: entryData.date_of_session || "",
+          time_of_session: entryData.time_of_session || "",
+          consent_form_signed: entryData.consent_form_signed || false
+        });*/
+      setOriginalData({
+        ...entryData,
+        package_name: entryData.package_name || "",
+        treatment: entryData.treatment || "",
+        payment_method: entryData.payment_method || ""
+      });
+      setFormData({});
+    }
+    const fetchAestheticians = async () => {
+      try {
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/getusers?archived!=notTrue`,
+          {
+            credentials: "include"
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status} - ${response.statusText}`);
+        }
+
+        const data = await response.json(); // Correct way to get JSON from fetch
+
+        const aestheticians = Array.isArray(data)
+          ? data.filter((user) => user.role?.toLowerCase() === "aesthetician")
+          : [];
+
+        setAestheticianList(aestheticians);
+      } catch (error) {
+        console.error("Error fetching aestheticians:", error);
+        setAestheticianList([]); // fallback to empty list
+      }
+    };
+
+    const fetchPackages = async () => {
+      try {
+        const res = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/packages?archived=notTrue`,
+          {
+            credentials: "include"
+          }
+        );
+        const data = await res.json();
+        setPackagesList(data);
+      } catch (err) {
+        console.error("Failed to fetch packages:", err);
+      }
+    };
+
+    const fetchTreatments = async () => {
+      try {
+        const res = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/treatments?archived!=notTrue`,
+          {
+            credentials: "include"
+          }
+        );
+        const data = await res.json();
+        setTreatmentsList(data);
+      } catch (err) {
+        console.error("Failed to fetch treatments:", err);
+      }
+    };
+
+    fetchAestheticians();
+    fetchPackages();
+    fetchTreatments();
+  }, [entryData]);
+
+  if (!isOpen) return null;
+  const total = parseFloat(
+    formData.total_amount ?? originalData.total_amount ?? "0"
+  );
+  const paid = parseFloat(
+    formData.amount_paid ?? originalData.amount_paid ?? "0"
+  );
+  const remainingBalance = total - paid;
+
+  return (
+    <ModalContainer>
+      <ModalHeader>
+        <ModalIcon>
+          <CircleUserIcon />
+        </ModalIcon>
+        <ModalTitle>UPDATE PATIENT RECORD</ModalTitle>
+      </ModalHeader>
+      <ModalBody>
+        <form onSubmit={(e) => e.preventDefault()}>
+          <div className="flex flex-col gap-4">
+            <p>
+              PATIENT RECORD OF{" "}
+              {originalData.patient_name?.toUpperCase() || "UNKNOWN"}
+            </p>
+
+            <InputContainer>
+              <InputLabel>PERSON IN CHARGE</InputLabel>
+              <p>{originalData.person_in_charge}</p>
+            </InputContainer>
+
+            {/* PACKAGE */}
+            <InputContainer>
+              <InputLabel>PACKAGE</InputLabel>
+              <p>{originalData.package_name}</p>
+            </InputContainer>
+
+            {/* TREATMENT */}
+            <InputContainer>
+              <InputLabel>TREATMENT</InputLabel>
+              <p>{originalData.treatment}</p>
+            </InputContainer>
+
+            <InputContainer>
+              <InputLabel>TOTAL AMOUNT</InputLabel>
+              <p>{originalData.total_amount}</p>
+            </InputContainer>
+
+            <InputContainer>
+              <InputLabel>AMOUNT PAID</InputLabel>
+              <p>{originalData.amount_paid}</p>
+            </InputContainer>
+
+            <InputContainer>
+              <InputLabel>REMAINING BALANCE</InputLabel>
+              <p>{remainingBalance}</p>
+            </InputContainer>
+
+            <InputContainer>
+              <InputLabel>PAYMENT METHOD</InputLabel>
+              <p>{originalData.payment_method}</p>
+            </InputContainer>
+          </div>
+
+          <div className="flex flex-row w-full gap-4">
+            <InputContainer className="flex-1">
+              <InputLabel>DATE OF SESSION</InputLabel>
+              <p>{originalData.date_of_session}</p>
+            </InputContainer>
+
+            <InputContainer className="flex-1">
+              <InputLabel>TIME OF SESSION</InputLabel>
+              <p>{originalData.time_of_session}</p>
+            </InputContainer>
+          </div>
+
+          <div className="flex flex-row w-full gap-4">
+            <InputContainer className="flex-1">
+              <InputLabel>DATE OF NEXT SESSION</InputLabel>
+              <InputTextField>
+                <InputIcon>
+                  <CalendarIcon />
+                </InputIcon>
+                <Input
+                  type="date"
+                  className="text-input"
+                  placeholder="Date of Session"
+                  required
+                  value={
+                    formData.date_of_session ??
+                    originalData.date_of_session ??
+                    ""
+                  }
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      date_of_session: e.target.value
+                    })
+                  }
+                />
+              </InputTextField>
+            </InputContainer>
+
+            <InputContainer className="flex-1">
+              <InputLabel>TIME OF NEXT SESSION</InputLabel>
+              <InputTextField className="flex-1">
+                <InputIcon>
+                  <ClockIcon />
+                </InputIcon>
+                <Input
+                  type="time"
+                  className="text-input"
+                  required
+                  value={
+                    formData.time_of_session ??
+                    originalData.time_of_session ??
+                    ""
+                  }
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      time_of_session: e.target.value
+                    })
+                  }
+                />
+              </InputTextField>
+            </InputContainer>
+          </div>
+
+          <div className="flex flex-col gap-2 mt-2">
+            <InputContainer>
+              <InputLabel>CLIENT TYPE</InputLabel>
+
+              <RadioGroup>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="full-payment" id="full-payment" />
+                  <label htmlFor="full-payment" className="text-sm">
+                    NEW
+                  </label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="installment" id="installment" />
+                  <label htmlFor="installment" className="text-sm">
+                    OLD
+                  </label>
+                </div>
+              </RadioGroup>
+            </InputContainer>
+          </div>
+
+          <div className="flex flex-col gap-4 my-4">
+            <h5 className="text-xl leading-8 font-semibold">
+              PATIENT CONSENT FORM
+            </h5>
+            <div className="flex flex-row gap-3 items-center justify-start">
+              <Checkbox
+                id="consent"
+                checked={formData.consent_form_signed}
+                onCheckedChange={(checked) =>
+                  setFormData({ ...formData, consent_form_signed: checked })
+                }
+              />
+              <label
+                htmlFor="consent"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                Accept terms and conditions
+              </label>
+            </div>
+          </div>
+
+          <div className="flex flex-row gap-4 mt-6 w-full">
+            <Button variant="outline" className="w-1/2" onClick={onClose}>
+              <ChevronLeftIcon />
+              CANCEL AND RETURN
+            </Button>
+            <Button className="w-1/2">
+              <UpdateIcon />
+              UPDATE ENTRY
+            </Button>
+          </div>
+        </form>
+      </ModalBody>
+    </ModalContainer>
+  );
+}
+
+export default UpdatePatientEntry;

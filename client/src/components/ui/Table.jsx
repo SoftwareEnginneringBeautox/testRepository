@@ -1,25 +1,63 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
+import { useEffect } from "react";
 
-const Table = React.forwardRef(({ className, ...props }, ref) => (
-  <div
-    className={cn(
-      "w-full max-w-full overflow-x-auto rounded-md flex-1",
-      "[&::-webkit-scrollbar]:h-2.5",
-      "[&::-webkit-scrollbar-thumb]:bg-gray-400",
-      "[&::-webkit-scrollbar-thumb]:rounded-full",
-      "[&::-webkit-scrollbar-track]:!bg-transparent",
-      "[&::-webkit-scrollbar-thumb:hover]:bg-lavender-200",
-      className
-    )}
-  >
-    <table
-      ref={ref}
-      className="w-full h-full border-collapse text-sm rounded-md min-w-full"
-      {...props}
-    />
-  </div>
-));
+const Table = React.forwardRef(({ className, children, ...props }, ref) => {
+  const [rowCount, setRowCount] = React.useState(0);
+
+  useEffect(() => {
+    React.Children.forEach(children, (child) => {
+      if (child?.type?.displayName === "TableBody") {
+        let count = 0;
+        React.Children.forEach(child.props.children, (row) => {
+          if (
+            React.isValidElement(row) &&
+            row.type?.displayName === "TableRow"
+          ) {
+            count++;
+          }
+        });
+        setRowCount(count);
+      }
+    });
+  }, [children]);
+
+  // Determine background color based on odd/even row count
+  const scrollbarBgClass =
+    rowCount % 2 === 0
+      ? "bg-faintingLight-100" // Even rows end with even bg
+      : "bg-reflexBlue-100"; // Odd rows end with odd bg
+
+  return (
+    <div
+      className={cn(
+        "w-full rounded-md overflow-hidden", // Clip to maintain rounded corners
+        className
+      )}
+    >
+      <div
+        className={cn(
+          "w-full max-w-full overflow-x-auto flex-1",
+          "pb-2.5", // Space for scrollbar
+          scrollbarBgClass, // Dynamic background color
+          "[&::-webkit-scrollbar]:h-2.5",
+          "[&::-webkit-scrollbar-thumb]:bg-gray-400",
+          "[&::-webkit-scrollbar-thumb]:rounded-full",
+          "[&::-webkit-scrollbar-track]:!bg-transparent",
+          "[&::-webkit-scrollbar-thumb:hover]:bg-lavender-200"
+        )}
+      >
+        <table
+          ref={ref}
+          className="w-full h-full border-collapse text-sm min-w-full"
+          {...props}
+        >
+          {children}
+        </table>
+      </div>
+    </div>
+  );
+});
 Table.displayName = "Table";
 
 const TableHeader = React.forwardRef(({ className, ...props }, ref) => (

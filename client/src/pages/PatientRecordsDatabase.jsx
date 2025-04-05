@@ -14,6 +14,7 @@ import EditIcon from "@/assets/icons/EditIcon";
 import ArchiveIcon from "@/assets/icons/ArchiveIcon";
 import DownloadIcon from "@/assets/icons/DownloadIcon";
 import EllipsisIcon from "@/assets/icons/EllipsisIcon";
+import UpdateIcon from "@/assets/icons/UpdateIcon";
 
 import {
   Table,
@@ -45,6 +46,7 @@ import {
 
 import CreatePatientEntry from "@/components/modals/CreatePatientEntry";
 import EditPatientEntry from "@/components/modals/EditPatientEntry";
+import UpdatePatientEntry from "@/components/modals/UpdatePatientEntry";
 import ArchivePatientEntry from "@/components/modals/ArchivePatientEntry";
 
 // Import date-fns for date formatting
@@ -83,10 +85,16 @@ function PatientRecordsDatabase() {
     fetchRecords();
   };
 
-  // Open update entry modal
+  // Open edit entry modal
   const handleOpenEditEntry = (record) => {
     setSelectedEntry(record);
     openModal("editEntry");
+  };
+
+  // Open update entry modal
+  const handleOpenUpdateEntry = (record) => {
+    setSelectedEntry(record);
+    openModal("updateEntry");
   };
 
   // Open delete entry modal
@@ -224,31 +232,32 @@ function PatientRecordsDatabase() {
 
     // Extract and standardize data for table
     const tableData = patientRecords.map((record) => {
-    const total = parseFloat(record.total_amount ?? record.total_amount ?? "0");
-    const paid = parseFloat(record.amount_paid || 0);
-    const remaining = total - paid;
+      const total = parseFloat(
+        record.total_amount ?? record.total_amount ?? "0"
+      );
+      const paid = parseFloat(record.amount_paid || 0);
+      const remaining = total - paid;
 
-    return [
-      record.client || record.patient_name?.toUpperCase() || "N/A",
-      formatDate(record.dateTransacted || record.date_of_session),
-      formatTime(record.nextSessionTime || record.time_of_session),
-      (record.personInCharge || record.person_in_charge)?.toUpperCase() || "N/A",
-      (record.package || record.package_name)?.toUpperCase() || "N/A",
-      record.treatment?.toUpperCase() || "N/A",
-      typeof record.consent_form_signed === "boolean"
-        ? record.consent_form_signed
-          ? "SIGNED"
-          : "NOT SIGNED"
-        : record.consentStatus || "N/A",
-      (record.paymentMethod || record.payment_method)?.toUpperCase() || "N/A",
-      `PHP ${total.toFixed(2)}`,
-      `PHP ${paid.toFixed(2)}`,
-      `PHP ${remaining.toFixed(2)}`,
-      record.reference_number || "N/A"
-      
-    ];
-  });
-
+      return [
+        record.client || record.patient_name?.toUpperCase() || "N/A",
+        formatDate(record.dateTransacted || record.date_of_session),
+        formatTime(record.nextSessionTime || record.time_of_session),
+        (record.personInCharge || record.person_in_charge)?.toUpperCase() ||
+          "N/A",
+        (record.package || record.package_name)?.toUpperCase() || "N/A",
+        record.treatment?.toUpperCase() || "N/A",
+        typeof record.consent_form_signed === "boolean"
+          ? record.consent_form_signed
+            ? "SIGNED"
+            : "NOT SIGNED"
+          : record.consentStatus || "N/A",
+        (record.paymentMethod || record.payment_method)?.toUpperCase() || "N/A",
+        `PHP ${total.toFixed(2)}`,
+        `PHP ${paid.toFixed(2)}`,
+        `PHP ${remaining.toFixed(2)}`,
+        record.reference_number || "N/A"
+      ];
+    });
 
     // Generate table
     autoTable(doc, {
@@ -333,17 +342,27 @@ function PatientRecordsDatabase() {
                 PERSON IN CHARGE
               </TableHead>
               <TableHead className="py-4 whitespace-nowrap">PACKAGE</TableHead>
-              <TableHead className="py-4 whitespace-nowrap">TREATMENT</TableHead>
+              <TableHead className="py-4 whitespace-nowrap">
+                TREATMENT
+              </TableHead>
               <TableHead className="py-4 text-center whitespace-nowrap">
                 CONSENT FORM SIGNED
               </TableHead>
-              <TableHead className="py-4 text-center whitespace-nowrap">PAYMENT METHOD</TableHead>
-              <TableHead className="py-4 text-center whitespace-nowrap">TOTAL AMOUNT</TableHead>
-              <TableHead className="py-4 text-center whitespace-nowrap">AMOUNT PAID</TableHead>
+              <TableHead className="py-4 text-center whitespace-nowrap">
+                PAYMENT METHOD
+              </TableHead>
+              <TableHead className="py-4 text-center whitespace-nowrap">
+                TOTAL AMOUNT
+              </TableHead>
+              <TableHead className="py-4 text-center whitespace-nowrap">
+                AMOUNT PAID
+              </TableHead>
               <TableHead className="py-4 text-center whitespace-nowrap">
                 REMAINING BALANCE
               </TableHead>
-              <TableHead className="py-4 text-center whitespace-nowrap">REFERENCE NO.</TableHead>
+              <TableHead className="py-4 text-center whitespace-nowrap">
+                REFERENCE NO.
+              </TableHead>
               <TableHead></TableHead>
             </TableRow>
           </TableHeader>
@@ -405,11 +424,10 @@ function PatientRecordsDatabase() {
                     const total = parseFloat(record.total_amount || 0);
                     return new Intl.NumberFormat("en-PH", {
                       style: "currency",
-                      currency: "PHP",
+                      currency: "PHP"
                     }).format(total);
                   })()}
                 </TableCell>
-
 
                 {/* AMOUNT PAID */}
                 <TableCell className="text-center">
@@ -424,7 +442,9 @@ function PatientRecordsDatabase() {
                 {/* REMAINING BALANCE */}
                 <TableCell className="text-center">
                   {(() => {
-                    const total = parseFloat(record.total_amount || record.total_amount || 0);
+                    const total = parseFloat(
+                      record.total_amount || record.total_amount || 0
+                    );
                     const paid = parseFloat(record.amount_paid || 0);
                     const remaining = total - paid;
                     return new Intl.NumberFormat("en-PH", {
@@ -451,6 +471,12 @@ function PatientRecordsDatabase() {
                           <p className="font-semibold">Edit</p>
                         </DropdownMenuItem>
                         <DropdownMenuItem
+                          onClick={() => handleOpenUpdateEntry(record)}
+                        >
+                          <UpdateIcon />
+                          <p className="font-semibold">Update</p>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
                           onClick={() => handleOpenArchiveEntry(record)}
                         >
                           <ArchiveIcon />
@@ -471,7 +497,10 @@ function PatientRecordsDatabase() {
           <ChevronLeftIcon />
           RETURN
         </Button>
-        <Button onClick={() => openModal("createEntry")} className="w-full md:w-auto">
+        <Button
+          onClick={() => openModal("createEntry")}
+          className="w-full md:w-auto"
+        >
           <PlusIcon />
           ADD NEW ENTRY
         </Button>
@@ -497,12 +526,20 @@ function PatientRecordsDatabase() {
           onSubmit={handleEditPatientEntry} // Pass the handleEditPatientEntry function to the modal
         />
       )}
+      {currentModal === "updateEntry" && selectedEntry && (
+        <UpdatePatientEntry
+          isOpen={true}
+          onClose={handleModalClose}
+          entryData={selectedEntry}
+          // Pass the handleEditPatientEntry function to the modal
+        />
+      )}
       {currentModal === "archiveEntry" && selectedEntry && (
         <ArchivePatientEntry
           isOpen={true}
           onClose={handleModalClose}
           entryData={selectedEntry}
-          onArchive={handleArchive} // Pass the handleArchive function to update the modal
+          onArchive={handleArchive}
         />
       )}
     </div>

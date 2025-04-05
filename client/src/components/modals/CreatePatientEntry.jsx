@@ -106,9 +106,12 @@ function CreatePatientEntry({ isOpen, onClose }) {
   useEffect(() => {
     async function fetchPackages() {
       try {
-        const response = await axios.get(`${API_BASE_URL}/api/packages?archived=false`, {
-          withCredentials: true
-        });
+        const response = await axios.get(
+          `${API_BASE_URL}/api/packages?archived=false`,
+          {
+            withCredentials: true
+          }
+        );
         setPackagesList(response.data);
       } catch (error) {
         console.error("Error fetching packages:", error);
@@ -121,9 +124,12 @@ function CreatePatientEntry({ isOpen, onClose }) {
   useEffect(() => {
     async function fetchTreatments() {
       try {
-        const response = await axios.get(`${API_BASE_URL}/api/treatments?archived=false`, {
-          withCredentials: true
-        });
+        const response = await axios.get(
+          `${API_BASE_URL}/api/treatments?archived=false`,
+          {
+            withCredentials: true
+          }
+        );
         setTreatmentsList(response.data);
       } catch (error) {
         console.error("Error fetching treatments:", error);
@@ -142,7 +148,6 @@ function CreatePatientEntry({ isOpen, onClose }) {
       setReferenceNumber(`REF${ref}`);
     }
   }, [isOpen]);
-  
 
   if (!isOpen) return null;
 
@@ -311,7 +316,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
                   } else {
                     setPackageName(value);
                     setTreatment(""); // Clear treatment if package is selected
-                  }; 
+                  }
                 }}
                 disabled={!!treatment}
               >
@@ -478,14 +483,13 @@ function CreatePatientEntry({ isOpen, onClose }) {
                 />
               </InputTextField>
             </InputContainer>
-
           </div>
 
           {/* PAYMENT METHOD RADIO */}
           <div className="flex flex-col gap-2 mt-2">
-          <InputContainer>
-            <InputLabel>PAYMENT METHOD</InputLabel>
-            
+            <InputContainer>
+              <InputLabel>PAYMENT METHOD</InputLabel>
+
               <RadioGroup
                 value={paymentMethod}
                 onValueChange={(val) => setPaymentMethod(val)}
@@ -503,8 +507,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
                   </label>
                 </div>
               </RadioGroup>
-            
-          </InputContainer>
+            </InputContainer>
           </div>
 
           {/* DATE AND TIME OF SESSION */}
@@ -544,12 +547,15 @@ function CreatePatientEntry({ isOpen, onClose }) {
             </InputContainer>
 
             <InputContainer>
-            <InputLabel>REFERENCE NUMBER</InputLabel>
-            <InputTextField>
-              <Input readOnly value={referenceNumber} className="bg-[#F5F3F0] text-gray-500" />
-            </InputTextField>
-          </InputContainer>
-
+              <InputLabel>REFERENCE NUMBER</InputLabel>
+              <InputTextField>
+                <Input
+                  readOnly
+                  value={referenceNumber}
+                  className="bg-[#F5F3F0] text-gray-500"
+                />
+              </InputTextField>
+            </InputContainer>
           </div>
 
           {/* CONSENT FORM CHECKBOX */}
