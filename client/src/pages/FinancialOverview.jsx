@@ -500,18 +500,20 @@ function FinancialOverview() {
   };
 
   return (
-    <div className="flex flex-col text-left w-[90%] mx-auto gap-4">
+    <div className="flex flex-col text-left w-full md:w-[90%] mx-auto gap-4 px-4 md:px-0">
       {/* Header */}
       <div>
-        <h1 className="text-[40px] leading-[56px] font-bold">
+        <h1 className="text-[28px] md:text-[40px] leading-[1.4] md:leading-[56px] font-bold">
           FINANCIAL OVERVIEW
         </h1>
-        <p>Summary of finances within Beautox</p>
+        <p className="text-sm md:text-base">Summary of finances within Beautox</p>
       </div>
 
       {/* Sales Tracker Section */}
-      <h2 className="font-bold text-[2rem]">SALES TRACKER</h2>
-      <SalesChart chartData={chartData} chartConfig={chartConfig} />
+      <h2 className="font-bold text-xl md:text-[2rem]">SALES TRACKER</h2>
+      <div className="w-full overflow-x-auto">
+        <SalesChart chartData={chartData} chartConfig={chartConfig} />
+      </div>
       <div className="flex justify-end">
         <Select>
           <SelectTrigger placeholder="FILTER BY" icon={<FilterIcon />}>
@@ -525,75 +527,76 @@ function FinancialOverview() {
         </Select>
       </div>
 
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="py-4 text-center">CLIENT</TableHead>
-            <TableHead className="py-4 text-center">PERSON IN CHARGE</TableHead>
-            <TableHead className="py-4 text-center">DATE TRANSACTED</TableHead>
-            <TableHead className="py-4 text-center">PAYMENT METHOD</TableHead>
-            <TableHead className="py-4 text-center">PACKAGES</TableHead>
-            <TableHead className="py-4 text-center">TREATMENT</TableHead>
-            <TableHead className="py-4 text-center">PAYMENT</TableHead>
-            <TableHead className="py-4 text-center">REFERENCE NO.</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {salesData.length > 0 ? (
-            salesData.map((sale, index) => (
-              <TableRow key={index}>
-                <TableCell>{sale.client.toUpperCase()}</TableCell>
-                <TableCell>{sale.person_in_charge.toUpperCase()}</TableCell>
-                <TableCell>
-                  {format(
-                    new Date(sale.date_transacted),
-                    "MMMM dd, yyyy"
-                  ).toUpperCase()}
-                </TableCell>
-                <TableCell>{sale.payment_method.toUpperCase()}</TableCell>
-                <TableCell>{sale.packages.toUpperCase()}</TableCell>
-                <TableCell>{sale.treatment.toUpperCase()}</TableCell>
-                <TableCell>
-                  {new Intl.NumberFormat("en-PH", {
-                    style: "currency",
-                    currency: "PHP"
-                  }).format(sale.payment)}
-                </TableCell>
-                <TableCell>{sale.reference_no}</TableCell>
-              </TableRow>
-            ))
-          ) : (
+      <div className="w-full overflow-x-auto">
+        <Table>
+          <TableHeader>
             <TableRow>
-              <TableCell colSpan="8" className="text-center">
-                NO SALES DATA CURRENTLY AVAILABLE
-              </TableCell>
+              <TableHead className="py-4 text-center whitespace-nowrap">CLIENT</TableHead>
+              <TableHead className="py-4 text-center whitespace-nowrap">PERSON IN CHARGE</TableHead>
+              <TableHead className="py-4 text-center whitespace-nowrap">DATE TRANSACTED</TableHead>
+              <TableHead className="py-4 text-center whitespace-nowrap">PAYMENT METHOD</TableHead>
+              <TableHead className="py-4 text-center whitespace-nowrap">PACKAGES</TableHead>
+              <TableHead className="py-4 text-center whitespace-nowrap">TREATMENT</TableHead>
+              <TableHead className="py-4 text-center whitespace-nowrap">PAYMENT</TableHead>
+              <TableHead className="py-4 text-center whitespace-nowrap">REFERENCE NO.</TableHead>
             </TableRow>
-          )}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {salesData.length > 0 ? (
+              salesData.map((sale, index) => (
+                <TableRow key={index}>
+                  <TableCell className="whitespace-nowrap">{sale.client.toUpperCase()}</TableCell>
+                  <TableCell className="whitespace-nowrap">{sale.person_in_charge.toUpperCase()}</TableCell>
+                  <TableCell className="whitespace-nowrap">
+                    {format(new Date(sale.date_transacted), "MMMM dd, yyyy").toUpperCase()}
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap">{sale.payment_method.toUpperCase()}</TableCell>
+                  <TableCell className="whitespace-nowrap">{sale.packages.toUpperCase()}</TableCell>
+                  <TableCell className="whitespace-nowrap">{sale.treatment.toUpperCase()}</TableCell>
+                  <TableCell className="whitespace-nowrap">
+                    {new Intl.NumberFormat("en-PH", {
+                      style: "currency",
+                      currency: "PHP"
+                    }).format(sale.payment)}
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap">{sale.reference_no}</TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan="8" className="text-center">
+                  NO SALES DATA CURRENTLY AVAILABLE
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
 
       <div className="w-full flex justify-end gap-4">
         <Button
           variant="callToAction"
           onClick={() => generateWeeklySalesReport(salesData)}
+          className="text-sm md:text-base"
         >
           <DownloadIcon />
-          DOWNLOAD WEEKLY SALES REPORT
+          <span className="hidden md:inline">DOWNLOAD WEEKLY SALES REPORT</span>
+          <span className="md:hidden">WEEKLY REPORT</span>
         </Button>
       </div>
 
       {/* Monthly Expenses Tracker Section */}
-      <h2 className="font-bold text-[2rem]">MONTHLY EXPENSES TRACKER</h2>
-      <div className="grid gap-14">
-        <div className="flex w-full gap-8">
-          <div className="flex-1 w-1/2">
+      <h2 className="font-bold text-xl md:text-[2rem]">MONTHLY EXPENSES TRACKER</h2>
+      <div className="grid gap-8 md:gap-14">
+        <div className="flex flex-col md:flex-row w-full gap-8">
+          <div className="w-full md:w-1/2">
             <BeautoxPieChart className="shadow-custom" />
           </div>
-          <div className="flex flex-col flex-1 w-1/2 h-full gap-2">
+          <div className="flex flex-col w-full md:w-1/2 gap-2">
             <Table className="overflow-x-hidden">
               <TableHeader>
                 <TableRow>
-                  <TableHead className="text-xl text-left font-semibold py-4">
+                  <TableHead className="text-lg md:text-xl text-left font-semibold py-4">
                     CURRENT CATEGORIES
                   </TableHead>
                 </TableRow>
@@ -608,9 +611,7 @@ function FinancialOverview() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent>
                         <DropdownMenuGroup>
-                          <DropdownMenuItem
-                            onClick={() => handleEditClick(expense)}
-                          >
+                          <DropdownMenuItem onClick={() => handleEditClick(expense)}>
                             <EditIcon />
                             <p className="font-semibold">Edit</p>
                           </DropdownMenuItem>
@@ -639,19 +640,11 @@ function FinancialOverview() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent>
                         <DropdownMenuGroup>
-                          <DropdownMenuItem
-                            onClick={() => {
-                              openModal("editCategory");
-                            }}
-                          >
+                          <DropdownMenuItem onClick={() => openModal("editCategory")}>
                             <EditIcon />
                             <p className="font-semibold">Edit</p>
                           </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => {
-                              openModal("archiveCategory");
-                            }}
-                          >
+                          <DropdownMenuItem onClick={() => openModal("archiveCategory")}>
                             <ArchiveIcon />
                             <p className="font-semibold">Archive</p>
                           </DropdownMenuItem>
@@ -662,95 +655,89 @@ function FinancialOverview() {
                 </TableRow>
               </TableBody>
             </Table>
-            <Button
-              fullWidth={true}
-              onClick={() => {
-                openModal("createCategory");
-              }}
-            >
+            <Button fullWidth={true} onClick={() => openModal("createCategory")}>
               <PlusIcon />
               ADD NEW CATEGORY
             </Button>
           </div>
         </div>
 
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="py-4 text-center">DATE</TableHead>
-              <TableHead className="py-4 text-center">CATEGORY</TableHead>
-              <TableHead className="py-4 text-center">EXPENSE</TableHead>
-              <TableHead></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {expensesData.length > 0 ? (
-              expensesData.map((expense, index) => (
-                <TableRow key={expense.id || index}>
-                  <TableCell className="py-4 text-center">
-                    {format(
-                      new Date(expense.date),
-                      "MMMM dd, yyyy"
-                    ).toUpperCase()}
-                  </TableCell>
-                  <TableCell className="py-4 text-center">
-                    {expense.category.toUpperCase()}
-                  </TableCell>
-                  <TableCell className="py-4 text-center">
-                    {new Intl.NumberFormat("en-PH", {
-                      style: "currency",
-                      currency: "PHP"
-                    }).format(expense.expense)}
-                  </TableCell>
-                  <TableCell className="py-4 text-center">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger>
-                        <EllipsisIcon />
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent>
-                        <DropdownMenuGroup>
-                          <DropdownMenuItem
-                            onClick={() => {
-                              const expense = expensesData[index];
-                              console.log("Setting expense to edit:", expense);
-                              setExpenseToEdit({
-                                id: expense.id,
-                                expense: expense.expense,
-                                category: expense.category,
-                                date: expense.date.split('T')[0]
-                              });
-                              openModal("editMonthlyExpense");
-                            }}
-                          >
-                            <EditIcon />
-                            <p className="font-semibold">Edit</p>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => {
-                              setSelectedExpense(expense); // Store the expense to be archived
-                              openModal("deleteMonthlyExpense"); // Match your modal name
-                            }}
-                          >
-                            <ArchiveIcon />
-                            <p className="font-semibold">Archive</p>
-                          </DropdownMenuItem>
-                        </DropdownMenuGroup>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+        <div className="w-full overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="py-4 text-center whitespace-nowrap">DATE</TableHead>
+                <TableHead className="py-4 text-center whitespace-nowrap">CATEGORY</TableHead>
+                <TableHead className="py-4 text-center whitespace-nowrap">EXPENSE</TableHead>
+                <TableHead></TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {expensesData.length > 0 ? (
+                expensesData.map((expense, index) => (
+                  <TableRow key={expense.id || index}>
+                    <TableCell className="py-4 text-center whitespace-nowrap">
+                      {format(new Date(expense.date), "MMMM dd, yyyy").toUpperCase()}
+                    </TableCell>
+                    <TableCell className="py-4 text-center whitespace-nowrap">
+                      {expense.category.toUpperCase()}
+                    </TableCell>
+                    <TableCell className="py-4 text-center whitespace-nowrap">
+                      {new Intl.NumberFormat("en-PH", {
+                        style: "currency",
+                        currency: "PHP"
+                      }).format(expense.expense)}
+                    </TableCell>
+                    <TableCell className="py-4 text-center">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger>
+                          <EllipsisIcon />
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                          <DropdownMenuGroup>
+                            <DropdownMenuItem
+                              onClick={() => {
+                                const expense = expensesData[index];
+                                console.log("Setting expense to edit:", expense);
+                                setExpenseToEdit({
+                                  id: expense.id,
+                                  expense: expense.expense,
+                                  category: expense.category,
+                                  date: expense.date.split('T')[0]
+                                });
+                                openModal("editMonthlyExpense");
+                              }}
+                            >
+                              <EditIcon />
+                              <p className="font-semibold">Edit</p>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => {
+                                setSelectedExpense(expense);
+                                openModal("deleteMonthlyExpense");
+                              }}
+                            >
+                              <ArchiveIcon />
+                              <p className="font-semibold">Archive</p>
+                            </DropdownMenuItem>
+                          </DropdownMenuGroup>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan="4" className="text-center">
+                    No expenses recorded
                   </TableCell>
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan="4" className="text-center">
-                  No expenses recorded
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+              )}
+            </TableBody>
+          </Table>
+        </div>
 
-        <div className="w-full rounded-lg p-4 border-2 border-lavender-400 text-center text-3xl leading-[67.2px]">
+        <div className="w-full rounded-lg p-4 border-2 border-lavender-400 text-center text-xl md:text-3xl leading-normal md:leading-[67.2px]">
           TOTAL PROFIT:{" "}
           <span className="font-bold">
             {new Intl.NumberFormat("en-PH", {
@@ -760,20 +747,22 @@ function FinancialOverview() {
           </span>
         </div>
 
-        <div className="w-full flex justify-end gap-4 mb-[10%]">
-          <Button variant="outline">
+        <div className="w-full flex flex-col md:flex-row justify-end gap-4 mb-[10%]">
+          <Button variant="outline" className="w-full md:w-auto">
             <ChevronLeftIcon />
             RETURN
           </Button>
-          <Button onClick={() => openModal("createMonthlyExpense")}>
+          <Button onClick={() => openModal("createMonthlyExpense")} className="w-full md:w-auto">
             <PlusIcon />
             ADD ADDITIONAL EXPENSES
           </Button>
           <Button
             onClick={() => generateMonthlySalesReport(salesData, expensesData)}
+            className="w-full md:w-auto"
           >
             <DownloadIcon />
-            DOWNLOAD MONTHLY SALES REPORT
+            <span className="hidden md:inline">DOWNLOAD MONTHLY SALES REPORT</span>
+            <span className="md:hidden">MONTHLY REPORT</span>
           </Button>
         </div>
       </div>
