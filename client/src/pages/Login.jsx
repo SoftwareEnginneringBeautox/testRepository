@@ -96,7 +96,7 @@ function Login() {
 
   return (
     <div className="min-h-screen flex flex-col md:grid md:grid-cols-12">
-      {/* Image section - Responsive across all breakpoints */}
+      {/* Image section - Improved responsiveness */}
       <div className="hidden md:block md:col-span-7 lg:col-span-8 h-screen relative overflow-hidden">
         <picture>
           <source media="(min-width: 1536px)" srcSet="/images/BeautoxLoginImage.png" />
@@ -161,7 +161,7 @@ function Login() {
                   data-cy="login-username"
                   type="text"
                   id="username"
-                  className="text-input text-sm sm:text-base py-2 sm:py-3"
+                  className="text-input text-sm sm:text-base h-10 sm:h-12"
                   onChange={(e) => setUsername(e.target.value)}
                   onBlur={(e) => setUsername(e.target.value.trim())}
                   placeholder="e.g. john_doe123"
@@ -180,7 +180,7 @@ function Login() {
                   data-cy="login-password"
                   type="password"
                   id="password"
-                  className="text-input text-sm sm:text-base py-2 sm:py-3"
+                  className="text-input text-sm sm:text-base h-10 sm:h-12"
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="e.g. P@ssw0rd123"
                   value={password}
