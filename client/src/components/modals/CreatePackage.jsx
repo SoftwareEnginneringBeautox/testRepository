@@ -25,6 +25,7 @@ import ChevronLeftIcon from "@/assets/icons/ChevronLeftIcon";
 import PlusIcon from "@/assets/icons/PlusIcon";
 import PackageIcon from "@/assets/icons/PackageIcon";
 import PesoIcon from "@/assets/icons/PesoIcon";
+import CalendarIcon from "@/assets/icons/CalendarIcon";
 
 function CreatePackage({ isOpen, onClose }) {
   const [packageName, setPackageName] = useState("");
@@ -40,7 +41,7 @@ function CreatePackage({ isOpen, onClose }) {
   useEffect(() => {
     async function fetchTreatments() {
       try {
-        const response = await axios.get(`${API_BASE_URL}/api/treatments`, {
+        const response = await axios.get(`${API_BASE_URL}/api/treatments?archived=false`, {
           withCredentials: true
         });
         setTreatmentsList(response.data);
@@ -199,6 +200,22 @@ function CreatePackage({ isOpen, onClose }) {
                   allowNegativeValue={false}
                   value={amount}
                   readOnly
+                />
+              </InputTextField>
+            </InputContainer>
+
+            <InputContainer>
+              <InputLabel>EXPIRATION DATE</InputLabel>
+              <InputTextField>
+                <InputIcon>
+                  <CalendarIcon />
+                </InputIcon>
+                <Input
+                  name="date"
+                  type="date"
+                  placeholder="Expiration Date of the Package"
+                  required
+                  className="text-input"
                 />
               </InputTextField>
             </InputContainer>

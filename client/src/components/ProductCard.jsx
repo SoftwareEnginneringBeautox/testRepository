@@ -3,6 +3,10 @@ import { Badge } from "@/components/ui/Badge";
 
 function ProductCard({ product, category }) {
   const getMainPrice = () => {
+    // Don't show total price for Intimate Secret or Vampire Facial Package
+    if (product.name === "Intimate Secret" || product.name === "Vampire Facial Package") {
+      return "";
+    }
     if (typeof product.price === "string") {
       return product.price;
     } else if (product.subcategories && product.subcategories.length > 0) {
@@ -58,34 +62,43 @@ function ProductCard({ product, category }) {
               <div className="space-y-4 mb-4">
                 {product.subcategories.map((sub, idx) => {
                   // Extract session count if available
-                  const sessionMatch =
-                    sub.details && sub.details[0]
-                      ? sub.details[0].match(/Total of (\d+) Sessions/)
-                      : null;
+                  const sessionMatch = sub.price ? sub.price.match(/\((\d+) Sessions\)/) : null;
                   const sessionCount = sessionMatch ? sessionMatch[1] : null;
-
-                  // Find corresponding per session price if available
-                  const perSessionInfo =
-                    product.perSession && Array.isArray(product.perSession)
-                      ? product.perSession.find(
-                          (s) => s.area === sub.name.split(" ")[0]
-                        )
-                      : null;
 
                   return (
                     <div key={idx} className="bg-white/40 rounded-lg p-3">
-                      <h4 className="font-medium">
+                      <h4 className={`font-medium ${
+                        product.name === "Intimate Secret" 
+                          ? sub.name === "Underarms, Knees, Elbows, Nape, or Nipples" || sub.name === "Brazilian, Bikini, or Butt"
+                            ? "text-base"
+                            : "text-lg"
+                          : ""
+                      }`}>
                         {sub.name}{" "}
                         {sessionCount && `(${sessionCount} Sessions)`}
                       </h4>
 
-                      {perSessionInfo && (
-                        <p className="text-sm text-gray-700 mt-1">
-                          {perSessionInfo.price}
+                      {sub.perSession && (
+                        <p className={`text-gray-700 mt-1 ${
+                          product.name === "Intimate Secret"
+                            ? sub.name === "Underarms, Knees, Elbows, Nape, or Nipples" || sub.name === "Brazilian, Bikini, or Butt"
+                              ? "text-base font-semibold"
+                              : "text-lg font-semibold"
+                            : "text-sm"
+                        }`}>
+                          Per Session: {sub.perSession}
                         </p>
                       )}
 
-                      <p className="text-sm font-semibold mt-1">{sub.price}</p>
+                      <p className={`font-semibold mt-1 ${
+                        product.name === "Intimate Secret"
+                          ? sub.name === "Underarms, Knees, Elbows, Nape, or Nipples" || sub.name === "Brazilian, Bikini, or Butt"
+                            ? "text-base"
+                            : "text-lg"
+                          : "text-sm"
+                      }`}>
+                        {sub.price}
+                      </p>
                     </div>
                   );
                 })}
@@ -95,7 +108,9 @@ function ProductCard({ product, category }) {
             {/* Per session pricing - Simplified */}
             {product.perSession && typeof product.perSession === "string" && (
               <div className="text-sm text-gray-700 mb-4">
-                <p>{product.perSession}</p>
+                <p className={`${product.name === "Botox" ? "font-bold text-base" : ""}`}>
+                  {product.name === "Botox" ? product.perSession : `Per Session: ${product.perSession}`}
+                </p>
               </div>
             )}
 
@@ -104,13 +119,29 @@ function ProductCard({ product, category }) {
               Array.isArray(product.perSession) &&
               !product.subcategories && (
                 <div className="space-y-2 mb-4">
-                  <p className="text-sm font-medium">Per Session:</p>
-                  {product.perSession.map((session, idx) => (
-                    <div key={idx} className="flex justify-between text-sm">
-                      <span>{session.area}:</span>
-                      <span className="font-semibold">{session.price}</span>
-                    </div>
-                  ))}
+                  {product.name === "Vampire Facial Package" ? (
+                    product.perSession.map((session, idx) => (
+                      <p key={idx} className="text-base font-bold text-gray-700">
+                        {typeof session === 'string' ? session : session.price}
+                      </p>
+                    ))
+                  ) : (
+                    <>
+                      <p className="text-sm font-medium">Per Session:</p>
+                      {product.perSession.map((session, idx) => (
+                        <div key={idx} className="flex justify-between text-sm">
+                          {typeof session === 'string' ? (
+                            <span className="text-gray-700">{session}</span>
+                          ) : (
+                            <>
+                              <span>{session.area}:</span>
+                              <span className="font-semibold">{session.price}</span>
+                            </>
+                          )}
+                        </div>
+                      ))}
+                    </>
+                  )}
                 </div>
               )}
 
@@ -123,6 +154,11 @@ function ProductCard({ product, category }) {
           {/* Footer with price - Redesigned to be more seamless */}
           <div className="mt-auto pt-4 flex justify-end">
             <div className="text-right">
+              {product.discountedFrom && (
+                <p className="text-sm text-red-500 mb-1">
+                  Discounted from {product.discountedFrom}
+                </p>
+              )}
               <p className="text-xl font-bold text-gray-900">
                 {getMainPrice()}
               </p>

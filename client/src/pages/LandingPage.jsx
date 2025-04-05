@@ -85,12 +85,12 @@ function LandingPage() {
           subcategories: [
             {
               name: "Brazilian, Bikini, or Butt",
-              price: "₱24,999 (5 Sessions)",
+              price: "₱24,999",
               perSession: "₱6,000"
             },
             {
               name: "Underarms, Knees, Elbows, Nape, or Nipples",
-              price: "₱14,999 (5 Sessions)",
+              price: "₱14,999",
               perSession: "₱4,000"
             }
           ]
@@ -126,8 +126,11 @@ function LandingPage() {
         },
         {
           name: "Vampire Facial Package",
-          price:
-            "₱19,999 (5 Sessions) / ₱9,999 (2 Sessions) / ₱6,999 (1 Session)",
+          perSession: [
+            { price: "₱19,999 (5 Sessions)" },
+            { price: "₱9,999 (2 Sessions)" },
+            { price: "₱6,999 (1 Session)" }
+          ],
           details: ["Includes FREE Basic Facial"]
         },
         {
@@ -148,11 +151,13 @@ function LandingPage() {
       items: [
         {
           name: "Profhilo Face Package",
-          price: "₱24,999 (Discounted from ₱34,999)"
+          price: "₱24,999",
+          discountedFrom: "₱34,999"
         },
         {
           name: "Botox",
-          price: "₱150/unit (100 units) | Regular: ₱300/unit"
+          price: "₱150/unit (100 units)",
+          perSession: "₱300/unit"
         },
         {
           name: "Filler",
@@ -280,7 +285,7 @@ function LandingPage() {
           }`}
         >
           <LoginIcon />
-          LOGIN 
+          LOGIN
         </Button>
       </header>
 
@@ -289,7 +294,7 @@ function LandingPage() {
           id="hero"
           className="relative w-full min-h-[100vh] flex items-center px-4 sm:px-8 md:px-16 lg:px-24"
           style={{
-            backgroundImage: "linear-gradient(to right, rgba(242, 235, 244, 0.8), rgba(255, 255, 255, 0.5), rgba(234, 206, 241, 0.01)), url('/images/LandingImage.png')",
+            backgroundImage: "linear-gradient(to right, rgba(242, 228, 246, 0.77), rgba(255, 255, 255, 0.5), rgba(234, 206, 241, 0.01)), url('/images/LandingImage.png')",
             backgroundSize: "cover",
             backgroundPosition: "center",
             backgroundRepeat: "no-repeat"
@@ -470,7 +475,7 @@ function LandingPage() {
           className="w-[90%] sm:w-3/4 flex flex-col items-center justify-center gap-4 mx-auto"
         >
           <h2 className="text-2xl sm:text-3xl font-semibold bg-gradient-to-r from-reflexBlue-300 to-lavender-300 text-transparent bg-clip-text mb-8 text-center">
-            FIND OUR CLINIC
+            ABOUT OUR CLINIC
           </h2>
           
           <div className="w-full flex flex-col lg:flex-row gap-8">
@@ -479,18 +484,18 @@ function LandingPage() {
               <img
                 src="/images/ClinicImage1.jpg"
                 alt="Beautox Clinic Main"
-                className="w-full h-[300px] sm:h-[400px] object-cover rounded-2xl mb-4 shadow-[0_4px_12px_rgba(0,0,0,0.15)] hover:shadow-[0_8px_20px_rgba(0,0,0,0.25)] transition-shadow duration-300"
+                className="w-full h-[300px] sm:h-[400px] object-cover rounded-2xl mb-4"
               />
               <div className="flex gap-2">
                 <img
                   src="/images/ClinicImage2.jpg"
                   alt="Beautox Clinic Interior"
-                  className="w-1/2 h-20 sm:h-24 object-cover rounded-lg shadow-[0_4px_12px_rgba(0,0,0,0.15)] hover:shadow-[0_8px_20px_rgba(0,0,0,0.25)] transition-shadow duration-300"
+                  className="w-1/2 h-20 sm:h-24 object-cover rounded-lg"
                 />
                 <img
                   src="/images/ClinicImage3.jpg"
                   alt="Beautox Clinic Treatment Room"
-                  className="w-1/2 h-20 sm:h-24 object-cover rounded-lg shadow-[0_4px_12px_rgba(0,0,0,0.15)] hover:shadow-[0_8px_20px_rgba(0,0,0,0.25)] transition-shadow duration-300"
+                  className="w-1/2 h-20 sm:h-24 object-cover rounded-lg"
                 />
               </div>
             </div>
@@ -502,15 +507,16 @@ function LandingPage() {
                   Beautox Aesthetic Clinic
                 </h3>
                 <p className="text-gray-600 text-base sm:text-lg">
-                42 Sonema Square, N. Domingo Street, Unit 5 Brgy. Valencia, Quezon City, 1112 Metro Manila <br />
+                  J26P+XXR, N. Domingo, Quezon City, 1112 Metro Manila <br />
                   Near Robinson's Magnolia
                 </p>
               </div>
 
               <div>
-                <h4 className="text-lg sm:text-xl font-semibold text-[#4A3B89] mb-2">Operating Days</h4>
+                <h4 className="text-lg sm:text-xl font-semibold text-[#4A3B89] mb-2">Operations Days</h4>
                 <p className="text-gray-600">
-                  Mon - Sun: <span className="font-semibold text-gray-700">12pm - 9pm</span> <br />
+                  Mon - Fri: <span className="font-semibold text-gray-700">9am - 6pm</span> <br />
+                  Sat: <span className="font-semibold text-gray-700">10am - 4pm</span>
                 </p>
               </div>
 
@@ -562,12 +568,12 @@ function LandingPage() {
                   <span className="text-purple-800 font-semibold text-lg">MA</span>
                 </div>
                 <div className="ml-4">
-                  <h4 className="font-semibold text-gray-800">Maria Angeles</h4>
+                  <h4 className="font-semibold text-gray-800">Maria Angeles (Alias) </h4>
                   <p className="text-sm text-purple-600">Regular Client</p>
                 </div>
               </div>
               <p className="text-gray-600 italic">
-                "Highly recommended! Staffs are very nice, they're also very accommodating! Ain't gonna lie... mano-notice agad ang improvement sa body. I also wanna mention that the clinic is always clean and very pretty. "
+                "Highly recommended! Staffs are very nice, they’re also very accommodating! Ain’t gonna lie… mano-notice agad ang improvement sa body. I also wanna mention that the clinic is always clean and very pretty. "
               </p>
             </div>
 
@@ -578,12 +584,12 @@ function LandingPage() {
                   <span className="text-purple-800 font-semibold text-lg">SR</span>
                 </div>
                 <div className="ml-4">
-                  <h4 className="font-semibold text-gray-800">Sarah Rodriguez</h4>
+                  <h4 className="font-semibold text-gray-800">Sarah Rodriguez (Alias) </h4>
                   <p className="text-sm text-purple-600">Me-So Sexy Package Client</p>
                 </div>
               </div>
               <p className="text-gray-600 italic">
-                "Highly recommended! I love the service here. The mesolipo is really effective. My arms have gotten noticeably thinner even after just 1 session, even my friends noticed it. So I'm definitely availing more sessions and I'm eyeing other services, as well."
+                "Highly recommended! I love the service here. The mesolipo is really effective. My arms have gotten noticeably thinner even after just 1 session, even my friends noticed it. So I’m definitely availing more sessions and I’m eyeing other services, as well."
               </p>
             </div>
 
@@ -594,7 +600,7 @@ function LandingPage() {
                   <span className="text-purple-800 font-semibold text-lg">JD</span>
                 </div>
                 <div className="ml-4">
-                  <h4 className="font-semibold text-gray-800">Jane Dela Cruz</h4>
+                  <h4 className="font-semibold text-gray-800">Jane Dela Cruz (Alias) </h4>
                   <p className="text-sm text-purple-600">Gluta Drips Package Client</p>
                 </div>
               </div>

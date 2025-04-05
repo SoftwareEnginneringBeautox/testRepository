@@ -46,11 +46,6 @@ const SelectTrigger = React.forwardRef(
         className="text-left truncate flex-1 "
       />
 
-      {/* ChevronDown Icon with dynamic color */}
-      <SelectIcon variant={variant}>
-        <ChevronDownIcon />
-      </SelectIcon>
-
       {/* Optional Right Icon for Default Variant */}
       {variant === "default" && RightIcon && (
         <SelectIcon variant={variant} className="text-customNeutral-100">
@@ -60,7 +55,6 @@ const SelectTrigger = React.forwardRef(
     </SelectPrimitive.Trigger>
   )
 );
-
 SelectTrigger.displayName = SelectPrimitive.Trigger.displayName;
 
 const SelectIcon = ({ children, className, variant }) => (

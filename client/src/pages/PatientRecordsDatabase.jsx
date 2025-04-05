@@ -13,6 +13,7 @@ import MagnifyingGlassIcon from "@/assets/icons/MagnifyingGlassIcon";
 import EditIcon from "@/assets/icons/EditIcon";
 import ArchiveIcon from "@/assets/icons/ArchiveIcon";
 import DownloadIcon from "@/assets/icons/DownloadIcon";
+import EllipsisIcon from "@/assets/icons/EllipsisIcon";
 
 import {
   Table,
@@ -24,6 +25,14 @@ import {
 } from "@/components/ui/Table";
 
 import { InputTextField, Input } from "@/components/ui/Input";
+
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuTrigger
+} from "@/components/ui/DropdownMenu";
 
 import {
   Select,
@@ -45,6 +54,8 @@ function PatientRecordsDatabase() {
   const { currentModal, openModal, closeModal } = useModal();
   const [selectedEntry, setSelectedEntry] = useState(null);
   const [records, setRecords] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortOption, setSortOption] = useState("");
 
   // Fetch patient records from the API
   const fetchRecords = async () => {
@@ -129,6 +140,27 @@ function PatientRecordsDatabase() {
     fetchRecords();
   };
 
+  const filteredRecords = [...records]
+    .filter((record) => {
+      const name = record.client || record.patient_name || "";
+      return name.toLowerCase().includes(searchTerm.toLowerCase());
+    })
+    .sort((a, b) => {
+      if (sortOption === "alphabetical") {
+        const nameA = (a.client || a.patient_name || "").toLowerCase();
+        const nameB = (b.client || b.patient_name || "").toLowerCase();
+        return nameA.localeCompare(nameB);
+      }
+
+      if (sortOption === "date") {
+        const dateA = new Date(a.dateTransacted || a.date_of_session);
+        const dateB = new Date(b.dateTransacted || b.date_of_session);
+        return dateB - dateA; // Most recent first
+      }
+
+      return 0;
+    });
+
   const generatePRDReport = (patientRecords) => {
     if (!patientRecords || patientRecords.length === 0) {
       console.error("No records available to generate PDF.");
@@ -175,7 +207,10 @@ function PatientRecordsDatabase() {
       "TREATMENT",
       "CONSENT STATUS",
       "PAYMENT METHOD",
-      "TOTAL AMOUNT"
+      "TOTAL AMOUNT",
+      "AMOUNT PAID",
+      "REMAINING BALANCE",
+      "REFERENCE NO."
     ];
 
     // Format Date & Time properly
@@ -188,12 +223,16 @@ function PatientRecordsDatabase() {
     };
 
     // Extract and standardize data for table
-    const tableData = patientRecords.map((record) => [
+    const tableData = patientRecords.map((record) => {
+    const total = parseFloat(record.total_amount ?? record.total_amount ?? "0");
+    const paid = parseFloat(record.amount_paid || 0);
+    const remaining = total - paid;
+
+    return [
       record.client || record.patient_name?.toUpperCase() || "N/A",
       formatDate(record.dateTransacted || record.date_of_session),
       formatTime(record.nextSessionTime || record.time_of_session),
-      (record.personInCharge || record.person_in_charge)?.toUpperCase() ||
-        "N/A",
+      (record.personInCharge || record.person_in_charge)?.toUpperCase() || "N/A",
       (record.package || record.package_name)?.toUpperCase() || "N/A",
       record.treatment?.toUpperCase() || "N/A",
       typeof record.consent_form_signed === "boolean"
@@ -202,10 +241,14 @@ function PatientRecordsDatabase() {
           : "NOT SIGNED"
         : record.consentStatus || "N/A",
       (record.paymentMethod || record.payment_method)?.toUpperCase() || "N/A",
-      record.totalAmount || record.total_amount
-        ? `PHP ${record.totalAmount || record.total_amount}`
-        : "N/A"
-    ]);
+      `PHP ${total.toFixed(2)}`,
+      `PHP ${paid.toFixed(2)}`,
+      `PHP ${remaining.toFixed(2)}`,
+      record.reference_number || "N/A"
+      
+    ];
+  });
+
 
     // Generate table
     autoTable(doc, {
@@ -246,23 +289,26 @@ function PatientRecordsDatabase() {
   };
 
   return (
-    <div className="flex flex-col gap-[1.5rem] text-left w-[90%] mx-auto">
-      <div className="flex justify-between items-center">
-        <h4 className="font-semibold text-[2rem] leading-[2.8rem]">
+    <div className="flex flex-col gap-4 md:gap-[1.5rem] text-left w-full md:w-[90%] mx-auto px-4 md:px-0">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <h4 className="font-semibold text-xl md:text-[2rem] leading-normal md:leading-[2.8rem]">
           PATIENT RECORDS
         </h4>
-        <div className="flex items-center justify-center gap-4 min-w-9">
-          <InputTextField>
-            <Input type="text" id="search" placeholder="Search..." />
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-center gap-4 w-full md:w-auto">
+          <InputTextField className="w-full md:w-auto">
+            <Input
+              type="text"
+              id="search"
+              placeholder="Search..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
             <MagnifyingGlassIcon />
           </InputTextField>
 
-          <Select>
-            <SelectTrigger>
-              <SelectValue placeholder="SORT BY" />
-              <SelectIcon>
-                <SortIcon />
-              </SelectIcon>
+          <Select onValueChange={setSortOption} className="w-full md:w-auto">
+            <SelectTrigger placeholder="SORT BY" icon={<SortIcon />}>
+              <SelectValue />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="alphabetical">ALPHABETICAL</SelectItem>
@@ -272,42 +318,42 @@ function PatientRecordsDatabase() {
         </div>
       </div>
 
-      <div className="flex w-full overflow-x-auto">
-        <Table className="flex-1">
+      <div className="w-full overflow-x-auto">
+        <Table className="min-w-[1200px]">
           <TableHeader>
             <TableRow>
-              <TableHead className="py-4">CLIENT</TableHead>
-              <TableHead className="py-4 text-center">
+              <TableHead className="py-4 whitespace-nowrap">CLIENT</TableHead>
+              <TableHead className="py-4 text-center whitespace-nowrap">
                 DATE OF SESSION
               </TableHead>
-              <TableHead className="py-4 text-center">
+              <TableHead className="py-4 text-center whitespace-nowrap">
                 TIME OF SESSION
               </TableHead>
-              <TableHead className="py-4 text-center">
+              <TableHead className="py-4 text-center whitespace-nowrap">
                 PERSON IN CHARGE
               </TableHead>
-              <TableHead className="py-4">PACKAGE</TableHead>
-              <TableHead className="py-4">TREATMENT</TableHead>
-              <TableHead className="py-4 text-center">
+              <TableHead className="py-4 whitespace-nowrap">PACKAGE</TableHead>
+              <TableHead className="py-4 whitespace-nowrap">TREATMENT</TableHead>
+              <TableHead className="py-4 text-center whitespace-nowrap">
                 CONSENT FORM SIGNED
               </TableHead>
-              <TableHead className="py-4 text-center">PAYMENT METHOD</TableHead>
-              <TableHead className="py-4 text-center">TOTAL AMOUNT</TableHead>
-              <TableHead className="py-4 text-center">AMOUNT PAID</TableHead>
-              <TableHead className="py-4 text-center">
+              <TableHead className="py-4 text-center whitespace-nowrap">PAYMENT METHOD</TableHead>
+              <TableHead className="py-4 text-center whitespace-nowrap">TOTAL AMOUNT</TableHead>
+              <TableHead className="py-4 text-center whitespace-nowrap">AMOUNT PAID</TableHead>
+              <TableHead className="py-4 text-center whitespace-nowrap">
                 REMAINING BALANCE
               </TableHead>
-              <TableHead className="py-4 text-center">REFERENCE NO.</TableHead>
+              <TableHead className="py-4 text-center whitespace-nowrap">REFERENCE NO.</TableHead>
               <TableHead></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {records.map((record, index) => (
+            {filteredRecords.map((record, index) => (
               <TableRow key={index}>
-                <TableCell>
+                <TableCell className="whitespace-nowrap">
                   {record.client || record.patient_name?.toUpperCase() || "N/A"}
                 </TableCell>
-                <TableCell className="text-center">
+                <TableCell className="text-center whitespace-nowrap">
                   {record.dateTransacted || record.date_of_session
                     ? format(
                         new Date(
@@ -318,7 +364,7 @@ function PatientRecordsDatabase() {
                     : "N/A"}
                 </TableCell>
 
-                <TableCell className="text-center">
+                <TableCell className="text-center whitespace-nowrap">
                   {record.nextSessionTime || record.time_of_session
                     ? (() => {
                         const timeValue =
@@ -330,18 +376,18 @@ function PatientRecordsDatabase() {
                       })()
                     : "N/A"}
                 </TableCell>
-                <TableCell className="text-center">
+                <TableCell className="text-center whitespace-nowrap">
                   {(
                     record.personInCharge || record.person_in_charge
                   )?.toUpperCase()}
                 </TableCell>
-                <TableCell>
+                <TableCell className="whitespace-nowrap">
                   {(record.package || record.package_name)?.toUpperCase()}
                 </TableCell>
-                <TableCell className="text-center">
+                <TableCell className="text-center whitespace-nowrap">
                   {record.treatment?.toUpperCase()}
                 </TableCell>
-                <TableCell className="text-center">
+                <TableCell className="text-center whitespace-nowrap">
                   {record.consentStatus ||
                     (typeof record.consent_form_signed === "boolean"
                       ? record.consent_form_signed
@@ -349,37 +395,70 @@ function PatientRecordsDatabase() {
                         : "NO"
                       : record.consent_form_signed)}
                 </TableCell>
-                <TableCell>
+                <TableCell className="whitespace-nowrap">
                   {(
                     record.paymentMethod || record.payment_method
                   )?.toUpperCase()}
                 </TableCell>
                 <TableCell className="text-center">
-                  {record.totalAmount || record.total_amount
+                  {(() => {
+                    const total = parseFloat(record.total_amount || 0);
+                    return new Intl.NumberFormat("en-PH", {
+                      style: "currency",
+                      currency: "PHP",
+                    }).format(total);
+                  })()}
+                </TableCell>
+
+
+                {/* AMOUNT PAID */}
+                <TableCell className="text-center">
+                  {record.amount_paid
                     ? new Intl.NumberFormat("en-PH", {
                         style: "currency",
                         currency: "PHP"
-                      }).format(record.totalAmount || record.total_amount)
-                    : "N/A"}
+                      }).format(record.amount_paid)
+                    : "₱0.00"}
                 </TableCell>
-                <TableCell>RANDOM INT</TableCell>
-                <TableCell>RANDOM INT</TableCell>
-                <TableCell>REF 123456</TableCell>
+
+                {/* REMAINING BALANCE */}
+                <TableCell className="text-center">
+                  {(() => {
+                    const total = parseFloat(record.total_amount || record.total_amount || 0);
+                    const paid = parseFloat(record.amount_paid || 0);
+                    const remaining = total - paid;
+                    return new Intl.NumberFormat("en-PH", {
+                      style: "currency",
+                      currency: "PHP"
+                    }).format(remaining);
+                  })()}
+                </TableCell>
+                <TableCell className="text-center">
+                  {record.reference_number || "N/A"}
+                </TableCell>
+
                 <TableCell>
-                  <div className="flex justify-center gap-2">
-                    <button
-                      className="text-reflexBlue-400"
-                      onClick={() => handleOpenEditEntry(record)}
-                    >
-                      <EditIcon />
-                    </button>
-                    <button
-                      className="text-reflexBlue-400"
-                      onClick={() => handleOpenArchiveEntry(record)}
-                    >
-                      <ArchiveIcon />
-                    </button>
-                  </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger>
+                      <EllipsisIcon />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      <DropdownMenuGroup>
+                        <DropdownMenuItem
+                          onClick={() => handleOpenEditEntry(record)}
+                        >
+                          <EditIcon />
+                          <p className="font-semibold">Edit</p>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => handleOpenArchiveEntry(record)}
+                        >
+                          <ArchiveIcon />
+                          <p className="font-semibold">Archive</p>
+                        </DropdownMenuItem>
+                      </DropdownMenuGroup>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </TableCell>
               </TableRow>
             ))}
@@ -387,21 +466,23 @@ function PatientRecordsDatabase() {
         </Table>
       </div>
 
-      <div className="flex flex-row gap-4 justify-end">
-        <Button variant="outline">
+      <div className="flex flex-col md:flex-row gap-4 justify-end">
+        <Button variant="outline" className="w-full md:w-auto">
           <ChevronLeftIcon />
           RETURN
         </Button>
-        <Button onClick={() => openModal("createEntry")}>
+        <Button onClick={() => openModal("createEntry")} className="w-full md:w-auto">
           <PlusIcon />
           ADD NEW ENTRY
         </Button>
         <Button
           variant="callToAction"
           onClick={() => generatePRDReport(records)}
+          className="w-full md:w-auto"
         >
           <DownloadIcon />
-          DOWNLOAD PATIENT RECORDS
+          <span className="hidden md:inline">DOWNLOAD PATIENT RECORDS</span>
+          <span className="md:hidden">DOWNLOAD RECORDS</span>
         </Button>
       </div>
 

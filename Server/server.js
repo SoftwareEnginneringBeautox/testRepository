@@ -293,7 +293,11 @@ app.post('/api/patients', async (req, res) => {
       payment_method,
       date_of_session,
       time_of_session,
-      consent_form_signed
+      consent_form_signed,
+      archived,
+      amount_paid,
+      remaining_balance,
+      reference_number
     } = req.body;
 
     const insertQuery = `
@@ -307,9 +311,13 @@ app.post('/api/patients', async (req, res) => {
         payment_method,
         date_of_session,
         time_of_session,
-        consent_form_signed
+        consent_form_signed,
+        archived,
+        amount_paid,
+        remaining_balance,
+        reference_number
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
       RETURNING id;
     `;
 
@@ -323,7 +331,11 @@ app.post('/api/patients', async (req, res) => {
       payment_method,
       date_of_session,
       time_of_session,
-      consent_form_signed
+      consent_form_signed,
+      archived,
+      amount_paid,
+      remaining_balance,
+      reference_number
     ];
 
     const result = await pool.query(insertQuery, values);
