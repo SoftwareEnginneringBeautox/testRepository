@@ -278,13 +278,13 @@ function PatientRecordsDatabase() {
   };
 
   return (
-    <div className="flex flex-col gap-[1.5rem] text-left w-[90%] mx-auto">
-      <div className="flex justify-between items-center">
-        <h4 className="font-semibold text-[2rem] leading-[2.8rem]">
+    <div className="flex flex-col gap-4 md:gap-[1.5rem] text-left w-full md:w-[90%] mx-auto px-4 md:px-0">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <h4 className="font-semibold text-xl md:text-[2rem] leading-normal md:leading-[2.8rem]">
           PATIENT RECORDS
         </h4>
-        <div className="flex items-center justify-center gap-4 min-w-9">
-          <InputTextField>
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-center gap-4 w-full md:w-auto">
+          <InputTextField className="w-full md:w-auto">
             <Input
               type="text"
               id="search"
@@ -292,11 +292,10 @@ function PatientRecordsDatabase() {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
-
             <MagnifyingGlassIcon />
           </InputTextField>
 
-          <Select onValueChange={setSortOption}>
+          <Select onValueChange={setSortOption} className="w-full md:w-auto">
             <SelectTrigger placeholder="SORT BY" icon={<SortIcon />}>
               <SelectValue />
             </SelectTrigger>
@@ -308,42 +307,42 @@ function PatientRecordsDatabase() {
         </div>
       </div>
 
-      <div className="flex w-full overflow-x-auto">
-        <Table className="flex-1">
+      <div className="w-full overflow-x-auto">
+        <Table className="min-w-[1200px]">
           <TableHeader>
             <TableRow>
-              <TableHead className="py-4">CLIENT</TableHead>
-              <TableHead className="py-4 text-center">
+              <TableHead className="py-4 whitespace-nowrap">CLIENT</TableHead>
+              <TableHead className="py-4 text-center whitespace-nowrap">
                 DATE OF SESSION
               </TableHead>
-              <TableHead className="py-4 text-center">
+              <TableHead className="py-4 text-center whitespace-nowrap">
                 TIME OF SESSION
               </TableHead>
-              <TableHead className="py-4 text-center">
+              <TableHead className="py-4 text-center whitespace-nowrap">
                 PERSON IN CHARGE
               </TableHead>
-              <TableHead className="py-4">PACKAGE</TableHead>
-              <TableHead className="py-4">TREATMENT</TableHead>
-              <TableHead className="py-4 text-center">
+              <TableHead className="py-4 whitespace-nowrap">PACKAGE</TableHead>
+              <TableHead className="py-4 whitespace-nowrap">TREATMENT</TableHead>
+              <TableHead className="py-4 text-center whitespace-nowrap">
                 CONSENT FORM SIGNED
               </TableHead>
-              <TableHead className="py-4 text-center">PAYMENT METHOD</TableHead>
-              <TableHead className="py-4 text-center">TOTAL AMOUNT</TableHead>
-              <TableHead className="py-4 text-center">AMOUNT PAID</TableHead>
-              <TableHead className="py-4 text-center">
+              <TableHead className="py-4 text-center whitespace-nowrap">PAYMENT METHOD</TableHead>
+              <TableHead className="py-4 text-center whitespace-nowrap">TOTAL AMOUNT</TableHead>
+              <TableHead className="py-4 text-center whitespace-nowrap">AMOUNT PAID</TableHead>
+              <TableHead className="py-4 text-center whitespace-nowrap">
                 REMAINING BALANCE
               </TableHead>
-              <TableHead className="py-4 text-center">REFERENCE NO.</TableHead>
+              <TableHead className="py-4 text-center whitespace-nowrap">REFERENCE NO.</TableHead>
               <TableHead></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredRecords.map((record, index) => (
               <TableRow key={index}>
-                <TableCell>
+                <TableCell className="whitespace-nowrap">
                   {record.client || record.patient_name?.toUpperCase() || "N/A"}
                 </TableCell>
-                <TableCell className="text-center">
+                <TableCell className="text-center whitespace-nowrap">
                   {record.dateTransacted || record.date_of_session
                     ? format(
                         new Date(
@@ -354,7 +353,7 @@ function PatientRecordsDatabase() {
                     : "N/A"}
                 </TableCell>
 
-                <TableCell className="text-center">
+                <TableCell className="text-center whitespace-nowrap">
                   {record.nextSessionTime || record.time_of_session
                     ? (() => {
                         const timeValue =
@@ -366,18 +365,18 @@ function PatientRecordsDatabase() {
                       })()
                     : "N/A"}
                 </TableCell>
-                <TableCell className="text-center">
+                <TableCell className="text-center whitespace-nowrap">
                   {(
                     record.personInCharge || record.person_in_charge
                   )?.toUpperCase()}
                 </TableCell>
-                <TableCell>
+                <TableCell className="whitespace-nowrap">
                   {(record.package || record.package_name)?.toUpperCase()}
                 </TableCell>
-                <TableCell className="text-center">
+                <TableCell className="text-center whitespace-nowrap">
                   {record.treatment?.toUpperCase()}
                 </TableCell>
-                <TableCell className="text-center">
+                <TableCell className="text-center whitespace-nowrap">
                   {record.consentStatus ||
                     (typeof record.consent_form_signed === "boolean"
                       ? record.consent_form_signed
@@ -385,12 +384,12 @@ function PatientRecordsDatabase() {
                         : "NO"
                       : record.consent_form_signed)}
                 </TableCell>
-                <TableCell>
+                <TableCell className="whitespace-nowrap">
                   {(
                     record.paymentMethod || record.payment_method
                   )?.toUpperCase()}
                 </TableCell>
-                <TableCell className="text-center">
+                <TableCell className="text-center whitespace-nowrap">
                   {record.totalAmount || record.total_amount
                     ? new Intl.NumberFormat("en-PH", {
                         style: "currency",
@@ -398,9 +397,9 @@ function PatientRecordsDatabase() {
                       }).format(record.totalAmount || record.total_amount)
                     : "N/A"}
                 </TableCell>
-                <TableCell>RANDOM INT</TableCell>
-                <TableCell>RANDOM INT</TableCell>
-                <TableCell>REF 123456</TableCell>
+                <TableCell className="whitespace-nowrap">RANDOM INT</TableCell>
+                <TableCell className="whitespace-nowrap">RANDOM INT</TableCell>
+                <TableCell className="whitespace-nowrap">REF 123456</TableCell>
                 <TableCell>
                   <DropdownMenu>
                     <DropdownMenuTrigger>
@@ -430,21 +429,23 @@ function PatientRecordsDatabase() {
         </Table>
       </div>
 
-      <div className="flex flex-row gap-4 justify-end">
-        <Button variant="outline">
+      <div className="flex flex-col md:flex-row gap-4 justify-end">
+        <Button variant="outline" className="w-full md:w-auto">
           <ChevronLeftIcon />
           RETURN
         </Button>
-        <Button onClick={() => openModal("createEntry")}>
+        <Button onClick={() => openModal("createEntry")} className="w-full md:w-auto">
           <PlusIcon />
           ADD NEW ENTRY
         </Button>
         <Button
           variant="callToAction"
           onClick={() => generatePRDReport(records)}
+          className="w-full md:w-auto"
         >
           <DownloadIcon />
-          DOWNLOAD PATIENT RECORDS
+          <span className="hidden md:inline">DOWNLOAD PATIENT RECORDS</span>
+          <span className="md:hidden">DOWNLOAD RECORDS</span>
         </Button>
       </div>
 
