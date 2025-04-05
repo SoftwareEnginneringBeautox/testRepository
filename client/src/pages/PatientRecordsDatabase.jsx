@@ -207,7 +207,10 @@ function PatientRecordsDatabase() {
       "TREATMENT",
       "CONSENT STATUS",
       "PAYMENT METHOD",
-      "TOTAL AMOUNT"
+      "TOTAL AMOUNT",
+      "AMOUNT PAID",
+      "REMAINING BALANCE",
+      "REFERENCE NO."
     ];
 
     // Format Date & Time properly
@@ -220,12 +223,16 @@ function PatientRecordsDatabase() {
     };
 
     // Extract and standardize data for table
-    const tableData = patientRecords.map((record) => [
+    const tableData = patientRecords.map((record) => {
+    const total = parseFloat(record.total_amount ?? record.total_amount ?? "0");
+    const paid = parseFloat(record.amount_paid || 0);
+    const remaining = total - paid;
+
+    return [
       record.client || record.patient_name?.toUpperCase() || "N/A",
       formatDate(record.dateTransacted || record.date_of_session),
       formatTime(record.nextSessionTime || record.time_of_session),
-      (record.personInCharge || record.person_in_charge)?.toUpperCase() ||
-        "N/A",
+      (record.personInCharge || record.person_in_charge)?.toUpperCase() || "N/A",
       (record.package || record.package_name)?.toUpperCase() || "N/A",
       record.treatment?.toUpperCase() || "N/A",
       typeof record.consent_form_signed === "boolean"
@@ -234,10 +241,14 @@ function PatientRecordsDatabase() {
           : "NOT SIGNED"
         : record.consentStatus || "N/A",
       (record.paymentMethod || record.payment_method)?.toUpperCase() || "N/A",
-      record.totalAmount || record.total_amount
-        ? `PHP ${record.totalAmount || record.total_amount}`
-        : "N/A"
-    ]);
+      `PHP ${total.toFixed(2)}`,
+      `PHP ${paid.toFixed(2)}`,
+      `PHP ${remaining.toFixed(2)}`,
+      record.reference_number || "N/A"
+      
+    ];
+  });
+
 
     // Generate table
     autoTable(doc, {
@@ -389,17 +400,43 @@ function PatientRecordsDatabase() {
                     record.paymentMethod || record.payment_method
                   )?.toUpperCase()}
                 </TableCell>
-                <TableCell className="text-center whitespace-nowrap">
-                  {record.totalAmount || record.total_amount
+                <TableCell className="text-center">
+                  {(() => {
+                    const total = parseFloat(record.total_amount || 0);
+                    return new Intl.NumberFormat("en-PH", {
+                      style: "currency",
+                      currency: "PHP",
+                    }).format(total);
+                  })()}
+                </TableCell>
+
+
+                {/* AMOUNT PAID */}
+                <TableCell className="text-center">
+                  {record.amount_paid
                     ? new Intl.NumberFormat("en-PH", {
                         style: "currency",
                         currency: "PHP"
-                      }).format(record.totalAmount || record.total_amount)
-                    : "N/A"}
+                      }).format(record.amount_paid)
+                    : "₱0.00"}
                 </TableCell>
-                <TableCell className="whitespace-nowrap">RANDOM INT</TableCell>
-                <TableCell className="whitespace-nowrap">RANDOM INT</TableCell>
-                <TableCell className="whitespace-nowrap">REF 123456</TableCell>
+
+                {/* REMAINING BALANCE */}
+                <TableCell className="text-center">
+                  {(() => {
+                    const total = parseFloat(record.total_amount || record.total_amount || 0);
+                    const paid = parseFloat(record.amount_paid || 0);
+                    const remaining = total - paid;
+                    return new Intl.NumberFormat("en-PH", {
+                      style: "currency",
+                      currency: "PHP"
+                    }).format(remaining);
+                  })()}
+                </TableCell>
+                <TableCell className="text-center">
+                  {record.reference_number || "N/A"}
+                </TableCell>
+
                 <TableCell>
                   <DropdownMenu>
                     <DropdownMenuTrigger>

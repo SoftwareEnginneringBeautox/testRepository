@@ -41,7 +41,7 @@ function CreatePackage({ isOpen, onClose }) {
   useEffect(() => {
     async function fetchTreatments() {
       try {
-        const response = await axios.get(`${API_BASE_URL}/api/treatments`, {
+        const response = await axios.get(`${API_BASE_URL}/api/treatments?archived=false`, {
           withCredentials: true
         });
         setTreatmentsList(response.data);

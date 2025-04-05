@@ -45,7 +45,11 @@ import EditIcon from "@/assets/icons/EditIcon";
 function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
   const [originalData, setOriginalData] = useState({});
   const [formData, setFormData] = useState({});
+  
 
+  const [packagesList, setPackagesList] = useState([]);
+  const [treatmentsList, setTreatmentsList] = useState([]);
+  const [aestheticianList, setAestheticianList] = useState([]);
   /*const [formData, setFormData] = useState({
     patient_name: "",
     person_in_charge: "",
@@ -72,9 +76,70 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
       setOriginalData(entryData);
       setFormData({});
     }
-  }, [entryData]);
+    const fetchAestheticians = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/getusers?archived=false`, {
+          credentials: "include"
+        });
+    
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status} - ${response.statusText}`);
+        }
+    
+        const data = await response.json(); // Correct way to get JSON from fetch
+    
+        const aestheticians = Array.isArray(data)
+          ? data.filter((user) => user.role?.toLowerCase() === "aesthetician")
+          : [];
+    
+        setAestheticianList(aestheticians);
+      } catch (error) {
+        console.error("Error fetching aestheticians:", error);
+        setAestheticianList([]); // fallback to empty list
+      }
+    };
+    
+    
+    const fetchPackages = async () => {
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/packages?archived=false`, {
+          credentials: "include"
+        });
+        const data = await res.json();
+        setPackagesList(data);
+      } catch (err) {
+        console.error("Failed to fetch packages:", err);
+      }
+    };
 
+    const fetchTreatments = async () => {
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/treatments?archived=false`, {
+          credentials: "include"
+        });
+        const data = await res.json();
+        setTreatmentsList(data);
+      } catch (err) {
+        console.error("Failed to fetch treatments:", err);
+      }
+    };
+
+    fetchAestheticians();
+    fetchPackages();
+    fetchTreatments();
+    
+  }, [entryData]);
+  
   if (!isOpen) return null;
+  const total = parseFloat(formData.total_amount ?? originalData.total_amount ?? "0");
+  const paid = parseFloat(formData.amount_paid ?? originalData.amount_paid ?? "0");
+  const remainingBalance = total - paid;
+  const formattedRemainingBalance = isNaN(remainingBalance)
+    ? ""
+    : new Intl.NumberFormat("en-PH", {
+        style: "currency",
+        currency: "PHP"
+      }).format(remainingBalance);
 
   return (
     <ModalContainer>
@@ -129,9 +194,13 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
                   placeholder="Person in charge of the session"
                 />
                 <ModalSelectContent>
-                  <SelectItem value="Jessica">Jessica</SelectItem>
-                  <SelectItem value="Jimmy">Jimmy</SelectItem>
-                </ModalSelectContent>
+                {aestheticianList.map((aesthetician) => (
+                  <SelectItem key={aesthetician.id} value={aesthetician.username}>
+                    {aesthetician.username}
+                  </SelectItem>
+                ))}
+              </ModalSelectContent>
+
               </Select>
             </InputContainer>
 
@@ -139,39 +208,25 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
             <InputContainer>
               <InputLabel>PACKAGE</InputLabel>
               <Select
-              // value={packageName}
-              // onValueChange={(value) => {
-              //   console.log("Selected package:", value);
-              //   setPackageName(value);
-              // }}
+                value={formData.packageName ?? originalData.package_name}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, package_name: value })
+                }
               >
                 <ModalSelectTrigger
                   icon={<PackageIcon className="w-4 h-4" />}
                   placeholder="Select package"
-                  // className={
-                  //   formSubmitAttempted && formErrors.packageName
-                  //     ? "border-red-500"
-                  //     : ""
-                  // }
+            
                 />
                 <ModalSelectContent>
-                  <SelectItem value="Basic Package">
-                    Basic Package - ₱999
-                  </SelectItem>
-                  <SelectItem value="Premium Package">
-                    Premium Package - ₱1,999
-                  </SelectItem>
-                  <SelectItem value="Ultimate Package">
-                    Ultimate Package - ₱2,999
-                  </SelectItem>
+                  {packagesList.map((pkg) => (
+                    <SelectItem key={pkg.id} value={pkg.package_name}>
+                      {pkg.package_name} - ₱{pkg.price}
+                    </SelectItem>
+                  ))}
                 </ModalSelectContent>
               </Select>
-
-              {/* {formSubmitAttempted && formErrors.packageName && (
-                <p className="text-red-500 text-sm mt-1">
-                  {formErrors.packageName}
-                </p>
-              )} */}
+             
             </InputContainer>
 
             <InputContainer>
@@ -186,119 +241,18 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
                   icon={<TreatmentIcon className="w-4 h-4" />}
                   placeholder="Chosen treatment"
                 />
-                <ModalSelectContent>
-                  <SelectItem value="Treatment 1">Treatment 1</SelectItem>
-                  <SelectItem value="Treatment 2">Treatment 2</SelectItem>
-                  <SelectItem value="Treatment 3">Treatment 3</SelectItem>
+               <ModalSelectContent>
+                  {treatmentsList.map((treatment) => (
+                    <SelectItem
+                      key={treatment.id}
+                      value={treatment.treatment_name}
+                    >
+                      {treatment.treatment_name}
+                    </SelectItem>
+                  ))}
                 </ModalSelectContent>
               </Select>
             </InputContainer>
-
-            <div className="flex flex-row w-full gap-4">
-              <InputContainer className="flex-1">
-                <InputLabel>DATE OF SESSION</InputLabel>
-                <InputTextField>
-                  <InputIcon>
-                    <CalendarIcon />
-                  </InputIcon>
-                  <Input
-                    type="date"
-                    className="text-input"
-                    placeholder="Date of Session"
-                    required
-                    value={
-                      formData.date_of_session ??
-                      originalData.date_of_session ??
-                      ""
-                    }
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        date_of_session: e.target.value
-                      })
-                    }
-                  />
-                </InputTextField>
-              </InputContainer>
-
-              <InputContainer className="flex-1">
-                <InputLabel>TIME OF SESSION</InputLabel>
-                <InputTextField className="flex-1">
-                  <InputIcon>
-                    <ClockIcon />
-                  </InputIcon>
-                  <Input
-                    type="time"
-                    className="text-input"
-                    required
-                    value={
-                      formData.time_of_session ??
-                      originalData.time_of_session ??
-                      ""
-                    }
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        time_of_session: e.target.value
-                      })
-                    }
-                  />
-                </InputTextField>
-              </InputContainer>
-            </div>
-
-            <div className="flex flex-row w-full gap-4">
-              <InputContainer className="flex-1">
-                <InputLabel>DATE OF NEXT SESSION</InputLabel>
-                <InputTextField>
-                  <InputIcon>
-                    <CalendarIcon />
-                  </InputIcon>
-                  <Input
-                    type="date"
-                    className="text-input"
-                    placeholder="Date of Session"
-                    required
-                    value={
-                      formData.date_of_session ??
-                      originalData.date_of_session ??
-                      ""
-                    }
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        date_of_session: e.target.value
-                      })
-                    }
-                  />
-                </InputTextField>
-              </InputContainer>
-
-              <InputContainer className="flex-1">
-                <InputLabel>TIME OF NEXT SESSION</InputLabel>
-                <InputTextField className="flex-1">
-                  <InputIcon>
-                    <ClockIcon />
-                  </InputIcon>
-                  <Input
-                    type="time"
-                    className="text-input"
-                    required
-                    value={
-                      formData.time_of_session ??
-                      originalData.time_of_session ??
-                      ""
-                    }
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        time_of_session: e.target.value
-                      })
-                    }
-                  />
-                </InputTextField>
-              </InputContainer>
-            </div>
 
             <InputContainer>
               <InputLabel>TOTAL AMOUNT</InputLabel>
@@ -307,12 +261,16 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
                   <PesoIcon />
                 </InputIcon>
                 <Input
-                  placeholder="Amount already paid"
-                  type="text"
-                  inputMode="decimal"
-                  pattern="\\d+(\\.\\d{0,2})?"
-                  min="0"
-                  step="0.01"
+                  prefix="₱"
+                  placeholder="₱0.00"
+                  decimalsLimit={2}
+                  allowNegativeValue={false}
+                  value={
+                    formData.total_amount ?? originalData.total_amount ?? ""
+                  }
+                  onChange={(e) =>
+                    setFormData({ ...formData, total_amount: e.target.value })
+                  }
                 />
               </InputTextField>
             </InputContainer>
@@ -324,21 +282,41 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
                   <PesoIcon />
                 </InputIcon>
                 <Input
-                  placeholder="Total Amount to Pay"
-                  type="text"
-                  inputMode="decimal"
-                  pattern="\\d+(\\.\\d{0,2})?"
-                  min="0"
-                  step="0.01"
+                  prefix="₱"
+                  placeholder="₱0.00"
+                  decimalsLimit={2}
+                  allowNegativeValue={false}
                   value={
-                    formData.total_amount ?? originalData.total_amount ?? ""
+                    formData.amount_paid ?? originalData.amount_paid ?? ""
                   }
                   onChange={(e) =>
-                    setFormData({ ...formData, total_amount: e.target.value })
+                    setFormData({ ...formData, amount_paid: e.target.value })
                   }
                 />
               </InputTextField>
             </InputContainer>
+
+            <InputContainer>
+              <InputLabel>REMAINING BALANCE</InputLabel>
+              <InputTextField>
+                <InputIcon>
+                  <PesoIcon />
+                </InputIcon>
+                <Input
+                  readOnly
+                  className="bg-[#F5F3F0] text-gray-500"
+                  value={
+                    isNaN(remainingBalance)
+                      ? ""
+                      : new Intl.NumberFormat("en-PH", {
+                          style: "currency",
+                          currency: "PHP"
+                        }).format(remainingBalance)
+                  }
+                />
+              </InputTextField>
+            </InputContainer>
+
 
             <InputContainer>
               <InputLabel>PAYMENT METHOD</InputLabel>
@@ -353,11 +331,63 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
                   placeholder="Select payment method"
                 />
                 <ModalSelectContent>
-                  <SelectItem value="Cash">Cash</SelectItem>
-                  <SelectItem value="Card">Card</SelectItem>
-                  <SelectItem value="GCash">GCash</SelectItem>
+                  <SelectItem value="Full Payment">Full Payment</SelectItem>
+                  <SelectItem value="Installment">Installment</SelectItem>
                 </ModalSelectContent>
               </Select>
+            </InputContainer>
+          </div>
+
+          <div className="flex flex-row w-full gap-4">
+            <InputContainer className="flex-1">
+              <InputLabel>DATE OF SESSION</InputLabel>
+              <InputTextField>
+                <InputIcon>
+                  <CalendarIcon />
+                </InputIcon>
+                <Input
+                  type="date"
+                  className="text-input"
+                  placeholder="Date of Session"
+                  required
+                  value={
+                    formData.date_of_session ??
+                    originalData.date_of_session ??
+                    ""
+                  }
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      date_of_session: e.target.value
+                    })
+                  }
+                />
+              </InputTextField>
+            </InputContainer>
+
+            <InputContainer className="flex-1">
+              <InputLabel>TIME OF SESSION</InputLabel>
+              <InputTextField className="flex-1">
+                <InputIcon>
+                  <ClockIcon />
+                </InputIcon>
+                <Input
+                  type="time"
+                  className="text-input"
+                  required
+                  value={
+                    formData.time_of_session ??
+                    originalData.time_of_session ??
+                    ""
+                  }
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      time_of_session: e.target.value
+                    })
+                  }
+                />
+              </InputTextField>
             </InputContainer>
           </div>
 

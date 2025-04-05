@@ -41,7 +41,7 @@ function EditPackage({ isOpen, onClose, entryData, onSubmit }) {
   useEffect(() => {
     const fetchTreatments = async () => {
       try {
-        const res = await fetch(`${API_BASE_URL}/api/treatments`, {
+        const res = await fetch(`${API_BASE_URL}/api/treatments?archived=false`, {
           credentials: "include",
         });
         const data = await res.json();
