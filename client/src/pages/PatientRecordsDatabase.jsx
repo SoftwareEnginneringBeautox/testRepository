@@ -13,6 +13,7 @@ import MagnifyingGlassIcon from "@/assets/icons/MagnifyingGlassIcon";
 import EditIcon from "@/assets/icons/EditIcon";
 import ArchiveIcon from "@/assets/icons/ArchiveIcon";
 import DownloadIcon from "@/assets/icons/DownloadIcon";
+import EllipsisIcon from "@/assets/icons/EllipsisIcon";
 
 import {
   Table,
@@ -24,6 +25,14 @@ import {
 } from "@/components/ui/Table";
 
 import { InputTextField, Input } from "@/components/ui/Input";
+
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuTrigger
+} from "@/components/ui/DropdownMenu";
 
 import {
   Select,
@@ -46,6 +55,7 @@ function PatientRecordsDatabase() {
   const [selectedEntry, setSelectedEntry] = useState(null);
   const [records, setRecords] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [sortOption, setSortOption] = useState("");
 
   // Fetch patient records from the API
   const fetchRecords = async () => {
@@ -130,10 +140,26 @@ function PatientRecordsDatabase() {
     fetchRecords();
   };
 
-  const filteredRecords = records.filter((record) => {
-    const name = record.client || record.patient_name || "";
-    return name.toLowerCase().includes(searchTerm.toLowerCase());
-  });
+  const filteredRecords = [...records]
+    .filter((record) => {
+      const name = record.client || record.patient_name || "";
+      return name.toLowerCase().includes(searchTerm.toLowerCase());
+    })
+    .sort((a, b) => {
+      if (sortOption === "alphabetical") {
+        const nameA = (a.client || a.patient_name || "").toLowerCase();
+        const nameB = (b.client || b.patient_name || "").toLowerCase();
+        return nameA.localeCompare(nameB);
+      }
+
+      if (sortOption === "date") {
+        const dateA = new Date(a.dateTransacted || a.date_of_session);
+        const dateB = new Date(b.dateTransacted || b.date_of_session);
+        return dateB - dateA; // Most recent first
+      }
+
+      return 0;
+    });
 
   const generatePRDReport = (patientRecords) => {
     if (!patientRecords || patientRecords.length === 0) {
@@ -270,7 +296,7 @@ function PatientRecordsDatabase() {
             <MagnifyingGlassIcon />
           </InputTextField>
 
-          <Select>
+          <Select onValueChange={setSortOption}>
             <SelectTrigger placeholder="SORT BY" icon={<SortIcon />}>
               <SelectValue />
             </SelectTrigger>
@@ -376,20 +402,27 @@ function PatientRecordsDatabase() {
                 <TableCell>RANDOM INT</TableCell>
                 <TableCell>REF 123456</TableCell>
                 <TableCell>
-                  <div className="flex justify-center gap-2">
-                    <button
-                      className="text-reflexBlue-400"
-                      onClick={() => handleOpenEditEntry(record)}
-                    >
-                      <EditIcon />
-                    </button>
-                    <button
-                      className="text-reflexBlue-400"
-                      onClick={() => handleOpenArchiveEntry(record)}
-                    >
-                      <ArchiveIcon />
-                    </button>
-                  </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger>
+                      <EllipsisIcon />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      <DropdownMenuGroup>
+                        <DropdownMenuItem
+                          onClick={() => handleOpenEditEntry(record)}
+                        >
+                          <EditIcon />
+                          <p className="font-semibold">Edit</p>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => handleOpenArchiveEntry(record)}
+                        >
+                          <ArchiveIcon />
+                          <p className="font-semibold">Archive</p>
+                        </DropdownMenuItem>
+                      </DropdownMenuGroup>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </TableCell>
               </TableRow>
             ))}
