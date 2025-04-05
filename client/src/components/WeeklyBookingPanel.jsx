@@ -67,23 +67,23 @@ const WeeklyBookingPanel = ({ events = [], currentDate }) => {
   };
 
   return (
-    <div className="w-full">
-      <table className="w-full">
-        <thead className="bg-lavender-400 text-customNeutral-100 text-center font-semibold text-[1.25rem] leading-8 py-4">
+    <div className="w-full overflow-x-auto">
+      <table className="w-full min-w-[800px]">
+        <thead className="bg-lavender-400 text-customNeutral-100 text-center font-semibold text-xs sm:text-sm md:text-base lg:text-lg leading-6 sm:leading-7 md:leading-8 py-2 sm:py-3 md:py-4">
           <tr>
-            <th className="w-24 bg-ash-100"></th>
+            <th className="w-16 sm:w-20 md:w-24 bg-ash-100"></th>
             {days.map((day, idx) => (
               <th
                 key={idx}
-                className={`p-2 ${idx === 0 ? "rounded-l-[0.5rem]" : ""} ${
+                className={`p-1 sm:p-2 ${idx === 0 ? "rounded-l-[0.5rem]" : ""} ${
                   idx === days.length - 1 ? "rounded-r-[0.5rem]" : ""
                 }`}
               >
-                <div>{day}</div>
+                <div className="text-[10px] sm:text-xs md:text-sm lg:text-base">{day}</div>
                 <div
-                  className={`text-sm ${
+                  className={`text-[10px] sm:text-xs md:text-sm ${
                     isToday(weekDates[idx])
-                      ? "bg-white text-lavender-400 rounded-full inline-block px-2"
+                      ? "bg-white text-lavender-400 rounded-full inline-block px-1 sm:px-2"
                       : ""
                   }`}
                 >
@@ -95,12 +95,12 @@ const WeeklyBookingPanel = ({ events = [], currentDate }) => {
         </thead>
       </table>
 
-      <div className="flex relative">
-        <div className="w-24 flex flex-col">
+      <div className="flex relative min-w-[800px]">
+        <div className="w-16 sm:w-20 md:w-24 flex flex-col">
           {hours.map((hour, idx) => (
             <div
               key={idx}
-              className="h-16 text-right pr-4 font-semibold text-customNeutral-300"
+              className="h-12 sm:h-14 md:h-16 text-right pr-2 sm:pr-3 md:pr-4 font-semibold text-customNeutral-300 text-[10px] sm:text-xs md:text-sm"
             >
               {hour}
             </div>
@@ -114,7 +114,7 @@ const WeeklyBookingPanel = ({ events = [], currentDate }) => {
                 {[...Array(24)].map((_, timeIdx) => (
                   <div
                     key={timeIdx}
-                    className="h-16 border-b border-gray-300"
+                    className="h-12 sm:h-14 md:h-16 border-b border-gray-300"
                   ></div>
                 ))}
               </div>
@@ -136,12 +136,12 @@ const WeeklyBookingPanel = ({ events = [], currentDate }) => {
                   return (
                     <button
                       key={idx}
-                      className="absolute left-1 right-1 bg-lavender-400 text-white rounded-md p-2.5 shadow-lg focus:outline-none text-left flex flex-col justify-end"
+                      className="absolute left-1 right-1 bg-lavender-400 text-white rounded-md p-1 sm:p-2 md:p-2.5 shadow-lg focus:outline-none text-left flex flex-col justify-end"
                       style={{ top, height }}
                       onClick={() => handleOpenModal(event)}
                     >
-                      <strong className="block">{event.name}</strong>
-                      <p className="text-xs">
+                      <strong className="block text-[10px] sm:text-xs md:text-sm truncate">{event.name}</strong>
+                      <p className="text-[8px] sm:text-[10px] md:text-xs truncate">
                         {event.startTime} - {event.endTime}
                       </p>
                     </button>
