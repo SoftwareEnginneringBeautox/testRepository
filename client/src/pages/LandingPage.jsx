@@ -30,15 +30,13 @@ function LandingPage() {
 
   useEffect(() => {
     const handleScroll = () => {
-      const heroSection = document.getElementById("hero");
-      if (heroSection) {
-        const heroHeight = heroSection.offsetHeight;
-        const scrollPosition = window.scrollY;
-        setIsScrolled(scrollPosition > heroHeight - 100);
-      }
+      const scrollThreshold = 50;
+      setIsScrolled(window.scrollY > scrollThreshold);
     };
 
     window.addEventListener("scroll", handleScroll);
+    handleScroll();
+
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 

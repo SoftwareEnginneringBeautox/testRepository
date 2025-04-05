@@ -4,9 +4,9 @@ import { useModal } from "@/hooks/useModal";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 
-import CreateMonthlySales from "@/components/modals/CreateMonthlySales";
-import EditMonthlySales from "@/components/modals/EditMonthlySales";
-import DeleteMonthlySales from "@/components/modals/DeleteMonthlySales";
+import CreateMonthlyExpense from "@/components/modals/CreateMonthlyExpense";
+import EditMonthlyExpense from "@/components/modals/EditMonthlyExpense";
+import DeleteMonthlyExpense from "@/components/modals/DeleteMonthlyExpense";
 
 import CreateCategory from "@/components/modals/CreateCategory";
 import EditCategory from "@/components/modals/EditCategory";
@@ -112,11 +112,11 @@ function FinancialOverview() {
         console.log("Categories fetched:", data);
         setCategories(data || []);
       })
-     .catch((error) => {
-      console.error("Error fetching categories:", error);
-      setCategories([]);  // Set to empty array on error
-    });
-}, []);
+      .catch((error) => {
+        console.error("Error fetching categories:", error);
+        setCategories([]); // Set to empty array on error
+      });
+  }, []);
 
   const refreshExpensesData = async () => {
     try {
@@ -127,7 +127,6 @@ function FinancialOverview() {
       console.error("Error refreshing expenses data:", error);
     }
   };
-
 
   // REPORT GENERATING FUNCTIONS
   const generateWeeklySalesReport = (salesData) => {
@@ -386,7 +385,7 @@ function FinancialOverview() {
       console.log("Create category callback called with:", categoryData);
       // The category should already be created in the database via the CreateCategory component
       // Just update the local state
-      setCategories(prevCategories => [
+      setCategories((prevCategories) => [
         ...prevCategories,
         { id: categoryData.id, name: categoryData.name }
       ]);
@@ -404,7 +403,7 @@ function FinancialOverview() {
 
       // Check for duplicate category names (case insensitive)
       const isDuplicate = categories.some(
-        category =>
+        (category) =>
           category.id !== categoryData.id &&
           category.name.toLowerCase() === categoryData.name.trim().toLowerCase()
       );
@@ -415,11 +414,14 @@ function FinancialOverview() {
       }
 
       // Call the API to update the category
-      const response = await fetch(`http://localhost:4000/api/categories/${categoryData.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: categoryData.name })
-      });
+      const response = await fetch(
+        `http://localhost:4000/api/categories/${categoryData.id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: categoryData.name })
+        }
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -427,8 +429,8 @@ function FinancialOverview() {
       }
 
       // Update the local state with the edited category
-      setCategories(prevCategories =>
-        prevCategories.map(category =>
+      setCategories((prevCategories) =>
+        prevCategories.map((category) =>
           category.id === categoryData.id
             ? { ...category, name: categoryData.name }
             : category
@@ -444,10 +446,13 @@ function FinancialOverview() {
 
   const handleArchiveCategory = async (categoryId) => {
     try {
-      const response = await fetch(`http://localhost:4000/api/categories/${categoryId}/archive`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" }
-      });
+      const response = await fetch(
+        `http://localhost:4000/api/categories/${categoryId}/archive`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" }
+        }
+      );
 
       if (response.ok) {
         await refreshCategories();
@@ -492,7 +497,7 @@ function FinancialOverview() {
           };
 
           // Add the new expense to the beginning of the list
-          setExpensesData(prevExpenses => [newExpense, ...prevExpenses]);
+          setExpensesData((prevExpenses) => [newExpense, ...prevExpenses]);
 
           // Close the modal
           closeModal();
@@ -519,7 +524,7 @@ function FinancialOverview() {
     const formattedExpense = {
       amount: expense.expense,
       category: expense.category,
-      date: expense.date.split('T')[0] // Format date for input element
+      date: expense.date.split("T")[0] // Format date for input element
     };
 
     // Set the expense state with both the formatted data and the original ID
@@ -571,7 +576,6 @@ function FinancialOverview() {
     }
   };
 
-
   const [selectedExpense, setSelectedExpense] = useState(null);
 
   // Handler for archive/delete action
@@ -593,8 +597,8 @@ function FinancialOverview() {
 
       if (response.ok) {
         // remove the archived expense immediately
-        setExpensesData(prevExpenses =>
-          prevExpenses.filter(expense => expense.id !== selectedExpense.id)
+        setExpensesData((prevExpenses) =>
+          prevExpenses.filter((expense) => expense.id !== selectedExpense.id)
         );
 
         closeModal();
@@ -614,7 +618,9 @@ function FinancialOverview() {
         <h1 className="text-[28px] md:text-[40px] leading-[1.4] md:leading-[56px] font-bold">
           FINANCIAL OVERVIEW
         </h1>
-        <p className="text-sm md:text-base">Summary of finances within Beautox</p>
+        <p className="text-sm md:text-base">
+          Summary of finances within Beautox
+        </p>
       </div>
 
       {/* Sales Tracker Section */}
@@ -639,35 +645,70 @@ function FinancialOverview() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="py-4 text-center whitespace-nowrap">CLIENT</TableHead>
-              <TableHead className="py-4 text-center whitespace-nowrap">PERSON IN CHARGE</TableHead>
-              <TableHead className="py-4 text-center whitespace-nowrap">DATE TRANSACTED</TableHead>
-              <TableHead className="py-4 text-center whitespace-nowrap">PAYMENT METHOD</TableHead>
-              <TableHead className="py-4 text-center whitespace-nowrap">PACKAGES</TableHead>
-              <TableHead className="py-4 text-center whitespace-nowrap">TREATMENT</TableHead>
-              <TableHead className="py-4 text-center whitespace-nowrap">PAYMENT</TableHead>
-              <TableHead className="py-4 text-center whitespace-nowrap">REFERENCE NO.</TableHead>
+              <TableHead className="py-4 text-center whitespace-nowrap">
+                CLIENT
+              </TableHead>
+              <TableHead className="py-4 text-center whitespace-nowrap">
+                PERSON IN CHARGE
+              </TableHead>
+              <TableHead className="py-4 text-center whitespace-nowrap">
+                DATE TRANSACTED
+              </TableHead>
+              <TableHead className="py-4 text-center whitespace-nowrap">
+                PAYMENT METHOD
+              </TableHead>
+              <TableHead className="py-4 text-center whitespace-nowrap">
+                PACKAGES
+              </TableHead>
+              <TableHead className="py-4 text-center whitespace-nowrap">
+                TREATMENT
+              </TableHead>
+              <TableHead className="py-4 text-center whitespace-nowrap">
+                PAYMENT
+              </TableHead>
+              <TableHead className="py-4 text-center whitespace-nowrap">
+                REFERENCE NO.
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {salesData.length > 0 ? (
               salesData.map((sale, index) => (
                 <TableRow key={index}>
-                  <TableCell className="whitespace-nowrap">{sale.client ? sale.client.toUpperCase() : 'N/A'}</TableCell>
-                  <TableCell className="whitespace-nowrap">{sale.person_in_charge ? sale.person_in_charge.toUpperCase() : 'N/A'}</TableCell>
                   <TableCell className="whitespace-nowrap">
-                    {format(new Date(sale.date_transacted), "MMMM dd, yyyy").toUpperCase()}
+                    {sale.client ? sale.client.toUpperCase() : "N/A"}
                   </TableCell>
-                  <TableCell className="whitespace-nowrap">{sale.payment_method ? sale.payment_method.toUpperCase() : 'N/A'}</TableCell>
-                  <TableCell className="whitespace-nowrap">{sale.packages ? sale.packages.toUpperCase() : 'N/A'}</TableCell>
-                  <TableCell className="whitespace-nowrap">{sale.treatment ? sale.treatment.toUpperCase() : 'N/A'}</TableCell>
+                  <TableCell className="whitespace-nowrap">
+                    {sale.person_in_charge
+                      ? sale.person_in_charge.toUpperCase()
+                      : "N/A"}
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap">
+                    {format(
+                      new Date(sale.date_transacted),
+                      "MMMM dd, yyyy"
+                    ).toUpperCase()}
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap">
+                    {sale.payment_method
+                      ? sale.payment_method.toUpperCase()
+                      : "N/A"}
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap">
+                    {sale.packages ? sale.packages.toUpperCase() : "N/A"}
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap">
+                    {sale.treatment ? sale.treatment.toUpperCase() : "N/A"}
+                  </TableCell>
                   <TableCell className="whitespace-nowrap">
                     {new Intl.NumberFormat("en-PH", {
                       style: "currency",
                       currency: "PHP"
                     }).format(sale.payment)}
                   </TableCell>
-                  <TableCell className="whitespace-nowrap">{sale.reference_no}</TableCell>
+                  <TableCell className="whitespace-nowrap">
+                    {sale.reference_no}
+                  </TableCell>
                 </TableRow>
               ))
             ) : (
@@ -694,7 +735,9 @@ function FinancialOverview() {
       </div>
 
       {/* Monthly Expenses Tracker Section */}
-      <h2 className="font-bold text-xl md:text-[2rem]">MONTHLY EXPENSES TRACKER</h2>
+      <h2 className="font-bold text-xl md:text-[2rem]">
+        MONTHLY EXPENSES TRACKER
+      </h2>
       <div className="grid gap-8 md:gap-14">
         <div className="flex flex-col md:flex-row w-full gap-8">
           <div className="w-full md:w-1/2">
@@ -714,7 +757,7 @@ function FinancialOverview() {
                   categories.map((category) => (
                     <TableRow key={category.id}>
                       <TableCell className="flex items-center justify-between gap-4 h-full w-full">
-                        {category.name ? category.name.toUpperCase() : 'N/A'}
+                        {category.name ? category.name.toUpperCase() : "N/A"}
                         <DropdownMenu>
                           <DropdownMenuTrigger>
                             <EllipsisIcon />
@@ -747,12 +790,17 @@ function FinancialOverview() {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell className="text-center">No categories available</TableCell>
+                    <TableCell className="text-center">
+                      No categories available
+                    </TableCell>
                   </TableRow>
                 )}
               </TableBody>
             </Table>
-            <Button fullWidth={true} onClick={() => openModal("createCategory")}>
+            <Button
+              fullWidth={true}
+              onClick={() => openModal("createCategory")}
+            >
               <PlusIcon />
               ADD NEW CATEGORY
             </Button>
@@ -763,9 +811,15 @@ function FinancialOverview() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="py-4 text-center whitespace-nowrap">DATE</TableHead>
-                <TableHead className="py-4 text-center whitespace-nowrap">CATEGORY</TableHead>
-                <TableHead className="py-4 text-center whitespace-nowrap">EXPENSE</TableHead>
+                <TableHead className="py-4 text-center whitespace-nowrap">
+                  DATE
+                </TableHead>
+                <TableHead className="py-4 text-center whitespace-nowrap">
+                  CATEGORY
+                </TableHead>
+                <TableHead className="py-4 text-center whitespace-nowrap">
+                  EXPENSE
+                </TableHead>
                 <TableHead></TableHead>
               </TableRow>
             </TableHeader>
@@ -774,10 +828,15 @@ function FinancialOverview() {
                 expensesData.map((expense, index) => (
                   <TableRow key={expense.id || index}>
                     <TableCell className="py-4 text-center whitespace-nowrap">
-                      {format(new Date(expense.date), "MMMM dd, yyyy").toUpperCase()}
+                      {format(
+                        new Date(expense.date),
+                        "MMMM dd, yyyy"
+                      ).toUpperCase()}
                     </TableCell>
                     <TableCell className="py-4 text-center whitespace-nowrap">
-                      {expense.category ? expense.category.toUpperCase() : 'N/A'}
+                      {expense.category
+                        ? expense.category.toUpperCase()
+                        : "N/A"}
                     </TableCell>
                     <TableCell className="py-4 text-center whitespace-nowrap">
                       {new Intl.NumberFormat("en-PH", {
@@ -795,12 +854,15 @@ function FinancialOverview() {
                             <DropdownMenuItem
                               onClick={() => {
                                 const expense = expensesData[index];
-                                console.log("Setting expense to edit:", expense);
+                                console.log(
+                                  "Setting expense to edit:",
+                                  expense
+                                );
                                 setExpenseToEdit({
                                   id: expense.id,
                                   expense: expense.expense,
                                   category: expense.category,
-                                  date: expense.date.split('T')[0]
+                                  date: expense.date.split("T")[0]
                                 });
                                 openModal("editMonthlyExpense");
                               }}
@@ -849,7 +911,10 @@ function FinancialOverview() {
             <ChevronLeftIcon />
             RETURN
           </Button>
-          <Button onClick={() => openModal("createMonthlyExpense")} className="w-full md:w-auto">
+          <Button
+            onClick={() => openModal("createMonthlyExpense")}
+            className="w-full md:w-auto"
+          >
             <PlusIcon />
             ADD ADDITIONAL EXPENSES
           </Button>
@@ -858,15 +923,16 @@ function FinancialOverview() {
             className="w-full md:w-auto"
           >
             <DownloadIcon />
-            <span className="hidden md:inline">DOWNLOAD MONTHLY SALES REPORT</span>
+            <span className="hidden md:inline">
+              DOWNLOAD MONTHLY SALES REPORT
+            </span>
             <span className="md:hidden">MONTHLY REPORT</span>
           </Button>
         </div>
       </div>
 
-
       {currentModal === "createMonthlyExpense" && (
-        <CreateMonthlySales
+        <CreateMonthlyExpense
           isOpen={true}
           onClose={closeModal}
           onCreateSuccess={handleCreateExpense}
@@ -875,7 +941,7 @@ function FinancialOverview() {
       )}
 
       {currentModal === "editMonthlyExpense" && expenseToEdit && (
-        <EditMonthlySales
+        <EditMonthlyExpense
           isOpen={true}
           onClose={closeModal}
           onEditSuccess={handleEditExpense}
@@ -889,7 +955,7 @@ function FinancialOverview() {
       )}
 
       {currentModal === "deleteMonthlyExpense" && selectedExpense && (
-        <DeleteMonthlySales
+        <DeleteMonthlyExpense
           isOpen={true}
           onClose={closeModal}
           onArchive={handleArchiveExpense}
@@ -914,7 +980,6 @@ function FinancialOverview() {
         />
       )}
 
-
       {currentModal === "archiveCategory" && (
         <ArchiveCategory
           isOpen={true}
@@ -923,10 +988,8 @@ function FinancialOverview() {
           category={selectedCategory}
         />
       )}
-
     </div>
   );
 }
-
 
 export default FinancialOverview;
