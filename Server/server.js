@@ -14,6 +14,21 @@ const bcrypt = require('bcrypt');
 const pgSession = require('connect-pg-simple')(session);
 const nodemailer = require("nodemailer");
 const isAuthenticated = require('./middleware/isAuthenticated');
+const config = require('config');
+require("dotenv").config();
+const {Pool} = require('pg');
+
+const pool = new Pool({
+    user: process.env.DB_USER || 'postgres',
+    host: process.env.DB_HOST || 'postgres',
+    database: process.env.DB_NAME || 'usersaccs',
+    password: process.env.DB_PASSWORD || 'password',
+    port: process.env.DB_PORT || 5432,
+  });
+
+console.log("Connected to Postgres");
+
+module.exports = pool;
 
 // Check required environment variables
 const requiredEnvVars = [
