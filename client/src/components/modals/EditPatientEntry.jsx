@@ -38,6 +38,7 @@ import CalendarIcon from "@/assets/icons/CalendarIcon";
 import UserIcon from "@/assets/icons/UserIcon";
 import UserIDIcon from "@/assets/icons/UserIDIcon";
 import CircleUserIcon from "@/assets/icons/CircleUserIcon";
+import PackageIcon from "@/assets/icons/PackageIcon";
 import TreatmentIcon from "@/assets/icons/TreatmentIcon";
 import EditIcon from "@/assets/icons/EditIcon";
 
@@ -87,11 +88,11 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
         <form onSubmit={(e) => e.preventDefault()}>
           <div className="flex flex-col gap-4">
             <p>
-              {originalData.patient_name?.toUpperCase() || "UNKNOWN"}'S PATIENT
-              RECORD
+              PATIENT RECORD OF{" "}
+              {originalData.patient_name?.toUpperCase() || "UNKNOWN"}
             </p>
             <p>
-              <span>CURRENT PACKAGE</span>{" "}
+              <span>CURRENT PACKAGE:</span>{" "}
               {entryData?.package_name?.toUpperCase() || "N/A"}
             </p>
             <InputContainer>
@@ -137,36 +138,40 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
             {/* PACKAGE */}
             <InputContainer>
               <InputLabel>PACKAGE</InputLabel>
-
               <Select
-                value={packageName}
-                onValueChange={(value) => {
-                  console.log("Selected package:", value);
-                  setPackageName(value);
-                }}
+              // value={packageName}
+              // onValueChange={(value) => {
+              //   console.log("Selected package:", value);
+              //   setPackageName(value);
+              // }}
               >
                 <ModalSelectTrigger
                   icon={<PackageIcon className="w-4 h-4" />}
                   placeholder="Select package"
-                  className={
-                    formSubmitAttempted && formErrors.packageName
-                      ? "border-red-500"
-                      : ""
-                  }
+                  // className={
+                  //   formSubmitAttempted && formErrors.packageName
+                  //     ? "border-red-500"
+                  //     : ""
+                  // }
                 />
                 <ModalSelectContent>
-                  {packagesList.map((pkg) => (
-                    <SelectItem key={pkg.id} value={pkg.package_name}>
-                      {pkg.package_name} - ₱{pkg.price}
-                    </SelectItem>
-                  ))}
+                  <SelectItem value="Basic Package">
+                    Basic Package - ₱999
+                  </SelectItem>
+                  <SelectItem value="Premium Package">
+                    Premium Package - ₱1,999
+                  </SelectItem>
+                  <SelectItem value="Ultimate Package">
+                    Ultimate Package - ₱2,999
+                  </SelectItem>
                 </ModalSelectContent>
               </Select>
-              {formSubmitAttempted && formErrors.packageName && (
+
+              {/* {formSubmitAttempted && formErrors.packageName && (
                 <p className="text-red-500 text-sm mt-1">
                   {formErrors.packageName}
                 </p>
-              )}
+              )} */}
             </InputContainer>
 
             <InputContainer>
@@ -188,6 +193,112 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
                 </ModalSelectContent>
               </Select>
             </InputContainer>
+
+            <div className="flex flex-row w-full gap-4">
+              <InputContainer className="flex-1">
+                <InputLabel>DATE OF SESSION</InputLabel>
+                <InputTextField>
+                  <InputIcon>
+                    <CalendarIcon />
+                  </InputIcon>
+                  <Input
+                    type="date"
+                    className="text-input"
+                    placeholder="Date of Session"
+                    required
+                    value={
+                      formData.date_of_session ??
+                      originalData.date_of_session ??
+                      ""
+                    }
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        date_of_session: e.target.value
+                      })
+                    }
+                  />
+                </InputTextField>
+              </InputContainer>
+
+              <InputContainer className="flex-1">
+                <InputLabel>TIME OF SESSION</InputLabel>
+                <InputTextField className="flex-1">
+                  <InputIcon>
+                    <ClockIcon />
+                  </InputIcon>
+                  <Input
+                    type="time"
+                    className="text-input"
+                    required
+                    value={
+                      formData.time_of_session ??
+                      originalData.time_of_session ??
+                      ""
+                    }
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        time_of_session: e.target.value
+                      })
+                    }
+                  />
+                </InputTextField>
+              </InputContainer>
+            </div>
+
+            <div className="flex flex-row w-full gap-4">
+              <InputContainer className="flex-1">
+                <InputLabel>DATE OF NEXT SESSION</InputLabel>
+                <InputTextField>
+                  <InputIcon>
+                    <CalendarIcon />
+                  </InputIcon>
+                  <Input
+                    type="date"
+                    className="text-input"
+                    placeholder="Date of Session"
+                    required
+                    value={
+                      formData.date_of_session ??
+                      originalData.date_of_session ??
+                      ""
+                    }
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        date_of_session: e.target.value
+                      })
+                    }
+                  />
+                </InputTextField>
+              </InputContainer>
+
+              <InputContainer className="flex-1">
+                <InputLabel>TIME OF NEXT SESSION</InputLabel>
+                <InputTextField className="flex-1">
+                  <InputIcon>
+                    <ClockIcon />
+                  </InputIcon>
+                  <Input
+                    type="time"
+                    className="text-input"
+                    required
+                    value={
+                      formData.time_of_session ??
+                      originalData.time_of_session ??
+                      ""
+                    }
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        time_of_session: e.target.value
+                      })
+                    }
+                  />
+                </InputTextField>
+              </InputContainer>
+            </div>
 
             <InputContainer>
               <InputLabel>TOTAL AMOUNT</InputLabel>
@@ -247,59 +358,6 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
                   <SelectItem value="GCash">GCash</SelectItem>
                 </ModalSelectContent>
               </Select>
-            </InputContainer>
-          </div>
-
-          <div className="flex flex-row w-full gap-4">
-            <InputContainer className="flex-1">
-              <InputLabel>DATE OF SESSION</InputLabel>
-              <InputTextField>
-                <InputIcon>
-                  <CalendarIcon />
-                </InputIcon>
-                <Input
-                  type="date"
-                  className="text-input"
-                  placeholder="Date of Session"
-                  required
-                  value={
-                    formData.date_of_session ??
-                    originalData.date_of_session ??
-                    ""
-                  }
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      date_of_session: e.target.value
-                    })
-                  }
-                />
-              </InputTextField>
-            </InputContainer>
-
-            <InputContainer className="flex-1">
-              <InputLabel>TIME OF SESSION</InputLabel>
-              <InputTextField className="flex-1">
-                <InputIcon>
-                  <ClockIcon />
-                </InputIcon>
-                <Input
-                  type="time"
-                  className="text-input"
-                  required
-                  value={
-                    formData.time_of_session ??
-                    originalData.time_of_session ??
-                    ""
-                  }
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      time_of_session: e.target.value
-                    })
-                  }
-                />
-              </InputTextField>
             </InputContainer>
           </div>
 
