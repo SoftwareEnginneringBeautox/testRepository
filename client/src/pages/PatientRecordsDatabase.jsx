@@ -46,6 +46,7 @@ function PatientRecordsDatabase() {
   const [selectedEntry, setSelectedEntry] = useState(null);
   const [records, setRecords] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [sortOption, setSortOption] = useState("");
 
   // Fetch patient records from the API
   const fetchRecords = async () => {
@@ -130,10 +131,27 @@ function PatientRecordsDatabase() {
     fetchRecords();
   };
 
-  const filteredRecords = records.filter((record) => {
+  const filteredRecords = [...records]
+  .filter((record) => {
     const name = record.client || record.patient_name || "";
     return name.toLowerCase().includes(searchTerm.toLowerCase());
+  })
+  .sort((a, b) => {
+    if (sortOption === "alphabetical") {
+      const nameA = (a.client || a.patient_name || "").toLowerCase();
+      const nameB = (b.client || b.patient_name || "").toLowerCase();
+      return nameA.localeCompare(nameB);
+    }
+
+    if (sortOption === "date") {
+      const dateA = new Date(a.dateTransacted || a.date_of_session);
+      const dateB = new Date(b.dateTransacted || b.date_of_session);
+      return dateB - dateA; // Most recent first
+    }
+
+    return 0;
   });
+
 
   const generatePRDReport = (patientRecords) => {
     if (!patientRecords || patientRecords.length === 0) {
@@ -270,7 +288,7 @@ function PatientRecordsDatabase() {
             <MagnifyingGlassIcon />
           </InputTextField>
 
-          <Select>
+          <Select onValueChange={setSortOption}>
             <SelectTrigger placeholder="SORT BY" icon={<SortIcon />}>
               <SelectValue />
             </SelectTrigger>
