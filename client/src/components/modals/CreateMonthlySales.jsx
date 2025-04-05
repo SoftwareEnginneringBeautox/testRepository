@@ -33,12 +33,16 @@ import ExpenseTypeIcon from "@/assets/icons/ExpenseTypeIcon";
 import CalendarIcon from "@/assets/icons/CalendarIcon";
 
 
-function CreateMonthlySales({ isOpen, onClose, onCreateSuccess }) {
+function CreateMonthlySales({ isOpen, onClose, onCreateSuccess, categories }) {
+  // Ensure categories is always an array
+  const safeCategories = Array.isArray(categories) ? categories : [];
+
   const [formData, setFormData] = useState({
     expenseType: "",
     amount: "",
     date: new Date().toISOString().split('T')[0]
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (!isOpen) return null;
 
@@ -57,7 +61,7 @@ function CreateMonthlySales({ isOpen, onClose, onCreateSuccess }) {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     // Validate form data
@@ -66,20 +70,31 @@ function CreateMonthlySales({ isOpen, onClose, onCreateSuccess }) {
       return;
     }
 
-    // Format data to match server expectations
-    const formattedData = {
-      category: formData.expenseType,
-      expense: parseFloat(formData.amount),
-      date: formData.date
-    };
+    setIsSubmitting(true);
 
-    console.log("Submitting expense data:", formattedData);
+    try {
+      // Format data to match server expectations
+      const formattedData = {
+        category: formData.expenseType,
+        expense: parseFloat(formData.amount),
+        date: formData.date
+      };
 
-    // Call the callback with form data
-    onCreateSuccess(formattedData);
+      console.log("Submitting expense data:", formattedData);
 
-    // Close the modal
-    onClose();
+      // Call the callback with form data
+      if (onCreateSuccess) {
+        await onCreateSuccess(formattedData);
+      }
+
+      // Close the modal
+      onClose();
+    } catch (error) {
+      console.error("Error creating expense:", error);
+      alert("An error occurred while creating the expense. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -106,23 +121,17 @@ function CreateMonthlySales({ isOpen, onClose, onCreateSuccess }) {
                   icon={<ExpenseTypeIcon className="w-4 h-4" />}
                 />
                 <ModalSelectContent>
-                  <SelectItem value="DAILY EXPENSE">DAILY EXPENSE</SelectItem>
-                  <SelectItem value="MONTHLY PURCHASE ORDER">
-                    MONTHLY PURCHASE ORDER
-                  </SelectItem>
-                  <SelectItem value="SALARY">SALARY</SelectItem>
-                  <SelectItem value="COMMISSIONS">COMMISSIONS</SelectItem>
-                  <SelectItem value="ELECTRICITY">ELECTRICITY</SelectItem>
-                  <SelectItem value="WATER">WATER</SelectItem>
-                  <SelectItem value="ACCOUNTING/TAX">ACCOUNTING/TAX</SelectItem>
-                  <SelectItem value="RENTAL">RENTAL</SelectItem>
-                  <SelectItem value="BUSINESS PHONE">BUSINESS PHONE</SelectItem>
-                  <SelectItem value="RENOVATIONS">RENOVATIONS</SelectItem>
-                  <SelectItem value="INTERNET">INTERNET</SelectItem>
-                  <SelectItem value="MARKETING TEAM">MARKETING TEAM</SelectItem>
-                  <SelectItem value="SOCIAL MEDIA ADVERTISEMENTS">
-                    SOCIAL MEDIA ADVERTISEMENTS
-                  </SelectItem>
+                  {safeCategories.length > 0 ? (
+                    safeCategories.map((category) => (
+                      <SelectItem key={category.id} value={category.name}>
+                        {category.name.toUpperCase()}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <SelectItem value="" disabled>
+                      No categories available
+                    </SelectItem>
+                  )}
                 </ModalSelectContent>
               </Select>
             </InputContainer>
@@ -170,13 +179,18 @@ function CreateMonthlySales({ isOpen, onClose, onCreateSuccess }) {
               className="w-1/2"
               onClick={onClose}
               type="button"
+              disabled={isSubmitting}
             >
               <ChevronLeftIcon />
               CANCEL AND RETURN
             </Button>
-            <Button className="w-1/2" type="submit">
+            <Button 
+              className="w-1/2" 
+              type="submit"
+              disabled={isSubmitting}
+            >
               <PlusIcon />
-              ADD EXPENSE
+              {isSubmitting ? "ADDING..." : "ADD EXPENSE"}
             </Button>
           </div>
         </form>

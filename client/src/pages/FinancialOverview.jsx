@@ -61,6 +61,7 @@ function FinancialOverview() {
   });
   const [salesData, setSalesData] = useState([]);
   const [expensesData, setExpensesData] = useState([]);
+  const [categories, setCategories] = useState([]);
 
   const { currentModal, openModal, closeModal } = useModal();
 
@@ -104,7 +105,18 @@ function FinancialOverview() {
       .then((response) => response.json())
       .then((data) => setExpensesData(data))
       .catch((error) => console.error("Error fetching expenses data:", error));
-  }, []);
+
+    fetch("http://localhost:4000/api/categories")
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Categories fetched:", data);
+        setCategories(data || []);
+      })
+     .catch((error) => {
+      console.error("Error fetching categories:", error);
+      setCategories([]);  // Set to empty array on error
+    });
+}, []);
 
   const refreshExpensesData = async () => {
     try {
@@ -357,6 +369,102 @@ function FinancialOverview() {
   };
   // REPORT GENERATING FUNCTIONS END HERE
 
+  // Function to refresh categories after changes
+  const refreshCategories = async () => {
+    try {
+      const response = await fetch("http://localhost:4000/api/categories");
+      const data = await response.json();
+      setCategories(data);
+    } catch (error) {
+      console.error("Error refreshing categories data:", error);
+    }
+  };
+
+  // Functions for category management
+  const handleCreateCategory = async (categoryData) => {
+    try {
+      console.log("Create category callback called with:", categoryData);
+      // The category should already be created in the database via the CreateCategory component
+      // Just update the local state
+      setCategories(prevCategories => [
+        ...prevCategories,
+        { id: categoryData.id, name: categoryData.name }
+      ]);
+
+      closeModal();
+    } catch (error) {
+      console.error("Create category error:", error);
+      // Error should be handled in the CreateCategory component
+    }
+  };
+
+  const handleEditCategory = async (categoryData) => {
+    try {
+      console.log("Edit category callback called with:", categoryData);
+
+      // Check for duplicate category names (case insensitive)
+      const isDuplicate = categories.some(
+        category =>
+          category.id !== categoryData.id &&
+          category.name.toLowerCase() === categoryData.name.trim().toLowerCase()
+      );
+
+      if (isDuplicate) {
+        alert("A category with this name already exists");
+        return;
+      }
+
+      // Call the API to update the category
+      const response = await fetch(`http://localhost:4000/api/categories/${categoryData.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: categoryData.name })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Error updating category");
+      }
+
+      // Update the local state with the edited category
+      setCategories(prevCategories =>
+        prevCategories.map(category =>
+          category.id === categoryData.id
+            ? { ...category, name: categoryData.name }
+            : category
+        )
+      );
+
+      closeModal();
+    } catch (error) {
+      console.error("Edit category error:", error);
+      alert(error.message || "An error occurred while updating the category");
+    }
+  };
+
+  const handleArchiveCategory = async (categoryId) => {
+    try {
+      const response = await fetch(`http://localhost:4000/api/categories/${categoryId}/archive`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" }
+      });
+
+      if (response.ok) {
+        await refreshCategories();
+        closeModal();
+      } else {
+        const errorData = await response.json();
+        alert(errorData.message || "Error archiving category");
+      }
+    } catch (error) {
+      console.error("Archive category error:", error);
+      alert("An error occurred. Please try again.");
+    }
+  };
+
+  // Add state for selected category
+  const [selectedCategory, setSelectedCategory] = useState(null);
+
   // Create new expense function
   const handleCreateExpense = async (expenseData) => {
     try {
@@ -599,67 +707,46 @@ function FinancialOverview() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                <TableRow>
-                  <TableCell className="flex items-center justify-between gap-4 h-full w-full">
-                    CHECK 1
-                    <DropdownMenu>
-                      <DropdownMenuTrigger>
-                        <EllipsisIcon />
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent>
-                        <DropdownMenuGroup>
-                          <DropdownMenuItem
-                            onClick={() => handleEditClick(expense)}
-                          >
-                            <EditIcon />
-                            <p className="font-semibold">Edit</p>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => {
-                              const expense = expensesData[index];
-                              console.log("Setting expense to archive:", expense);
-                              setSelectedExpense(expense);
-                              openModal("deleteMonthlyExpense");
-                            }}
-                          >
-                            <ArchiveIcon />
-                            <p className="font-semibold">Archive</p>
-                          </DropdownMenuItem>
-                        </DropdownMenuGroup>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="flex items-center justify-between gap-4 h-full w-full">
-                    CHECK 2
-                    <DropdownMenu>
-                      <DropdownMenuTrigger>
-                        <EllipsisIcon />
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent>
-                        <DropdownMenuGroup>
-                          <DropdownMenuItem
-                            onClick={() => {
-                              openModal("editCategory");
-                            }}
-                          >
-                            <EditIcon />
-                            <p className="font-semibold">Edit</p>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => {
-                              openModal("archiveCategory");
-                            }}
-                          >
-                            <ArchiveIcon />
-                            <p className="font-semibold">Archive</p>
-                          </DropdownMenuItem>
-                        </DropdownMenuGroup>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
+                {categories.length > 0 ? (
+                  categories.map((category) => (
+                    <TableRow key={category.id}>
+                      <TableCell className="flex items-center justify-between gap-4 h-full w-full">
+                        {category.name.toUpperCase()}
+                        <DropdownMenu>
+                          <DropdownMenuTrigger>
+                            <EllipsisIcon />
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent>
+                            <DropdownMenuGroup>
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  setSelectedCategory(category);
+                                  openModal("editCategory");
+                                }}
+                              >
+                                <EditIcon />
+                                <p className="font-semibold">Edit</p>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  setSelectedCategory(category);
+                                  openModal("archiveCategory");
+                                }}
+                              >
+                                <ArchiveIcon />
+                                <p className="font-semibold">Archive</p>
+                              </DropdownMenuItem>
+                            </DropdownMenuGroup>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell className="text-center">No categories available</TableCell>
+                  </TableRow>
+                )}
               </TableBody>
             </Table>
             <Button
@@ -778,12 +865,13 @@ function FinancialOverview() {
         </div>
       </div>
 
-     
+
       {currentModal === "createMonthlyExpense" && (
         <CreateMonthlySales
           isOpen={true}
           onClose={closeModal}
           onCreateSuccess={handleCreateExpense}
+          categories={categories} // Make sure this is passed correctly
         />
       )}
 
@@ -792,8 +880,9 @@ function FinancialOverview() {
           isOpen={true}
           onClose={closeModal}
           onEditSuccess={handleEditExpense}
+          categories={categories} // Make sure this is passed correctly
           initialData={{
-            amount: expenseToEdit.expense, // Make sure these property names match
+            amount: expenseToEdit.expense,
             category: expenseToEdit.category,
             date: expenseToEdit.date
           }}
@@ -809,14 +898,33 @@ function FinancialOverview() {
       )}
 
       {currentModal === "createCategory" && (
-        <CreateCategory isOpen onClose={closeModal} />
+        <CreateCategory
+          isOpen={true}
+          onClose={closeModal}
+          onCreateSuccess={handleCreateCategory}
+          categories={categories} // Pass the current categories for duplicate checking
+        />
       )}
+
       {currentModal === "editCategory" && (
-        <EditCategory isOpen onClose={closeModal} />
+        <EditCategory
+          isOpen={true}
+          onClose={closeModal}
+          category={selectedCategory}
+          onEditSuccess={handleEditCategory}
+        />
       )}
+
+
       {currentModal === "archiveCategory" && (
-        <ArchiveCategory isOpen onClose={closeModal} />
+        <ArchiveCategory
+          isOpen={true}
+          onClose={closeModal}
+          onArchiveSuccess={handleArchiveCategory}
+          category={selectedCategory}
+        />
       )}
+
     </div>
   );
 }

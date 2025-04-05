@@ -30,7 +30,9 @@ import EditIcon from "@/assets/icons/EditIcon";
 import ExpenseTypeIcon from "@/assets/icons/ExpenseTypeIcon";
 import CalendarIcon from "@/assets/icons/CalendarIcon";
 
-function EditMonthlySales({ isOpen, onClose, onEditSuccess, initialData }) {
+function EditMonthlySales({ isOpen, onClose, onEditSuccess, initialData, categories }) {
+  // Ensure categories is always an array
+  const safeCategories = Array.isArray(categories) ? categories : [];
   const [formData, setFormData] = useState({
     amount: "",
     category: "",
@@ -92,23 +94,17 @@ function EditMonthlySales({ isOpen, onClose, onEditSuccess, initialData }) {
                   placeholder="Select category"
                 />
                 <ModalSelectContent>
-                  <SelectItem value="DAILY EXPENSE">DAILY EXPENSE</SelectItem>
-                  <SelectItem value="MONTHLY PURCHASE ORDER">
-                    MONTHLY PURCHASE ORDER
-                  </SelectItem>
-                  <SelectItem value="SALARY">SALARY</SelectItem>
-                  <SelectItem value="COMMISSIONS">COMMISSIONS</SelectItem>
-                  <SelectItem value="ELECTRICITY">ELECTRICITY</SelectItem>
-                  <SelectItem value="WATER">WATER</SelectItem>
-                  <SelectItem value="ACCOUNTING/TAX">ACCOUNTING/TAX</SelectItem>
-                  <SelectItem value="RENTAL">RENTAL</SelectItem>
-                  <SelectItem value="BUSINESS PHONE">BUSINESS PHONE</SelectItem>
-                  <SelectItem value="RENOVATIONS">RENOVATIONS</SelectItem>
-                  <SelectItem value="INTERNET">INTERNET</SelectItem>
-                  <SelectItem value="MARKETING TEAM">MARKETING TEAM</SelectItem>
-                  <SelectItem value="SOCIAL MEDIA ADVERTISEMENTS">
-                    SOCIAL MEDIA ADVERTISEMENTS
-                  </SelectItem>
+                  {safeCategories.length > 0 ? (
+                    safeCategories.map((category) => (
+                      <SelectItem key={category.id} value={category.name}>
+                        {category.name.toUpperCase()}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <SelectItem value="" disabled>
+                      No categories available
+                    </SelectItem>
+                  )}
                 </ModalSelectContent>
               </Select>
             </InputContainer>

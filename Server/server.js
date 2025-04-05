@@ -1,7 +1,7 @@
 // Load environment variables (for local dev; in production, AWS environment variables override these)
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config();
-} 
+}
 
 const express = require('express');
 const cors = require('cors');
@@ -103,7 +103,7 @@ app.use(cors({
   origin: function (origin, callback) {
     // Allow requests with no origin (like mobile apps or curl)
     if (!origin) return callback(null, true);
-    
+
     // Normalize the origin by removing any trailing slash
     const normalizedOrigin = origin.endsWith('/') ? origin.slice(0, -1) : origin;
     if (allowedOrigins.indexOf(normalizedOrigin) !== -1) {
@@ -623,12 +623,12 @@ app.get("/sales", async (req, res) => {
 app.post("/api/expenses", async (req, res) => {
   try {
     const { category, expense, date } = req.body;
-    
+
     // Validate required fields
     if (!category || !expense || !date) {
-      return res.status(400).json({ 
-        success: false, 
-        message: "Missing required fields: category, expense, and date are required" 
+      return res.status(400).json({
+        success: false,
+        message: "Missing required fields: category, expense, and date are required"
       });
     }
 
@@ -643,9 +643,9 @@ app.post("/api/expenses", async (req, res) => {
       VALUES ($1, $2, $3, $4)
       RETURNING id;
     `;
-    
+
     const result = await pool.query(insertQuery, [category, expense, date, false]);
-    
+
     // Return success with the new expense ID
     res.status(201).json({
       success: true,
@@ -654,10 +654,10 @@ app.post("/api/expenses", async (req, res) => {
     });
   } catch (error) {
     console.error('Error creating expense:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Error creating expense', 
-      error: error.message 
+    res.status(500).json({
+      success: false,
+      message: 'Error creating expense',
+      error: error.message
     });
   }
 });
@@ -686,6 +686,166 @@ app.get("/financial-overview", async (req, res) => {
     res.json({ totalSales, totalExpenses, netIncome });
   } catch (err) {
     res.status(500).send(err.message);
+  }
+});
+
+/* --------------------------------------------
+   CATEGORIES MANAGEMENT ENDPOINTS
+--------------------------------------------- */
+
+// Create the expense_categories table if it doesn't exist
+app.post('/api/initialize-categories-table', async (req, res) => {
+  try {
+    // Create the categories table if it doesn't exist
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS expense_categories (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        archived BOOLEAN DEFAULT FALSE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    res.json({ success: true, message: 'Expense categories table initialized' });
+  } catch (error) {
+    console.error('Error initializing expense_categories table:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error initializing expense_categories table',
+      error: error.message
+    });
+  }
+});
+
+// Get all active categories
+app.get('/api/categories', async (req, res) => {
+  try {
+    const result = await pool.query(
+      'SELECT * FROM expense_categories WHERE archived = FALSE ORDER BY name'
+    );
+
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error retrieving categories:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error retrieving categories',
+      error: error.message
+    });
+  }
+});
+
+// Create a new category
+app.post('/api/categories', async (req, res) => {
+  try {
+    const { name } = req.body;
+
+    if (!name || name.trim() === '') {
+      return res.status(400).json({
+        success: false,
+        message: 'Category name is required'
+      });
+    }
+
+    const trimmedName = name.trim();
+
+    // Check if the category already exists (case insensitive)
+    const checkQuery = 'SELECT * FROM expense_categories WHERE LOWER(name) = LOWER($1) AND archived = FALSE';
+    const checkResult = await pool.query(checkQuery, [trimmedName]);
+
+    if (checkResult.rowCount > 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'This category already exists'
+      });
+    }
+
+    // Create the new category
+    const insertQuery = 'INSERT INTO expense_categories (name) VALUES ($1) RETURNING id';
+    const result = await pool.query(insertQuery, [trimmedName]);
+
+    res.status(201).json({
+      success: true,
+      id: result.rows[0].id,
+      message: 'Category created successfully'
+    });
+  } catch (error) {
+    console.error('Error creating category:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error creating category',
+      error: error.message
+    });
+  }
+});
+
+// Update an existing category
+app.put('/api/categories/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name } = req.body;
+
+    console.log(`Updating category ${id} with name: ${name}`);
+
+    if (!name || name.trim() === '') {
+      return res.status(400).json({
+        success: false,
+        message: 'Category name is required'
+      });
+    }
+
+    const query = 'UPDATE expense_categories SET name = $1 WHERE id = $2';
+    const result = await pool.query(query, [name.trim(), id]);
+
+    console.log(`Update result: ${result.rowCount} rows affected`);
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Category not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Category updated successfully'
+    });
+  } catch (error) {
+    console.error('Error updating category:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error updating category',
+      error: error.message
+    });
+  }
+});
+
+// Archive a category
+app.patch('/api/categories/:id/archive', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const query = 'UPDATE expense_categories SET archived = TRUE WHERE id = $1';
+    const result = await pool.query(query, [id]);
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Category not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Category archived successfully'
+    });
+  } catch (error) {
+    console.error('Error archiving category:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error archiving category',
+      error: error.message
+    });
   }
 });
 
