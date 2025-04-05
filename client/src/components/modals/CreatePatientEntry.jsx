@@ -51,7 +51,9 @@ function CreatePatientEntry({ isOpen, onClose }) {
 
   const [amount, setAmount] = useState(""); // Original amount input by the user
   const [packageDiscount, setPackageDiscount] = useState("");
-  const [totalAmount, setTotalAmount] = useState(""); // Computed automatically
+  const [totalAmount, setTotalAmount] = useState("");
+  const [amountPaid, setAmountPaid] = useState(""); // Amount paid by the patient
+  const [referenceNumber, setReferenceNumber] = useState("");
 
   // Payment method radio
   const [paymentMethod, setPaymentMethod] = useState("full-payment");
@@ -104,7 +106,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
   useEffect(() => {
     async function fetchPackages() {
       try {
-        const response = await axios.get(`${API_BASE_URL}/api/packages`, {
+        const response = await axios.get(`${API_BASE_URL}/api/packages?archived=false`, {
           withCredentials: true
         });
         setPackagesList(response.data);
@@ -119,7 +121,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
   useEffect(() => {
     async function fetchTreatments() {
       try {
-        const response = await axios.get(`${API_BASE_URL}/api/treatments`, {
+        const response = await axios.get(`${API_BASE_URL}/api/treatments?archived=false`, {
           withCredentials: true
         });
         setTreatmentsList(response.data);
@@ -129,6 +131,18 @@ function CreatePatientEntry({ isOpen, onClose }) {
     }
     fetchTreatments();
   }, []);
+
+  useEffect(() => {
+    if (isOpen) {
+      const now = new Date();
+      const ref = now
+        .toISOString()
+        .replace(/[-:.TZ]/g, "")
+        .slice(0, 17); // YYYYMMDDHHMMSSmmm
+      setReferenceNumber(`REF${ref}`);
+    }
+  }, [isOpen]);
+  
 
   if (!isOpen) return null;
 
@@ -169,6 +183,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
       amount: parseFloat(amount) || 0,
       packageDiscount: numericDiscount,
       totalAmount: numericTotal,
+      amountPaid: parseFloat(amountPaid) || 0,
       paymentMethod,
       dateOfSession,
       timeOfSession,
@@ -182,12 +197,14 @@ function CreatePatientEntry({ isOpen, onClose }) {
       package_name: packageName,
       treatment: treatment,
       amount: parseFloat(amount) || 0,
+      amount_paid: parseFloat(amountPaid) || 0,
       package_discount: numericDiscount,
       total_amount: numericTotal,
       payment_method: paymentMethod,
       date_of_session: dateOfSession,
       time_of_session: timeOfSession,
-      consent_form_signed: consentFormSigned
+      consent_form_signed: consentFormSigned,
+      reference_number: referenceNumber
     };
 
     console.log("Payload being sent to API:", payload);
@@ -213,6 +230,10 @@ function CreatePatientEntry({ isOpen, onClose }) {
       console.error("Error during patient record creation:", error);
     }
   };
+
+  const numericTotalAmount = parseFloat(totalAmount) || 0;
+  const numericAmountPaid = parseFloat(amountPaid) || 0;
+  const remainingBalance = numericTotalAmount - numericAmountPaid;
 
   return (
     <ModalContainer>
@@ -402,6 +423,47 @@ function CreatePatientEntry({ isOpen, onClose }) {
                 />
               </InputTextField>
             </InputContainer>
+
+            <InputContainer>
+              <InputLabel>AMOUNT PAID</InputLabel>
+              <InputTextField>
+                <InputIcon>
+                  <PesoIcon />
+                </InputIcon>
+                <CurrencyInput
+                  className="outline-none flex-1 bg-[#F5F3F0]"
+                  prefix="₱"
+                  placeholder="₱0.00"
+                  decimalsLimit={2}
+                  allowNegativeValue={false}
+                  value={amountPaid}
+                  onValueChange={(value) => setAmountPaid(value || "")}
+                />
+              </InputTextField>
+            </InputContainer>
+
+            {/* REMAINING BALANCE */}
+            <InputContainer>
+              <InputLabel>REMAINING BALANCE</InputLabel>
+              <InputTextField>
+                <InputIcon>
+                  <PesoIcon />
+                </InputIcon>
+                <Input
+                  readOnly
+                  className="bg-[#F5F3F0] text-gray-500"
+                  value={
+                    isNaN(remainingBalance)
+                      ? ""
+                      : new Intl.NumberFormat("en-PH", {
+                          style: "currency",
+                          currency: "PHP"
+                        }).format(remainingBalance)
+                  }
+                />
+              </InputTextField>
+            </InputContainer>
+
           </div>
 
           {/* PAYMENT METHOD RADIO */}
@@ -457,6 +519,14 @@ function CreatePatientEntry({ isOpen, onClose }) {
                 />
               </InputTextField>
             </InputContainer>
+
+            <InputContainer>
+            <InputLabel>REFERENCE NUMBER</InputLabel>
+            <InputTextField>
+              <Input readOnly value={referenceNumber} className="bg-[#F5F3F0] text-gray-500" />
+            </InputTextField>
+          </InputContainer>
+
           </div>
 
           {/* CONSENT FORM CHECKBOX */}
