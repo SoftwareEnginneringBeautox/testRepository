@@ -68,27 +68,28 @@ function CreateCategory({ isOpen, onClose, onCreateSuccess, categories = [] }) {
       });
 
       const result = await response.json();
-      console.log("Create category API response:", result);
-
-      if (result.success) {
-        // If onCreateSuccess callback is provided, call it
-        if (onCreateSuccess) {
-          onCreateSuccess({ id: result.id, name: categoryName });
-        }
-        // Close the modal
-        onClose();
-      } else {
-        alert(result.message || "Error creating category");
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to create category");
       }
-    } catch (error) {
-      console.error("Error creating category:", error);
-      alert("An error occurred. Please try again.");
+
+      // Call the parent component's callback with the new category
+      if (onCreateSuccess) {
+        onCreateSuccess({
+          id: data.id,
+          name: categoryName.trim()
+        });
+      }
+
+      // Close the modal
+      onClose();
+    } catch (err) {
+      console.error("Error creating category:", err);
+      setError(err.message || "An error occurred while creating the category");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  if (!isOpen) return null;
 
   return (
     <ModalContainer>
@@ -117,6 +118,11 @@ function CreateCategory({ isOpen, onClose, onCreateSuccess, categories = [] }) {
                 />
               </InputTextField>
             </InputContainer>
+            {error && (
+                  <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-2 rounded-md text-sm mt-2">
+                    {error}
+                  </div>
+                )}
           </div>
           <div className="flex flex-row gap-4 mt-6 w-full">
             <Button

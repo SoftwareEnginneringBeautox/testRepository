@@ -653,14 +653,14 @@ function FinancialOverview() {
             {salesData.length > 0 ? (
               salesData.map((sale, index) => (
                 <TableRow key={index}>
-                  <TableCell className="whitespace-nowrap">{sale.client.toUpperCase()}</TableCell>
-                  <TableCell className="whitespace-nowrap">{sale.person_in_charge.toUpperCase()}</TableCell>
+                  <TableCell className="whitespace-nowrap">{sale.client ? sale.client.toUpperCase() : 'N/A'}</TableCell>
+                  <TableCell className="whitespace-nowrap">{sale.person_in_charge ? sale.person_in_charge.toUpperCase() : 'N/A'}</TableCell>
                   <TableCell className="whitespace-nowrap">
                     {format(new Date(sale.date_transacted), "MMMM dd, yyyy").toUpperCase()}
                   </TableCell>
-                  <TableCell className="whitespace-nowrap">{sale.payment_method.toUpperCase()}</TableCell>
-                  <TableCell className="whitespace-nowrap">{sale.packages.toUpperCase()}</TableCell>
-                  <TableCell className="whitespace-nowrap">{sale.treatment.toUpperCase()}</TableCell>
+                  <TableCell className="whitespace-nowrap">{sale.payment_method ? sale.payment_method.toUpperCase() : 'N/A'}</TableCell>
+                  <TableCell className="whitespace-nowrap">{sale.packages ? sale.packages.toUpperCase() : 'N/A'}</TableCell>
+                  <TableCell className="whitespace-nowrap">{sale.treatment ? sale.treatment.toUpperCase() : 'N/A'}</TableCell>
                   <TableCell className="whitespace-nowrap">
                     {new Intl.NumberFormat("en-PH", {
                       style: "currency",
@@ -714,7 +714,7 @@ function FinancialOverview() {
                   categories.map((category) => (
                     <TableRow key={category.id}>
                       <TableCell className="flex items-center justify-between gap-4 h-full w-full">
-                        {category.name.toUpperCase()}
+                        {category.name ? category.name.toUpperCase() : 'N/A'}
                         <DropdownMenu>
                           <DropdownMenuTrigger>
                             <EllipsisIcon />
@@ -777,7 +777,7 @@ function FinancialOverview() {
                       {format(new Date(expense.date), "MMMM dd, yyyy").toUpperCase()}
                     </TableCell>
                     <TableCell className="py-4 text-center whitespace-nowrap">
-                      {expense.category.toUpperCase()}
+                      {expense.category ? expense.category.toUpperCase() : 'N/A'}
                     </TableCell>
                     <TableCell className="py-4 text-center whitespace-nowrap">
                       {new Intl.NumberFormat("en-PH", {
