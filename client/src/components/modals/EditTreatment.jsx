@@ -25,18 +25,23 @@ import EditIcon from "@/assets/icons/EditIcon";
 import TreatmentIcon from "@/assets/icons/TreatmentIcon";
 import PesoIcon from "@/assets/icons/PesoIcon";
 import ClockIcon from "@/assets/icons/ClockIcon";
+import e from "express";
 
 function EditTreatment({ isOpen, onClose, entryData, onSubmit }) {
   const [formData, setFormData] = useState({
     treatment_name: "",
-    price: ""
+    price: "",
+    duration: "",
+    expiration: ""
   });
 
   useEffect(() => {
     if (entryData) {
       setFormData({
         treatment_name: entryData.treatment_name || "",
-        price: entryData.price || ""
+        price: entryData.price || "",
+        duration: entryData.duration || "",
+        expiration: entryData.expiration || ""
       });
     }
   }, [entryData]);
@@ -119,21 +124,33 @@ function EditTreatment({ isOpen, onClose, entryData, onSubmit }) {
                 type="number"
                 min="0"
                 step="1"
+                value={formData.duration}
+                onChange={(e) =>
+                  setFormData({ ...formData, duration: e.target.value })
+                }
                 required
               />
             </InputTextField>
           </InputContainer>
-
-          {/* Description */}
           <InputContainer>
-            <InputLabel>DESCRIPTION</InputLabel>
-            <InputAreaField>
-              <InputArea
-                data-cy="treatment-description"
-                placeholder="e.g. A deep exfoliation facial treatment"
-              />
-            </InputAreaField>
-          </InputContainer>
+          <InputLabel>EXPIRATION (IN WEEKS)</InputLabel>
+          <InputTextField>
+            <InputIcon>
+              <TreatmentIcon />
+            </InputIcon>
+            <Input
+              data-cy="treatment-expiration"
+              placeholder="e.g. 12"
+              type="number"
+              min="0"
+              step="1"
+              value={formData.expiration}
+              onChange={(e) =>
+                setFormData({ ...formData, expiration: e.target.value })
+              }
+            />
+          </InputTextField>
+        </InputContainer>
 
           <div className="flex flex-row gap-4 mt-6 w-full">
             <Button

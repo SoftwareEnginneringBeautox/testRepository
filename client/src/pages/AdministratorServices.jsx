@@ -211,6 +211,13 @@ function AdministratorServices() {
               PRICE
             </TableHead>
             <TableHead
+            className="py-4 text-center"
+            data-cy="treatment-expiration-header"
+          >
+            EXPIRATION
+          </TableHead>
+
+            <TableHead
               className="py-4 text-center"
               data-cy="treatment-actions-header"
             ></TableHead>
@@ -241,6 +248,13 @@ function AdministratorServices() {
                 >
                   ₱{treatment.price}
                 </TableCell>
+                <TableCell
+                  className="py-4 text-center"
+                  data-cy={`treatment-expiration-${treatment.id}`}
+                >
+                  {treatment.expiration ? `${treatment.expiration} week${treatment.expiration > 1 ? "s" : ""}` : "-"}
+                </TableCell>
+
                 <TableCell
                   className="py-4 text-center"
                   data-cy={`treatment-actions-${treatment.id}`}
@@ -338,6 +352,13 @@ function AdministratorServices() {
             </TableHead>
             <TableHead
               className="py-4 text-center"
+              data-cy="package-expiration-header"
+            >
+              EXPIRATION
+            </TableHead>
+
+            <TableHead
+              className="py-4 text-center"
               data-cy="package-actions-header"
             ></TableHead>
           </TableRow>
@@ -413,6 +434,13 @@ function AdministratorServices() {
                 >
                   ₱{pkg.price}
                 </TableCell>
+                <TableCell
+                className="py-4 text-center"
+                data-cy={`package-expiration-${pkg.id}`}
+              >
+                {pkg.expiration ? `${pkg.expiration} week${pkg.expiration > 1 ? "s" : ""}` : "-"}
+              </TableCell>
+
                 <TableCell
                   className="py-4 text-center"
                   data-cy={`package-actions-${pkg.id}`}

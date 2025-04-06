@@ -417,18 +417,18 @@ app.get('/api/appointments', async (req, res) => {
 // Create a new treatment
 app.post('/api/treatments', async (req, res) => {
   try {
-    const { treatment_name, price, duration, description } = req.body;
+    const { treatment_name, price, duration, expiration } = req.body;
     const insertQuery = `
       INSERT INTO treatments (
         treatment_name,
         price,
         duration,
-        description
+        expiration
       )
       VALUES ($1, $2, $3, $4)
       RETURNING id;
     `;
-    const result = await pool.query(insertQuery, [treatment_name, price, duration, description]);
+    const result = await pool.query(insertQuery, [treatment_name, price, duration, expiration]);
     res.json({ success: true, message: 'Treatment created', treatmentId: result.rows[0].id });
   } catch (error) {
     console.error('Error creating treatment:', error);
@@ -454,18 +454,19 @@ app.get('/api/treatments', async (req, res) => {
 // Create a new package
 app.post('/api/packages', async (req, res) => {
   try {
-    const { package_name, treatment_ids, sessions, price } = req.body;
+    const { package_name, treatment_ids, sessions, price, expiration } = req.body;
     const insertQuery = `
       INSERT INTO packages (
         package_name,
         treatment_ids,
         sessions,
-        price
+        price,
+        expiration
       )
-      VALUES ($1, $2, $3, $4)
+      VALUES ($1, $2, $3, $4, $5)
       RETURNING id;
     `;
-    const result = await pool.query(insertQuery, [package_name, treatment_ids, sessions, price]);
+    const result = await pool.query(insertQuery, [package_name, treatment_ids, sessions, price, expiration]);
     res.json({ success: true, message: 'Package created', packageId: result.rows[0].id });
   } catch (error) {
     console.error('Error creating package:', error);

@@ -37,6 +37,7 @@ function CreatePackage({ isOpen, onClose }) {
   const API_BASE_URL = import.meta.env.VITE_API_URL;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [expiration, setExpiration] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -115,7 +116,8 @@ function CreatePackage({ isOpen, onClose }) {
       treatments: selectedTreatmentNames,
       sessions: parseInt(numberOfTreatments, 10) || 0,
       price: parseFloat(amount) || 0,
-      treatment_ids: selectedTreatmentIds.map(Number)
+      treatment_ids: selectedTreatmentIds.map(Number),
+      expiration: parseInt(expiration, 10) || 0
     };
 
     try {
@@ -216,19 +218,21 @@ function CreatePackage({ isOpen, onClose }) {
             </InputContainer>
 
             <InputContainer>
-              <InputLabel>EXPIRATION DATE</InputLabel>
-              <InputTextField>
-                <InputIcon>
-                  <CalendarIcon />
-                </InputIcon>
-                <Input
-                  name="date"
-                  type="date"
-                  placeholder="Select expiration date"
-                  required
-                  className="text-input"
-                />
-              </InputTextField>
+            <InputLabel>EXPIRATION (IN WEEKS)</InputLabel>
+          <InputTextField>
+            <InputIcon>
+              <CalendarIcon />
+            </InputIcon>
+            <Input
+              type="number"
+              min="1"
+              placeholder="e.g. 12 weeks"
+              value={expiration}
+              onChange={(e) => setExpiration(e.target.value)}
+              required
+              className="text-input"
+            />
+          </InputTextField>
             </InputContainer>
           </div>
 

@@ -34,7 +34,6 @@ function CreateTreatment({ isOpen, onClose }) {
   const [treatmentName, setTreatmentName] = useState("");
   const [price, setPrice] = useState("");
   const [duration, setDuration] = useState("");
-  const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [existingTreatments, setExistingTreatments] = useState([]);
@@ -76,7 +75,7 @@ function CreateTreatment({ isOpen, onClose }) {
       treatment_name: treatmentName,
       price: parseFloat(price) || 0,
       duration: parseInt(duration, 10) || 0,
-      description
+      
     };
 
     try {
@@ -167,18 +166,7 @@ function CreateTreatment({ isOpen, onClose }) {
               </InputTextField>
             </InputContainer>
 
-            {/* Description */}
-            <InputContainer>
-              <InputLabel>DESCRIPTION</InputLabel>
-              <InputAreaField>
-                <InputArea
-                  data-cy="treatment-description"
-                  placeholder="e.g. A deep exfoliation facial treatment"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                />
-              </InputAreaField>
-            </InputContainer>
+          
 
             {error && <p className="text-red-500">{error}</p>}
           </div>

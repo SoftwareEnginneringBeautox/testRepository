@@ -35,7 +35,7 @@ function EditPackage({ isOpen, onClose, entryData, onSubmit }) {
     treatment_ids: [],
     sessions: "",
     price: "",
-    expiration_date: ""
+    expiration: ""
   });
 
   const [treatments, setTreatments] = useState([]);
@@ -63,28 +63,27 @@ function EditPackage({ isOpen, onClose, entryData, onSubmit }) {
 
   // ✅ Initialize formData only once per modal open
   useEffect(() => {
-    if (!entryData || initialized.current || !Array.isArray(entryData.treatments)) return;
+    
+    if (
+      !isOpen ||
+      !entryData ||
+      !Array.isArray(entryData.treatments) ||
+      entryData.treatments.length === 0 ||
+      initialized.current
+    ) return;
   
     setFormData({
       package_name: entryData.package_name || "",
       treatment_ids: entryData.treatments.map((t) => t?.id).filter(Boolean),
       sessions: entryData.sessions || "",
       price: entryData.price || "",
-      expiration_date: entryData.expiration_date
-        ? new Date(entryData.expiration_date).toISOString().split("T")[0]
-        : ""
+      expiration: entryData.expiration || ""
     });
-  
+    console.log("entryData received:", entryData);
+
     initialized.current = true;
-  }, [entryData]);
-
-  // ✅ Reset initialized flag on close
-  useEffect(() => {
-    if (!isOpen) {
-      initialized.current = false;
-    }
-  }, [isOpen]);
-
+  }, [isOpen, entryData]);
+  
   if (!isOpen) return null;
 
   const handleSubmit = () => {
@@ -190,20 +189,21 @@ function EditPackage({ isOpen, onClose, entryData, onSubmit }) {
             </InputContainer>
 
             <InputContainer>
-              <InputLabel>EXPIRATION DATE</InputLabel>
-              <InputTextField>
-                <InputIcon>
-                  <PackageIcon />
-                </InputIcon>
-                <Input
-                  type="date"
-                  placeholder="Select expiration date"
-                  value={formData.expiration_date}
-                  onChange={(e) =>
-                    setFormData({ ...formData, expiration_date: e.target.value })
-                  }
-                />
-              </InputTextField>
+            <InputLabel>EXPIRATION (IN WEEKS)</InputLabel>
+            <InputTextField>
+              <InputIcon>
+                <PackageIcon />
+              </InputIcon>
+              <Input
+                type="number"
+                min="1"
+                placeholder="e.g. 12 weeks"
+                value={formData.expiration}
+                onChange={(e) =>
+                  setFormData({ ...formData, expiration: e.target.value })
+                }
+              />
+            </InputTextField>
             </InputContainer>
           </div>
 
