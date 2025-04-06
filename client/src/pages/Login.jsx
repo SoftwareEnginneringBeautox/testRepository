@@ -126,30 +126,30 @@ function Login() {
 
         {/* Login Card */}
         <div className="relative min-h-screen flex items-center justify-center p-4 sm:p-6 md:p-8">
-          <div className="w-full max-w-[320px] sm:max-w-[360px] md:max-w-[400px] bg-white rounded-3xl shadow-lg p-6 sm:p-8">
-            <div className="flex flex-col items-center mb-6 sm:mb-8">
+          <div className="w-[280px] sm:w-[360px] md:w-[400px] bg-white rounded-[32px] shadow-lg p-4 my-8">
+            <div className="flex flex-col items-center mb-6 mt-2">
               <img
                 src={BeautoxLogo}
                 alt="Beautox Logo"
-                className="w-14 sm:w-16 md:w-20 h-auto mb-5 sm:mb-6"
+                className="w-12 h-auto mb-4"
               />
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-black mb-1 sm:mb-2">
+              <h2 className="text-xl font-semibold text-center mb-2">
                 Welcome to PRISM,
               </h2>
-              <p className="text-xs sm:text-sm text-gray-600 text-center max-w-[280px] mx-auto">
-                BEAUTOX PATIENT RECORDS, INTEGRATION, SCHEDULING AND MANAGEMENT
+              <p className="text-[10px] text-center mb-4 max-w-[240px] tracking-wide uppercase">
+                BEAUTOX'S PATIENT RECORDS, INTEGRATION, SCHEDULING, AND MANAGEMENT
               </p>
             </div>
 
             {/* Alert Messages */}
             {errorMessage && (
-              <div className="bg-red-50 border border-red-200 text-red-600 px-3 py-2 rounded-md text-xs sm:text-sm text-center mb-4">
+              <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-2 rounded-md text-sm text-center mb-4">
                 {errorMessage}
               </div>
             )}
 
             {successMessage && (
-              <div className="bg-green-50 border border-green-200 text-green-600 px-3 py-2 rounded-md text-xs sm:text-sm text-center mb-4">
+              <div className="bg-green-50 border border-green-200 text-green-600 px-4 py-2 rounded-md text-sm text-center mb-4">
                 {successMessage}
               </div>
             )}
@@ -157,73 +157,72 @@ function Login() {
             {/* Login Form */}
             <form
               onSubmit={handleSubmit}
-              className="space-y-4 sm:space-y-5 w-full"
+              className="flex flex-col gap-4"
             >
-              <div className="w-full">
-                <label className="block text-sm sm:text-base font-medium text-gray-700 mb-1.5 sm:mb-2">
-                  Username
-                </label>
-                <div className="relative w-full">
+              <InputContainer className="transition-all duration-200">
+                <InputLabel className="text-xs mb-1">Username</InputLabel>
+                <InputTextField className="mt-1">
+                  <InputIcon className="text-gray-400">
+                    <UserIcon className="w-3.5 h-3.5" />
+                  </InputIcon>
                   <Input
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    // className="w-full px-3 sm:px-4 py-2 sm:py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1 focus:ring-purple-500 focus:border-purple-500 text-sm sm:text-base"
-                    placeholder="Enter your username"
+                    className="text-input text-xs h-9 pl-8"
+                    placeholder="e.g. john_doe123"
                     required
                   />
-                </div>
-              </div>
+                </InputTextField>
+              </InputContainer>
 
-              <div className="w-full">
-                <label className="block text-sm sm:text-base font-medium text-gray-700 mb-1.5 sm:mb-2">
-                  Password
-                </label>
-                <div className="relative w-full">
+              <InputContainer className="transition-all duration-200">
+                <InputLabel className="text-xs mb-1">Password</InputLabel>
+                <InputTextField className="mt-1">
+                  <InputIcon className="text-gray-400">
+                    <PasswordIcon className="w-3.5 h-3.5" />
+                  </InputIcon>
                   <Input
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    // className="w-full px-3 sm:px-4 py-2 sm:py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1 focus:ring-purple-500 focus:border-purple-500 text-sm sm:text-base"
-                    placeholder="Enter your password"
+                    className="text-input text-xs h-9 pl-8"
+                    placeholder="e.g. P@ssw0rd123"
                     required
                   />
-                </div>
-              </div>
+                </InputTextField>
+              </InputContainer>
 
-              <div className="flex items-center justify-between text-xs sm:text-sm pt-1">
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    className="rounded border-gray-300 text-purple-600 focus:ring-purple-500 h-3 w-3 sm:h-4 sm:w-4"
-                  />
-                  <span className="ml-2 text-gray-600">Remember me</span>
-                </label>
+              {/* Forgot password link */}
+              <p className="text-gray-500 text-[10px] font-bold text-center mb-4">
+                FORGOT PASSWORD?{" "}
                 <a
                   href="#"
                   onClick={(e) => {
                     e.preventDefault();
                     openModal("forgotPassword");
                   }}
-                  className="text-purple-600 hover:text-purple-500"
+                  className="underline font-bold"
                 >
-                  Forgot password?
+                  CLICK HERE
                 </a>
-              </div>
+              </p>
 
-              <div className="space-y-2.5 sm:space-y-3 pt-4 sm:pt-5 w-full">
+              {/* Buttons */}
+              <div className="space-y-2.5 mb-2">
                 <Button
                   type="submit"
-                  className="w-full bg-purple-950 hover:bg-purple-900 text-white py-2 sm:py-2.5 rounded-lg text-sm sm:text-base font-medium transition-colors duration-200"
+                  className="w-full bg-purple-950 hover:bg-purple-900 text-white h-9 rounded-lg text-xs font-medium transition-colors duration-200 flex items-center justify-center gap-2"
                 >
-                  LOGIN
+                  <LoginIcon className="w-3.5 h-3.5" />
+                  <span>LOGIN</span>
                 </Button>
 
                 <Button
                   variant="outline"
                   onClick={() => navigate("/")}
                   type="button"
-                  className="w-full bg-white border border-purple-950 text-gray-700 hover:bg-gray-50 py-2.5 rounded-lg text-sm font-medium transition-colors duration-200"
+                  className="w-full bg-white border border-purple-950 text-gray-700 hover:bg-purple-950 hover:text-white h-9 rounded-lg text-xs font-medium transition-colors duration-200"
                 >
                   RETURN
                 </Button>
