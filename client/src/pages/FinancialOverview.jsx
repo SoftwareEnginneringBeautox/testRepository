@@ -22,6 +22,7 @@ import ArchiveIcon from "@/assets/icons/ArchiveIcon";
 import SalesChart from "../components/SalesChart";
 import BeautoxPieChart from "../components/BeautoxPieChart";
 import SortIcon from "@/assets/icons/SortIcon";
+import MultiSelectFilter from "@/components/ui/MultiSelectFilter";
 import { format } from "date-fns";
 
 import {
@@ -626,21 +627,39 @@ function FinancialOverview() {
   };
 
   return (
-    <div className="flex flex-col text-left w-full md:w-[90%] mx-auto gap-4 px-4 md:px-0" data-cy="financial-overview-container">
+    <div
+      className="flex flex-col text-left w-full md:w-[90%] mx-auto gap-4 px-4 md:px-0"
+      data-cy="financial-overview-container"
+    >
       {/* Header */}
       <div data-cy="financial-overview-header">
-        <h1 className="text-[28px] md:text-[40px] leading-[1.4] md:leading-[56px] font-bold" data-cy="financial-overview-title">
+        <h1
+          className="text-[28px] md:text-[40px] leading-[1.4] md:leading-[56px] font-bold"
+          data-cy="financial-overview-title"
+        >
           FINANCIAL OVERVIEW
         </h1>
-        <p className="text-sm md:text-base" data-cy="financial-overview-subtitle">
+        <p
+          className="text-sm md:text-base"
+          data-cy="financial-overview-subtitle"
+        >
           Summary of finances within Beautox
         </p>
       </div>
 
       {/* Sales Tracker Section */}
-      <h2 className="font-bold text-xl md:text-[2rem]" data-cy="sales-tracker-title">SALES TRACKER</h2>
+      <h2
+        className="font-bold text-xl md:text-[2rem]"
+        data-cy="sales-tracker-title"
+      >
+        SALES TRACKER
+      </h2>
       <div data-cy="sales-chart-container">
-        <SalesChart chartData={chartData} chartConfig={chartConfig} data-cy="sales-chart" />
+        <SalesChart
+          chartData={chartData}
+          chartConfig={chartConfig}
+          data-cy="sales-chart"
+        />
       </div>
 
       <div className="flex justify-end gap-4" data-cy="filter-controls">
@@ -649,92 +668,36 @@ function FinancialOverview() {
           onValueChange={(value) => setFilterType(value)}
           data-cy="sort-select"
         >
-          <SelectTrigger placeholder="SORT BY" icon={<SortIcon />} data-cy="sort-trigger">
+          <SelectTrigger
+            placeholder="SORT BY"
+            icon={<SortIcon />}
+            data-cy="sort-trigger"
+          >
             <SelectValue />
           </SelectTrigger>
           <SelectContent data-cy="sort-content">
-            <SelectItem value="all" data-cy="sort-option-all">ALL DATA</SelectItem>
-            <SelectItem value="client" data-cy="sort-option-client">CLIENT NAME</SelectItem>
-            <SelectItem value="person_in_charge" data-cy="sort-option-pic">PERSON IN CHARGE</SelectItem>
-            <SelectItem value="date_transacted" data-cy="sort-option-date">DATE TRANSACTED</SelectItem>
+            <SelectItem value="all" data-cy="sort-option-all">
+              ALL DATA
+            </SelectItem>
+            <SelectItem value="client" data-cy="sort-option-client">
+              CLIENT NAME
+            </SelectItem>
+            <SelectItem value="person_in_charge" data-cy="sort-option-pic">
+              PERSON IN CHARGE
+            </SelectItem>
+            <SelectItem value="date_transacted" data-cy="sort-option-date">
+              DATE TRANSACTED
+            </SelectItem>
           </SelectContent>
         </Select>
 
-        <Select className="w-full md:w-auto" data-cy="column-filter-select">
-          <SelectTrigger placeholder="FILTER COLUMNS" icon={<FilterIcon />} data-cy="column-filter-trigger">
-            <SelectValue data-cy="column-filter-value">
-              {selectedColumns.length > 0
-                ? `${selectedColumns.length} selected`
-                : "Select columns"}
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent className="min-w-[200px] p-2" data-cy="column-filter-content">
-            <div className="max-h-[300px] overflow-y-auto space-y-2" data-cy="column-options-container">
-              {columns.map((option) => (
-                <div
-                  key={option.value}
-                  className={cn(
-                    "flex items-center space-x-2 p-2 rounded-md",
-                    option.mandatory 
-                      ? "bg-gray-100 cursor-not-allowed opacity-60" 
-                      : "hover:bg-lavender-100 cursor-pointer"
-                  )}
-                  onClick={() => {
-                    if (option.mandatory) return;
-                    
-                    const newSelection = selectedColumns.includes(option.value)
-                      ? selectedColumns.filter((item) => item !== option.value)
-                      : [...selectedColumns, option.value];
-                    
-                    const mandatoryColumns = columns
-                      .filter(col => col.mandatory)
-                      .map(col => col.value);
-                    
-                    setSelectedColumns([...new Set([...mandatoryColumns, ...newSelection])]);
-                  }}
-                  data-cy={`column-option-${option.value}`}
-                >
-                  <Checkbox
-                    checked={selectedColumns.includes(option.value)}
-                    disabled={option.mandatory}
-                    onCheckedChange={() => {
-                      if (option.mandatory) return;
-                      
-                      const newSelection = selectedColumns.includes(option.value)
-                        ? selectedColumns.filter((item) => item !== option.value)
-                        : [...selectedColumns, option.value];
-                      
-                      const mandatoryColumns = columns
-                        .filter(col => col.mandatory)
-                        .map(col => col.value);
-                      
-                      setSelectedColumns([...new Set([...mandatoryColumns, ...newSelection])]);
-                    }}
-                    id={`checkbox-${option.value}`}
-                    className={cn(
-                      "data-[state=checked]:bg-lavender-400 data-[state=checked]:border-lavender-400",
-                      option.mandatory && "opacity-60"
-                    )}
-                    data-cy={`column-checkbox-${option.value}`}
-                  />
-                  <label
-                    htmlFor={`checkbox-${option.value}`}
-                    className={cn(
-                      "flex-1 text-sm font-medium",
-                      option.mandatory ? "cursor-not-allowed" : "cursor-pointer"
-                    )}
-                    data-cy={`column-label-${option.value}`}
-                  >
-                    {option.label}
-                    {option.mandatory && (
-                      <span className="ml-1 text-xs text-gray-500" data-cy={`mandatory-label-${option.value}`}>(Required)</span>
-                    )}
-                  </label>
-                </div>
-              ))}
-            </div>
-          </SelectContent>
-        </Select>
+        {/* Use MultiSelectFilter for column selection */}
+        <MultiSelectFilter
+          options={columns}
+          selectedValues={selectedColumns}
+          setSelectedValues={setSelectedColumns}
+          placeholder="FILTER COLUMNS"
+        />
       </div>
 
       <div className="w-full overflow-x-auto" data-cy="sales-table-container">
@@ -812,19 +775,37 @@ function FinancialOverview() {
       </div>
 
       {/* Monthly Expenses Tracker Section */}
-      <h2 className="font-bold text-xl md:text-[2rem]" data-cy="monthly-expenses-title">
+      <h2
+        className="font-bold text-xl md:text-[2rem]"
+        data-cy="monthly-expenses-title"
+      >
         MONTHLY EXPENSES TRACKER
       </h2>
-      <div className="grid gap-8 md:gap-14" data-cy="monthly-expenses-container">
-        <div className="flex flex-col md:flex-row w-full gap-8" data-cy="expenses-charts-section">
+      <div
+        className="grid gap-8 md:gap-14"
+        data-cy="monthly-expenses-container"
+      >
+        <div
+          className="flex flex-col md:flex-row w-full gap-8"
+          data-cy="expenses-charts-section"
+        >
           <div className="w-full md:w-1/2" data-cy="pie-chart-container">
-            <BeautoxPieChart className="shadow-custom" data-cy="beautox-pie-chart" />
+            <BeautoxPieChart
+              className="shadow-custom"
+              data-cy="beautox-pie-chart"
+            />
           </div>
-          <div className="flex flex-col w-full md:w-1/2 gap-2" data-cy="categories-section">
+          <div
+            className="flex flex-col w-full md:w-1/2 gap-2"
+            data-cy="categories-section"
+          >
             <Table className="overflow-x-hidden" data-cy="categories-table">
               <TableHeader>
                 <TableRow>
-                  <TableHead className="text-lg md:text-xl text-left font-semibold py-4" data-cy="categories-table-header">
+                  <TableHead
+                    className="text-lg md:text-xl text-left font-semibold py-4"
+                    data-cy="categories-table-header"
+                  >
                     CURRENT CATEGORIES
                   </TableHead>
                 </TableRow>
@@ -832,11 +813,19 @@ function FinancialOverview() {
               <TableBody data-cy="categories-table-body">
                 {categories.length > 0 ? (
                   categories.map((category) => (
-                    <TableRow key={category.id} data-cy={`category-row-${category.id}`}>
-                      <TableCell className="flex items-center justify-between gap-4 h-full w-full" data-cy={`category-cell-${category.id}`}>
+                    <TableRow
+                      key={category.id}
+                      data-cy={`category-row-${category.id}`}
+                    >
+                      <TableCell
+                        className="flex items-center justify-between gap-4 h-full w-full"
+                        data-cy={`category-cell-${category.id}`}
+                      >
                         {(category.name || "N/A").toUpperCase()}
                         <DropdownMenu>
-                          <DropdownMenuTrigger data-cy={`category-actions-${category.id}`}>
+                          <DropdownMenuTrigger
+                            data-cy={`category-actions-${category.id}`}
+                          >
                             <EllipsisIcon />
                           </DropdownMenuTrigger>
                           <DropdownMenuContent>
@@ -869,7 +858,10 @@ function FinancialOverview() {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell className="text-center" data-cy="no-categories-message">
+                    <TableCell
+                      className="text-center"
+                      data-cy="no-categories-message"
+                    >
                       No categories available
                     </TableCell>
                   </TableRow>
@@ -887,17 +879,29 @@ function FinancialOverview() {
           </div>
         </div>
 
-        <div className="w-full overflow-x-auto" data-cy="expenses-table-container">
+        <div
+          className="w-full overflow-x-auto"
+          data-cy="expenses-table-container"
+        >
           <Table data-cy="expenses-table">
             <TableHeader>
               <TableRow>
-                <TableHead className="py-4 text-center whitespace-nowrap" data-cy="expense-header-date">
+                <TableHead
+                  className="py-4 text-center whitespace-nowrap"
+                  data-cy="expense-header-date"
+                >
                   DATE
                 </TableHead>
-                <TableHead className="py-4 text-center whitespace-nowrap" data-cy="expense-header-category">
+                <TableHead
+                  className="py-4 text-center whitespace-nowrap"
+                  data-cy="expense-header-category"
+                >
                   CATEGORY
                 </TableHead>
-                <TableHead className="py-4 text-center whitespace-nowrap" data-cy="expense-header-amount">
+                <TableHead
+                  className="py-4 text-center whitespace-nowrap"
+                  data-cy="expense-header-amount"
+                >
                   EXPENSE
                 </TableHead>
                 <TableHead data-cy="expense-header-actions"></TableHead>
@@ -906,8 +910,14 @@ function FinancialOverview() {
             <TableBody data-cy="expenses-table-body">
               {expensesData.length > 0 ? (
                 expensesData.map((expense, index) => (
-                  <TableRow key={expense.id || index} data-cy={`expense-row-${expense.id || index}`}>
-                    <TableCell className="py-4 text-center whitespace-nowrap" data-cy={`expense-date-${expense.id || index}`}>
+                  <TableRow
+                    key={expense.id || index}
+                    data-cy={`expense-row-${expense.id || index}`}
+                  >
+                    <TableCell
+                      className="py-4 text-center whitespace-nowrap"
+                      data-cy={`expense-date-${expense.id || index}`}
+                    >
                       {expense.date
                         ? format(
                             new Date(expense.date),
@@ -915,18 +925,31 @@ function FinancialOverview() {
                           ).toUpperCase()
                         : "N/A"}
                     </TableCell>
-                    <TableCell className="py-4 text-center whitespace-nowrap" data-cy={`expense-category-${expense.id || index}`}>
+                    <TableCell
+                      className="py-4 text-center whitespace-nowrap"
+                      data-cy={`expense-category-${expense.id || index}`}
+                    >
                       {(expense.category || "N/A").toUpperCase()}
                     </TableCell>
-                    <TableCell className="py-4 text-center whitespace-nowrap" data-cy={`expense-amount-${expense.id || index}`}>
+                    <TableCell
+                      className="py-4 text-center whitespace-nowrap"
+                      data-cy={`expense-amount-${expense.id || index}`}
+                    >
                       {new Intl.NumberFormat("en-PH", {
                         style: "currency",
                         currency: "PHP"
                       }).format(expense.expense)}
                     </TableCell>
-                    <TableCell className="py-4 text-center" data-cy={`expense-actions-${expense.id || index}`}>
+                    <TableCell
+                      className="py-4 text-center"
+                      data-cy={`expense-actions-${expense.id || index}`}
+                    >
                       <DropdownMenu>
-                        <DropdownMenuTrigger data-cy={`expense-actions-trigger-${expense.id || index}`}>
+                        <DropdownMenuTrigger
+                          data-cy={`expense-actions-trigger-${
+                            expense.id || index
+                          }`}
+                        >
                           <EllipsisIcon />
                         </DropdownMenuTrigger>
                         <DropdownMenuContent>
@@ -964,7 +987,11 @@ function FinancialOverview() {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan="4" className="text-center" data-cy="no-expenses-message">
+                  <TableCell
+                    colSpan="4"
+                    className="text-center"
+                    data-cy="no-expenses-message"
+                  >
                     No expenses recorded
                   </TableCell>
                 </TableRow>
@@ -973,7 +1000,10 @@ function FinancialOverview() {
           </Table>
         </div>
 
-        <div className="w-full rounded-lg p-4 border-2 border-lavender-400 text-center text-xl md:text-3xl leading-normal md:leading-[67.2px]" data-cy="total-profit-container">
+        <div
+          className="w-full rounded-lg p-4 border-2 border-lavender-400 text-center text-xl md:text-3xl leading-normal md:leading-[67.2px]"
+          data-cy="total-profit-container"
+        >
           TOTAL PROFIT:{" "}
           <span className="font-bold" data-cy="total-profit-amount">
             {new Intl.NumberFormat("en-PH", {
@@ -983,8 +1013,15 @@ function FinancialOverview() {
           </span>
         </div>
 
-        <div className="w-full flex flex-col md:flex-row justify-end gap-4 mb-[10%]" data-cy="bottom-actions">
-          <Button variant="outline" className="w-full md:w-auto" data-cy="return-btn">
+        <div
+          className="w-full flex flex-col md:flex-row justify-end gap-4 mb-[10%]"
+          data-cy="bottom-actions"
+        >
+          <Button
+            variant="outline"
+            className="w-full md:w-auto"
+            data-cy="return-btn"
+          >
             <ChevronLeftIcon />
             RETURN
           </Button>
