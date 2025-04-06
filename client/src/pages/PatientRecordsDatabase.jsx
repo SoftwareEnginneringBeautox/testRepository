@@ -424,7 +424,7 @@ function PatientRecordsDatabase() {
             <Input
               type="text"
               id="search"
-              placeholder="Search..."
+              placeholder="Search by client name..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
