@@ -72,6 +72,7 @@ function PatientRecordsDatabase() {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortOption, setSortOption] = useState("");
 
+  // State for managing column visibility
   const [selectedColumns, setSelectedColumns] = useState([
     "client", // Mandatory
     "dateofsession", // Mandatory
@@ -87,6 +88,9 @@ function PatientRecordsDatabase() {
     "referenceno"
   ]);
 
+  // State for temp column selection (before applying)
+  const [tempSelectedColumns, setTempSelectedColumns] = useState([...selectedColumns]);
+
   const columns = [
     { label: "CLIENT", value: "client", mandatory: true },
     { label: "DATE OF SESSION", value: "dateofsession", mandatory: true },
@@ -101,6 +105,25 @@ function PatientRecordsDatabase() {
     { label: "REMAINING BALANCE", value: "remainingbalance" },
     { label: "REFERENCE NO.", value: "referenceno" }
   ];
+
+  // Handle applying column filter changes
+  const applyColumnFilters = () => {
+    // Ensure mandatory columns are included
+    const mandatoryColumns = columns
+      .filter(col => col.mandatory)
+      .map(col => col.value);
+    
+    const updatedColumns = [...tempSelectedColumns];
+    
+    // Add any missing mandatory columns
+    mandatoryColumns.forEach(mandatoryCol => {
+      if (!updatedColumns.includes(mandatoryCol)) {
+        updatedColumns.push(mandatoryCol);
+      }
+    });
+    
+    setSelectedColumns(updatedColumns);
+  };
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
@@ -146,6 +169,11 @@ function PatientRecordsDatabase() {
 
     fetchTreatments();
   }, []);
+
+  // Initialize the temporary column selection
+  useEffect(() => {
+    setTempSelectedColumns([...selectedColumns]);
+  }, [selectedColumns]);
 
   const getTreatmentNames = (ids) => {
     if (!Array.isArray(ids)) return [];
@@ -510,6 +538,23 @@ function PatientRecordsDatabase() {
     );
   };
 
+  // Column mapping to determine visibility
+  const isColumnVisible = {
+    client: true, // Always true - mandatory
+    dateofsession: true, // Always true - mandatory
+    timeofsession: selectedColumns.includes("timeofsession"),
+    personincharge: selectedColumns.includes("personincharge"),
+    package: selectedColumns.includes("package"),
+    treatment: selectedColumns.includes("treatment"),
+    consentformsigned: selectedColumns.includes("consentformsigned"),
+    paymentmethod: selectedColumns.includes("paymentmethod"),
+    totalamount: selectedColumns.includes("totalamount"),
+    amountpaid: selectedColumns.includes("amountpaid"),
+    remainingbalance: selectedColumns.includes("remainingbalance"),
+    referenceno: selectedColumns.includes("referenceno"),
+    paid: true // Always show paid status
+  };
+
   return (
     <div className="flex flex-col gap-4 md:gap-[1.5rem] text-left w-full md:w-[90%] mx-auto px-4 md:px-0">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -538,12 +583,15 @@ function PatientRecordsDatabase() {
             </SelectContent>
           </Select>
 
-          {/* Use MultiSelectFilter for column selection */}
+          {/* Use modified MultiSelectFilter with Apply button */}
           <MultiSelectFilter
             options={columns}
-            selectedValues={selectedColumns}
-            setSelectedValues={setSelectedColumns}
+            selectedValues={tempSelectedColumns}
+            setSelectedValues={setTempSelectedColumns}
             placeholder="FILTER COLUMNS"
+            mandatoryValues={["client", "dateofsession"]}
+            onApply={applyColumnFilters}
+            showApplyButton={true}
           />
         </div>
       </div>
@@ -558,50 +606,90 @@ function PatientRecordsDatabase() {
         >
           <TableHeader>
             <TableRow>
+              {/* Always show CLIENT column */}
               <TableHead className="py-4 whitespace-nowrap">CLIENT</TableHead>
+              
+              {/* Always show DATE OF SESSION column */}
               <TableHead className="py-4 text-center whitespace-nowrap">
                 DATE OF SESSION
               </TableHead>
-              <TableHead className="py-4 text-center whitespace-nowrap">
-                TIME OF SESSION
-              </TableHead>
-              <TableHead className="py-4 text-center whitespace-nowrap">
-                PERSON IN CHARGE
-              </TableHead>
-              <TableHead className="py-4 whitespace-nowrap">PACKAGE</TableHead>
-              <TableHead className="py-4 whitespace-nowrap">
-                TREATMENT
-              </TableHead>
-              <TableHead className="py-4 text-center whitespace-nowrap">
-                CONSENT FORM SIGNED
-              </TableHead>
-              <TableHead className="py-4 text-center whitespace-nowrap">
-                PAYMENT METHOD
-              </TableHead>
-              <TableHead className="py-4 text-center whitespace-nowrap">
-                TOTAL AMOUNT
-              </TableHead>
-              <TableHead className="py-4 text-center whitespace-nowrap">
-                AMOUNT PAID
-              </TableHead>
-              <TableHead className="py-4 text-center whitespace-nowrap">
-                REMAINING BALANCE
-              </TableHead>
-              <TableHead className="py-4 text-center whitespace-nowrap">
-                REFERENCE NO.
-              </TableHead>
+              
+              {/* Conditionally show other columns based on selectedColumns */}
+              {isColumnVisible.timeofsession && (
+                <TableHead className="py-4 text-center whitespace-nowrap">
+                  TIME OF SESSION
+                </TableHead>
+              )}
+              
+              {isColumnVisible.personincharge && (
+                <TableHead className="py-4 text-center whitespace-nowrap">
+                  PERSON IN CHARGE
+                </TableHead>
+              )}
+              
+              {isColumnVisible.package && (
+                <TableHead className="py-4 whitespace-nowrap">PACKAGE</TableHead>
+              )}
+              
+              {isColumnVisible.treatment && (
+                <TableHead className="py-4 whitespace-nowrap">
+                  TREATMENT
+                </TableHead>
+              )}
+              
+              {isColumnVisible.consentformsigned && (
+                <TableHead className="py-4 text-center whitespace-nowrap">
+                  CONSENT FORM SIGNED
+                </TableHead>
+              )}
+              
+              {isColumnVisible.paymentmethod && (
+                <TableHead className="py-4 text-center whitespace-nowrap">
+                  PAYMENT METHOD
+                </TableHead>
+              )}
+              
+              {isColumnVisible.totalamount && (
+                <TableHead className="py-4 text-center whitespace-nowrap">
+                  TOTAL AMOUNT
+                </TableHead>
+              )}
+              
+              {isColumnVisible.amountpaid && (
+                <TableHead className="py-4 text-center whitespace-nowrap">
+                  AMOUNT PAID
+                </TableHead>
+              )}
+              
+              {isColumnVisible.remainingbalance && (
+                <TableHead className="py-4 text-center whitespace-nowrap">
+                  REMAINING BALANCE
+                </TableHead>
+              )}
+              
+              {isColumnVisible.referenceno && (
+                <TableHead className="py-4 text-center whitespace-nowrap">
+                  REFERENCE NO.
+                </TableHead>
+              )}
+              
+              {/* Always show PAID column */}
               <TableHead className="py-4 text-center whitespace-nowrap">
                 PAID
               </TableHead>
+              
               <TableHead></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {currentRecords.map((record, index) => (
               <TableRow key={index}>
+                {/* Always show CLIENT column */}
                 <TableCell className="whitespace-nowrap">
                   {record.client || record.patient_name?.toUpperCase() || "N/A"}
                 </TableCell>
+                
+                {/* Always show DATE OF SESSION column */}
                 <TableCell className="text-center whitespace-nowrap">
                   {record.dateTransacted || record.date_of_session
                     ? format(
@@ -612,75 +700,107 @@ function PatientRecordsDatabase() {
                       ).toUpperCase()
                     : "N/A"}
                 </TableCell>
-                <TableCell className="text-center whitespace-nowrap">
-                  {record.nextSessionTime || record.time_of_session
-                    ? (() => {
-                        const timeValue =
-                          record.nextSessionTime || record.time_of_session;
-                        const parsedTime = new Date(`1970-01-01T${timeValue}`);
-                        return isNaN(parsedTime.getTime())
-                          ? "Invalid Time"
-                          : format(parsedTime, "hh:mm a");
-                      })()
-                    : "N/A"}
-                </TableCell>
-                <TableCell className="text-center whitespace-nowrap">
-                  {(
-                    record.personInCharge || record.person_in_charge
-                  )?.toUpperCase()}
-                </TableCell>
-                <TableCell className="whitespace-nowrap">
-                  {(record.package || record.package_name)?.toUpperCase()}
-                </TableCell>
-                <TableCell className="text-left whitespace-nowrap">
-                  {Array.isArray(record.treatment_ids)
-                    ? getTreatmentNames(record.treatment_ids)
-                        .join(", ")
-                        .toUpperCase()
-                    : "N/A"}
-                </TableCell>
-
-                <TableCell className="text-center whitespace-nowrap">
-                  {record.consentStatus ||
-                    (typeof record.consent_form_signed === "boolean"
-                      ? record.consent_form_signed
-                        ? "YES"
-                        : "NO"
-                      : record.consent_form_signed)}
-                </TableCell>
-                <TableCell className="whitespace-nowrap">
-                  {(
-                    record.paymentMethod || record.payment_method
-                  )?.toUpperCase()}
-                </TableCell>
-                <TableCell className="text-center">
-                  {new Intl.NumberFormat("en-PH", {
-                    style: "currency",
-                    currency: "PHP"
-                  }).format(parseFloat(record.total_amount || 0))}
-                </TableCell>
-                <TableCell className="text-center">
-                  {record.amount_paid
-                    ? new Intl.NumberFormat("en-PH", {
-                        style: "currency",
-                        currency: "PHP"
-                      }).format(record.amount_paid)
-                    : "₱0.00"}
-                </TableCell>
-                <TableCell className="text-center">
-                  {(() => {
-                    const total = parseFloat(record.total_amount || 0);
-                    const paid = parseFloat(record.amount_paid || 0);
-                    const remaining = total - paid;
-                    return new Intl.NumberFormat("en-PH", {
+                
+                {/* Conditionally show other cells based on selectedColumns */}
+                {isColumnVisible.timeofsession && (
+                  <TableCell className="text-center whitespace-nowrap">
+                    {record.nextSessionTime || record.time_of_session
+                      ? (() => {
+                          const timeValue =
+                            record.nextSessionTime || record.time_of_session;
+                          const parsedTime = new Date(`1970-01-01T${timeValue}`);
+                          return isNaN(parsedTime.getTime())
+                            ? "Invalid Time"
+                            : format(parsedTime, "hh:mm a");
+                        })()
+                      : "N/A"}
+                  </TableCell>
+                )}
+                
+                {isColumnVisible.personincharge && (
+                  <TableCell className="text-center whitespace-nowrap">
+                    {(
+                      record.personInCharge || record.person_in_charge
+                    )?.toUpperCase()}
+                  </TableCell>
+                )}
+                
+                {isColumnVisible.package && (
+                  <TableCell className="whitespace-nowrap">
+                    {(record.package || record.package_name)?.toUpperCase()}
+                  </TableCell>
+                )}
+                
+                {isColumnVisible.treatment && (
+                  <TableCell className="text-left whitespace-nowrap">
+                    {Array.isArray(record.treatment_ids)
+                      ? getTreatmentNames(record.treatment_ids)
+                          .join(", ")
+                          .toUpperCase()
+                      : "N/A"}
+                  </TableCell>
+                )}
+                
+                {isColumnVisible.consentformsigned && (
+                  <TableCell className="text-center whitespace-nowrap">
+                    {record.consentStatus ||
+                      (typeof record.consent_form_signed === "boolean"
+                        ? record.consent_form_signed
+                          ? "YES"
+                          : "NO"
+                        : record.consent_form_signed)}
+                  </TableCell>
+                )}
+                
+                {isColumnVisible.paymentmethod && (
+                  <TableCell className="whitespace-nowrap">
+                    {(
+                      record.paymentMethod || record.payment_method
+                    )?.toUpperCase()}
+                  </TableCell>
+                )}
+                
+                {isColumnVisible.totalamount && (
+                  <TableCell className="text-center">
+                    {new Intl.NumberFormat("en-PH", {
                       style: "currency",
                       currency: "PHP"
-                    }).format(remaining);
-                  })()}
-                </TableCell>
-                <TableCell className="text-center">
-                  {record.reference_number || "N/A"}
-                </TableCell>
+                    }).format(parseFloat(record.total_amount || 0))}
+                  </TableCell>
+                )}
+                
+                {isColumnVisible.amountpaid && (
+                  <TableCell className="text-center">
+                    {record.amount_paid
+                      ? new Intl.NumberFormat("en-PH", {
+                          style: "currency",
+                          currency: "PHP"
+                        }).format(record.amount_paid)
+                      : "₱0.00"}
+                  </TableCell>
+                )}
+                
+                {isColumnVisible.remainingbalance && (
+                  <TableCell className="text-center">
+                    {(() => {
+                      const total = parseFloat(record.total_amount || 0);
+                      const paid = parseFloat(record.amount_paid || 0);
+                      const remaining = total - paid;
+                      return new Intl.NumberFormat("en-PH", {
+                        style: "currency",
+                        currency: "PHP"
+                      }).format(remaining);
+                    })()}
+                  </TableCell>
+                )}
+                
+                {isColumnVisible.referenceno && (
+                  <TableCell className="text-center">
+                    {record.reference_number || "N/A"}
+                  </TableCell>
+                )}
+                
+                {/* Always show PAID column */}
                 <TableCell className="text-center">
                   <Select
                     value={record.isPaid ? record.isPaid.toLowerCase() : "-"}
@@ -698,6 +818,7 @@ function PatientRecordsDatabase() {
                     </SelectContent>
                   </Select>
                 </TableCell>
+                
                 <TableCell>
                   <DropdownMenu>
                     <DropdownMenuTrigger>

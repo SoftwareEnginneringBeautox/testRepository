@@ -49,6 +49,16 @@ import {
   SelectValue,
   SelectTrigger
 } from "@/components/ui/Select";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious
+} from "@/components/ui/Pagination";
+
 
 import { Checkbox } from "@/components/ui/Checkbox";
 
@@ -61,10 +71,16 @@ function FinancialOverview() {
     totalSales: 0,
     totalExpenses: 0,
     netIncome: 0
+    
   });
   const [salesData, setSalesData] = useState([]);
   const [expensesData, setExpensesData] = useState([]);
   const [categories, setCategories] = useState([]);
+
+  // Pagination states
+  const [salesPage, setSalesPage] = useState(1);
+  const [expensesPage, setExpensesPage] = useState(1);
+  const itemsPerPage = 10; // You can adjust this value as needed
 
   const { currentModal, openModal, closeModal } = useModal();
 
@@ -144,6 +160,7 @@ function FinancialOverview() {
     }
 
     setFilteredSalesData(filtered);
+    setSalesPage(1); // Reset to first page when filter changes
   }, [filterType, salesData]);
 
   // Update the initial setting of filteredSalesData when salesData changes
@@ -203,6 +220,25 @@ function FinancialOverview() {
       console.error("Error refreshing expenses data:", error);
     }
   };
+
+  // Helper functions for pagination
+  const getPaginatedData = (data, page, itemsPerPage) => {
+    if (!data || data.length === 0) return [];
+    const startIndex = (page - 1) * itemsPerPage;
+    return data.slice(startIndex, startIndex + itemsPerPage);
+  };
+
+  const getTotalPages = (dataLength, itemsPerPage) => {
+    return Math.ceil(dataLength / itemsPerPage);
+  };
+
+  // Get paginated data for tables
+  const paginatedSalesData = getPaginatedData(filteredSalesData, salesPage, itemsPerPage);
+  const paginatedExpensesData = getPaginatedData(expensesData, expensesPage, itemsPerPage);
+  
+  // Calculate total pages
+  const totalSalesPages = getTotalPages(filteredSalesData?.length || 0, itemsPerPage);
+  const totalExpensesPages = getTotalPages(expensesData?.length || 0, itemsPerPage);
 
   // REPORT GENERATING FUNCTIONS
   const generateWeeklySalesReport = (salesData) => {
@@ -624,6 +660,7 @@ function FinancialOverview() {
     } catch (error) {
       console.error("Archive expense error:", error);
     }
+    
   };
 
   return (
@@ -718,8 +755,8 @@ function FinancialOverview() {
             </TableRow>
           </TableHeader>
           <TableBody data-cy="sales-table-body">
-            {filteredSalesData && filteredSalesData.length > 0 ? (
-              filteredSalesData.map((sale, index) => (
+            {paginatedSalesData && paginatedSalesData.length > 0 ? (
+              paginatedSalesData.map((sale, index) => (
                 <TableRow key={index} data-cy={`sales-row-${index}`}>
                   {columns
                     .filter((col) => selectedColumns.includes(col.value))
@@ -759,6 +796,69 @@ function FinancialOverview() {
             )}
           </TableBody>
         </Table>
+
+        {/* Sales Table Pagination */}
+        {filteredSalesData && filteredSalesData.length > 0 && (
+          <div className="mt-4" data-cy="sales-pagination">
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious 
+                    onClick={() => setSalesPage(Math.max(1, salesPage - 1))} 
+                    disabled={salesPage === 1}
+                    className={salesPage === 1 ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
+                    data-cy="sales-prev-page"
+                  />
+                </PaginationItem>
+                
+                {Array.from({ length: Math.min(5, totalSalesPages) }).map((_, index) => {
+                  let pageNumber;
+                  
+                  // Logic to determine which page numbers to show
+                  if (totalSalesPages <= 5) {
+                    pageNumber = index + 1;
+                  } else if (salesPage <= 3) {
+                    pageNumber = index + 1;
+                  } else if (salesPage >= totalSalesPages - 2) {
+                    pageNumber = totalSalesPages - 4 + index;
+                  } else {
+                    pageNumber = salesPage - 2 + index;
+                  }
+                  
+                  if (pageNumber > 0 && pageNumber <= totalSalesPages) {
+                    return (
+                      <PaginationItem key={pageNumber}>
+                        <PaginationLink 
+                          isActive={pageNumber === salesPage}
+                          onClick={() => setSalesPage(pageNumber)}
+                          data-cy={`sales-page-${pageNumber}`}
+                        >
+                          {pageNumber}
+                        </PaginationLink>
+                      </PaginationItem>
+                    );
+                  }
+                  return null;
+                })}
+                
+                {totalSalesPages > 5 && salesPage < totalSalesPages - 2 && (
+                  <PaginationItem>
+                    <PaginationEllipsis />
+                  </PaginationItem>
+                )}
+                
+                <PaginationItem>
+                  <PaginationNext 
+                    onClick={() => setSalesPage(Math.min(totalSalesPages, salesPage + 1))} 
+                    disabled={salesPage === totalSalesPages}
+                    className={salesPage === totalSalesPages ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
+                    data-cy="sales-next-page"
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </div>
+        )}
       </div>
 
       <div className="w-full flex justify-end gap-4" data-cy="sales-actions">
@@ -908,8 +1008,8 @@ function FinancialOverview() {
               </TableRow>
             </TableHeader>
             <TableBody data-cy="expenses-table-body">
-              {expensesData.length > 0 ? (
-                expensesData.map((expense, index) => (
+              {paginatedExpensesData.length > 0 ? (
+                paginatedExpensesData.map((expense, index) => (
                   <TableRow
                     key={expense.id || index}
                     data-cy={`expense-row-${expense.id || index}`}
@@ -998,6 +1098,69 @@ function FinancialOverview() {
               )}
             </TableBody>
           </Table>
+
+          {/* Expenses Table Pagination */}
+          {expensesData.length > 0 && (
+            <div className="mt-4" data-cy="expenses-pagination">
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious 
+                      onClick={() => setExpensesPage(Math.max(1, expensesPage - 1))} 
+                      disabled={expensesPage === 1}
+                      className={expensesPage === 1 ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
+                      data-cy="expenses-prev-page"
+                    />
+                  </PaginationItem>
+                  
+                  {Array.from({ length: Math.min(5, totalExpensesPages) }).map((_, index) => {
+                    let pageNumber;
+                    
+                    // Logic to determine which page numbers to show
+                    if (totalExpensesPages <= 5) {
+                      pageNumber = index + 1;
+                    } else if (expensesPage <= 3) {
+                      pageNumber = index + 1;
+                    } else if (expensesPage >= totalExpensesPages - 2) {
+                      pageNumber = totalExpensesPages - 4 + index;
+                    } else {
+                      pageNumber = expensesPage - 2 + index;
+                    }
+                    
+                    if (pageNumber > 0 && pageNumber <= totalExpensesPages) {
+                      return (
+                        <PaginationItem key={pageNumber}>
+                          <PaginationLink 
+                            isActive={pageNumber === expensesPage}
+                            onClick={() => setExpensesPage(pageNumber)}
+                            data-cy={`expenses-page-${pageNumber}`}
+                          >
+                            {pageNumber}
+                          </PaginationLink>
+                        </PaginationItem>
+                      );
+                    }
+                    return null;
+                  })}
+                  
+                  {totalExpensesPages > 5 && expensesPage < totalExpensesPages - 2 && (
+                    <PaginationItem>
+                      <PaginationEllipsis />
+                    </PaginationItem>
+                  )}
+                  
+                  <PaginationItem>
+                    <PaginationNext 
+                      onClick={() => setExpensesPage(Math.min(totalExpensesPages, expensesPage + 1))} 
+                      disabled={expensesPage === totalExpensesPages}
+                      className={expensesPage === totalExpensesPages ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
+                      data-cy="expenses-next-page"
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
+          )}
         </div>
 
         <div

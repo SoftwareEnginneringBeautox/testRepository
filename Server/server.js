@@ -815,8 +815,12 @@ app.post("/api/expenses", async (req, res) => {
 // Fetch Expenses Data
 app.get("/expenses", async (req, res) => {
   try {
-    const result = await pool.query("SELECT * FROM expenses_tracker WHERE archived IS NOT TRUE ORDER BY date DESC");
-    console.log("Expenses endpoint called, returning", result.rows.length, "records");
+    // Set proper content type header
+    res.setHeader('Content-Type', 'application/json');
+    
+    // Get the data from the database
+    const result = await pool.query("SELECT * FROM expenses_tracker ORDER BY date DESC");
+    console.log("API /api/expenses endpoint called, returning", result.rows.length, "records");
     
     // Count April 2025 records
     const april2025Count = result.rows.filter(row => {
@@ -825,10 +829,49 @@ app.get("/expenses", async (req, res) => {
     }).length;
     
     console.log("April 2025 expenses:", april2025Count);
+    
+    // Return the data as JSON
     res.json(result.rows);
   } catch (err) {
     console.error("Error fetching expenses:", err);
-    res.status(500).send(err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+app.get("/api/test-expenses", async (req, res) => {
+  try {
+    // Test the database connection first
+    const connectionTest = await pool.query("SELECT NOW() as time");
+    console.log("Database connection test:", connectionTest.rows[0]);
+    
+    // Query the expenses table
+    const result = await pool.query("SELECT * FROM expenses_tracker LIMIT 10");
+    
+    // Log detailed information about the results
+    console.log("Expenses test query returned", result.rows.length, "records");
+    
+    // Count April 2025 records
+    const april2025Count = result.rows.filter(row => {
+      const date = new Date(row.date);
+      return date.getMonth() + 1 === 4 && date.getFullYear() === 2025;
+    }).length;
+    
+    console.log("April 2025 expenses in test:", april2025Count);
+    
+    // Send response with success details
+    res.json({
+      success: true,
+      message: "Test completed successfully",
+      count: result.rows.length,
+      april2025Count: april2025Count,
+      sample: result.rows.slice(0, 3)
+    });
+  } catch (err) {
+    console.error("Error in test-expenses endpoint:", err);
+    res.status(500).json({
+      success: false,
+      message: "Test failed",
+      error: err.message
+    });
   }
 });
 
