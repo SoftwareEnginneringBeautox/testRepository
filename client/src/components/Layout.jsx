@@ -9,7 +9,7 @@ export default function Layout() {
   const location = useLocation();
   const outlet = useOutlet();
 
-  // Define routes that should not show the sidebar
+  // Define routes that should not show the sidebar or user profile
   const sidebarlessRoutes = ["/", "/login", "/scheduleappointment"];
 
   // List all valid routes from your App.jsx
@@ -32,7 +32,7 @@ export default function Layout() {
         location.pathname.toLowerCase().startsWith(route.toLowerCase() + "/")
     ) && !sidebarlessRoutes.includes(location.pathname.toLowerCase());
 
-  // Only show the sidebar if the current route is allowed and it's not the error page
+  // Only show the sidebar and user profile if the current route is allowed and it's not the error page
   const shouldShowSidebar =
     !sidebarlessRoutes.includes(location.pathname.toLowerCase()) &&
     !isErrorPage;
@@ -48,7 +48,7 @@ export default function Layout() {
 
       <main
         className={cn(
-          "w-dvw h-screen flex flex-col overflow-y-auto",
+          "w-dvw h-screen flex flex-col overflow-y-auto ",
           "[&::-webkit-scrollbar]:w-2.5",
           "[&::-webkit-scrollbar-thumb]:bg-gray-400",
           "[&::-webkit-scrollbar-thumb]:rounded-full",
@@ -56,15 +56,16 @@ export default function Layout() {
           "[&::-webkit-scrollbar-thumb:hover]:bg-lavender-200"
         )}
       >
-        {/* Fixed header with controlled width */}
-        <header className="sticky top-0 w-full flex items-center justify-between px-4 py-2 bg-transparent z-40">
+        {/* Use horizontal padding only so nothing pushes down at the top */}
+        <header className="fixed w-full flex items-center justify-between px-4 py-2 z-40">
           <div>{shouldShowSidebar && <SidebarTrigger />}</div>
           <div>
-            <UserProfile />
+            {/* Only show UserProfile when sidebar should be shown */}
+            {shouldShowSidebar && <UserProfile />}
           </div>
         </header>
 
-        <div className="flex flex-col flex-1 items-center">
+        <div className="flex flex-col flex-1 items-center my-8">
           <div className="flex flex-col flex-1 w-full gap-4">
             <Outlet />
           </div>
