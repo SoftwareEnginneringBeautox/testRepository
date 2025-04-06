@@ -38,7 +38,7 @@ import ArchiveIcon from "@/assets/icons/ArchiveIcon";
 import CalendarIcon from "@/assets/icons/CalendarIcon";
 import axios from "axios";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 function AdministratorDashboard() {
   const [userName, setUserName] = useState(
@@ -57,59 +57,66 @@ function AdministratorDashboard() {
 
   const [selectedStaff, setSelectedStaff] = useState(null);
   const handleEditStaff = async (updatedData) => {
-    console.log("Sending to backend:", updatedData); 
+    console.log("Sending to backend:", updatedData);
     try {
-      await axios.post(`${API_BASE_URL}/api/manage-record`, {
-        table: "accounts",
-        id: updatedData.id,
-        action: "edit",
-        data: updatedData,
-      }, {
-        withCredentials: true,
-      });
-  
+      await axios.post(
+        `${API_BASE_URL}/api/manage-record`,
+        {
+          table: "accounts",
+          id: updatedData.id,
+          action: "edit",
+          data: updatedData
+        },
+        {
+          withCredentials: true
+        }
+      );
+
       closeModal();
       fetchStaff();
     } catch (error) {
       console.error("Error editing staff:", error);
     }
   };
-  
+
   const handleArchiveStaff = async () => {
     if (!selectedStaff?.id) return;
-  
+
     try {
-      await axios.post(`${API_BASE_URL}/api/manage-record`, {
-        table: "accounts",
-        id: selectedStaff.id,
-        action: "archive",
-      }, {
-        withCredentials: true,
-      });
-  
+      await axios.post(
+        `${API_BASE_URL}/api/manage-record`,
+        {
+          table: "accounts",
+          id: selectedStaff.id,
+          action: "archive"
+        },
+        {
+          withCredentials: true
+        }
+      );
+
       closeModal();
       fetchStaff();
     } catch (error) {
       console.error("Error archiving staff:", error);
     }
   };
-  
 
   const fetchStaff = async () => {
     try {
       setLoadingStaff(true);
       const response = await axios.get(`${API_BASE_URL}/getusers`, {
-        withCredentials: true,
+        withCredentials: true
       });
       console.log("Raw staff response:", response.data);
-      
+
       const data = response.data;
       const filteredStaff = data.filter(
         (user) =>
           (user.role === "receptionist" || user.role === "aesthetician") &&
           !user.archived // ✅ only include unarchived staff
       );
-      
+
       setStaffList(filteredStaff);
       setErrorStaff(null);
     } catch (error) {
@@ -179,7 +186,7 @@ function AdministratorDashboard() {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row items-start gap-6 justify-center w-full p-3 sm:p-4 md:p-6 lg:w-[90%] mx-auto mt-6 sm:mt-8 md:mt-10">
+    <div className="flex flex-col lg:flex-row items-start gap-6 justify-center w-full p-3 sm:p-4 md:p-6 lg:w-[90%] mx-auto ">
       {showAlert && (
         <AlertContainer className="w-full">
           <InformationIcon />
@@ -213,19 +220,31 @@ function AdministratorDashboard() {
             </TableHeader>
             <TableBody>
               <TableRow>
-                <TableCell className="flex items-center gap-2 sm:gap-4 text-sm sm:text-base" data-cy="reminder-item">
+                <TableCell
+                  className="flex items-center gap-2 sm:gap-4 text-sm sm:text-base"
+                  data-cy="reminder-item"
+                >
                   <CalendarIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                   Check 1
                 </TableCell>
-                <TableCell className="flex items-center gap-2 sm:gap-4 text-sm sm:text-base" data-cy="reminder-item">
+                <TableCell
+                  className="flex items-center gap-2 sm:gap-4 text-sm sm:text-base"
+                  data-cy="reminder-item"
+                >
                   <CalendarIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                   Check 2
                 </TableCell>
-                <TableCell className="flex items-center gap-2 sm:gap-4 text-sm sm:text-base" data-cy="reminder-item">
+                <TableCell
+                  className="flex items-center gap-2 sm:gap-4 text-sm sm:text-base"
+                  data-cy="reminder-item"
+                >
                   <CalendarIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                   Check 3
                 </TableCell>
-                <TableCell className="flex items-center gap-2 sm:gap-4 text-sm sm:text-base" data-cy="reminder-item">
+                <TableCell
+                  className="flex items-center gap-2 sm:gap-4 text-sm sm:text-base"
+                  data-cy="reminder-item"
+                >
                   <CalendarIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                   Check 4
                 </TableCell>
@@ -236,7 +255,7 @@ function AdministratorDashboard() {
         <div data-cy="sales-chart" className="w-full overflow-x-auto">
           <SalesChart chartData={chartData} chartConfig={chartConfig} />
         </div>
-        
+
         <br />
       </div>
       {/* Right Section */}
@@ -260,7 +279,9 @@ function AdministratorDashboard() {
                 data-cy="staff-card"
               >
                 <div className="flex flex-col">
-                  <span className="font-semibold text-sm sm:text-base">{staff.username}</span>
+                  <span className="font-semibold text-sm sm:text-base">
+                    {staff.username}
+                  </span>
                   {(staff.role === "receptionist" ||
                     staff.role === "aesthetician") && (
                     <span className="text-xs sm:text-sm text-gray-500 capitalize">
@@ -274,28 +295,31 @@ function AdministratorDashboard() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
                     <DropdownMenuGroup>
-                    <DropdownMenuItem
-                      data-cy="edit-staff-btn"
-                      onClick={() => {
-                        setSelectedStaff(staff);
-                        openModal("modifyStaff");
-                      }}
-                    >
-                      <EditIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-                      <p className="font-semibold text-sm sm:text-base">Edit</p>
-                    </DropdownMenuItem>
+                      <DropdownMenuItem
+                        data-cy="edit-staff-btn"
+                        onClick={() => {
+                          setSelectedStaff(staff);
+                          openModal("modifyStaff");
+                        }}
+                      >
+                        <EditIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                        <p className="font-semibold text-sm sm:text-base">
+                          Edit
+                        </p>
+                      </DropdownMenuItem>
 
-                    <DropdownMenuItem
-                      data-cy="archive-staff-btn"
-                      onClick={() => {
-                        setSelectedStaff(staff);
-                        openModal("archiveStaff");
-                      }}
-                    >
-                      <ArchiveIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-                      <p className="font-semibold text-sm sm:text-base">Archive</p>
-                    </DropdownMenuItem>
-
+                      <DropdownMenuItem
+                        data-cy="archive-staff-btn"
+                        onClick={() => {
+                          setSelectedStaff(staff);
+                          openModal("archiveStaff");
+                        }}
+                      >
+                        <ArchiveIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                        <p className="font-semibold text-sm sm:text-base">
+                          Archive
+                        </p>
+                      </DropdownMenuItem>
                     </DropdownMenuGroup>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -303,9 +327,9 @@ function AdministratorDashboard() {
             ))}
           </div>
         )}
-        <Button 
-          data-cy="add-staff-btn" 
-          fullWidth="true" 
+        <Button
+          data-cy="add-staff-btn"
+          fullWidth="true"
           onClick={() => openModal("createStaff")}
           className="mt-2 text-sm sm:text-base py-2 sm:py-3"
         >

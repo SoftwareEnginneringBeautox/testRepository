@@ -138,33 +138,46 @@ const Table = React.forwardRef(
     };
 
     return (
-      <div className="flex flex-col w-full rounded-lg">
-        {/* Table container with scroll - fixed to prevent double scrollbar */}
-        <div
-          className={cn(
-            "w-full overflow-x-auto",
-            scrollbarBgClass,
-            "pb-4", // Add padding at bottom
-            "[&::-webkit-scrollbar]:h-2.5",
-            "[&::-webkit-scrollbar-thumb]:bg-gray-400",
-            "[&::-webkit-scrollbar-thumb]:rounded-full",
-            "[&::-webkit-scrollbar-track]:!bg-transparent",
-            "[&::-webkit-scrollbar-thumb:hover]:bg-lavender-200",
-            className
-          )}
-        >
-          <table
-            ref={ref}
-            className="w-full border-collapse text-sm"
-            {...props}
+      <div className="w-full overflow-hidden rounded-lg">
+        {/* Use a relative positioned container */}
+        <div className="relative w-full">
+          {/* Table container with scroll - modified for fixed scrollbar */}
+          <div
+            className={cn(
+              "w-full overflow-x-auto",
+              scrollbarBgClass,
+              "pb-8", // Increased padding to ensure space for the scrollbar
+              className
+            )}
+            style={{
+              // Use CSS to ensure scrollbar is always at the bottom
+              scrollbarWidth: "auto",
+              scrollbarColor: "rgba(156, 163, 175, 0.5) transparent"
+            }}
           >
-            {children}
-          </table>
+            <table
+              ref={ref}
+              className="w-full border-collapse text-sm"
+              {...props}
+            >
+              {children}
+            </table>
+
+            {/* Fixed scrollbar track - visible regardless of scroll position */}
+            <div className="sticky left-0 right-0 bottom-0 h-2.5 bg-transparent mt-2 w-full">
+              <div className="w-full h-full overflow-x-scroll overflow-y-hidden invisible">
+                {/* This mimics the width of the table to ensure proper scrollbar width */}
+                <div className="h-px" style={{ width: "200%" }}></div>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Pagination outside the scroll container with matching background color */}
         {showPagination && (
-          <div className={cn("w-full flex justify-center", scrollbarBgClass)}>
+          <div
+            className={cn("w-full flex justify-center py-2", scrollbarBgClass)}
+          >
             <Pagination>
               <PaginationContent>
                 <PaginationItem>

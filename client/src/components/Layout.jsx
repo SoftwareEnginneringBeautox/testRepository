@@ -56,10 +56,12 @@ export default function Layout() {
           "[&::-webkit-scrollbar-thumb:hover]:bg-lavender-200"
         )}
       >
-        {/* Use horizontal padding only so nothing pushes down at the top */}
-        <header className="relative w-full flex items-center justify-between px-3">
-          {shouldShowSidebar && <SidebarTrigger />}
-          {shouldShowSidebar && <UserProfile />}
+        {/* Fixed header with controlled width */}
+        <header className="sticky top-0 w-full flex items-center justify-between px-4 py-2 bg-transparent z-40">
+          <div>{shouldShowSidebar && <SidebarTrigger />}</div>
+          <div>
+            <UserProfile />
+          </div>
         </header>
 
         <div className="flex flex-col flex-1 items-center">

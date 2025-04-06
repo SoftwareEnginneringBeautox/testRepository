@@ -40,9 +40,7 @@ const UserProfile = () => {
   }, []);
 
   return (
-    // The relative positioning ensures that if you need to overlay or align elements,
-    // the UserProfile will serve as the reference. The higher z-index (z-50) places it above the trigger.
-    <div className="relative flex items-center justify-end gap-2 p-3 rounded-lg bg-transparent w-full z-50">
+    <div className="flex items-center justify-end gap-2 p-3 bg-transparent">
       <div className="text-right">
         <h6 className="text-base font-semibold">{userName.toUpperCase()}</h6>
         <p className="text-xs text-gray-600">{userRole?.toUpperCase()}</p>

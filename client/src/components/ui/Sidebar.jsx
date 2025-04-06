@@ -30,12 +30,11 @@ const SidebarContext = React.createContext(null);
 
 function useSidebar() {
   const context = React.useContext(SidebarContext);
-  
+
   if (!context) {
     throw new Error("useSidebar must be used within a SidebarProvider.");
   }
   return context;
-  
 }
 
 const SidebarProvider = React.forwardRef(
@@ -235,11 +234,13 @@ Sidebar.displayName = "Sidebar";
 const SidebarTrigger = React.forwardRef(({ className, ...props }, ref) => {
   const { toggleSidebar } = useSidebar();
   const location = useLocation();
-  
+
   // Define routes that should not show the sidebar trigger
   const hiddenRoutes = ["/", "/login", "/scheduleappointment"];
-  const shouldHideTrigger = hiddenRoutes.includes(location.pathname.toLowerCase());
-  
+  const shouldHideTrigger = hiddenRoutes.includes(
+    location.pathname.toLowerCase()
+  );
+
   if (shouldHideTrigger) {
     return null;
   }
@@ -247,14 +248,14 @@ const SidebarTrigger = React.forwardRef(({ className, ...props }, ref) => {
   return (
     // Use absolute positioning so it can be placed relative to a parent container.
     // Adjust left offset and use a lower z-index (z-40) so the user profile (z-50) appears above it if overlapping.
-    <div className=" top-2 left-2 z-40 pointer-events-auto">
+    <div className=" top-2 left-2 z-40 pointer-events-auto bg-transparent">
       <button
         ref={ref}
         type="button"
         className={cn(
           "h-10 w-10",
-          "bg-white hover:bg-gray-100",
-          
+          "bg-transparent hover:bg-gray-100 transition-colors",
+
           "flex items-center justify-center",
           "transition-colors duration-200",
           className
@@ -265,15 +266,15 @@ const SidebarTrigger = React.forwardRef(({ className, ...props }, ref) => {
         }}
         {...props}
       >
-        <svg 
-          xmlns="http://www.w3.org/2000/svg" 
-          width="24" 
-          height="24" 
-          viewBox="0 0 24 24" 
-          fill="none" 
-          stroke="currentColor" 
-          strokeWidth="2" 
-          strokeLinecap="round" 
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
           strokeLinejoin="round"
           className="text-lavender-700 w-6 h-6"
         >
@@ -287,7 +288,6 @@ const SidebarTrigger = React.forwardRef(({ className, ...props }, ref) => {
 });
 
 SidebarTrigger.displayName = "SidebarTrigger";
-
 
 const SidebarRail = React.forwardRef(({ className, ...props }, ref) => {
   const { toggleSidebar } = useSidebar();

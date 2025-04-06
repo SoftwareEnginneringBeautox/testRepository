@@ -34,7 +34,7 @@ const PaginationLink = ({ className, isActive, size = "icon", ...props }) => (
   <a
     aria-current={isActive ? "page" : undefined}
     className={cn(
-      "cursor-pointer h-4 w-4 flex items-center justify-center rounded-full p-3",
+      "cursor-pointer flex items-center justify-center rounded-full p-3",
       buttonVariants({
         variant: isActive ? "outline" : "ghost",
         size
