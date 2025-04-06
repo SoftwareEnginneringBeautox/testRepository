@@ -816,6 +816,15 @@ app.post("/api/expenses", async (req, res) => {
 app.get("/expenses", async (req, res) => {
   try {
     const result = await pool.query("SELECT * FROM expenses_tracker WHERE archived IS NOT TRUE ORDER BY date DESC");
+    console.log("Expenses endpoint called, returning", result.rows.length, "records");
+    
+    // Count April 2025 records
+    const april2025Count = result.rows.filter(row => {
+      const date = new Date(row.date);
+      return date.getMonth() + 1 === 4 && date.getFullYear() === 2025;
+    }).length;
+    
+    console.log("April 2025 expenses:", april2025Count);
     res.json(result.rows);
   } catch (err) {
     console.error("Error fetching expenses:", err);
