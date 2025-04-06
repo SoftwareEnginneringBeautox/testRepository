@@ -542,7 +542,13 @@ function PatientRecordsDatabase() {
           <MultiSelectFilter
             options={columns}
             selectedValues={selectedColumns}
-            setSelectedValues={setSelectedColumns}
+            setSelectedValues={(newSelectedValues) => {
+              // Ensure "client" is always selected
+              if (!newSelectedValues.includes("client")) {
+                newSelectedValues.push("client");
+              }
+              setSelectedColumns(newSelectedValues);
+            }}
             placeholder="FILTER COLUMNS"
           />
         </div>
