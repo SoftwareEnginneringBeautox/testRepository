@@ -252,12 +252,13 @@ function AdministratorDashboard() {
             </TableBody>
           </Table>
         </div>
-        <div data-cy="sales-chart" className="w-full overflow-x-auto">
+        <div data-cy="sales-chart">
           <SalesChart chartData={chartData} chartConfig={chartConfig} />
         </div>
 
         <br />
       </div>
+
       {/* Right Section */}
       <div className="w-full lg:w-1/4 shadow-custom p-4 sm:p-6 md:p-8 lg:p-10 bg-ash-100 rounded-lg flex flex-col items-center gap-3 sm:gap-4 mt-4 lg:mt-0">
         <h3 className="flex items-center gap-2 text-lg sm:text-xl md:text-2xl lg:text-[2rem] leading-tight sm:leading-[2.8rem] font-semibold">

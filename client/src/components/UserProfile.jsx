@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import UserIcon from "@/assets/icons/UserIcon";
 
-// In UserProfile.jsx
 const UserProfile = () => {
   const [userName, setUserName] = useState(
     localStorage.getItem("username") || ""

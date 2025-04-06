@@ -56,16 +56,26 @@ export default function Layout() {
           "[&::-webkit-scrollbar-thumb:hover]:bg-lavender-200"
         )}
       >
-        {/* Use horizontal padding only so nothing pushes down at the top */}
-        <header className="fixed w-full flex items-center justify-between px-4 py-2 z-40">
-          <div>{shouldShowSidebar && <SidebarTrigger />}</div>
-          <div>
-            {/* Only show UserProfile when sidebar should be shown */}
+        {/* Fixed header with proper positioning */}
+        <header className="fixed w-full flex items-center justify-between px-4 py-5 z-40">
+          {/* Left side - sidebar trigger */}
+          <div className="flex-shrink-0">
+            {shouldShowSidebar && <SidebarTrigger />}
+          </div>
+
+          {/* Right side - user profile with fixed positioning */}
+          <div className="flex-shrink-0 fixed right-4">
             {shouldShowSidebar && <UserProfile />}
           </div>
         </header>
 
-        <div className="flex flex-col flex-1 items-center my-8">
+        <div
+          className={cn(
+            "flex flex-col flex-1 items-center",
+            !sidebarlessRoutes.includes(location.pathname.toLowerCase()) &&
+              "my-12 lg:my-16"
+          )}
+        >
           <div className="flex flex-col flex-1 w-full gap-4">
             <Outlet />
           </div>

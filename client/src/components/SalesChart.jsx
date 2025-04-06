@@ -9,7 +9,7 @@ import {
   CartesianGrid,
   XAxis,
   YAxis,
-  ResponsiveContainer,
+  ResponsiveContainer
 } from "recharts";
 import {
   Card,
@@ -17,12 +17,12 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-  CardFooter,
+  CardFooter
 } from "@/components/ui/Card";
 import {
   ChartContainer,
   ChartTooltip,
-  ChartTooltipContent,
+  ChartTooltipContent
 } from "@/components/ui/Chart";
 
 // Calculate percentage change between current and previous week values
@@ -33,8 +33,14 @@ const calculatePercentageChange = (salesData) => {
   }
 
   // Calculate totals
-  const totalCurrent = salesData.reduce((sum, entry) => sum + (entry.currentWeek || 0), 0);
-  const totalPrevious = salesData.reduce((sum, entry) => sum + (entry.previousWeek || 0), 0);
+  const totalCurrent = salesData.reduce(
+    (sum, entry) => sum + (entry.currentWeek || 0),
+    0
+  );
+  const totalPrevious = salesData.reduce(
+    (sum, entry) => sum + (entry.previousWeek || 0),
+    0
+  );
 
   // Avoid division by zero
   if (totalPrevious === 0) return 0;
@@ -48,16 +54,16 @@ const SalesChart = ({ chartConfig }) => {
     currentWeek: { color: "#4CAF50" },
     previousWeek: { color: "#FF9800" }
   };
-  
+
   // State for sales data and date filtering
   const [salesData, setSalesData] = useState([]);
   const [startDate, setStartDate] = useState(() => {
     const date = new Date();
     date.setDate(date.getDate() - 6); // Default to last 7 days
-    return date.toISOString().split('T')[0];
+    return date.toISOString().split("T")[0];
   });
   const [endDate, setEndDate] = useState(() => {
-    return new Date().toISOString().split('T')[0];
+    return new Date().toISOString().split("T")[0];
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -66,7 +72,9 @@ const SalesChart = ({ chartConfig }) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`http://localhost:4000/api/sales?startDate=${start}&endDate=${end}`);
+      const response = await fetch(
+        `http://localhost:4000/api/sales?startDate=${start}&endDate=${end}`
+      );
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
@@ -103,12 +111,12 @@ const SalesChart = ({ chartConfig }) => {
 
   // Format the date range for display
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric'
+    return new Date(dateString).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric"
     });
   };
-  
+
   const dateRangeLabel = `${formatDate(startDate)} - ${formatDate(endDate)}`;
 
   return (
@@ -147,13 +155,13 @@ const SalesChart = ({ chartConfig }) => {
             />
           </div>
         </div>
-        
+
         {error && (
           <div className="p-2 mb-4 bg-red-100 text-red-700 rounded">
             Error: {error}. Showing sample data instead.
           </div>
         )}
-        
+
         <ChartContainer config={config}>
           <div className="relative w-full h-0 pb-[55%]">
             <div className="absolute w-full h-full">
@@ -259,7 +267,10 @@ const SalesChart = ({ chartConfig }) => {
               ) : (
                 <>
                   Current week down by {Math.abs(percentageChange)}%
-                  <TrendDownIcon className="h-4 w-4 text-red-500" fill="#ef4444" />
+                  <TrendDownIcon
+                    className="h-4 w-4 text-red-500"
+                    fill="#ef4444"
+                  />
                 </>
               )}
             </div>

@@ -75,8 +75,8 @@ function PatientRecordsDatabase() {
   const [sortOption, setSortOption] = useState("");
 
   const [selectedColumns, setSelectedColumns] = useState([
-    "client",           // Mandatory
-    "dateofsession",    // Mandatory
+    "client", // Mandatory
+    "dateofsession", // Mandatory
     "timeofsession",
     "personincharge",
     "package",
@@ -133,30 +133,32 @@ function PatientRecordsDatabase() {
   useEffect(() => {
     const fetchTreatments = async () => {
       try {
-        const res = await fetch(`${API_BASE_URL}/api/treatments?archived=false`, {
-          credentials: "include"
-        });
+        const res = await fetch(
+          `${API_BASE_URL}/api/treatments?archived=false`,
+          {
+            credentials: "include"
+          }
+        );
         const data = await res.json();
         setTreatmentsList(data);
       } catch (err) {
         console.error("Error fetching treatments:", err);
       }
     };
-  
+
     fetchTreatments();
   }, []);
-  
+
   const getTreatmentNames = (ids) => {
-      if (!Array.isArray(ids)) return [];
-    
-      return ids
-        .map((id) => {
-          const treatment = treatmentsList.find((t) => t.id === id);
-          return treatment?.treatment_name;
-        })
-        .filter(Boolean);
-    };
-  
+    if (!Array.isArray(ids)) return [];
+
+    return ids
+      .map((id) => {
+        const treatment = treatmentsList.find((t) => t.id === id);
+        return treatment?.treatment_name;
+      })
+      .filter(Boolean);
+  };
 
   // Refresh data when a modal closes
   const handleModalClose = () => {
@@ -259,7 +261,10 @@ function PatientRecordsDatabase() {
 
       fetchRecords();
     } catch (error) {
-      console.error("Error updating isPaid or posting to sales tracker:", error);
+      console.error(
+        "Error updating isPaid or posting to sales tracker:",
+        error
+      );
     }
   };
 
@@ -399,7 +404,10 @@ function PatientRecordsDatabase() {
     const startY = margin + 10;
 
     const currentDate = new Date();
-    const formattedCurrentDate = format(currentDate, "MMMM dd, yyyy").toUpperCase();
+    const formattedCurrentDate = format(
+      currentDate,
+      "MMMM dd, yyyy"
+    ).toUpperCase();
     const formattedDateForFilename = format(currentDate, "MMMM dd, yyyy");
 
     doc.setFont("helvetica", "bold");
@@ -448,11 +456,12 @@ function PatientRecordsDatabase() {
         record.client || record.patient_name?.toUpperCase() || "N/A",
         formatDate(record.dateTransacted || record.date_of_session),
         formatTime(record.nextSessionTime || record.time_of_session),
-        (record.personInCharge || record.person_in_charge)?.toUpperCase() || "N/A",
+        (record.personInCharge || record.person_in_charge)?.toUpperCase() ||
+          "N/A",
         (record.package || record.package_name)?.toUpperCase() || "N/A",
         Array.isArray(record.treatments)
-        ? record.treatments.join(", ").toUpperCase()
-        : (record.treatment?.toUpperCase() || "N/A"),
+          ? record.treatments.join(", ").toUpperCase()
+          : record.treatment?.toUpperCase() || "N/A",
         typeof record.consent_form_signed === "boolean"
           ? record.consent_form_signed
             ? "SIGNED"
@@ -546,25 +555,29 @@ function PatientRecordsDatabase() {
                     key={option.value}
                     className={cn(
                       "flex items-center space-x-2 p-2 rounded-md",
-                      option.mandatory 
-                        ? "bg-gray-100 cursor-not-allowed opacity-60" 
+                      option.mandatory
+                        ? "bg-gray-100 cursor-not-allowed opacity-60"
                         : "hover:bg-lavender-100 cursor-pointer"
                     )}
                     onClick={() => {
                       if (option.mandatory) return; // Prevent clicking on mandatory columns
-                      
-                      const newSelection = selectedColumns.includes(option.value)
+
+                      const newSelection = selectedColumns.includes(
+                        option.value
+                      )
                         ? selectedColumns.filter(
                             (item) => item !== option.value
                           )
                         : [...selectedColumns, option.value];
-                      
+
                       // Ensure mandatory columns are always included
                       const mandatoryColumns = columns
-                        .filter(col => col.mandatory)
-                        .map(col => col.value);
-                      
-                      setSelectedColumns([...new Set([...mandatoryColumns, ...newSelection])]);
+                        .filter((col) => col.mandatory)
+                        .map((col) => col.value);
+
+                      setSelectedColumns([
+                        ...new Set([...mandatoryColumns, ...newSelection])
+                      ]);
                     }}
                   >
                     <Checkbox
@@ -572,19 +585,23 @@ function PatientRecordsDatabase() {
                       disabled={option.mandatory}
                       onCheckedChange={() => {
                         if (option.mandatory) return;
-                        
-                        const newSelection = selectedColumns.includes(option.value)
+
+                        const newSelection = selectedColumns.includes(
+                          option.value
+                        )
                           ? selectedColumns.filter(
                               (item) => item !== option.value
                             )
                           : [...selectedColumns, option.value];
-                        
+
                         // Ensure mandatory columns are always included
                         const mandatoryColumns = columns
-                          .filter(col => col.mandatory)
-                          .map(col => col.value);
-                        
-                        setSelectedColumns([...new Set([...mandatoryColumns, ...newSelection])]);
+                          .filter((col) => col.mandatory)
+                          .map((col) => col.value);
+
+                        setSelectedColumns([
+                          ...new Set([...mandatoryColumns, ...newSelection])
+                        ]);
                       }}
                       id={`checkbox-${option.value}`}
                       className={cn(
@@ -596,12 +613,16 @@ function PatientRecordsDatabase() {
                       htmlFor={`checkbox-${option.value}`}
                       className={cn(
                         "flex-1 text-sm font-medium",
-                        option.mandatory ? "cursor-not-allowed" : "cursor-pointer"
+                        option.mandatory
+                          ? "cursor-not-allowed"
+                          : "cursor-pointer"
                       )}
                     >
                       {option.label}
                       {option.mandatory && (
-                        <span className="ml-1 text-xs text-gray-500">(Required)</span>
+                        <span className="ml-1 text-xs text-gray-500">
+                          (Required)
+                        </span>
                       )}
                     </label>
                   </div>
@@ -654,7 +675,9 @@ function PatientRecordsDatabase() {
               <TableHead className="py-4 text-center whitespace-nowrap">
                 REFERENCE NO.
               </TableHead>
-              <TableHead className="py-4 text-center whitespace-nowrap">PAID</TableHead>
+              <TableHead className="py-4 text-center whitespace-nowrap">
+                PAID
+              </TableHead>
               <TableHead></TableHead>
             </TableRow>
           </TableHeader>
@@ -667,7 +690,9 @@ function PatientRecordsDatabase() {
                 <TableCell className="text-center whitespace-nowrap">
                   {record.dateTransacted || record.date_of_session
                     ? format(
-                        new Date(record.dateTransacted || record.date_of_session),
+                        new Date(
+                          record.dateTransacted || record.date_of_session
+                        ),
                         "MMMM dd, yyyy"
                       ).toUpperCase()
                     : "N/A"}
@@ -675,7 +700,8 @@ function PatientRecordsDatabase() {
                 <TableCell className="text-center whitespace-nowrap">
                   {record.nextSessionTime || record.time_of_session
                     ? (() => {
-                        const timeValue = record.nextSessionTime || record.time_of_session;
+                        const timeValue =
+                          record.nextSessionTime || record.time_of_session;
                         const parsedTime = new Date(`1970-01-01T${timeValue}`);
                         return isNaN(parsedTime.getTime())
                           ? "Invalid Time"
@@ -684,17 +710,20 @@ function PatientRecordsDatabase() {
                     : "N/A"}
                 </TableCell>
                 <TableCell className="text-center whitespace-nowrap">
-                  {(record.personInCharge || record.person_in_charge)?.toUpperCase()}
+                  {(
+                    record.personInCharge || record.person_in_charge
+                  )?.toUpperCase()}
                 </TableCell>
                 <TableCell className="whitespace-nowrap">
                   {(record.package || record.package_name)?.toUpperCase()}
                 </TableCell>
                 <TableCell className="text-left whitespace-nowrap">
                   {Array.isArray(record.treatment_ids)
-                    ? getTreatmentNames(record.treatment_ids).join(", ").toUpperCase()
+                    ? getTreatmentNames(record.treatment_ids)
+                        .join(", ")
+                        .toUpperCase()
                     : "N/A"}
                 </TableCell>
-
 
                 <TableCell className="text-center whitespace-nowrap">
                   {record.consentStatus ||
@@ -705,12 +734,14 @@ function PatientRecordsDatabase() {
                       : record.consent_form_signed)}
                 </TableCell>
                 <TableCell className="whitespace-nowrap">
-                  {(record.paymentMethod || record.payment_method)?.toUpperCase()}
+                  {(
+                    record.paymentMethod || record.payment_method
+                  )?.toUpperCase()}
                 </TableCell>
                 <TableCell className="text-center">
                   {new Intl.NumberFormat("en-PH", {
                     style: "currency",
-                    currency: "PHP",
+                    currency: "PHP"
                   }).format(parseFloat(record.total_amount || 0))}
                 </TableCell>
                 <TableCell className="text-center">
@@ -759,11 +790,15 @@ function PatientRecordsDatabase() {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
                       <DropdownMenuGroup>
-                        <DropdownMenuItem onClick={() => handleOpenEditEntry(record)}>
+                        <DropdownMenuItem
+                          onClick={() => handleOpenEditEntry(record)}
+                        >
                           <EditIcon />
                           <p className="font-semibold">Edit</p>
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleOpenArchiveEntry(record)}>
+                        <DropdownMenuItem
+                          onClick={() => handleOpenArchiveEntry(record)}
+                        >
                           <ArchiveIcon />
                           <p className="font-semibold">Archive</p>
                         </DropdownMenuItem>

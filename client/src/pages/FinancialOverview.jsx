@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { cn } from "@/lib/utils";
 import "../App.css";
 import { useModal } from "@/hooks/useModal";
 import { jsPDF } from "jspdf";
@@ -20,29 +21,35 @@ import EllipsisIcon from "@/assets/icons/EllipsisIcon";
 import ArchiveIcon from "@/assets/icons/ArchiveIcon";
 import SalesChart from "../components/SalesChart";
 import BeautoxPieChart from "../components/BeautoxPieChart";
+import SortIcon from "@/assets/icons/SortIcon";
 import { format } from "date-fns";
+
 import {
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
+  TableRow
 } from "@/components/ui/Table";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuTrigger,
+  DropdownMenuTrigger
 } from "@/components/ui/DropdownMenu";
+
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectValue,
-  SelectTrigger,
+  SelectTrigger
 } from "@/components/ui/Select";
+
+import { Checkbox } from "@/components/ui/Checkbox";
 
 // Define the base API URL from environment variable
 const API_BASE_URL = import.meta.env.VITE_API_URL;
@@ -52,13 +59,25 @@ function FinancialOverview() {
   const [financialData, setFinancialData] = useState({
     totalSales: 0,
     totalExpenses: 0,
-    netIncome: 0,
+    netIncome: 0
   });
   const [salesData, setSalesData] = useState([]);
   const [expensesData, setExpensesData] = useState([]);
   const [categories, setCategories] = useState([]);
 
   const { currentModal, openModal, closeModal } = useModal();
+
+  const [selectedColumns, setSelectedColumns] = useState([]);
+  const [columns] = useState([
+    { value: "client", label: "CLIENT", mandatory: true },
+    { value: "person_in_charge", label: "PERSON IN CHARGE", mandatory: false },
+    { value: "date_transacted", label: "DATE TRANSACTED", mandatory: true },
+    { value: "payment_method", label: "PAYMENT METHOD", mandatory: false },
+    { value: "packages", label: "PACKAGES", mandatory: false },
+    { value: "treatment", label: "TREATMENT", mandatory: false },
+    { value: "payment", label: "PAYMENT", mandatory: true },
+    { value: "reference_no", label: "REFERENCE NO.", mandatory: false }
+  ]);
 
   // Static chart data and config
   const chartData = [
@@ -68,18 +87,18 @@ function FinancialOverview() {
     { day: "Thu", currentWeek: 1600, previousWeek: 1250 },
     { day: "Fri", currentWeek: 1700, previousWeek: 1300 },
     { day: "Sat", currentWeek: 1800, previousWeek: 1350 },
-    { day: "Sun", currentWeek: 1900, previousWeek: 1400 },
+    { day: "Sun", currentWeek: 1900, previousWeek: 1400 }
   ];
 
   const chartConfig = {
     currentWeek: {
       label: "Current Week",
-      color: "#381B4C", // Lavender-400
+      color: "#381B4C" // Lavender-400
     },
     previousWeek: {
       label: "Previous Week",
-      color: "#002B7F", // ReflexBlue-400
-    },
+      color: "#002B7F" // ReflexBlue-400
+    }
   };
 
   const [filterType, setFilterType] = useState("all");
@@ -116,8 +135,7 @@ function FinancialOverview() {
       case "date_transacted":
         // Sort by date (most recent first)
         filtered = [...salesData].sort(
-          (a, b) =>
-            new Date(b.date_transacted) - new Date(a.date_transacted)
+          (a, b) => new Date(b.date_transacted) - new Date(a.date_transacted)
         );
         break;
       default:
@@ -167,6 +185,14 @@ function FinancialOverview() {
       });
   }, []);
 
+  useEffect(() => {
+    // Initialize with mandatory columns
+    const mandatoryColumns = columns
+      .filter((col) => col.mandatory)
+      .map((col) => col.value);
+    setSelectedColumns([...mandatoryColumns]);
+  }, []);
+
   const refreshExpensesData = async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/expenses`);
@@ -187,7 +213,7 @@ function FinancialOverview() {
     const doc = new jsPDF({
       orientation: "portrait",
       unit: "pt",
-      format: "a4",
+      format: "a4"
     });
 
     doc.setFont("helvetica");
@@ -199,8 +225,10 @@ function FinancialOverview() {
 
     const currentDate = new Date();
     const formattedCurrentDate = format(currentDate, "MMMM dd, yyyy");
-    const formattedMonthForFilename = format(currentDate, "MMMM dd, yyyy")
-      .replace(/^([a-z])/, (match) => match.toUpperCase());
+    const formattedMonthForFilename = format(
+      currentDate,
+      "MMMM dd, yyyy"
+    ).replace(/^([a-z])/, (match) => match.toUpperCase());
 
     doc.setFont("helvetica", "bold");
     doc.setFontSize(14);
@@ -219,7 +247,7 @@ function FinancialOverview() {
       "PACKAGES",
       "TREATMENT",
       "AMOUNT",
-      "REF NO",
+      "REF NO"
     ];
 
     const tableData = salesData.map((sale) => {
@@ -247,7 +275,7 @@ function FinancialOverview() {
         (sale.packages || "N/A").toUpperCase(),
         treatmentValue,
         paymentValue,
-        (sale.reference_no || "N/A").toUpperCase(),
+        (sale.reference_no || "N/A").toUpperCase()
       ];
     });
 
@@ -263,7 +291,7 @@ function FinancialOverview() {
         overflow: "linebreak",
         cellPadding: 2,
         lineWidth: 0.5,
-        lineColor: "#000000",
+        lineColor: "#000000"
       },
       headStyles: {
         fillColor: "#381B4C",
@@ -272,12 +300,12 @@ function FinancialOverview() {
         halign: "center",
         valign: "middle",
         fontStyle: "bold",
-        minCellHeight: 20,
+        minCellHeight: 20
       },
       bodyStyles: {
         valign: "middle",
         lineWidth: { top: 0.2, bottom: 0.2 },
-        lineColor: "#000000",
+        lineColor: "#000000"
       },
       columnStyles: {
         0: { cellWidth: contentWidth * 0.15 },
@@ -287,7 +315,7 @@ function FinancialOverview() {
         4: { cellWidth: contentWidth * 0.15 },
         5: { cellWidth: contentWidth * 0.15 },
         6: { cellWidth: contentWidth * 0.1, halign: "right" },
-        7: { cellWidth: contentWidth * 0.1 },
+        7: { cellWidth: contentWidth * 0.1 }
       },
       didDrawPage: function () {
         doc.setFontSize(8);
@@ -296,7 +324,7 @@ function FinancialOverview() {
           pageWidth - margin - 30,
           doc.internal.pageSize.height - 10
         );
-      },
+      }
     });
 
     const totalPayment = salesData.reduce((total, sale) => {
@@ -359,7 +387,7 @@ function FinancialOverview() {
     const doc = new jsPDF({
       orientation: "portrait",
       unit: "mm",
-      format: "a4",
+      format: "a4"
     });
     const pageWidth = doc.internal.pageSize.getWidth();
 
@@ -418,7 +446,7 @@ function FinancialOverview() {
     try {
       setCategories((prevCategories) => [
         ...prevCategories,
-        { id: categoryData.id, name: categoryData.name },
+        { id: categoryData.id, name: categoryData.name }
       ]);
       closeModal();
     } catch (error) {
@@ -443,7 +471,7 @@ function FinancialOverview() {
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name: categoryData.name }),
+          body: JSON.stringify({ name: categoryData.name })
         }
       );
       if (!response.ok) {
@@ -470,7 +498,7 @@ function FinancialOverview() {
         `${API_BASE_URL}/api/categories/${categoryId}/archive`,
         {
           method: "PATCH",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json" }
         }
       );
       if (response.ok) {
@@ -496,7 +524,7 @@ function FinancialOverview() {
       const response = await fetch(`${API_BASE_URL}/api/expenses`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(expenseData),
+        body: JSON.stringify(expenseData)
       });
       console.log("Create response status:", response.status);
       if (response.ok) {
@@ -506,7 +534,7 @@ function FinancialOverview() {
           const newExpense = {
             id: result.id,
             ...expenseData,
-            archived: false,
+            archived: false
           };
           setExpensesData((prevExpenses) => [newExpense, ...prevExpenses]);
           closeModal();
@@ -528,11 +556,11 @@ function FinancialOverview() {
     const formattedExpense = {
       amount: expense.expense,
       category: expense.category,
-      date: expense.date.split("T")[0],
+      date: expense.date.split("T")[0]
     };
     setExpenseToEdit({
       ...formattedExpense,
-      id: expense.id,
+      id: expense.id
     });
     openModal("editMonthlyExpense");
   };
@@ -543,7 +571,7 @@ function FinancialOverview() {
       const formattedData = {
         expense: parseFloat(updatedData.amount),
         category: updatedData.category,
-        date: updatedData.date,
+        date: updatedData.date
       };
       console.log("Formatted data for API:", formattedData);
       console.log("Expense ID being edited:", expenseToEdit.id);
@@ -554,8 +582,8 @@ function FinancialOverview() {
           table: "expenses_tracker",
           id: expenseToEdit.id,
           action: "edit",
-          data: formattedData,
-        }),
+          data: formattedData
+        })
       });
       console.log("API response status:", response.status);
       if (response.ok) {
@@ -579,8 +607,8 @@ function FinancialOverview() {
         body: JSON.stringify({
           table: "expenses_tracker",
           id: selectedExpense.id,
-          action: "archive",
-        }),
+          action: "archive"
+        })
       });
       console.log("Archive response status:", response.status);
       if (response.ok) {
@@ -611,11 +639,11 @@ function FinancialOverview() {
 
       {/* Sales Tracker Section */}
       <h2 className="font-bold text-xl md:text-[2rem]">SALES TRACKER</h2>
-      <div className="w-full overflow-x-auto">
+      <div>
         <SalesChart chartData={chartData} chartConfig={chartConfig} />
       </div>
 
-      <div className="flex justify-end">
+      {/* <div className="flex justify-end">
         <Select
           value={filterType}
           onValueChange={(value) => setFilterType(value)}
@@ -630,82 +658,160 @@ function FinancialOverview() {
             <SelectItem value="date_transacted">DATE TRANSACTED</SelectItem>
           </SelectContent>
         </Select>
+      </div> */}
+
+      <div className="flex justify-end gap-4">
+        <Select
+          value={filterType}
+          onValueChange={(value) => setFilterType(value)}
+        >
+          <SelectTrigger placeholder="SORT BY" icon={<SortIcon />}>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">ALL DATA</SelectItem>
+            <SelectItem value="client">CLIENT NAME</SelectItem>
+            <SelectItem value="person_in_charge">PERSON IN CHARGE</SelectItem>
+            <SelectItem value="date_transacted">DATE TRANSACTED</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Select className="w-full md:w-auto">
+          <SelectTrigger placeholder="FILTER COLUMNS" icon={<FilterIcon />}>
+            <SelectValue>
+              {selectedColumns.length > 0
+                ? `${selectedColumns.length} selected`
+                : "Select columns"}
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent className="min-w-[200px] p-2">
+            <div className="max-h-[300px] overflow-y-auto space-y-2">
+              {columns.map((option) => (
+                <div
+                  key={option.value}
+                  className={cn(
+                    "flex items-center space-x-2 p-2 rounded-md",
+                    option.mandatory
+                      ? "bg-gray-100 cursor-not-allowed opacity-60"
+                      : "hover:bg-lavender-100 cursor-pointer"
+                  )}
+                  onClick={() => {
+                    if (option.mandatory) return;
+
+                    const newSelection = selectedColumns.includes(option.value)
+                      ? selectedColumns.filter((item) => item !== option.value)
+                      : [...selectedColumns, option.value];
+
+                    // Ensure mandatory columns are always included
+                    const mandatoryColumns = columns
+                      .filter((col) => col.mandatory)
+                      .map((col) => col.value);
+
+                    setSelectedColumns([
+                      ...new Set([...mandatoryColumns, ...newSelection])
+                    ]);
+                  }}
+                >
+                  <Checkbox
+                    checked={selectedColumns.includes(option.value)}
+                    disabled={option.mandatory}
+                    onCheckedChange={() => {
+                      if (option.mandatory) return;
+
+                      const newSelection = selectedColumns.includes(
+                        option.value
+                      )
+                        ? selectedColumns.filter(
+                            (item) => item !== option.value
+                          )
+                        : [...selectedColumns, option.value];
+
+                      // Ensure mandatory columns are always included
+                      const mandatoryColumns = columns
+                        .filter((col) => col.mandatory)
+                        .map((col) => col.value);
+
+                      setSelectedColumns([
+                        ...new Set([...mandatoryColumns, ...newSelection])
+                      ]);
+                    }}
+                    id={`checkbox-${option.value}`}
+                    className={cn(
+                      "data-[state=checked]:bg-lavender-400 data-[state=checked]:border-lavender-400",
+                      option.mandatory && "opacity-60"
+                    )}
+                  />
+                  <label
+                    htmlFor={`checkbox-${option.value}`}
+                    className={cn(
+                      "flex-1 text-sm font-medium",
+                      option.mandatory ? "cursor-not-allowed" : "cursor-pointer"
+                    )}
+                  >
+                    {option.label}
+                    {option.mandatory && (
+                      <span className="ml-1 text-xs text-gray-500">
+                        (Required)
+                      </span>
+                    )}
+                  </label>
+                </div>
+              ))}
+            </div>
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="w-full overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="py-4 text-center whitespace-nowrap">
-                CLIENT
-              </TableHead>
-              <TableHead className="py-4 text-center whitespace-nowrap">
-                PERSON IN CHARGE
-              </TableHead>
-              <TableHead className="py-4 text-center whitespace-nowrap">
-                DATE TRANSACTED
-              </TableHead>
-              <TableHead className="py-4 text-center whitespace-nowrap">
-                PAYMENT METHOD
-              </TableHead>
-              <TableHead className="py-4 text-center whitespace-nowrap">
-                PACKAGES
-              </TableHead>
-              <TableHead className="py-4 text-center whitespace-nowrap">
-                TREATMENT
-              </TableHead>
-              <TableHead className="py-4 text-center whitespace-nowrap">
-                PAYMENT
-              </TableHead>
-              <TableHead className="py-4 text-center whitespace-nowrap">
-                REFERENCE NO.
-              </TableHead>
+              {columns
+                .filter((col) => selectedColumns.includes(col.value))
+                .map((column) => (
+                  <TableHead
+                    key={column.value}
+                    className="py-4 text-center whitespace-nowrap"
+                  >
+                    {column.label}
+                  </TableHead>
+                ))}
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredSalesData && filteredSalesData.length > 0 ? (
               filteredSalesData.map((sale, index) => (
                 <TableRow key={index}>
-                  <TableCell className="whitespace-nowrap">
-                    {(sale.client || "N/A").toUpperCase()}
-                  </TableCell>
-                  <TableCell className="whitespace-nowrap">
-                    {(sale.person_in_charge || "N/A").toUpperCase()}
-                  </TableCell>
-                  <TableCell className="whitespace-nowrap">
-                    {sale.date_transacted
-                      ? format(
-                          new Date(sale.date_transacted),
-                          "MMMM dd, yyyy"
-                        ).toUpperCase()
-                      : "N/A"}
-                  </TableCell>
-                  <TableCell className="whitespace-nowrap">
-                    {(sale.payment_method || "N/A").toUpperCase()}
-                  </TableCell>
-                  <TableCell className="whitespace-nowrap">
-                    {(sale.packages || "N/A").toUpperCase()}
-                  </TableCell>
-                  <TableCell className="whitespace-nowrap">
-                    {(sale.treatment &&
-                    sale.treatment.trim()
-                      ? sale.treatment.toUpperCase()
-                      : "N/A")}
-                  </TableCell>
-                  <TableCell className="whitespace-nowrap">
-                    {new Intl.NumberFormat("en-PH", {
-                      style: "currency",
-                      currency: "PHP",
-                    }).format(sale.payment)}
-                  </TableCell>
-                  <TableCell className="whitespace-nowrap">
-                    {(sale.reference_no || "N/A").toUpperCase()}
-                  </TableCell>
+                  {columns
+                    .filter((col) => selectedColumns.includes(col.value))
+                    .map((column) => (
+                      <TableCell
+                        key={column.value}
+                        className="whitespace-nowrap"
+                      >
+                        {column.value === "date_transacted"
+                          ? sale.date_transacted
+                            ? format(
+                                new Date(sale.date_transacted),
+                                "MMMM dd, yyyy"
+                              ).toUpperCase()
+                            : "N/A"
+                          : column.value === "payment"
+                          ? new Intl.NumberFormat("en-PH", {
+                              style: "currency",
+                              currency: "PHP"
+                            }).format(sale.payment)
+                          : (sale[column.value] || "N/A").toUpperCase()}
+                      </TableCell>
+                    ))}
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan="8" className="text-center">
+                <TableCell
+                  colSpan={selectedColumns.length}
+                  className="text-center"
+                >
                   NO SALES DATA CURRENTLY AVAILABLE
                 </TableCell>
               </TableRow>
@@ -721,9 +827,7 @@ function FinancialOverview() {
           className="text-sm md:text-base"
         >
           <DownloadIcon />
-          <span className="hidden md:inline">
-            DOWNLOAD WEEKLY SALES REPORT
-          </span>
+          <span className="hidden md:inline">DOWNLOAD WEEKLY SALES REPORT</span>
           <span className="md:hidden">WEEKLY REPORT</span>
         </Button>
       </div>
@@ -823,7 +927,10 @@ function FinancialOverview() {
                   <TableRow key={expense.id || index}>
                     <TableCell className="py-4 text-center whitespace-nowrap">
                       {expense.date
-                        ? format(new Date(expense.date), "MMMM dd, yyyy").toUpperCase()
+                        ? format(
+                            new Date(expense.date),
+                            "MMMM dd, yyyy"
+                          ).toUpperCase()
                         : "N/A"}
                     </TableCell>
                     <TableCell className="py-4 text-center whitespace-nowrap">
@@ -832,7 +939,7 @@ function FinancialOverview() {
                     <TableCell className="py-4 text-center whitespace-nowrap">
                       {new Intl.NumberFormat("en-PH", {
                         style: "currency",
-                        currency: "PHP",
+                        currency: "PHP"
                       }).format(expense.expense)}
                     </TableCell>
                     <TableCell className="py-4 text-center">
@@ -848,7 +955,7 @@ function FinancialOverview() {
                                   id: expense.id,
                                   expense: expense.expense,
                                   category: expense.category,
-                                  date: expense.date.split("T")[0],
+                                  date: expense.date.split("T")[0]
                                 });
                                 openModal("editMonthlyExpense");
                               }}
@@ -887,7 +994,7 @@ function FinancialOverview() {
           <span className="font-bold">
             {new Intl.NumberFormat("en-PH", {
               style: "currency",
-              currency: "PHP",
+              currency: "PHP"
             }).format(financialData.netIncome)}
           </span>
         </div>
@@ -905,9 +1012,7 @@ function FinancialOverview() {
             ADD ADDITIONAL EXPENSES
           </Button>
           <Button
-            onClick={() =>
-              generateMonthlySalesReport(salesData, expensesData)
-            }
+            onClick={() => generateMonthlySalesReport(salesData, expensesData)}
             className="w-full md:w-auto"
           >
             <DownloadIcon />
@@ -937,7 +1042,7 @@ function FinancialOverview() {
           initialData={{
             amount: expenseToEdit.expense,
             category: expenseToEdit.category,
-            date: expenseToEdit.date,
+            date: expenseToEdit.date
           }}
         />
       )}
