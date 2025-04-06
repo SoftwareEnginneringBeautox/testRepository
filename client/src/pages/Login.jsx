@@ -8,13 +8,14 @@ import LoginIcon from "../assets/icons/LoginIcon";
 import BeautoxLogo from "../assets/logos/Beautox.svg";
 import axios from "axios";
 import ForgotPassword from "@/components/modals/ForgotPassword";
+import ChevronLeftIcon from "@/assets/icons/ChevronLeftIcon";
 
 import {
   InputContainer,
   InputTextField,
   InputLabel,
   InputIcon,
-  Input,
+  Input
 } from "@/components/ui/Input";
 
 function Login() {
@@ -116,7 +117,7 @@ function Login() {
             backgroundSize: "cover",
             backgroundPosition: "center",
             backgroundRepeat: "no-repeat",
-            backgroundAttachment: "fixed",
+            backgroundAttachment: "fixed"
           }}
         >
           {/* White overlay with transparency */}
@@ -138,7 +139,8 @@ function Login() {
                 Welcome to PRISM,
               </h2>
               <p className="text-[10px] text-center mb-3 max-w-[260px] tracking-wide uppercase">
-                BEAUTOX'S PATIENT RECORDS, INTEGRATION, SCHEDULING, AND MANAGEMENT
+                BEAUTOX'S PATIENT RECORDS, INTEGRATION, SCHEDULING, AND
+                MANAGEMENT
               </p>
             </div>
 
@@ -166,7 +168,7 @@ function Login() {
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    className="text-input text-xs h-8 pl-5 placeholder:text-left"
+                    className="text-input text-xs sm:pl-2  text-left placeholder:text-left"
                     placeholder="e.g. john_doe123"
                     required
                   />
@@ -174,16 +176,16 @@ function Login() {
               </InputContainer>
 
               <InputContainer className="transition-all duration-200">
-                <InputLabel className="text-[11px] mb-0.5">Password</InputLabel>
-                <InputTextField className="mt-0.5">
-                  <InputIcon className="text-gray-400">
-                    <PasswordIcon className="w-3.5 h-3.5" />
+                <InputLabel>Password</InputLabel>
+                <InputTextField>
+                  <InputIcon>
+                    <PasswordIcon />
                   </InputIcon>
                   <Input
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="text-input text-xs h-8 pl-5 placeholder:text-left"
+                    className="text-input text-xs sm:pl-2  text-left placeholder:text-left"
                     placeholder="e.g. P@ssw0rd123"
                     required
                   />
@@ -209,7 +211,7 @@ function Login() {
               <div className="space-y-2">
                 <Button
                   type="submit"
-                  className="w-full bg-purple-950 hover:bg-purple-900 text-white h-8 rounded-md text-xs font-medium flex items-center justify-center gap-1.5"
+                  // className="w-full bg-purple-950 hover:bg-purple-900 text-white h-8 rounded-md text-xs font-medium flex items-center justify-center gap-1.5"
                   fullWidth="true"
                 >
                   <LoginIcon className="sm:w-3.5 sm:h-3.5" />
@@ -220,6 +222,7 @@ function Login() {
                   onClick={() => navigate("/")}
                   fullWidth="true"
                 >
+                  <ChevronLeftIcon />
                   RETURN
                 </Button>
               </div>
@@ -253,7 +256,8 @@ function Login() {
                 Welcome to PRISM,
               </h2>
               <p className="text-xs sm:text-sm md:text-base text-center mb-6 max-w-sm px-2">
-                BEAUTOX&apos;S PATIENT RECORDS, INTEGRATION, SCHEDULING, AND MANAGEMENT
+                BEAUTOX&apos;S PATIENT RECORDS, INTEGRATION, SCHEDULING, AND
+                MANAGEMENT
               </p>
             </div>
 
@@ -279,13 +283,13 @@ function Login() {
                 <InputLabel className="text-xs sm:text-sm">Username</InputLabel>
                 <InputTextField className="mt-1 sm:mt-2">
                   <InputIcon className="text-gray-400">
-                    <UserIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                    <UserIcon className="sm:w-5 sm:h-5" />
                   </InputIcon>
                   <Input
                     data-cy="login-username"
                     type="text"
                     id="username"
-                    className="text-input text-sm sm:text-base"
+                    className="text-sm sm:text-base"
                     onChange={(e) => setUsername(e.target.value)}
                     onBlur={(e) => setUsername(e.target.value.trim())}
                     placeholder="e.g. john_doe123"
@@ -296,15 +300,15 @@ function Login() {
 
               <InputContainer className="transition-all duration-200">
                 <InputLabel className="text-xs sm:text-sm">Password</InputLabel>
-                <InputTextField className="mt-1 sm:mt-2">
-                  <InputIcon className="text-gray-400">
-                    <PasswordIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                <InputTextField>
+                  <InputIcon>
+                    <PasswordIcon className="sm:w-5 sm:h-5" />
                   </InputIcon>
                   <Input
                     data-cy="login-password"
                     type="password"
                     id="password"
-                    className="text-input text-sm sm:text-base"
+                    className="text-sm sm:text-base"
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="e.g. P@ssw0rd123"
                     value={password}
@@ -331,13 +335,8 @@ function Login() {
 
               {/* Responsive buttons */}
               <div className="space-y-3 pt-4">
-                <Button
-                  type="submit"
-                  fullWidth="true"
-                  data-cy="login-submit"
-                  className="w-full bg-purple-950 hover:bg-purple-900 text-white py-2.5 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center justify-center gap-2"
-                >
-                  <LoginIcon className="w-5 h-5" />
+                <Button type="submit" fullWidth="true" data-cy="login-submit">
+                  <LoginIcon />
                   <span>LOGIN</span>
                 </Button>
 
@@ -348,6 +347,7 @@ function Login() {
                   type="button"
                   className="w-full"
                 >
+                  <ChevronLeftIcon />
                   RETURN
                 </Button>
               </div>

@@ -35,7 +35,7 @@ const SelectTrigger = React.forwardRef(
       ref={ref}
       className={cn(
         selectVariants({ variant }),
-        "flex items-center gap-2 h-12 ",
+        "flex items-center gap-2 h-12",
         className
       )}
       {...props}
