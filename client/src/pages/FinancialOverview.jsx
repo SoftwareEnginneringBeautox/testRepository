@@ -3,17 +3,10 @@ import "../App.css";
 import { useModal } from "@/hooks/useModal";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
-<<<<<<< Updated upstream
 
 import CreateMonthlyExpense from "@/components/modals/CreateMonthlyExpense";
 import EditMonthlyExpense from "@/components/modals/EditMonthlyExpense";
 import DeleteMonthlyExpense from "@/components/modals/DeleteMonthlyExpense";
-
-=======
-import CreateMonthlySales from "@/components/modals/CreateMonthlySales";
-import EditMonthlySales from "@/components/modals/EditMonthlySales";
-import DeleteMonthlySales from "@/components/modals/DeleteMonthlySales";
->>>>>>> Stashed changes
 import CreateCategory from "@/components/modals/CreateCategory";
 import EditCategory from "@/components/modals/EditCategory";
 import ArchiveCategory from "@/components/modals/ArchiveCategory";
@@ -111,16 +104,21 @@ function FinancialOverview() {
       case "person_in_charge":
         // Group by person in charge and sort alphabetically
         filtered = [...salesData].sort((a, b) => {
-          const picA = a.person_in_charge ? a.person_in_charge.toUpperCase() : "";
-          const picB = b.person_in_charge ? b.person_in_charge.toUpperCase() : "";
+          const picA = a.person_in_charge
+            ? a.person_in_charge.toUpperCase()
+            : "";
+          const picB = b.person_in_charge
+            ? b.person_in_charge.toUpperCase()
+            : "";
           return picA.localeCompare(picB);
         });
         break;
       case "date_transacted":
         // Sort by date (most recent first)
-        filtered = [...salesData].sort((a, b) => {
-          return new Date(b.date_transacted) - new Date(a.date_transacted);
-        });
+        filtered = [...salesData].sort(
+          (a, b) =>
+            new Date(b.date_transacted) - new Date(a.date_transacted)
+        );
         break;
       default:
         filtered = salesData;
@@ -144,7 +142,7 @@ function FinancialOverview() {
         console.error("Error fetching financial overview:", error)
       );
 
-    // 2. Sales data for table (ensure your server has GET /sales defined)
+    // 2. Sales data for table
     fetch(`${API_BASE_URL}/sales`)
       .then((response) => response.json())
       .then((data) => setSalesData(data))
@@ -165,11 +163,7 @@ function FinancialOverview() {
       })
       .catch((error) => {
         console.error("Error fetching categories:", error);
-<<<<<<< Updated upstream
         setCategories([]); // Set to empty array on error
-=======
-        setCategories([]);
->>>>>>> Stashed changes
       });
   }, []);
 
@@ -422,12 +416,6 @@ function FinancialOverview() {
 
   const handleCreateCategory = async (categoryData) => {
     try {
-      console.log("Create category callback called with:", categoryData);
-<<<<<<< Updated upstream
-      // The category should already be created in the database via the CreateCategory component
-      // Just update the local state
-=======
->>>>>>> Stashed changes
       setCategories((prevCategories) => [
         ...prevCategories,
         { id: categoryData.id, name: categoryData.name },
@@ -450,19 +438,6 @@ function FinancialOverview() {
         alert("A category with this name already exists");
         return;
       }
-<<<<<<< Updated upstream
-
-      // Call the API to update the category
-      const response = await fetch(
-        `http://localhost:4000/api/categories/${categoryData.id}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name: categoryData.name })
-        }
-      );
-
-=======
       const response = await fetch(
         `${API_BASE_URL}/api/categories/${categoryData.id}`,
         {
@@ -471,16 +446,10 @@ function FinancialOverview() {
           body: JSON.stringify({ name: categoryData.name }),
         }
       );
->>>>>>> Stashed changes
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || "Error updating category");
       }
-<<<<<<< Updated upstream
-
-      // Update the local state with the edited category
-=======
->>>>>>> Stashed changes
       setCategories((prevCategories) =>
         prevCategories.map((category) =>
           category.id === categoryData.id
@@ -498,22 +467,12 @@ function FinancialOverview() {
   const handleArchiveCategory = async (categoryId) => {
     try {
       const response = await fetch(
-<<<<<<< Updated upstream
-        `http://localhost:4000/api/categories/${categoryId}/archive`,
-        {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" }
-        }
-      );
-
-=======
         `${API_BASE_URL}/api/categories/${categoryId}/archive`,
         {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
         }
       );
->>>>>>> Stashed changes
       if (response.ok) {
         await refreshCategories();
         closeModal();
@@ -549,15 +508,7 @@ function FinancialOverview() {
             ...expenseData,
             archived: false,
           };
-<<<<<<< Updated upstream
-
-          // Add the new expense to the beginning of the list
           setExpensesData((prevExpenses) => [newExpense, ...prevExpenses]);
-
-          // Close the modal
-=======
-          setExpensesData((prevExpenses) => [newExpense, ...prevExpenses]);
->>>>>>> Stashed changes
           closeModal();
         } else {
           alert(result.message || "Error creating expense");
@@ -577,11 +528,7 @@ function FinancialOverview() {
     const formattedExpense = {
       amount: expense.expense,
       category: expense.category,
-<<<<<<< Updated upstream
-      date: expense.date.split("T")[0] // Format date for input element
-=======
       date: expense.date.split("T")[0],
->>>>>>> Stashed changes
     };
     setExpenseToEdit({
       ...formattedExpense,
@@ -623,12 +570,6 @@ function FinancialOverview() {
     }
   };
 
-<<<<<<< Updated upstream
-  const [selectedExpense, setSelectedExpense] = useState(null);
-
-  // Handler for archive/delete action
-=======
->>>>>>> Stashed changes
   const handleArchiveExpense = async () => {
     try {
       console.log("Archiving expense with ID:", selectedExpense.id);
@@ -643,10 +584,6 @@ function FinancialOverview() {
       });
       console.log("Archive response status:", response.status);
       if (response.ok) {
-<<<<<<< Updated upstream
-        // remove the archived expense immediately
-=======
->>>>>>> Stashed changes
         setExpensesData((prevExpenses) =>
           prevExpenses.filter((expense) => expense.id !== selectedExpense.id)
         );
@@ -730,31 +667,6 @@ function FinancialOverview() {
               filteredSalesData.map((sale, index) => (
                 <TableRow key={index}>
                   <TableCell className="whitespace-nowrap">
-<<<<<<< Updated upstream
-                    {sale.client ? sale.client.toUpperCase() : "N/A"}
-                  </TableCell>
-                  <TableCell className="whitespace-nowrap">
-                    {sale.person_in_charge
-                      ? sale.person_in_charge.toUpperCase()
-                      : "N/A"}
-                  </TableCell>
-                  <TableCell className="whitespace-nowrap">
-                    {format(
-                      new Date(sale.date_transacted),
-                      "MMMM dd, yyyy"
-                    ).toUpperCase()}
-                  </TableCell>
-                  <TableCell className="whitespace-nowrap">
-                    {sale.payment_method
-                      ? sale.payment_method.toUpperCase()
-                      : "N/A"}
-                  </TableCell>
-                  <TableCell className="whitespace-nowrap">
-                    {sale.packages ? sale.packages.toUpperCase() : "N/A"}
-                  </TableCell>
-                  <TableCell className="whitespace-nowrap">
-                    {sale.treatment ? sale.treatment.toUpperCase() : "N/A"}
-=======
                     {(sale.client || "N/A").toUpperCase()}
                   </TableCell>
                   <TableCell className="whitespace-nowrap">
@@ -762,7 +674,10 @@ function FinancialOverview() {
                   </TableCell>
                   <TableCell className="whitespace-nowrap">
                     {sale.date_transacted
-                      ? format(new Date(sale.date_transacted), "MMMM dd, yyyy").toUpperCase()
+                      ? format(
+                          new Date(sale.date_transacted),
+                          "MMMM dd, yyyy"
+                        ).toUpperCase()
                       : "N/A"}
                   </TableCell>
                   <TableCell className="whitespace-nowrap">
@@ -772,8 +687,10 @@ function FinancialOverview() {
                     {(sale.packages || "N/A").toUpperCase()}
                   </TableCell>
                   <TableCell className="whitespace-nowrap">
-                    {(sale.treatment && sale.treatment.trim() ? sale.treatment.toUpperCase() : "N/A")}
->>>>>>> Stashed changes
+                    {(sale.treatment &&
+                    sale.treatment.trim()
+                      ? sale.treatment.toUpperCase()
+                      : "N/A")}
                   </TableCell>
                   <TableCell className="whitespace-nowrap">
                     {new Intl.NumberFormat("en-PH", {
@@ -782,11 +699,7 @@ function FinancialOverview() {
                     }).format(sale.payment)}
                   </TableCell>
                   <TableCell className="whitespace-nowrap">
-<<<<<<< Updated upstream
-                    {sale.reference_no}
-=======
                     {(sale.reference_no || "N/A").toUpperCase()}
->>>>>>> Stashed changes
                   </TableCell>
                 </TableRow>
               ))
@@ -838,11 +751,7 @@ function FinancialOverview() {
                   categories.map((category) => (
                     <TableRow key={category.id}>
                       <TableCell className="flex items-center justify-between gap-4 h-full w-full">
-<<<<<<< Updated upstream
-                        {category.name ? category.name.toUpperCase() : "N/A"}
-=======
                         {(category.name || "N/A").toUpperCase()}
->>>>>>> Stashed changes
                         <DropdownMenu>
                           <DropdownMenuTrigger>
                             <EllipsisIcon />
@@ -913,24 +822,12 @@ function FinancialOverview() {
                 expensesData.map((expense, index) => (
                   <TableRow key={expense.id || index}>
                     <TableCell className="py-4 text-center whitespace-nowrap">
-<<<<<<< Updated upstream
-                      {format(
-                        new Date(expense.date),
-                        "MMMM dd, yyyy"
-                      ).toUpperCase()}
-                    </TableCell>
-                    <TableCell className="py-4 text-center whitespace-nowrap">
-                      {expense.category
-                        ? expense.category.toUpperCase()
-                        : "N/A"}
-=======
                       {expense.date
                         ? format(new Date(expense.date), "MMMM dd, yyyy").toUpperCase()
                         : "N/A"}
                     </TableCell>
                     <TableCell className="py-4 text-center whitespace-nowrap">
                       {(expense.category || "N/A").toUpperCase()}
->>>>>>> Stashed changes
                     </TableCell>
                     <TableCell className="py-4 text-center whitespace-nowrap">
                       {new Intl.NumberFormat("en-PH", {
@@ -947,23 +844,11 @@ function FinancialOverview() {
                           <DropdownMenuGroup>
                             <DropdownMenuItem
                               onClick={() => {
-<<<<<<< Updated upstream
-                                const expense = expensesData[index];
-                                console.log(
-                                  "Setting expense to edit:",
-                                  expense
-                                );
-=======
->>>>>>> Stashed changes
                                 setExpenseToEdit({
                                   id: expense.id,
                                   expense: expense.expense,
                                   category: expense.category,
-<<<<<<< Updated upstream
-                                  date: expense.date.split("T")[0]
-=======
                                   date: expense.date.split("T")[0],
->>>>>>> Stashed changes
                                 });
                                 openModal("editMonthlyExpense");
                               }}

@@ -142,17 +142,7 @@ function PatientRecordsDatabase() {
     openModal("editEntry");
   };
 
-<<<<<<< Updated upstream
-  // Open update entry modal
-  const handleOpenUpdateEntry = (record) => {
-    setSelectedEntry(record);
-    openModal("updateEntry");
-  };
-
-  // Open delete entry modal
-=======
   // Open archive entry modal
->>>>>>> Stashed changes
   const handleOpenArchiveEntry = (record) => {
     setSelectedEntry(record);
     openModal("archiveEntry");
@@ -201,9 +191,6 @@ function PatientRecordsDatabase() {
     fetchRecords();
   };
 
-<<<<<<< Updated upstream
-  // Filter and sort records
-=======
   // Handle Paid dropdown change
   const handlePaidChange = async (record, newValue) => {
     const newVal = newValue === "-" ? null : newValue;
@@ -248,7 +235,6 @@ function PatientRecordsDatabase() {
     }
   };
 
->>>>>>> Stashed changes
   const filteredRecords = [...records]
     .filter((record) => {
       const name = record.client || record.patient_name || "";
@@ -422,36 +408,6 @@ function PatientRecordsDatabase() {
     };
 
     const tableData = patientRecords.map((record) => {
-<<<<<<< Updated upstream
-      const total = parseFloat(
-        record.total_amount ?? record.total_amount ?? "0"
-      );
-      const paid = parseFloat(record.amount_paid || 0);
-      const remaining = total - paid;
-
-      return [
-        record.client || record.patient_name?.toUpperCase() || "N/A",
-        formatDate(record.dateTransacted || record.date_of_session),
-        formatTime(record.nextSessionTime || record.time_of_session),
-        (record.personInCharge || record.person_in_charge)?.toUpperCase() ||
-          "N/A",
-        (record.package || record.package_name)?.toUpperCase() || "N/A",
-        record.treatment?.toUpperCase() || "N/A",
-        typeof record.consent_form_signed === "boolean"
-          ? record.consent_form_signed
-            ? "SIGNED"
-            : "NOT SIGNED"
-          : record.consentStatus || "N/A",
-        (record.paymentMethod || record.payment_method)?.toUpperCase() || "N/A",
-        `PHP ${total.toFixed(2)}`,
-        `PHP ${paid.toFixed(2)}`,
-        `PHP ${remaining.toFixed(2)}`,
-        record.reference_number || "N/A"
-      ];
-    });
-
-    // Generate table
-=======
       const total = parseFloat(record.total_amount ?? "0");
       const paid = parseFloat(record.amount_paid || 0);
       const remaining = total - paid;
@@ -481,7 +437,6 @@ function PatientRecordsDatabase() {
       ];
     });
 
->>>>>>> Stashed changes
     autoTable(doc, {
       head: [headers],
       body: tableData,
@@ -669,10 +624,7 @@ function PatientRecordsDatabase() {
               <TableHead className="py-4 text-center whitespace-nowrap">
                 REFERENCE NO.
               </TableHead>
-<<<<<<< Updated upstream
-=======
               <TableHead className="py-4 text-center whitespace-nowrap">PAID</TableHead>
->>>>>>> Stashed changes
               <TableHead></TableHead>
             </TableRow>
           </TableHeader>
@@ -727,24 +679,11 @@ function PatientRecordsDatabase() {
                   {(record.paymentMethod || record.payment_method)?.toUpperCase()}
                 </TableCell>
                 <TableCell className="text-center">
-<<<<<<< Updated upstream
-                  {(() => {
-                    const total = parseFloat(record.total_amount || 0);
-                    return new Intl.NumberFormat("en-PH", {
-                      style: "currency",
-                      currency: "PHP"
-                    }).format(total);
-                  })()}
-                </TableCell>
-
-                {/* AMOUNT PAID */}
-=======
                   {new Intl.NumberFormat("en-PH", {
                     style: "currency",
                     currency: "PHP",
                   }).format(parseFloat(record.total_amount || 0))}
                 </TableCell>
->>>>>>> Stashed changes
                 <TableCell className="text-center">
                   {record.amount_paid
                     ? new Intl.NumberFormat("en-PH", {
@@ -755,13 +694,7 @@ function PatientRecordsDatabase() {
                 </TableCell>
                 <TableCell className="text-center">
                   {(() => {
-<<<<<<< Updated upstream
-                    const total = parseFloat(
-                      record.total_amount || record.total_amount || 0
-                    );
-=======
                     const total = parseFloat(record.total_amount || 0);
->>>>>>> Stashed changes
                     const paid = parseFloat(record.amount_paid || 0);
                     const remaining = total - paid;
                     return new Intl.NumberFormat("en-PH", {
@@ -801,19 +734,7 @@ function PatientRecordsDatabase() {
                           <EditIcon />
                           <p className="font-semibold">Edit</p>
                         </DropdownMenuItem>
-<<<<<<< Updated upstream
-                        <DropdownMenuItem
-                          onClick={() => handleOpenUpdateEntry(record)}
-                        >
-                          <UpdateIcon />
-                          <p className="font-semibold">Update</p>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => handleOpenArchiveEntry(record)}
-                        >
-=======
                         <DropdownMenuItem onClick={() => handleOpenArchiveEntry(record)}>
->>>>>>> Stashed changes
                           <ArchiveIcon />
                           <p className="font-semibold">Archive</p>
                         </DropdownMenuItem>
