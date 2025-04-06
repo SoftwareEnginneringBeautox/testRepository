@@ -41,6 +41,7 @@ const chartConfig = {
     color: "#7A4C93"
   },
 <<<<<<< HEAD
+<<<<<<< HEAD
   testii: {
     label: "Test II",
     color: "#9d71b1"
@@ -61,6 +62,9 @@ const chartConfig = {
 =======
   // Add more color mappings as needed for other categories
 >>>>>>> parent of d3f6131 (Update BeautoxPieChart.jsx)
+=======
+  // Add more color mappings as needed for other categories
+>>>>>>> parent of d3f6131 (Update BeautoxPieChart.jsx)
   other: {
     label: "Other",
     color: "#9d71b1"
@@ -68,12 +72,15 @@ const chartConfig = {
 };
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 // Custom colors for the pie chart
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#ffc658'];
 
 // Modified to accept expensesData as a prop
 const BeautoxPieChart = ({ expensesData = [] }) => {
 =======
+=======
+>>>>>>> parent of d3f6131 (Update BeautoxPieChart.jsx)
 const BeautoxPieChart = () => {
 >>>>>>> parent of d3f6131 (Update BeautoxPieChart.jsx)
   const [chartData, setChartData] = useState([]);
@@ -93,6 +100,7 @@ const BeautoxPieChart = () => {
   const previousYear = currentMonth === 1 ? currentYear - 1 : currentYear;
 
   useEffect(() => {
+<<<<<<< HEAD
 <<<<<<< HEAD
     // Get the current date for filtering
     const currentDate = new Date();
@@ -118,6 +126,8 @@ const BeautoxPieChart = () => {
     const processData = () => {
       setLoading(true);
 =======
+=======
+>>>>>>> parent of d3f6131 (Update BeautoxPieChart.jsx)
     // Fetch expenses data from the server
     const fetchExpenses = async () => {
 >>>>>>> parent of d3f6131 (Update BeautoxPieChart.jsx)
@@ -242,6 +252,9 @@ const BeautoxPieChart = () => {
 =======
           // Transform data for recharts
           const transformedData = Object.keys(categoryTotals).map((key) => {
+<<<<<<< HEAD
+>>>>>>> parent of d3f6131 (Update BeautoxPieChart.jsx)
+=======
 >>>>>>> parent of d3f6131 (Update BeautoxPieChart.jsx)
             // Find the known category or use the original key
             const categoryKey =
@@ -255,6 +268,7 @@ const BeautoxPieChart = () => {
             };
 
 <<<<<<< HEAD
+<<<<<<< HEAD
             transformedData.push({
               category: categoryConfig.label || key.charAt(0).toUpperCase() + key.slice(1),
               value: categoryTotals[key],
@@ -267,6 +281,15 @@ const BeautoxPieChart = () => {
           
           console.log("Final chart data:", transformedData);
 
+=======
+            return {
+              category: categoryConfig.label,
+              value: categoryTotals[key],
+              fill: categoryConfig.color
+            };
+          });
+
+>>>>>>> parent of d3f6131 (Update BeautoxPieChart.jsx)
 =======
             return {
               category: categoryConfig.label,
@@ -307,6 +330,9 @@ const BeautoxPieChart = () => {
 =======
     fetchExpenses();
   }, [currentMonth, currentYear, previousMonth, previousYear]);
+<<<<<<< HEAD
+>>>>>>> parent of d3f6131 (Update BeautoxPieChart.jsx)
+=======
 >>>>>>> parent of d3f6131 (Update BeautoxPieChart.jsx)
 
   if (loading) {
