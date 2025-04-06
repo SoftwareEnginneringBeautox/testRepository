@@ -57,7 +57,7 @@ function LandingPage() {
             "Diamond Peel",
             "Bleaching"
           ],
-          note: "*If no package: ₱499/session"
+          note: "*If no package: ₱499/session" 
         },
         {
           name: "Diode Laser",
@@ -65,17 +65,20 @@ function LandingPage() {
             {
               name: "Underarm Package",
               price: "₱5,999",
-              details: ["Total of 8 Sessions"]
+              perSession: "₱1,500",
+              details: ["8 Sessions"]
             },
             {
               name: "Brazilian Package",
               price: "₱11,999",
-              details: ["Total of 8 Sessions"]
+              perSession: "₱2,500",
+              details: ["8 Sessions"]
             },
             {
               name: "Full Arms or Legs Package",
               price: "₱14,999",
-              details: ["Total of 8 Sessions"]
+              perSession: "₱3,000",
+              details: ["8 Sessions"]
             }
           ],
           perSession: [
@@ -87,7 +90,7 @@ function LandingPage() {
         },
         {
           name: "Intimate Secret",
-          discount: "20% OFF if you avail any Diode Package",
+          note: "*20% OFF on Diode Packages", 
           subcategories: [
             {
               name: "Brazilian, Bikini, or Butt",
@@ -103,6 +106,8 @@ function LandingPage() {
         }
       ]
     },
+
+  
     {
       category: "FACIAL",
       items: [
@@ -380,7 +385,7 @@ function LandingPage() {
             <img
               src={BeautoxLogo}
               alt="Beautox Logo"
-              className="mb-4 w-28 sm:w-32 md:w-36 lg:w-44 h-auto"
+              className="mb-4 w-28 sm:w-32 md:w-36 lg:w-44 h-auto mx-auto"
             />
 
             <div className="flex flex-col gap-2">
@@ -561,23 +566,23 @@ function LandingPage() {
           </h2>
 
           <div className="w-full flex flex-col lg:flex-row gap-8">
-            {/* Main Image and Details */}
-            <div className="w-full lg:w-1/2">
+           {/* Main Image and Details */}
+           <div className="w-full lg:w-1/2">
               <img
                 src="/images/ClinicImage1.jpg"
                 alt="Beautox Clinic Main"
-                className="w-full h-[300px] sm:h-[400px] object-cover rounded-2xl mb-4"
+                className="w-full h-[300px] sm:h-[400px] object-cover rounded-2xl mb-4 shadow-[0_8px_30px_rgba(0,0,0,0.25)] hover:shadow-[0_15px_40px_rgba(0,0,0,0.35)] transition-shadow duration-300"
               />
               <div className="flex gap-2">
                 <img
                   src="/images/ClinicImage2.jpg"
                   alt="Beautox Clinic Interior"
-                  className="w-1/2 h-20 sm:h-24 object-cover rounded-lg"
+                  className="w-1/2 h-20 sm:h-24 object-cover rounded-lg shadow-[0_8px_30px_rgba(0,0,0,0.25)] hover:shadow-[0_15px_40px_rgba(0,0,0,0.35)] transition-shadow duration-300"
                 />
                 <img
                   src="/images/ClinicImage3.jpg"
                   alt="Beautox Clinic Treatment Room"
-                  className="w-1/2 h-20 sm:h-24 object-cover rounded-lg"
+                  className="w-1/2 h-20 sm:h-24 object-cover rounded-lg shadow-[0_8px_30px_rgba(0,0,0,0.25)] hover:shadow-[0_15px_40px_rgba(0,0,0,0.35)] transition-shadow duration-300"
                 />
               </div>
             </div>
@@ -589,7 +594,7 @@ function LandingPage() {
                   Beautox Aesthetic Clinic
                 </h3>
                 <p className="text-gray-600 text-base sm:text-lg">
-                  J26P+XXR, N. Domingo, Quezon City, 1112 Metro Manila <br />
+                42 Sonema Square, N. Domingo Street, Unit 5 Brgy. Valencia, Quezon City, 1112 Metro Manila <br />
                   Near Robinson's Magnolia
                 </p>
               </div>
@@ -599,13 +604,8 @@ function LandingPage() {
                   Operations Days
                 </h4>
                 <p className="text-gray-600">
-                  Mon - Fri:{" "}
-                  <span className="font-semibold text-gray-700">9am - 6pm</span>{" "}
-                  <br />
-                  Sat:{" "}
-                  <span className="font-semibold text-gray-700">
-                    10am - 4pm
-                  </span>
+                  Mon - Sun:{" "}
+                  <span className="font-semibold text-gray-700">12pm - 9pm</span>{" "}
                 </p>
               </div>
 

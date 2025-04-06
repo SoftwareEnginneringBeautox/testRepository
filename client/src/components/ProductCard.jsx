@@ -3,25 +3,49 @@ import { Badge } from "@/components/ui/Badge";
 
 function ProductCard({ product, category }) {
   const getMainPrice = () => {
-    // Don't show total price for Intimate Secret or Vampire Facial Package
-    if (product.name === "Intimate Secret" || product.name === "Vampire Facial Package") {
+    if (
+      product.name === "Intimate Secret" ||
+      product.name === "Vampire Facial Package"
+    ) {
+      if (typeof product.perSession === "string") {
+        return product.perSession;
+      }
+      if (Array.isArray(product.perSession) && product.perSession.length > 0) {
+        const first = product.perSession[0];
+        return typeof first === "string" ? first : first.price;
+      }
+      if (product.subcategories?.[0]?.perSession) {
+        return product.subcategories[0].perSession;
+      }
       return "";
     }
+
     if (typeof product.price === "string") {
       return product.price;
-    } else if (product.subcategories && product.subcategories.length > 0) {
+    } else if (product.subcategories?.[0]?.price) {
       return product.subcategories[0].price;
     }
+
     return "Price on request";
+  };
+
+  const getTotalPrice = () => {
+    if (product.name === "Diode Laser" || product.name === "Intimate Secret") {
+      return null;
+    }
+    return getMainPrice();
   };
 
   return (
     <div className="group h-full">
-      <div className="relative h-full rounded-xl overflow-hidden shadow-md transition-all duration-300 group-hover:shadow-xl"
+      <div
+        className="relative h-full rounded-xl overflow-hidden shadow-md transition-all duration-300 group-hover:shadow-xl"
         style={{
-          backgroundColor: '#E5BDF6',
-          backgroundImage: 'linear-gradient(45deg, rgba(229, 189, 246, 0.9) 0%, rgba(243, 232, 246, 0.95) 100%)'
-        }}>
+          backgroundColor: "#E5BDF6",
+          backgroundImage:
+            "linear-gradient(45deg, rgba(229, 189, 246, 0.9) 0%, rgba(243, 232, 246, 0.95) 100%)",
+        }}
+      >
         <div className="relative z-10 p-6 flex flex-col h-full">
           {/* Header */}
           <div className="mb-4 flex justify-between items-start">
@@ -35,13 +59,15 @@ function ProductCard({ product, category }) {
             </div>
 
             {product.discount && (
-              <Badge className="bg-red-100 hover:bg-red-200 text-red-800 text-xs px-2 py-0.5">
-                {product.discount}
-              </Badge>
+              <div className="absolute -right-[2px] -top-[2px]">
+                <div className="bg-red-100 text-red-800 text-xs px-3 py-1.5 rounded-tr-xl rounded-bl-xl font-medium">
+                  {product.discount}
+                </div>
+              </div>
             )}
           </div>
 
-          {/* Content - Middle section with flexible height */}
+          {/* Content */}
           <div className="flex-grow">
             {/* Details list */}
             {product.details && (
@@ -57,93 +83,42 @@ function ProductCard({ product, category }) {
               </div>
             )}
 
-            {/* Subcategories - Reformatted */}
+            {/* Subcategories */}
             {product.subcategories && (
               <div className="space-y-4 mb-4">
-                {product.subcategories.map((sub, idx) => {
-                  // Extract session count if available
-                  const sessionMatch = sub.price ? sub.price.match(/\((\d+) Sessions\)/) : null;
-                  const sessionCount = sessionMatch ? sessionMatch[1] : null;
-
-                  return (
-                    <div key={idx} className="bg-white/40 rounded-lg p-3">
-                      <h4 className={`font-medium ${
-                        product.name === "Intimate Secret" 
-                          ? sub.name === "Underarms, Knees, Elbows, Nape, or Nipples" || sub.name === "Brazilian, Bikini, or Butt"
-                            ? "text-base"
-                            : "text-lg"
-                          : ""
-                      }`}>
-                        {sub.name}{" "}
-                        {sessionCount && `(${sessionCount} Sessions)`}
-                      </h4>
-
+                {product.subcategories.map((sub, idx) => (
+                  <div
+                    key={idx}
+                    className="bg-white/40 rounded-lg p-3 relative flex flex-col justify-between min-h-[100px]"
+                  >
+                    <div>
+                      <h4 className="text-base font-semibold">{sub.name}</h4>
                       {sub.perSession && (
-                        <p className={`text-gray-700 mt-1 ${
-                          product.name === "Intimate Secret"
-                            ? sub.name === "Underarms, Knees, Elbows, Nape, or Nipples" || sub.name === "Brazilian, Bikini, or Butt"
-                              ? "text-base font-semibold"
-                              : "text-lg font-semibold"
-                            : "text-sm"
-                        }`}>
+                        <p className="text-gray-600 mt-1 text-sm">
                           Per Session: {sub.perSession}
                         </p>
                       )}
-
-                      <p className={`font-semibold mt-1 ${
-                        product.name === "Intimate Secret"
-                          ? sub.name === "Underarms, Knees, Elbows, Nape, or Nipples" || sub.name === "Brazilian, Bikini, or Butt"
-                            ? "text-base"
-                            : "text-lg"
-                          : "text-sm"
-                      }`}>
-                        {sub.price}
-                      </p>
+                      {product.name !== "Diode Laser" && sub.details && (
+                        <ul className="text-sm text-gray-600 mt-1 list-disc list-inside">
+                          {sub.details.map((detail, i) => (
+                            <li key={i}>{detail}</li>
+                          ))}
+                        </ul>
+                      )}
                     </div>
-                  );
-                })}
+
+                    {sub.price && (
+                      <div className="self-end text-base font-bold text-gray-900 text-right mt-1">
+                        <span>{sub.price}</span>
+                        {sub.details?.[0] && (
+                          <span className="ml-1">({sub.details[0]})</span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ))}
               </div>
             )}
-
-            {/* Per session pricing - Simplified */}
-            {product.perSession && typeof product.perSession === "string" && (
-              <div className="text-sm text-gray-700 mb-4">
-                <p className={`${product.name === "Botox" ? "font-bold text-base" : ""}`}>
-                  {product.name === "Botox" ? product.perSession : `Per Session: ${product.perSession}`}
-                </p>
-              </div>
-            )}
-
-            {/* Per session pricing as array - Only if not already shown with subcategories */}
-            {product.perSession &&
-              Array.isArray(product.perSession) &&
-              !product.subcategories && (
-                <div className="space-y-2 mb-4">
-                  {product.name === "Vampire Facial Package" ? (
-                    product.perSession.map((session, idx) => (
-                      <p key={idx} className="text-base font-bold text-gray-700">
-                        {typeof session === 'string' ? session : session.price}
-                      </p>
-                    ))
-                  ) : (
-                    <>
-                      <p className="text-sm font-medium">Per Session:</p>
-                      {product.perSession.map((session, idx) => (
-                        <div key={idx} className="flex justify-between text-sm">
-                          {typeof session === 'string' ? (
-                            <span className="text-gray-700">{session}</span>
-                          ) : (
-                            <>
-                              <span>{session.area}:</span>
-                              <span className="font-semibold">{session.price}</span>
-                            </>
-                          )}
-                        </div>
-                      ))}
-                    </>
-                  )}
-                </div>
-              )}
 
             {/* Note */}
             {product.note && (
@@ -151,7 +126,7 @@ function ProductCard({ product, category }) {
             )}
           </div>
 
-          {/* Footer with price - Redesigned to be more seamless */}
+          {/* Footer Price */}
           <div className="mt-auto pt-4 flex justify-end">
             <div className="text-right">
               {product.discountedFrom && (
@@ -159,9 +134,11 @@ function ProductCard({ product, category }) {
                   Discounted from {product.discountedFrom}
                 </p>
               )}
-              <p className="text-xl font-bold text-gray-900">
-                {getMainPrice()}
-              </p>
+              {getTotalPrice() && (
+                <p className="text-xl font-bold text-gray-900">
+                  {getTotalPrice()}
+                </p>
+              )}
               {product.package && (
                 <p className="text-xs text-gray-600">{product.package}</p>
               )}
