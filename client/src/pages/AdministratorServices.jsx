@@ -275,26 +275,29 @@ function AdministratorServices() {
                 <TableCell className="py-4 text-center">
                   {pkg.package_name}
                 </TableCell>
-                {console.log("Rendering pkg:", pkg)}
-                {console.log("pkg.treatments:", pkg.treatments)}
+                {console.log("packagesData:", packagesData)}
+                {console.log("treatmentsData:", treatmentsData)}
                 <TableCell className="py-4 text-left">
-                  {Array.isArray(pkg.treatments) &&
-                  pkg.treatments.length > 0 ? (
-                    <div className="flex flex-col gap-1">
-                      {pkg.treatments.map((t) =>
-                        t?.treatment_name ? (
-                          <Badge key={t.id} variant="outline">
-                            + {t.treatment_name}
-                          </Badge>
-                        ) : null
-                      )}
-                    </div>
-                  ) : (
-                    <span className="text-muted-foreground italic">
-                      No treatments found
-                    </span>
-                  )}
-                </TableCell>
+                {treatmentsData.length > 0 && Array.isArray(pkg.treatment_ids) && pkg.treatment_ids.length > 0 ? (
+                <div className="flex flex-col gap-1">
+                  {pkg.treatment_ids.map((id) => {
+                    const treatment = treatmentsData.find((t) => t.id === Number(id));
+                    return treatment ? (
+                      <Badge key={treatment.id} variant="outline">
+                        + {treatment.treatment_name}
+                      </Badge>
+                    ) : (
+                      <span key={id} className="text-red-500 text-sm italic">
+                        Not found: {id}
+                      </span>
+                    );
+                  })}
+                </div>
+              ) : (
+                <span className="text-muted-foreground italic">No treatments found</span>
+              )}
+              </TableCell>
+
 
                 <TableCell className="py-4 text-center">
                   {pkg.sessions}
