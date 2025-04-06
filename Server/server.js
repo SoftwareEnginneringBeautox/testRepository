@@ -287,7 +287,7 @@ app.post('/api/patients', async (req, res) => {
       patient_name,
       person_in_charge,
       package_name,
-      treatment,
+      treatment_ids,
       total_amount,
       package_discount,
       payment_method,
@@ -305,7 +305,7 @@ app.post('/api/patients', async (req, res) => {
         patient_name,
         person_in_charge,
         package_name,
-        treatment,
+        treatment_ids,
         total_amount,
         package_discount,
         payment_method,
@@ -325,7 +325,7 @@ app.post('/api/patients', async (req, res) => {
       patient_name,
       person_in_charge,
       package_name,
-      treatment,
+      treatment_ids,
       total_amount,
       package_discount,
       payment_method,
@@ -454,18 +454,18 @@ app.get('/api/treatments', async (req, res) => {
 // Create a new package
 app.post('/api/packages', async (req, res) => {
   try {
-    const { package_name, treatment, sessions, price } = req.body;
+    const { package_name, treatment_ids, sessions, price } = req.body;
     const insertQuery = `
       INSERT INTO packages (
         package_name,
-        treatment,
+        treatment_ids,
         sessions,
         price
       )
       VALUES ($1, $2, $3, $4)
       RETURNING id;
     `;
-    const result = await pool.query(insertQuery, [package_name, treatment, sessions, price]);
+    const result = await pool.query(insertQuery, [package_name, treatment_ids, sessions, price]);
     res.json({ success: true, message: 'Package created', packageId: result.rows[0].id });
   } catch (error) {
     console.error('Error creating package:', error);

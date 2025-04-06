@@ -129,6 +129,34 @@ function PatientRecordsDatabase() {
   useEffect(() => {
     fetchRecords();
   }, []);
+  const [treatmentsList, setTreatmentsList] = useState([]);
+  useEffect(() => {
+    const fetchTreatments = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/treatments?archived=false`, {
+          credentials: "include"
+        });
+        const data = await res.json();
+        setTreatmentsList(data);
+      } catch (err) {
+        console.error("Error fetching treatments:", err);
+      }
+    };
+  
+    fetchTreatments();
+  }, []);
+  
+  const getTreatmentNames = (ids) => {
+      if (!Array.isArray(ids)) return [];
+    
+      return ids
+        .map((id) => {
+          const treatment = treatmentsList.find((t) => t.id === id);
+          return treatment?.treatment_name;
+        })
+        .filter(Boolean);
+    };
+  
 
   // Refresh data when a modal closes
   const handleModalClose = () => {
@@ -422,7 +450,9 @@ function PatientRecordsDatabase() {
         formatTime(record.nextSessionTime || record.time_of_session),
         (record.personInCharge || record.person_in_charge)?.toUpperCase() || "N/A",
         (record.package || record.package_name)?.toUpperCase() || "N/A",
-        record.treatment?.toUpperCase() || "N/A",
+        Array.isArray(record.treatments)
+        ? record.treatments.join(", ").toUpperCase()
+        : (record.treatment?.toUpperCase() || "N/A"),
         typeof record.consent_form_signed === "boolean"
           ? record.consent_form_signed
             ? "SIGNED"
@@ -660,12 +690,11 @@ function PatientRecordsDatabase() {
                   {(record.package || record.package_name)?.toUpperCase()}
                 </TableCell>
                 <TableCell className="text-left whitespace-nowrap">
-                  {record.treatment
-                    ? Array.isArray(record.treatment)
-                      ? record.treatment.join(", ").toUpperCase()
-                      : record.treatment.toUpperCase()
+                  {Array.isArray(record.treatment_ids)
+                    ? getTreatmentNames(record.treatment_ids).join(", ").toUpperCase()
                     : "N/A"}
                 </TableCell>
+
 
                 <TableCell className="text-center whitespace-nowrap">
                   {record.consentStatus ||

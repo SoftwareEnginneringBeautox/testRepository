@@ -142,23 +142,23 @@ function CreatePatientEntry({ isOpen, onClose }) {
     fetchPackages();
   }, []);
 
-  // Fetch treatments list from the database
   useEffect(() => {
-    async function fetchTreatments() {
+    const fetchTreatments = async () => {
       try {
-        const response = await axios.get(
-          `${API_BASE_URL}/api/treatments?archived=false`,
-          {
-            withCredentials: true
-          }
-        );
-        setTreatmentsList(response.data);
-      } catch (error) {
-        console.error("Error fetching treatments:", error);
+        const res = await fetch(`${API_BASE_URL}/api/treatments?archived=false`, {
+          credentials: "include"
+        });
+        const data = await res.json();
+        setTreatmentsList(data);
+      } catch (err) {
+        console.error("Error fetching treatments:", err);
       }
-    }
+    };
+  
     fetchTreatments();
   }, []);
+
+ 
 
   useEffect(() => {
     if (isOpen) {
@@ -195,19 +195,23 @@ function CreatePatientEntry({ isOpen, onClose }) {
   
     const numericTotal = parseFloat(totalAmount) || 0;
     const numericDiscount = parseFloat(packageDiscount) || 0;
+    const numericAmount = parseFloat(amount) || 0;
+    const numericAmountPaid = parseFloat(amountPaid) || 0;
+  
+    const selectedTreatmentIds = Array.isArray(treatment) ? treatment.map(Number) : [];
+  
+    const selectedTreatmentNames = treatmentsList
+      .filter((t) => selectedTreatmentIds.includes(t.id))
+      .map((t) => t.treatment_name);
   
     const payload = {
       patient_name: patientName,
       person_in_charge: personInCharge,
       package_name: packageName,
-      treatment: Array.isArray(treatment)
-        ? treatment
-            .map((id) => treatmentsList.find((t) => t.id === id)?.treatment_name)
-            .filter(Boolean)
-            .join(", ")
-        : "",
-      amount: parseFloat(amount) || 0,
-      amount_paid: parseFloat(amountPaid) || 0,
+      treatments: selectedTreatmentNames, // names for UI/logging
+      treatment_ids: selectedTreatmentIds, // IDs for backend
+      amount: numericAmount,
+      amount_paid: numericAmountPaid,
       package_discount: numericDiscount,
       total_amount: numericTotal,
       payment_method: paymentMethod,
@@ -234,6 +238,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
       console.error("Error submitting form:", error);
     }
   };
+  
   
 
   const numericTotalAmount = parseFloat(totalAmount) || 0;
