@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import CurrencyInput from "react-currency-input-field";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/RadioGroup";
 import { Checkbox } from "@/components/ui/Checkbox";
+import { TreatmentMultiSelect } from "@/components/ui/TreatmentMultiSelect";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -75,6 +76,27 @@ function CreatePatientEntry({ isOpen, onClose }) {
   const [packagesList, setPackagesList] = useState([]);
   const [treatmentsList, setTreatmentsList] = useState([]);
 
+  useEffect(() => {
+    if (packageName) {
+      const pkg = packagesList.find((p) => p.package_name === packageName);
+      if (pkg && typeof pkg.price === "number") {
+        setAmount(pkg.price.toFixed(2));
+      } else {
+        setAmount(""); // fallback if price is not a number
+      }
+    } else if (Array.isArray(treatment) && treatment.length > 0) {
+      const selected = treatmentsList.filter((t) => treatment.includes(t.id));
+      const total = selected.reduce((sum, t) => {
+        const price = parseFloat(t.price);
+        return sum + (isNaN(price) ? 0 : price);
+      }, 0);
+      setAmount(total.toFixed(2));
+    } else {
+      setAmount("");
+    }
+  }, [packageName, treatment, treatmentsList, packagesList]);
+  
+  
   // Compute total amount automatically whenever amount or discount changes
   useEffect(() => {
     const numericAmount = parseFloat(amount) || 0;
@@ -161,47 +183,29 @@ function CreatePatientEntry({ isOpen, onClose }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setFormSubmitAttempted(true);
-
-    // Validate required dropdown selections
+  
     const errors = {};
     if (!personInCharge) errors.personInCharge = "Person in charge is required";
-    if (!packageName && !treatment) {
-      errors.packageOrTreatment = "Select either a package or a treatment";
+    if (!packageName && (!treatment || treatment.length === 0)) {
+      errors.packageOrTreatment = "Select either a package or at least one treatment";
     }
-
+  
     setFormErrors(errors);
-
-    // Stop submission if there are errors
-    if (Object.keys(errors).length > 0) {
-      console.error("Form validation failed:", errors);
-      return;
-    }
-
-    // Parse numeric values for the payload
+    if (Object.keys(errors).length > 0) return;
+  
     const numericTotal = parseFloat(totalAmount) || 0;
     const numericDiscount = parseFloat(packageDiscount) || 0;
-
-    console.log("Form values before submission:", {
-      patientName,
-      personInCharge,
-      packageName,
-      treatment,
-      amount: parseFloat(amount) || 0,
-      packageDiscount: numericDiscount,
-      totalAmount: numericTotal,
-      amountPaid: parseFloat(amountPaid) || 0,
-      paymentMethod,
-      dateOfSession,
-      timeOfSession,
-      consent_form_signed: consentFormSigned
-    });
-
-    // Construct payload matching the server's expected field names and data types
+  
     const payload = {
       patient_name: patientName,
       person_in_charge: personInCharge,
       package_name: packageName,
-      treatment: treatment,
+      treatment: Array.isArray(treatment)
+        ? treatment
+            .map((id) => treatmentsList.find((t) => t.id === id)?.treatment_name)
+            .filter(Boolean)
+            .join(", ")
+        : "",
       amount: parseFloat(amount) || 0,
       amount_paid: parseFloat(amountPaid) || 0,
       package_discount: numericDiscount,
@@ -212,30 +216,25 @@ function CreatePatientEntry({ isOpen, onClose }) {
       consent_form_signed: consentFormSigned,
       reference_number: referenceNumber
     };
-
-    console.log("Payload being sent to API:", payload);
-
+  
     try {
       const response = await fetch(`${API_BASE_URL}/api/patients`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       });
-
+  
       if (response.ok) {
-        const data = await response.json();
-        console.log("Patient record created:", data);
-        onClose(); // Close modal upon success
+        onClose();
       } else {
-        const errorData = await response.text();
-        console.error("Failed to create patient record:", errorData);
+        const errorText = await response.text();
+        console.error("Submission failed:", errorText);
       }
     } catch (error) {
-      console.error("Error during patient record creation:", error);
+      console.error("Error submitting form:", error);
     }
   };
+  
 
   const numericTotalAmount = parseFloat(totalAmount) || 0;
   const numericAmountPaid = parseFloat(amountPaid) || 0;
@@ -318,7 +317,6 @@ function CreatePatientEntry({ isOpen, onClose }) {
                     setTreatment(""); // Clear treatment if package is selected
                   }
                 }}
-                disabled={!!treatment}
               >
                 <ModalSelectTrigger
                   icon={<PackageIcon className="w-4 h-4" />}
@@ -345,47 +343,40 @@ function CreatePatientEntry({ isOpen, onClose }) {
               )}
             </InputContainer>
 
-            {/* TREATMENT */}
-            <InputContainer>
-              <InputLabel>TREATMENT</InputLabel>
+            {/* TREATMENTS */}
+              <InputContainer>
+                <InputLabel>TREATMENTS</InputLabel>
+                <TreatmentMultiSelect
+  options={[
+    { value: "CLEAR", label: "Clear Selection" },
+    ...treatmentsList.map((t) => ({
+      value: t.id,
+      label: `${t.treatment_name} - ₱${t.price}`
+    }))
+  ]}
+  value={Array.isArray(treatment) ? treatment : []}
+  onChange={(selected) => {
+    if (selected.includes("CLEAR")) {
+      setTreatment([]);
+    } else {
+      setTreatment(selected);
+    }
+    setPackageName(""); // <-- always clear package here
+  }}
+  placeholder="Select treatments"
+  className={
+    formSubmitAttempted && formErrors.packageOrTreatment
+      ? "border-red-500"
+      : ""
+  }
+/>
 
-              <Select
-                value={treatment}
-                onValueChange={(value) => {
-                  console.log("Selected treatment:", value);
-                  if (value === "CLEAR") {
-                    setTreatment("");
-                  } else {
-                    setTreatment(value);
-                    setPackageName(""); // Clear package if treatment is selected
-                  }
-                }}
-                disabled={!!packageName}
-              >
-                <ModalSelectTrigger
-                  icon={<TreatmentIcon className="w-4 h-4" />}
-                  placeholder="Select treatment"
-                  className={
-                    formSubmitAttempted && formErrors.packageOrTreatment
-                      ? "border-red-500"
-                      : ""
-                  }
-                />
-                <ModalSelectContent>
-                  <SelectItem value="CLEAR">Clear Selection</SelectItem>
-                  {treatmentsList.map((t) => (
-                    <SelectItem key={t.id} value={t.treatment_name}>
-                      {t.treatment_name} - ₱{t.price}
-                    </SelectItem>
-                  ))}
-                </ModalSelectContent>
-              </Select>
-              {formSubmitAttempted && formErrors.packageOrTreatment && (
-                <p className="text-red-500 text-sm mt-1">
-                  {formErrors.packageOrTreatment}
-                </p>
-              )}
-            </InputContainer>
+                {formSubmitAttempted && formErrors.packageOrTreatment && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {formErrors.packageOrTreatment}
+                  </p>
+                )}
+              </InputContainer>
 
             {/* AMOUNT (CURRENCY) */}
             <InputContainer>
@@ -401,7 +392,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
                   decimalsLimit={2}
                   allowNegativeValue={false}
                   value={amount}
-                  onValueChange={(value) => setAmount(value || "")}
+                  readOnly
                 />
               </InputTextField>
             </InputContainer>

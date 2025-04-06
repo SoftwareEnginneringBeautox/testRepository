@@ -60,21 +60,29 @@ function CreatePackage({ isOpen, onClose }) {
   }, []);
 
   useEffect(() => {
-    if (selectedTreatmentIds.length > 0 && numberOfTreatments) {
+    if (
+      Array.isArray(selectedTreatmentIds) &&
+      selectedTreatmentIds.length > 0 &&
+      !isNaN(parseInt(numberOfTreatments))
+    ) {
       const selectedTreatments = treatmentsList.filter((t) =>
         selectedTreatmentIds.includes(t.id)
       );
-      const totalPerSession = selectedTreatments.reduce(
-        (sum, t) => sum + t.price,
-        0
-      );
+  
+      const totalPerSession = selectedTreatments.reduce((sum, t) => {
+        const price = parseFloat(t.price);
+        return sum + (isNaN(price) ? 0 : price);
+      }, 0);
+  
       const total = totalPerSession * parseInt(numberOfTreatments, 10);
       setAmount(total.toFixed(2));
     } else {
       setAmount("");
     }
   }, [selectedTreatmentIds, numberOfTreatments, treatmentsList]);
+  
 
+    
   if (!isOpen) return null;
 
   const treatmentOptions = treatmentsList.map((t) => ({
@@ -202,7 +210,7 @@ function CreatePackage({ isOpen, onClose }) {
                   decimalsLimit={2}
                   allowNegativeValue={false}
                   value={amount}
-                  readOnly
+                  onValueChange={(value) => setAmount(value || "")}
                 />
               </InputTextField>
             </InputContainer>

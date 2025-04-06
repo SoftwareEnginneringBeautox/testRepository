@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/Input";
 
 import { Button } from "../ui/Button";
+import { TreatmentMultiSelect } from "@/components/ui/TreatmentMultiSelect";
 
 import PesoIcon from "@/assets/icons/PesoIcon";
 import ClockIcon from "@/assets/icons/ClockIcon";
@@ -47,7 +48,7 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
   const [originalData, setOriginalData] = useState({});
   const [formData, setFormData] = useState({});
   
-
+  const [amount, setAmount] = useState("");
   const [packagesList, setPackagesList] = useState([]);
   const [treatmentsList, setTreatmentsList] = useState([]);
   const [aestheticianList, setAestheticianList] = useState([]);
@@ -136,6 +137,28 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
     
   }, [entryData]);
   
+  useEffect(() => {
+    if (formData.package_name) {
+      const pkg = packagesList.find(p => p.package_name === formData.package_name);
+      const price = parseFloat(pkg?.price);
+      if (!isNaN(price)) {
+        setFormData(prev => ({ ...prev, total_amount: price.toFixed(2) }));
+      }
+    } else if (Array.isArray(formData.treatment_ids) && formData.treatment_ids.length > 0) {
+      const selectedTreatments = treatmentsList.filter(t =>
+        formData.treatment_ids.includes(t.id)
+      );
+      const total = selectedTreatments.reduce((sum, t) => {
+        const price = parseFloat(t.price);
+        return sum + (isNaN(price) ? 0 : price);
+      }, 0);
+      setFormData(prev => ({ ...prev, total_amount: total.toFixed(2) }));
+    } else {
+      setFormData(prev => ({ ...prev, total_amount: "" }));
+    }
+  }, [formData.package_name, formData.treatment_ids, treatmentsList, packagesList]);
+  
+  
   if (!isOpen) return null;
   const total = parseFloat(formData.total_amount ?? originalData.total_amount ?? "0");
   const paid = parseFloat(formData.amount_paid ?? originalData.amount_paid ?? "0");
@@ -219,9 +242,10 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
                   setFormData((prev) => ({
                     ...prev,
                     package_name: value === "CLEAR" ? "" : value,
-                    treatment: value === "CLEAR" ? prev.treatment : "", // mutually exclusive
+                    treatment_ids: [], // clear treatments when package is selected
                   }));
                 }}
+                
                 
               >
                 <ModalSelectTrigger
@@ -244,57 +268,59 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
             </InputContainer>
 
             <InputContainer>
-              <InputLabel>TREATMENT</InputLabel>
-              <Select
-                value={formData.treatment ?? originalData.treatment ?? ""}
-                onValueChange={(value) => {
-                  setFormData((prev) => ({
-                    ...prev,
-                    treatment: value === "CLEAR" ? "" : value,
-                    package_name: value === "CLEAR" ? prev.package_name : "", // mutually exclusive
-                  }));
-                }}
-                
-              >
-                <ModalSelectTrigger
-                  icon={<TreatmentIcon className="w-4 h-4" />}
-                  placeholder="Chosen treatment"
-                />
-               <ModalSelectContent>
-                  <SelectItem value="CLEAR">Clear Selection</SelectItem>
-                  {!Boolean(formData.package_name ?? originalData.package_name) &&
-                    treatmentsList.map((treatment) => (
-                    <SelectItem
-                      key={treatment.id}
-                      value={treatment.treatment_name}
-                    >
-                      {treatment.treatment_name}
-                    </SelectItem>
-                  ))}
-                </ModalSelectContent>
-              </Select>
-            </InputContainer>
+            <InputLabel>TREATMENTS</InputLabel>
+            <TreatmentMultiSelect
+            options={[
+              { value: "CLEAR", label: "Clear Selection" },
+              ...treatmentsList.map((t) => ({
+                value: t.id,
+                label: `${t.treatment_name} - ₱${t.price}`
+              }))
+            ]}
+            value={Array.isArray(formData.treatment_ids) ? formData.treatment_ids : []}
+            onChange={(selected) => {
+              if (selected.includes("CLEAR")) {
+                setFormData((prev) => ({
+                  ...prev,
+                  treatment_ids: [],
+                  package_name: "",
+                  total_amount: ""
+                }));
+              } else {
+                setFormData((prev) => ({
+                  ...prev,
+                  treatment_ids: selected,
+                  package_name: "", // Always clear package when treatments are selected
+                }));
+              }
+            }}
+            
+            placeholder="Select treatments"
+          />
 
-            <InputContainer>
-              <InputLabel>TOTAL AMOUNT</InputLabel>
-              <InputTextField>
-                <InputIcon>
-                  <PesoIcon />
-                </InputIcon>
-                <Input
-                  prefix="₱"
-                  placeholder="₱0.00"
-                  decimalsLimit={2}
-                  allowNegativeValue={false}
-                  value={
-                    formData.total_amount ?? originalData.total_amount ?? ""
-                  }
-                  onChange={(e) =>
-                    setFormData({ ...formData, total_amount: e.target.value })
-                  }
-                />
-              </InputTextField>
-            </InputContainer>
+          </InputContainer>
+
+          <InputContainer>
+            <InputLabel>TOTAL AMOUNT</InputLabel>
+            <InputTextField>
+              <InputIcon>
+                <PesoIcon />
+              </InputIcon>
+              <Input
+                readOnly
+                className="bg-[#F5F3F0] text-gray-500"
+                value={
+                  isNaN(amount)
+                    ? ""
+                    : new Intl.NumberFormat("en-PH", {
+                        style: "currency",
+                        currency: "PHP"
+                      }).format(amount)
+                }
+              />
+            </InputTextField>
+          </InputContainer>
+
 
             <InputContainer>
               <InputLabel>AMOUNT PAID</InputLabel>

@@ -403,9 +403,14 @@ function PatientRecordsDatabase() {
                 <TableCell className="whitespace-nowrap">
                   {(record.package || record.package_name)?.toUpperCase()}
                 </TableCell>
-                <TableCell className="text-center whitespace-nowrap">
-                  {record.treatment?.toUpperCase()}
+                <TableCell className="text-left whitespace-nowrap">
+                  {record.treatment
+                    ? Array.isArray(record.treatment)
+                      ? record.treatment.join(", ").toUpperCase()
+                      : record.treatment.toUpperCase()
+                    : "N/A"}
                 </TableCell>
+
                 <TableCell className="text-center whitespace-nowrap">
                   {record.consentStatus ||
                     (typeof record.consent_form_signed === "boolean"
