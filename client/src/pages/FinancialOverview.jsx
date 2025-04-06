@@ -192,7 +192,7 @@ function FinancialOverview() {
       .filter((col) => col.mandatory)
       .map((col) => col.value);
     setSelectedColumns([...mandatoryColumns]);
-  }, [columns]);
+  }, []);
 
   const refreshExpensesData = async () => {
     try {
@@ -695,13 +695,7 @@ function FinancialOverview() {
         <MultiSelectFilter
           options={columns}
           selectedValues={selectedColumns}
-          setSelectedValues={(newSelectedValues) => {
-            // Ensure "client" is always selected
-            if (!newSelectedValues.includes("client")) {
-              newSelectedValues.push("client");
-            }
-            setSelectedColumns(newSelectedValues);
-          }}
+          setSelectedValues={setSelectedColumns}
           placeholder="FILTER COLUMNS"
         />
       </div>

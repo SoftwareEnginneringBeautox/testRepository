@@ -58,7 +58,7 @@ const MultiSelectFilter = ({
             htmlFor="select-all-checkbox"
             className="flex-1 cursor-pointer text-sm"
           >
-            SELECT ALL
+            Select All
           </label>
         </div>
         {options.map((option) => (
