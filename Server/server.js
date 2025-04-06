@@ -454,18 +454,18 @@ app.get('/api/treatments', async (req, res) => {
 // Create a new package
 app.post('/api/packages', async (req, res) => {
   try {
-    const { package_name, treatment_ids, sessions, price } = req.body;
+    const { package_name, treatment, sessions, price } = req.body;
     const insertQuery = `
       INSERT INTO packages (
         package_name,
-        treatment_ids,
+        treatment,
         sessions,
         price
       )
       VALUES ($1, $2, $3, $4)
       RETURNING id;
     `;
-    const result = await pool.query(insertQuery, [package_name, treatment_ids, sessions, price]);
+    const result = await pool.query(insertQuery, [package_name, treatment, sessions, price]);
     res.json({ success: true, message: 'Package created', packageId: result.rows[0].id });
   } catch (error) {
     console.error('Error creating package:', error);
@@ -474,7 +474,6 @@ app.post('/api/packages', async (req, res) => {
 });
 
 // Retrieve all packages
-/* 
 app.get('/api/packages', async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM packages ORDER BY id ASC');
@@ -483,34 +482,7 @@ app.get('/api/packages', async (req, res) => {
     console.error('Error retrieving packages:', error);
     res.status(500).json({ success: false, error: 'Error retrieving packages' });
   }
-}); 
-*/
-
-app.get('/api/packages', async (req, res) => {
-  try {
-    const result = await pool.query(`
-      SELECT 
-        p.*,
-        json_agg(
-          json_build_object('id', t.id, 'treatment_name', t.treatment_name, 'price', t.price)
-        ) AS treatments
-      FROM packages p
-      LEFT JOIN LATERAL (
-        SELECT *
-        FROM treatments
-        WHERE id = ANY(p.treatment_ids)
-      ) t ON true
-      GROUP BY p.id
-      ORDER BY p.id ASC;
-    `);
-
-    res.json(result.rows);
-  } catch (error) {
-    console.error('Error retrieving packages with treatments:', error);
-    res.status(500).json({ success: false, error: 'Error retrieving packages' });
-  }
 });
-
 
 /* --------------------------------------------
    EMAIL + OTP ENDPOINTS
@@ -649,6 +621,152 @@ app.post('/api/manage-record', async (req, res) => {
    SALES AND EXPENSES ENDPOINTS
 --------------------------------------------- */
 
+//Fetch Sales Data
+app.get("/sales", async (req, res) => {
+  try {
+    const result = await pool.query("SELECT * FROM sales_tracker ORDER BY date_transacted DESC");
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).send(err.message);
+  }
+});
+
+app.get("/api/sales", async (req, res) => {
+  try {
+    const { startDate, endDate } = req.query;
+    
+    // Default to last 7 days if dates not provided
+    const end = endDate ? new Date(endDate) : new Date();
+    const start = startDate ? new Date(startDate) : new Date(end);
+    start.setDate(start.getDate() - 7); // Default to a week before end date
+    
+    // Format dates for SQL query
+    const formattedStartDate = start.toISOString().split('T')[0];
+    const formattedEndDate = end.toISOString().split('T')[0];
+    
+    // Get current week's data
+    const currentWeekQuery = `
+      SELECT 
+        TO_CHAR(date_transacted, 'Day') as day,
+        SUM(payment) as amount
+      FROM 
+        sales_tracker
+      WHERE 
+        date_transacted BETWEEN $1 AND $2
+      GROUP BY 
+        TO_CHAR(date_transacted, 'Day'), 
+        date_transacted
+      ORDER BY 
+        date_transacted
+    `;
+    
+    // Get previous week's data (same days of week, but 7 days earlier)
+    const previousStart = new Date(start);
+    previousStart.setDate(previousStart.getDate() - 7);
+    const previousEnd = new Date(end);
+    previousEnd.setDate(previousEnd.getDate() - 7);
+    
+    const previousWeekQuery = `
+      SELECT 
+        TO_CHAR(date_transacted, 'Day') as day,
+        SUM(payment) as amount
+      FROM 
+        sales_tracker
+      WHERE 
+        date_transacted BETWEEN $1 AND $2
+      GROUP BY 
+        TO_CHAR(date_transacted, 'Day'),
+        date_transacted
+      ORDER BY 
+        date_transacted
+    `;
+    
+    // Execute both queries
+    const currentWeekResult = await pool.query(currentWeekQuery, [formattedStartDate, formattedEndDate]);
+    const previousWeekResult = await pool.query(previousWeekQuery, [
+      previousStart.toISOString().split('T')[0], 
+      previousEnd.toISOString().split('T')[0]
+    ]);
+    
+    // Process results into days of the week
+    const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    const salesData = daysOfWeek.map(day => {
+      // Find current week data for this day
+      const currentDayData = currentWeekResult.rows.find(row => row.day.trim().startsWith(day));
+      // Find previous week data for this day
+      const previousDayData = previousWeekResult.rows.find(row => row.day.trim().startsWith(day));
+      
+      return {
+        day,
+        currentWeek: currentDayData ? parseFloat(currentDayData.amount) : 0,
+        previousWeek: previousDayData ? parseFloat(previousDayData.amount) : 0
+      };
+    });
+    
+    res.json(salesData);
+  } catch (error) {
+    console.error("Error fetching sales data for chart:", error);
+    res.status(500).json({ error: "Failed to fetch sales data" });
+  }
+});
+app.post("/sales", async (req, res) => {
+  try {
+    // Destructure incoming data
+    const {
+      client,
+      person_in_charge,
+      date_transacted,
+      payment_method,
+      packages,
+      treatment,
+      payment,
+      reference_no
+    } = req.body;
+
+    // (Optional) Basic validation
+    if (!client || !date_transacted || payment == null) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing required fields: 'client', 'date_transacted', or 'payment'."
+      });
+    }
+
+    // Insert into sales_tracker table
+    const insertQuery = `
+      INSERT INTO sales_tracker
+        (client, person_in_charge, date_transacted, payment_method, packages, treatment, payment, reference_no)
+      VALUES
+        ($1, $2, $3, $4, $5, $6, $7, $8)
+      RETURNING id;
+    `;
+
+    const values = [
+      client,
+      person_in_charge,
+      date_transacted,   // Make sure this is in a valid Date or string format for your DB
+      payment_method,
+      packages,
+      treatment,
+      payment,           // e.g. numeric or decimal
+      reference_no
+    ];
+
+    const result = await pool.query(insertQuery, values);
+
+    // Return the newly created sale ID
+    res.status(201).json({
+      success: true,
+      message: "Sale record created successfully",
+      saleId: result.rows[0].id
+    });
+  } catch (error) {
+    console.error("Error creating sale record:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    });
+  }
+});
 
 // Create a new expense
 app.post("/api/expenses", async (req, res) => {
