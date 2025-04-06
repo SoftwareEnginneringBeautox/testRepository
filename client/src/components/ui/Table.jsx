@@ -1,63 +1,203 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import { useEffect } from "react";
 
-const Table = React.forwardRef(({ className, children, ...props }, ref) => {
-  const [rowCount, setRowCount] = React.useState(0);
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious
+} from "@/components/ui/Pagination";
 
-  useEffect(() => {
-    React.Children.forEach(children, (child) => {
-      if (child?.type?.displayName === "TableBody") {
-        let count = 0;
-        React.Children.forEach(child.props.children, (row) => {
-          if (
-            React.isValidElement(row) &&
-            row.type?.displayName === "TableRow"
-          ) {
-            count++;
-          }
-        });
-        setRowCount(count);
+const Table = React.forwardRef(
+  (
+    {
+      className,
+      children,
+      // Pagination props
+      currentPage = 1,
+      totalPages = 1,
+      onPageChange,
+      showPagination = false,
+      ...props
+    },
+    ref
+  ) => {
+    // Use this state to count rows if you still want the dynamic background feature
+    const [rowCount, setRowCount] = React.useState(0);
+
+    // Count logic for row background
+    React.useEffect(() => {
+      // Find TableBody in children and count its direct tr children
+      React.Children.forEach(children, (child) => {
+        if (child?.type?.displayName === "TableBody") {
+          let count = 0;
+          React.Children.forEach(child.props.children, (row) => {
+            if (
+              React.isValidElement(row) &&
+              row.type?.displayName === "TableRow"
+            ) {
+              count++;
+            }
+          });
+          setRowCount(count);
+        }
+      });
+    }, [children]);
+
+    // Determine background color based on odd/even row count
+    const scrollbarBgClass =
+      rowCount % 2 === 0 ? "bg-faintingLight-100" : "bg-reflexBlue-100";
+
+    // Function to handle pagination
+    const paginate = (pageNumber) => {
+      if (pageNumber > 0 && pageNumber <= totalPages && onPageChange) {
+        onPageChange(pageNumber);
       }
-    });
-  }, [children]);
+    };
 
-  // Determine background color based on odd/even row count
-  const scrollbarBgClass =
-    rowCount % 2 === 0
-      ? "bg-faintingLight-100" // Even rows end with even bg
-      : "bg-reflexBlue-100"; // Odd rows end with odd bg
+    // Generate pagination items
+    const generatePaginationItems = () => {
+      const items = [];
+      const maxVisiblePages = 5;
 
-  return (
-    <div
-      className={cn(
-        "w-full rounded-md overflow-hidden", // Clip to maintain rounded corners
-        className
-      )}
-    >
-      <div
-        className={cn(
-          "w-full max-w-full overflow-x-auto flex-1",
-          "pb-2.5", // Space for scrollbar
-          scrollbarBgClass, // Dynamic background color
-          "[&::-webkit-scrollbar]:h-2.5",
-          "[&::-webkit-scrollbar-thumb]:bg-gray-400",
-          "[&::-webkit-scrollbar-thumb]:rounded-full",
-          "[&::-webkit-scrollbar-track]:!bg-transparent",
-          "[&::-webkit-scrollbar-thumb:hover]:bg-lavender-200"
-        )}
-      >
-        <table
-          ref={ref}
-          className="w-full h-full border-collapse text-sm min-w-full"
-          {...props}
+      // Always show first page
+      items.push(
+        <PaginationItem key="first">
+          <PaginationLink
+            isActive={currentPage === 1}
+            onClick={() => paginate(1)}
+          >
+            1
+          </PaginationLink>
+        </PaginationItem>
+      );
+
+      // Show ellipsis if needed
+      if (currentPage > 3) {
+        items.push(
+          <PaginationItem key="ellipsis-start">
+            <PaginationEllipsis />
+          </PaginationItem>
+        );
+      }
+
+      // Calculate range of visible pages
+      let startPage = Math.max(2, currentPage - 1);
+      let endPage = Math.min(totalPages - 1, currentPage + 1);
+
+      // Adjust if at the beginning or end
+      if (currentPage <= 3) {
+        endPage = Math.min(maxVisiblePages - 1, totalPages - 1);
+      } else if (currentPage >= totalPages - 2) {
+        startPage = Math.max(2, totalPages - maxVisiblePages + 2);
+      }
+
+      // Add middle pages
+      for (let i = startPage; i <= endPage; i++) {
+        if (i > 1 && i < totalPages) {
+          items.push(
+            <PaginationItem key={i}>
+              <PaginationLink
+                isActive={currentPage === i}
+                onClick={() => paginate(i)}
+              >
+                {i}
+              </PaginationLink>
+            </PaginationItem>
+          );
+        }
+      }
+
+      // Show ellipsis if needed
+      if (currentPage < totalPages - 2 && totalPages > maxVisiblePages) {
+        items.push(
+          <PaginationItem key="ellipsis-end">
+            <PaginationEllipsis />
+          </PaginationItem>
+        );
+      }
+
+      // Always show last page if there's more than one page
+      if (totalPages > 1) {
+        items.push(
+          <PaginationItem key="last">
+            <PaginationLink
+              isActive={currentPage === totalPages}
+              onClick={() => paginate(totalPages)}
+            >
+              {totalPages}
+            </PaginationLink>
+          </PaginationItem>
+        );
+      }
+
+      return items;
+    };
+
+    return (
+      <div className="flex flex-col w-full rounded-lg">
+        {/* Table container with scroll - fixed to prevent double scrollbar */}
+        <div
+          className={cn(
+            "w-full overflow-x-auto",
+            scrollbarBgClass,
+            "pb-4", // Add padding at bottom
+            "[&::-webkit-scrollbar]:h-2.5",
+            "[&::-webkit-scrollbar-thumb]:bg-gray-400",
+            "[&::-webkit-scrollbar-thumb]:rounded-full",
+            "[&::-webkit-scrollbar-track]:!bg-transparent",
+            "[&::-webkit-scrollbar-thumb:hover]:bg-lavender-200",
+            className
+          )}
         >
-          {children}
-        </table>
+          <table
+            ref={ref}
+            className="w-full border-collapse text-sm"
+            {...props}
+          >
+            {children}
+          </table>
+        </div>
+
+        {/* Pagination outside the scroll container with matching background color */}
+        {showPagination && (
+          <div className={cn("w-full flex justify-center", scrollbarBgClass)}>
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    onClick={() => paginate(currentPage - 1)}
+                    className={
+                      currentPage === 1
+                        ? "pointer-events-none opacity-50"
+                        : "cursor-pointer"
+                    }
+                  />
+                </PaginationItem>
+
+                {generatePaginationItems()}
+
+                <PaginationItem>
+                  <PaginationNext
+                    onClick={() => paginate(currentPage + 1)}
+                    className={
+                      currentPage === totalPages
+                        ? "pointer-events-none opacity-50"
+                        : "cursor-pointer"
+                    }
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </div>
+        )}
       </div>
-    </div>
-  );
-});
+    );
+  }
+);
 Table.displayName = "Table";
 
 const TableHeader = React.forwardRef(({ className, ...props }, ref) => (

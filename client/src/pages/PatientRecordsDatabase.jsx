@@ -44,6 +44,17 @@ import {
   SelectValue
 } from "@/components/ui/Select";
 
+// Import Pagination components from shadcn
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious
+} from "@/components/ui/Pagination";
+
 import CreatePatientEntry from "@/components/modals/CreatePatientEntry";
 import EditPatientEntry from "@/components/modals/EditPatientEntry";
 import UpdatePatientEntry from "@/components/modals/UpdatePatientEntry";
@@ -59,6 +70,10 @@ function PatientRecordsDatabase() {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortOption, setSortOption] = useState("");
 
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const recordsPerPage = 10;
+
   // Fetch patient records from the API
   const fetchRecords = async () => {
     try {
@@ -69,6 +84,8 @@ function PatientRecordsDatabase() {
       const data = await response.json();
       console.log("API Response Data:", data); // 🔍 Debugging line
       setRecords(data.filter((record) => !record.archived)); // only show active records
+      // Reset to first page when data changes
+      setCurrentPage(1);
     } catch (error) {
       console.error("Error fetching records:", error);
     }
@@ -148,6 +165,7 @@ function PatientRecordsDatabase() {
     fetchRecords();
   };
 
+  // Filter and sort records
   const filteredRecords = [...records]
     .filter((record) => {
       const name = record.client || record.patient_name || "";
@@ -168,6 +186,104 @@ function PatientRecordsDatabase() {
 
       return 0;
     });
+
+  // Calculate pagination info
+  const totalRecords = filteredRecords.length;
+  const totalPages = Math.ceil(totalRecords / recordsPerPage);
+
+  // Get current page records
+  const indexOfLastRecord = currentPage * recordsPerPage;
+  const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
+  const currentRecords = filteredRecords.slice(
+    indexOfFirstRecord,
+    indexOfLastRecord
+  );
+
+  // Change page function
+  const paginate = (pageNumber) => {
+    if (pageNumber > 0 && pageNumber <= totalPages) {
+      setCurrentPage(pageNumber);
+    }
+  };
+
+  // Generate pagination links
+  const generatePaginationItems = () => {
+    const items = [];
+    const maxVisiblePages = 5;
+
+    // Always show first page
+    items.push(
+      <PaginationItem key="first">
+        <PaginationLink
+          isActive={currentPage === 1}
+          onClick={() => paginate(1)}
+        >
+          1
+        </PaginationLink>
+      </PaginationItem>
+    );
+
+    // Show ellipsis if needed
+    if (currentPage > 3) {
+      items.push(
+        <PaginationItem key="ellipsis-start">
+          <PaginationEllipsis />
+        </PaginationItem>
+      );
+    }
+
+    // Calculate range of visible pages
+    let startPage = Math.max(2, currentPage - 1);
+    let endPage = Math.min(totalPages - 1, currentPage + 1);
+
+    // Adjust if at the beginning or end
+    if (currentPage <= 3) {
+      endPage = Math.min(maxVisiblePages - 1, totalPages - 1);
+    } else if (currentPage >= totalPages - 2) {
+      startPage = Math.max(2, totalPages - maxVisiblePages + 2);
+    }
+
+    // Add middle pages
+    for (let i = startPage; i <= endPage; i++) {
+      if (i > 1 && i < totalPages) {
+        items.push(
+          <PaginationItem key={i}>
+            <PaginationLink
+              isActive={currentPage === i}
+              onClick={() => paginate(i)}
+            >
+              {i}
+            </PaginationLink>
+          </PaginationItem>
+        );
+      }
+    }
+
+    // Show ellipsis if needed
+    if (currentPage < totalPages - 2 && totalPages > maxVisiblePages) {
+      items.push(
+        <PaginationItem key="ellipsis-end">
+          <PaginationEllipsis />
+        </PaginationItem>
+      );
+    }
+
+    // Always show last page if there's more than one page
+    if (totalPages > 1) {
+      items.push(
+        <PaginationItem key="last">
+          <PaginationLink
+            isActive={currentPage === totalPages}
+            onClick={() => paginate(totalPages)}
+          >
+            {totalPages}
+          </PaginationLink>
+        </PaginationItem>
+      );
+    }
+
+    return items;
+  };
 
   const generatePRDReport = (patientRecords) => {
     if (!patientRecords || patientRecords.length === 0) {
@@ -328,7 +444,13 @@ function PatientRecordsDatabase() {
       </div>
 
       <div className="w-full overflow-x-auto">
-        <Table className="min-w-[1200px]">
+        <Table
+          className="min-w-[1200px]"
+          showPagination={true}
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={paginate}
+        >
           <TableHeader>
             <TableRow>
               <TableHead className="py-4 whitespace-nowrap">CLIENT</TableHead>
@@ -367,7 +489,7 @@ function PatientRecordsDatabase() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredRecords.map((record, index) => (
+            {currentRecords.map((record, index) => (
               <TableRow key={index}>
                 <TableCell className="whitespace-nowrap">
                   {record.client || record.patient_name?.toUpperCase() || "N/A"}

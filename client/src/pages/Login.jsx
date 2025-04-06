@@ -8,6 +8,7 @@ import LoginIcon from "../assets/icons/LoginIcon";
 import BeautoxLogo from "../assets/logos/Beautox.svg";
 import axios from "axios";
 import ForgotPassword from "@/components/modals/ForgotPassword";
+
 import {
   InputContainer,
   InputTextField,
@@ -159,10 +160,8 @@ function Login() {
               onSubmit={handleSubmit}
               className="space-y-4 sm:space-y-5 w-full"
             >
-              <div className="w-full">
-                <label className="block text-sm sm:text-base font-medium text-gray-700 mb-1.5 sm:mb-2">
-                  Username
-                </label>
+              <InputContainer className="w-full p-0">
+                <InputLabel>Username</InputLabel>
                 <div className="relative w-full">
                   <Input
                     type="text"
@@ -173,12 +172,10 @@ function Login() {
                     required
                   />
                 </div>
-              </div>
+              </InputContainer>
 
-              <div className="w-full">
-                <label className="block text-sm sm:text-base font-medium text-gray-700 mb-1.5 sm:mb-2">
-                  Password
-                </label>
+              <InputContainer className="w-full p-0">
+                <InputLabel>Password</InputLabel>
                 <div className="relative w-full">
                   <Input
                     type="password"
@@ -189,7 +186,7 @@ function Login() {
                     required
                   />
                 </div>
-              </div>
+              </InputContainer>
 
               <div className="flex items-center justify-between text-xs sm:text-sm pt-1">
                 <label className="flex items-center">
@@ -219,12 +216,7 @@ function Login() {
                   LOGIN
                 </Button>
 
-                <Button
-                  variant="outline"
-                  onClick={() => navigate("/")}
-                  type="button"
-                  className="w-full bg-white border border-purple-950 text-gray-700 hover:bg-gray-50 py-2.5 rounded-lg text-sm font-medium transition-colors duration-200"
-                >
+                <Button variant="outline" onClick={() => navigate("/")}>
                   RETURN
                 </Button>
               </div>
@@ -290,7 +282,7 @@ function Login() {
                     data-cy="login-username"
                     type="text"
                     id="username"
-                    className="text-input text-sm sm:text-base h-10 sm:h-12"
+                    className="text-input text-sm sm:text-base "
                     onChange={(e) => setUsername(e.target.value)}
                     onBlur={(e) => setUsername(e.target.value.trim())}
                     placeholder="e.g. john_doe123"
@@ -309,7 +301,7 @@ function Login() {
                     data-cy="login-password"
                     type="password"
                     id="password"
-                    className="text-input text-sm sm:text-base h-10 sm:h-12"
+                    className="text-input text-sm sm:text-base "
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="e.g. P@ssw0rd123"
                     value={password}
@@ -338,7 +330,8 @@ function Login() {
               <div className="space-y-3 pt-4">
                 <Button
                   type="submit"
-                  className="w-full bg-purple-950 hover:bg-purple-900 text-white py-2.5 rounded-lg text-sm font-medium transition-colors duration-200"
+                  fullWidth="true"
+                  // className="w-full bg-purple-950 hover:bg-purple-900 text-white py-2.5 rounded-lg text-sm font-medium transition-colors duration-200"
                 >
                   <LoginIcon className="w-5 h-5" />
                   <span>LOGIN</span>
@@ -346,9 +339,10 @@ function Login() {
 
                 <Button
                   variant="outline"
+                  fullWidth="true"
                   onClick={() => navigate("/")}
                   type="button"
-                  className="w-full bg-white border border-purple-950 text-gray-700 hover:bg-gray-50 py-2.5 rounded-lg text-sm font-medium transition-colors duration-200"
+                  className="w-full "
                 >
                   RETURN
                 </Button>

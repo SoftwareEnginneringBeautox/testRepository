@@ -284,7 +284,7 @@ function AdministratorServices() {
                       {pkg.treatments.map((t) =>
                         t?.treatment_name ? (
                           <Badge key={t.id} variant="outline">
-                            {t.treatment_name}
+                            + {t.treatment_name}
                           </Badge>
                         ) : null
                       )}

@@ -1,15 +1,11 @@
 import * as React from "react";
-
 import { useId } from "react";
-
 import { cn } from "@/lib/utils";
 
 const InputContainer = React.forwardRef(
-  ({ className, label, children, ...props }, ref) => {
-    // Generate a unique ID if not provided
+  ({ className, label, children, fullWidth, ...props }, ref) => {
     const generatedId = useId();
 
-    // Clone children and ensure InputLabel gets the input's ID
     const enhancedChildren = React.Children.map(children, (child) => {
       if (React.isValidElement(child) && child.type === InputLabel) {
         return React.cloneElement(child, { htmlFor: generatedId });
@@ -25,7 +21,7 @@ const InputContainer = React.forwardRef(
 
     return (
       <div
-        className={cn("flex flex-col gap-1 w-full", className)}
+        className={cn("flex flex-col gap-1", fullWidth && "w-full", className)}
         ref={ref}
         {...props}
       >
@@ -37,12 +33,16 @@ const InputContainer = React.forwardRef(
 InputContainer.displayName = "InputContainer";
 
 const InputLabel = React.forwardRef(
-  ({ className, htmlFor, type, ...props }, ref) => {
+  ({ className, htmlFor, type, fullWidth, ...props }, ref) => {
     return (
       <label
         htmlFor={htmlFor}
         type={type}
-        className={cn("text-sm font-semibold", className)}
+        className={cn(
+          "text-sm font-semibold",
+          fullWidth && "w-full",
+          className
+        )}
         ref={ref}
         {...props}
       />
@@ -51,11 +51,12 @@ const InputLabel = React.forwardRef(
 );
 InputLabel.displayName = "InputLabel";
 
-const InputTextField = ({ children, className }) => {
+const InputTextField = ({ children, className, fullWidth }) => {
   return (
     <div
       className={cn(
-        "flex items-center gap-2 w-full bg-customNeutral-100 rounded-lg border-2 border-customNeutral-200 focus-within:border-lavender-400 dark:border-neutral-800 dark:bg-neutral-950 dark:ring-offset-neutral-950 dark:file:text-neutral-50 dark:placeholder:text-neutral-400 px-3 py-2",
+        "flex items-center gap-2 bg-customNeutral-100 rounded-lg border-2 border-customNeutral-200 focus-within:border-lavender-400 dark:border-neutral-800 dark:bg-neutral-950 dark:ring-offset-neutral-950 dark:file:text-neutral-50 dark:placeholder:text-neutral-400 px-3 py-2",
+        fullWidth && "w-full",
         className
       )}
     >
@@ -66,44 +67,50 @@ const InputTextField = ({ children, className }) => {
 InputTextField.displayName = "InputTextField";
 
 const InputIcon = ({ children }) => {
-  return <div className="[&_svg]:size-6 [&_svg]:shrink-0 ">{children}</div>;
+  return <div className="[&_svg]:size-6 [&_svg]:shrink-0">{children}</div>;
 };
 InputIcon.displayName = "InputIcon";
 
-const Input = React.forwardRef(({ className, type, ...props }, ref) => {
-  return (
-    <input
-      type={type}
-      className={cn(
-        "w-full flex-1 outline-none bg-inherit file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-neutral-950 placeholder:text-customNeutral-300 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
-        className
-      )}
-      ref={ref}
-      {...props}
-    />
-  );
-});
+const Input = React.forwardRef(
+  ({ className, type, fullWidth, ...props }, ref) => {
+    return (
+      <input
+        type={type}
+        className={cn(
+          "flex-1 outline-none bg-inherit file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-neutral-950 placeholder:text-customNeutral-300 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
+          fullWidth && "w-full",
+          className
+        )}
+        ref={ref}
+        {...props}
+      />
+    );
+  }
+);
 Input.displayName = "Input";
 
-const InputArea = React.forwardRef(({ className, rows = 4, ...props }, ref) => (
-  <textarea
-    ref={ref}
-    rows={rows}
-    className={cn(
-      "w-full flex-1 outline-none bg-inherit file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-neutral-950 placeholder:text-customNeutral-300 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm resize-none",
-      className
-    )}
-    {...props}
-  />
-));
+const InputArea = React.forwardRef(
+  ({ className, rows = 4, fullWidth, ...props }, ref) => (
+    <textarea
+      ref={ref}
+      rows={rows}
+      className={cn(
+        "flex-1 outline-none bg-inherit file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-neutral-950 placeholder:text-customNeutral-300 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm resize-none",
+        fullWidth && "w-full",
+        className
+      )}
+      {...props}
+    />
+  )
+);
 InputArea.displayName = "InputArea";
 
-// New component for textarea container
-const InputAreaField = ({ children, className }) => {
+const InputAreaField = ({ children, className, fullWidth }) => {
   return (
     <div
       className={cn(
-        "flex w-full bg-customNeutral-100 rounded-lg border-2 border-customNeutral-200 focus-within:border-lavender-400 dark:border-neutral-800 dark:bg-neutral-950 dark:ring-offset-neutral-950 dark:file:text-neutral-50 dark:placeholder:text-neutral-400 px-3 py-2",
+        "flex bg-customNeutral-100 rounded-lg border-2 border-customNeutral-200 focus-within:border-lavender-400 dark:border-neutral-800 dark:bg-neutral-950 dark:ring-offset-neutral-950 dark:file:text-neutral-50 dark:placeholder:text-neutral-400 px-3 py-2",
+        fullWidth && "w-full",
         className
       )}
     >
