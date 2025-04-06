@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { PieChart, Pie, Label } from "recharts";
+import { PieChart, Pie, Cell, Label } from "recharts";
 import axios from "axios";
 import {
   Card,
@@ -18,34 +18,33 @@ import {
 import TrendUpIcon from "@/assets/icons/TrendUpIcon";
 import TrendDownIcon from "@/assets/icons/TrendDownIcon";
 
-// Chart configuration with predefined colors for different categories
+// Updated chart configuration with your actual expense categories
 const chartConfig = {
-  rent: {
-    label: "Rent",
+  salary: {
+    label: "Salary",
     color: "#100524"
   },
-  utilities: {
-    label: "Utilities",
+  monthlypurchaseorder: {
+    label: "Monthly Purchase Order",
     color: "#17082C"
   },
-  salaries: {
-    label: "Salaries",
+  businessphone: {
+    label: "Business Phone",
     color: "#210D36"
   },
-  supplies: {
-    label: "Supplies",
+  internet: {
+    label: "Internet",
     color: "#381B4C"
   },
-  marketing: {
-    label: "Marketing",
+  edittest1: {
+    label: "Edit Test 1",
     color: "#7A4C93"
   },
-<<<<<<< HEAD
-<<<<<<< HEAD
   testii: {
     label: "Test II",
     color: "#9d71b1"
   },
+  // Add more categories based on your data
   rent: {
     label: "Rent",
     color: "#6e4789"
@@ -59,49 +58,29 @@ const chartConfig = {
     color: "#8a5ca3"
   },
   // Default for any other category
-=======
-  // Add more color mappings as needed for other categories
->>>>>>> parent of d3f6131 (Update BeautoxPieChart.jsx)
-=======
-  // Add more color mappings as needed for other categories
->>>>>>> parent of d3f6131 (Update BeautoxPieChart.jsx)
   other: {
     label: "Other",
-    color: "#9d71b1"
+    color: "#b794dc"
   }
 };
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 // Custom colors for the pie chart
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#ffc658'];
 
-// Modified to accept expensesData as a prop
-const BeautoxPieChart = ({ expensesData = [] }) => {
-=======
-=======
->>>>>>> parent of d3f6131 (Update BeautoxPieChart.jsx)
 const BeautoxPieChart = () => {
->>>>>>> parent of d3f6131 (Update BeautoxPieChart.jsx)
   const [chartData, setChartData] = useState([]);
   const [totalExpenses, setTotalExpenses] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [trend, setTrend] = useState(null);
   const [pastMonthTotal, setPastMonthTotal] = useState(0);
-
-  // Get the current date
-  const currentDate = new Date();
-  const currentMonth = currentDate.getMonth() + 1; // 1-12
-  const currentYear = currentDate.getFullYear(); // YYYY
-
-  // Get the previous month
-  const previousMonth = currentMonth === 1 ? 12 : currentMonth - 1;
-  const previousYear = currentMonth === 1 ? currentYear - 1 : currentYear;
+  const [debugInfo, setDebugInfo] = useState({});
+  const [monthlyData, setMonthlyData] = useState({
+    currentMonth: "",
+    currentYear: ""
+  });
 
   useEffect(() => {
-<<<<<<< HEAD
-<<<<<<< HEAD
     // Get the current date for filtering
     const currentDate = new Date();
     const currentMonth = currentDate.getMonth() + 1; // 1-12
@@ -111,8 +90,10 @@ const BeautoxPieChart = () => {
     const previousMonth = currentMonth === 1 ? 12 : currentMonth - 1;
     const previousYear = currentMonth === 1 ? currentYear - 1 : currentYear;
 
-    console.log("Current filter date:", currentDate);
-    console.log("Current month:", currentMonth, "Current year:", currentYear);
+    // Logging for debugging
+    console.log("Current date:", currentDate);
+    console.log("Filter month:", currentMonth);
+    console.log("Filter year:", currentYear);
 
     // Set the month and year for display
     setMonthlyData({
@@ -122,183 +103,129 @@ const BeautoxPieChart = () => {
       currentYear
     });
 
-    // Process expenses data
-    const processData = () => {
-      setLoading(true);
-=======
-=======
->>>>>>> parent of d3f6131 (Update BeautoxPieChart.jsx)
     // Fetch expenses data from the server
     const fetchExpenses = async () => {
->>>>>>> parent of d3f6131 (Update BeautoxPieChart.jsx)
       try {
-        // Use the passed expensesData prop instead of fetching
-        console.log(`Processing ${expensesData.length} expenses`);
+        setLoading(true);
+        console.log("Fetching expenses data...");
+        const response = await axios.get("/expenses");
+        console.log("API Response received with", response.data.length, "records");
 
-        if (expensesData.length > 0) {
-          // Group by category for the current month
-          const currentMonthExpenses = expensesData.filter((expense) => {
-            try {
-              // Safely parse the date
-              const dateParts = expense.date.split('-');
-              if (dateParts.length !== 3) {
-                return false;
-              }
+        // Add debugging for first 3 records
+        if (response.data.length > 0) {
+          console.log("Sample data:", response.data.slice(0, 3));
+        }
 
-<<<<<<< HEAD
-              const expenseDate = new Date(
-                parseInt(dateParts[0]), // year
-                parseInt(dateParts[1]) - 1, // month (0-indexed in JS)
-                parseInt(dateParts[2]) // day
-              );
-              
-              return (
-                expenseDate.getMonth() + 1 === currentMonth &&
-                expenseDate.getFullYear() === currentYear
-              );
-            } catch (err) {
-              return false;
-            }
-          });
+        // Ensure we're working with an array
+        const expenses = Array.isArray(response.data) ? response.data : [];
 
-          console.log(`Found ${currentMonthExpenses.length} expenses for ${currentMonth}/${currentYear}`);
+        // Debug information
+        const debugData = {
+          totalRecords: expenses.length,
+          apiSuccess: true,
+          dateSamples: expenses.slice(0, 3).map(e => e.date)
+        };
 
-          // Group by category for the previous month
-          const previousMonthExpenses = expensesData.filter((expense) => {
-            try {
-              const dateParts = expense.date.split('-');
-              if (dateParts.length !== 3) return false;
-              
-              const expenseDate = new Date(
-                parseInt(dateParts[0]),
-                parseInt(dateParts[1]) - 1,
-                parseInt(dateParts[2])
-              );
-              
-              return (
-                expenseDate.getMonth() + 1 === previousMonth &&
-                expenseDate.getFullYear() === previousYear
-              );
-            } catch (err) {
-              return false;
-            }
-=======
         // Process expenses data
         if (expenses.length > 0) {
-          // Group by category for the current month
+          // Group by category for the current month (non-archived only)
           const currentMonthExpenses = expenses.filter((expense) => {
-            const expenseDate = new Date(expense.date);
-            return (
+            // More explicit date parsing to avoid timezone issues
+            const dateParts = expense.date.split('-');
+            const expenseDate = new Date(
+              parseInt(dateParts[0]), // year
+              parseInt(dateParts[1]) - 1, // month (0-indexed in JS)
+              parseInt(dateParts[2]) // day
+            );
+            
+            const match = (
               expenseDate.getMonth() + 1 === currentMonth &&
               expenseDate.getFullYear() === currentYear
             );
+            
+            // Extensive logging for the first few expenses
+            if (expenses.indexOf(expense) < 5) {
+              console.log(`Expense ${expenses.indexOf(expense)}: date=${expense.date}, parsed month=${expenseDate.getMonth() + 1}, expected month=${currentMonth}, match=${match}`);
+            }
+            
+            return match;
           });
 
-          // Group by category for the previous month
+          console.log(`Found ${currentMonthExpenses.length} expenses for ${currentMonth}/${currentYear}`);
+          debugData.currentMonthExpenses = currentMonthExpenses.length;
+
+          // Group by category for the previous month (non-archived only)
           const previousMonthExpenses = expenses.filter((expense) => {
-            const expenseDate = new Date(expense.date);
+            const dateParts = expense.date.split('-');
+            const expenseDate = new Date(
+              parseInt(dateParts[0]),
+              parseInt(dateParts[1]) - 1,
+              parseInt(dateParts[2])
+            );
+            
             return (
               expenseDate.getMonth() + 1 === previousMonth &&
               expenseDate.getFullYear() === previousYear
             );
->>>>>>> parent of d3f6131 (Update BeautoxPieChart.jsx)
           });
+
+          debugData.previousMonthExpenses = previousMonthExpenses.length;
 
           // Calculate total expenses by category for current month
           const categoryTotals = {};
 
           currentMonthExpenses.forEach((expense) => {
-            if (!expense.category) {
-              return;
-            }
-            
             const category = expense.category.toLowerCase().replace(/\s+/g, "");
             if (!categoryTotals[category]) {
               categoryTotals[category] = 0;
             }
-            
-            // Make sure expense is a number
-            const expenseValue = parseFloat(expense.expense);
-            if (!isNaN(expenseValue)) {
-              categoryTotals[category] += expenseValue;
-            }
+            categoryTotals[category] += parseFloat(expense.expense);
           });
 
+          debugData.categories = Object.keys(categoryTotals);
           console.log("Category totals:", categoryTotals);
 
           // Calculate total expenses for current month
           const currentMonthTotal = currentMonthExpenses.reduce(
-            (sum, expense) => {
-              const expenseValue = parseFloat(expense.expense);
-              return !isNaN(expenseValue) ? sum + expenseValue : sum;
-            },
+            (sum, expense) => sum + parseFloat(expense.expense),
             0
           );
 
           // Calculate total expenses for previous month
           const prevMonthTotal = previousMonthExpenses.reduce(
-            (sum, expense) => {
-              const expenseValue = parseFloat(expense.expense);
-              return !isNaN(expenseValue) ? sum + expenseValue : sum;
-            },
+            (sum, expense) => sum + parseFloat(expense.expense),
             0
           );
 
-<<<<<<< HEAD
-          // Transform data for recharts - using a safer pattern
-          const transformedData = [];
-          
-          Object.keys(categoryTotals).forEach((key, index) => {
-=======
+          debugData.currentMonthTotal = currentMonthTotal;
+          debugData.prevMonthTotal = prevMonthTotal;
+
           // Transform data for recharts
-          const transformedData = Object.keys(categoryTotals).map((key) => {
-<<<<<<< HEAD
->>>>>>> parent of d3f6131 (Update BeautoxPieChart.jsx)
-=======
->>>>>>> parent of d3f6131 (Update BeautoxPieChart.jsx)
+          const transformedData = Object.keys(categoryTotals).map((key, index) => {
             // Find the known category or use the original key
             const categoryKey =
               Object.keys(chartConfig).find(
                 (configKey) => configKey.toLowerCase() === key.toLowerCase()
-              ) || key;
+              ) || "other";
 
-            const categoryConfig = chartConfig[categoryKey] || {
-              label: key.charAt(0).toUpperCase() + key.slice(1),
-              color: `#${Math.floor(Math.random() * 16777215).toString(16)}`
-            };
+            const categoryConfig = chartConfig[categoryKey] || chartConfig.other;
+            
+            // Use either the config color or a color from the COLORS array
+            const fillColor = categoryConfig.color || COLORS[index % COLORS.length];
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-            transformedData.push({
+            return {
               category: categoryConfig.label || key.charAt(0).toUpperCase() + key.slice(1),
               value: categoryTotals[key],
               fill: fillColor
-            });
+            };
           });
 
           // Sort data by value (largest to smallest) for better visualization
           transformedData.sort((a, b) => b.value - a.value);
           
           console.log("Final chart data:", transformedData);
+          debugData.transformedDataLength = transformedData.length;
 
-=======
-            return {
-              category: categoryConfig.label,
-              value: categoryTotals[key],
-              fill: categoryConfig.color
-            };
-          });
-
->>>>>>> parent of d3f6131 (Update BeautoxPieChart.jsx)
-=======
-            return {
-              category: categoryConfig.label,
-              value: categoryTotals[key],
-              fill: categoryConfig.color
-            };
-          });
-
->>>>>>> parent of d3f6131 (Update BeautoxPieChart.jsx)
           setChartData(transformedData);
           setTotalExpenses(currentMonthTotal);
           setPastMonthTotal(prevMonthTotal);
@@ -308,32 +235,25 @@ const BeautoxPieChart = () => {
             const calculatedTrend =
               ((currentMonthTotal - prevMonthTotal) / prevMonthTotal) * 100;
             setTrend(calculatedTrend);
+            debugData.trend = calculatedTrend;
           }
-        } else {
-          // No data - set empty chart
-          setChartData([]);
-          setTotalExpenses(0);
-          console.log("No expense data found");
         }
+        
+        setDebugInfo(debugData);
       } catch (err) {
-        console.error("Error processing expense data:", err);
-        setError("Failed to process expense data. Please try again later.");
-        setChartData([]);  // Ensure chartData is an empty array, not undefined
+        console.error("Error fetching expense data:", err);
+        setDebugInfo({
+          error: err.message,
+          apiSuccess: false
+        });
+        setError("Failed to load expense data. Please try again later.");
       } finally {
         setLoading(false);
       }
     };
 
-<<<<<<< HEAD
-    processData();
-  }, [expensesData]); // Process data whenever expensesData changes
-=======
     fetchExpenses();
-  }, [currentMonth, currentYear, previousMonth, previousYear]);
-<<<<<<< HEAD
->>>>>>> parent of d3f6131 (Update BeautoxPieChart.jsx)
-=======
->>>>>>> parent of d3f6131 (Update BeautoxPieChart.jsx)
+  }, []);
 
   if (loading) {
     return (
@@ -363,27 +283,6 @@ const BeautoxPieChart = () => {
     );
   }
 
-  // Add fallback if chart data is empty or not an array
-  if (!chartData || !Array.isArray(chartData) || chartData.length === 0) {
-    return (
-      <Card className="w-full h-full shadow-custom bg-ash-100">
-        <CardHeader className="items-center pb-2">
-          <CardTitle>MONTHLY EXPENSES</CardTitle>
-          <CardDescription>Expense Breakdown</CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-col justify-center items-center h-64 text-muted-foreground">
-          <p className="mb-2">No expense data available for this month</p>
-          <p className="text-sm text-gray-500">
-            Try adding expenses with "archived = false" to see them on this chart
-          </p>
-        </CardContent>
-        <CardFooter className="text-sm text-muted-foreground">
-          Showing expenses for {monthlyData.currentMonth} {monthlyData.currentYear}
-        </CardFooter>
-      </Card>
-    );
-  }
-
   const isTrendingUp = trend > 0;
 
   return (
@@ -398,53 +297,18 @@ const BeautoxPieChart = () => {
         </CardDescription>
       </CardHeader>
       <CardContent className="pb-0" data-cy="card-content">
-        <ChartContainer
-          className="aspect-square w-full max-w-xs mx-auto"
-          config={chartConfig}
-          data-cy="chart-container"
-        >
-          <PieChart
-            margin={{ top: 10, right: 10, bottom: 10, left: 10 }}
-            width={300}
-            height={300}
-            data-cy="pie-chart"
+        {chartData.length > 0 ? (
+          <ChartContainer
+            className="aspect-square w-full max-w-xs mx-auto"
+            config={chartConfig}
+            data-cy="chart-container"
           >
-            <ChartTooltip
-              cursor={false}
-              content={<ChartTooltipContent />}
-              data-cy="chart-tooltip"
-            />
-            <Pie
-              data={chartData}
-              dataKey="value"
-              nameKey="category"
-              cx="50%"
-              cy="50%"
-              innerRadius={60}
-              outerRadius={100}
-              strokeWidth={2}
-              paddingAngle={1}
-              data-cy="pie"
+            <PieChart
+              margin={{ top: 10, right: 10, bottom: 10, left: 10 }}
+              width={300}
+              height={300}
+              data-cy="pie-chart"
             >
-<<<<<<< HEAD
-              {chartData.map((entry, index) => (
-                <Cell 
-                  key={`cell-${index}`} 
-                  fill={entry.fill} 
-                />
-              ))}
-              <Label
-                content={({ viewBox }) =>
-                  viewBox && (
-                    <text
-                      x={viewBox.cx}
-                      y={viewBox.cy}
-                      textAnchor="middle"
-                      dominantBaseline="middle"
-                      data-cy="pie-label"
-                    >
-                      <tspan
-=======
               <ChartTooltip
                 cursor={false}
                 content={<ChartTooltipContent />}
@@ -462,39 +326,22 @@ const BeautoxPieChart = () => {
                 paddingAngle={1}
                 data-cy="pie"
               >
+                {chartData.map((entry, index) => (
+                  <Cell 
+                    key={`cell-${index}`} 
+                    fill={entry.fill} 
+                  />
+                ))}
                 <Label
                   content={({ viewBox }) =>
                     viewBox && (
                       <text
->>>>>>> parent of d3f6131 (Update BeautoxPieChart.jsx)
                         x={viewBox.cx}
                         y={viewBox.cy}
-                        className="fill-foreground text-2xl font-bold"
-                        data-cy="total-expenses"
+                        textAnchor="middle"
+                        dominantBaseline="middle"
+                        data-cy="pie-label"
                       >
-<<<<<<< HEAD
-                        ₱
-                        {totalExpenses.toLocaleString(undefined, {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2
-                        })}
-                      </tspan>
-                      <tspan
-                        x={viewBox.cx}
-                        y={viewBox.cy + 20}
-                        className="fill-muted-foreground text-sm"
-                        data-cy="total-expenses-label"
-                      >
-                        TOTAL EXPENSES
-                      </tspan>
-                    </text>
-                  )
-                }
-              />
-            </Pie>
-          </PieChart>
-        </ChartContainer>
-=======
                         <tspan
                           x={viewBox.cx}
                           y={viewBox.cy}
@@ -524,16 +371,21 @@ const BeautoxPieChart = () => {
           </ChartContainer>
         ) : (
           <div
-            className="flex justify-center items-center h-64 text-muted-foreground"
+            className="flex flex-col justify-center items-center h-64 text-muted-foreground"
             data-cy="no-data-message"
           >
-            No expense data available for this month
+            <p className="mb-2">No expense data available for this month</p>
+            <p className="text-sm text-gray-500">
+              Found {debugInfo.totalRecords || 0} total records but none match current month filter
+            </p>
+            <p className="text-xs text-gray-400 mt-2">
+              Expected month: {monthlyData.currentMonth} {monthlyData.currentYear}
+            </p>
           </div>
         )}
->>>>>>> parent of d3f6131 (Update BeautoxPieChart.jsx)
       </CardContent>
       <CardFooter className="flex-col gap-2 text-sm" data-cy="card-footer">
-        {trend !== null && (
+        {trend !== null && chartData.length > 0 && (
           <div
             className="flex items-center gap-2 font-medium leading-none"
             data-cy="trend-info"
@@ -563,11 +415,9 @@ const BeautoxPieChart = () => {
           className="leading-none text-muted-foreground"
           data-cy="footer-info"
         >
-          Showing total expenses for{" "}
-          {new Date(currentYear, currentMonth - 1).toLocaleString("default", {
-            month: "long"
-          })}{" "}
-          {currentYear}
+          Showing expenses for{" "}
+          {monthlyData.currentMonth}{" "}
+          {monthlyData.currentYear}
         </div>
       </CardFooter>
     </Card>
