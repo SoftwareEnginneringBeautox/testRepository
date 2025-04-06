@@ -3,17 +3,21 @@ import "../App.css";
 import { useModal } from "@/hooks/useModal";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
+<<<<<<< Updated upstream
 
 import CreateMonthlyExpense from "@/components/modals/CreateMonthlyExpense";
 import EditMonthlyExpense from "@/components/modals/EditMonthlyExpense";
 import DeleteMonthlyExpense from "@/components/modals/DeleteMonthlyExpense";
 
+=======
+import CreateMonthlySales from "@/components/modals/CreateMonthlySales";
+import EditMonthlySales from "@/components/modals/EditMonthlySales";
+import DeleteMonthlySales from "@/components/modals/DeleteMonthlySales";
+>>>>>>> Stashed changes
 import CreateCategory from "@/components/modals/CreateCategory";
 import EditCategory from "@/components/modals/EditCategory";
 import ArchiveCategory from "@/components/modals/ArchiveCategory";
-
 import { Button } from "@/components/ui/Button";
-
 import FilterIcon from "../assets/icons/FilterIcon";
 import ChevronLeftIcon from "../assets/icons/ChevronLeftIcon";
 import DownloadIcon from "../assets/icons/DownloadIcon";
@@ -21,43 +25,41 @@ import PlusIcon from "../assets/icons/PlusIcon";
 import EditIcon from "@/assets/icons/EditIcon";
 import EllipsisIcon from "@/assets/icons/EllipsisIcon";
 import ArchiveIcon from "@/assets/icons/ArchiveIcon";
-
 import SalesChart from "../components/SalesChart";
 import BeautoxPieChart from "../components/BeautoxPieChart";
-
 import { format } from "date-fns";
-
 import {
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
-  TableRow
+  TableRow,
 } from "@/components/ui/Table";
-
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuTrigger
+  DropdownMenuTrigger,
 } from "@/components/ui/DropdownMenu";
-
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectValue,
-  SelectTrigger
+  SelectTrigger,
 } from "@/components/ui/Select";
+
+// Define the base API URL from environment variable
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 function FinancialOverview() {
   // Dynamic data states
   const [financialData, setFinancialData] = useState({
     totalSales: 0,
     totalExpenses: 0,
-    netIncome: 0
+    netIncome: 0,
   });
   const [salesData, setSalesData] = useState([]);
   const [expensesData, setExpensesData] = useState([]);
@@ -65,7 +67,7 @@ function FinancialOverview() {
 
   const { currentModal, openModal, closeModal } = useModal();
 
-  // Static chart data and config from the second file
+  // Static chart data and config
   const chartData = [
     { day: "Mon", currentWeek: 1300, previousWeek: 1100 },
     { day: "Tue", currentWeek: 1400, previousWeek: 1150 },
@@ -73,18 +75,18 @@ function FinancialOverview() {
     { day: "Thu", currentWeek: 1600, previousWeek: 1250 },
     { day: "Fri", currentWeek: 1700, previousWeek: 1300 },
     { day: "Sat", currentWeek: 1800, previousWeek: 1350 },
-    { day: "Sun", currentWeek: 1900, previousWeek: 1400 }
+    { day: "Sun", currentWeek: 1900, previousWeek: 1400 },
   ];
 
   const chartConfig = {
     currentWeek: {
       label: "Current Week",
-      color: "#381B4C" // Lavender-400
+      color: "#381B4C", // Lavender-400
     },
     previousWeek: {
       label: "Previous Week",
-      color: "#002B7F" // ReflexBlue-400
-    }
+      color: "#002B7F", // ReflexBlue-400
+    },
   };
 
   const [filterType, setFilterType] = useState("all");
@@ -134,24 +136,28 @@ function FinancialOverview() {
 
   // Fetch data from endpoints
   useEffect(() => {
-    fetch("http://localhost:4000/financial-overview")
+    // 1. Financial Overview
+    fetch(`${API_BASE_URL}/financial-overview`)
       .then((response) => response.json())
       .then((data) => setFinancialData(data))
       .catch((error) =>
         console.error("Error fetching financial overview:", error)
       );
 
-    fetch("http://localhost:4000/sales")
+    // 2. Sales data for table (ensure your server has GET /sales defined)
+    fetch(`${API_BASE_URL}/sales`)
       .then((response) => response.json())
       .then((data) => setSalesData(data))
       .catch((error) => console.error("Error fetching sales data:", error));
 
-    fetch("http://localhost:4000/expenses")
+    // 3. Expenses data
+    fetch(`${API_BASE_URL}/expenses`)
       .then((response) => response.json())
       .then((data) => setExpensesData(data))
       .catch((error) => console.error("Error fetching expenses data:", error));
 
-    fetch("http://localhost:4000/api/categories")
+    // 4. Categories
+    fetch(`${API_BASE_URL}/api/categories`)
       .then((response) => response.json())
       .then((data) => {
         console.log("Categories fetched:", data);
@@ -159,13 +165,17 @@ function FinancialOverview() {
       })
       .catch((error) => {
         console.error("Error fetching categories:", error);
+<<<<<<< Updated upstream
         setCategories([]); // Set to empty array on error
+=======
+        setCategories([]);
+>>>>>>> Stashed changes
       });
   }, []);
 
   const refreshExpensesData = async () => {
     try {
-      const response = await fetch("http://localhost:4000/expenses");
+      const response = await fetch(`${API_BASE_URL}/expenses`);
       const data = await response.json();
       setExpensesData(data);
     } catch (error) {
@@ -183,7 +193,7 @@ function FinancialOverview() {
     const doc = new jsPDF({
       orientation: "portrait",
       unit: "pt",
-      format: "a4"
+      format: "a4",
     });
 
     doc.setFont("helvetica");
@@ -195,10 +205,8 @@ function FinancialOverview() {
 
     const currentDate = new Date();
     const formattedCurrentDate = format(currentDate, "MMMM dd, yyyy");
-    const formattedMonthForFilename = format(
-      currentDate,
-      "MMMM dd, yyyy"
-    ).replace(/^([a-z])/, (match) => match.toUpperCase());
+    const formattedMonthForFilename = format(currentDate, "MMMM dd, yyyy")
+      .replace(/^([a-z])/, (match) => match.toUpperCase());
 
     doc.setFont("helvetica", "bold");
     doc.setFontSize(14);
@@ -217,7 +225,7 @@ function FinancialOverview() {
       "PACKAGES",
       "TREATMENT",
       "AMOUNT",
-      "REF NO"
+      "REF NO",
     ];
 
     const tableData = salesData.map((sale) => {
@@ -238,16 +246,14 @@ function FinancialOverview() {
           : "N/A";
 
       return [
-        sale.client?.trim() ? sale.client.toUpperCase() : "N/A",
-        sale.person_in_charge?.trim()
-          ? sale.person_in_charge.toUpperCase()
-          : "N/A",
+        (sale.client || "N/A").toUpperCase(),
+        (sale.person_in_charge || "N/A").toUpperCase(),
         transactionDate,
-        sale.payment_method?.trim() ? sale.payment_method.toUpperCase() : "N/A",
-        sale.packages?.trim() ? sale.packages.toUpperCase() : "N/A",
+        (sale.payment_method || "N/A").toUpperCase(),
+        (sale.packages || "N/A").toUpperCase(),
         treatmentValue,
         paymentValue,
-        sale.reference_no?.trim() ? sale.reference_no.toUpperCase() : "N/A"
+        (sale.reference_no || "N/A").toUpperCase(),
       ];
     });
 
@@ -263,7 +269,7 @@ function FinancialOverview() {
         overflow: "linebreak",
         cellPadding: 2,
         lineWidth: 0.5,
-        lineColor: "#000000"
+        lineColor: "#000000",
       },
       headStyles: {
         fillColor: "#381B4C",
@@ -272,12 +278,12 @@ function FinancialOverview() {
         halign: "center",
         valign: "middle",
         fontStyle: "bold",
-        minCellHeight: 20
+        minCellHeight: 20,
       },
       bodyStyles: {
         valign: "middle",
         lineWidth: { top: 0.2, bottom: 0.2 },
-        lineColor: "#000000"
+        lineColor: "#000000",
       },
       columnStyles: {
         0: { cellWidth: contentWidth * 0.15 },
@@ -287,7 +293,7 @@ function FinancialOverview() {
         4: { cellWidth: contentWidth * 0.15 },
         5: { cellWidth: contentWidth * 0.15 },
         6: { cellWidth: contentWidth * 0.1, halign: "right" },
-        7: { cellWidth: contentWidth * 0.1 }
+        7: { cellWidth: contentWidth * 0.1 },
       },
       didDrawPage: function () {
         doc.setFontSize(8);
@@ -296,7 +302,7 @@ function FinancialOverview() {
           pageWidth - margin - 30,
           doc.internal.pageSize.height - 10
         );
-      }
+      },
     });
 
     const totalPayment = salesData.reduce((total, sale) => {
@@ -331,7 +337,7 @@ function FinancialOverview() {
     // Compute expense totals grouped by category
     const computeExpenseCategoryTotals = () => {
       return expensesData.reduce((acc, expense) => {
-        const category = expense.category || "Uncategorized"; // Default if no category is provided
+        const category = expense.category || "Uncategorized";
         const value = parseFloat(expense.expense);
         acc[category] = (acc[category] || 0) + (isNaN(value) ? 0 : value);
         return acc;
@@ -348,7 +354,6 @@ function FinancialOverview() {
       }, 0);
     };
 
-    // Calculate values
     const expenseCategoryTotals = computeExpenseCategoryTotals();
     const monthlyExpenses = Object.values(expenseCategoryTotals).reduce(
       (total, val) => total + val,
@@ -357,15 +362,13 @@ function FinancialOverview() {
     const totalSales = computeTotalSales();
     const totalProfit = totalSales - monthlyExpenses;
 
-    // Create a new jsPDF instance in portrait mode
     const doc = new jsPDF({
       orientation: "portrait",
       unit: "mm",
-      format: "a4"
+      format: "a4",
     });
     const pageWidth = doc.internal.pageSize.getWidth();
 
-    // Header: Centered Report Title & Month/Year
     doc.setFont("helvetica", "bold");
     doc.setFontSize(16);
     const reportTitle = "BEAUTOX PRISM MONTHLY SALES REPORT";
@@ -378,45 +381,38 @@ function FinancialOverview() {
     let y = 40;
     doc.setFont("helvetica", "normal");
 
-    // Display each expense category and its total
     Object.entries(expenseCategoryTotals)
-      .sort((a, b) => a[0].localeCompare(b[0])) // Sort categories alphabetically
+      .sort((a, b) => a[0].localeCompare(b[0]))
       .forEach(([category, total]) => {
         doc.text(`${category.toUpperCase()}`, 10, y);
         doc.text(`PHP ${total}`, pageWidth - 10, y, { align: "right" });
         y += 10;
       });
 
-    // Display total sales of the month so far
     y += 5;
     doc.setFont("helvetica", "bold");
     doc.text("TOTAL SALES", 10, y);
     doc.text(`PHP ${totalSales}`, pageWidth - 10, y, { align: "right" });
 
-    // Draw a separator line
     y += 10;
     doc.setLineWidth(0.5);
     doc.line(10, y, pageWidth - 10, y);
 
-    // Display total profit (total sales - expenses)
     y += 10;
     doc.setFontSize(14);
     doc.text("TOTAL PROFIT", 10, y);
     doc.text(`PHP ${totalProfit}`, pageWidth - 10, y, { align: "right" });
 
-    // Generate filename with the current date
     const formattedDate = format(currentDate, "MMMM_dd_yyyy");
     const filename = `Beautox_MonthlySalesReport_${formattedDate}.pdf`;
 
-    // Save the PDF
     doc.save(filename);
   };
-  // REPORT GENERATING FUNCTIONS END HERE
 
-  // Function to refresh categories after changes
+  // Category management functions
   const refreshCategories = async () => {
     try {
-      const response = await fetch("http://localhost:4000/api/categories");
+      const response = await fetch(`${API_BASE_URL}/api/categories`);
       const data = await response.json();
       setCategories(data);
     } catch (error) {
@@ -424,39 +420,37 @@ function FinancialOverview() {
     }
   };
 
-  // Functions for category management
   const handleCreateCategory = async (categoryData) => {
     try {
       console.log("Create category callback called with:", categoryData);
+<<<<<<< Updated upstream
       // The category should already be created in the database via the CreateCategory component
       // Just update the local state
+=======
+>>>>>>> Stashed changes
       setCategories((prevCategories) => [
         ...prevCategories,
-        { id: categoryData.id, name: categoryData.name }
+        { id: categoryData.id, name: categoryData.name },
       ]);
-
       closeModal();
     } catch (error) {
       console.error("Create category error:", error);
-      // Error should be handled in the CreateCategory component
     }
   };
 
   const handleEditCategory = async (categoryData) => {
     try {
       console.log("Edit category callback called with:", categoryData);
-
-      // Check for duplicate category names (case insensitive)
       const isDuplicate = categories.some(
         (category) =>
           category.id !== categoryData.id &&
           category.name.toLowerCase() === categoryData.name.trim().toLowerCase()
       );
-
       if (isDuplicate) {
         alert("A category with this name already exists");
         return;
       }
+<<<<<<< Updated upstream
 
       // Call the API to update the category
       const response = await fetch(
@@ -468,12 +462,25 @@ function FinancialOverview() {
         }
       );
 
+=======
+      const response = await fetch(
+        `${API_BASE_URL}/api/categories/${categoryData.id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: categoryData.name }),
+        }
+      );
+>>>>>>> Stashed changes
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || "Error updating category");
       }
+<<<<<<< Updated upstream
 
       // Update the local state with the edited category
+=======
+>>>>>>> Stashed changes
       setCategories((prevCategories) =>
         prevCategories.map((category) =>
           category.id === categoryData.id
@@ -481,7 +488,6 @@ function FinancialOverview() {
             : category
         )
       );
-
       closeModal();
     } catch (error) {
       console.error("Edit category error:", error);
@@ -492,6 +498,7 @@ function FinancialOverview() {
   const handleArchiveCategory = async (categoryId) => {
     try {
       const response = await fetch(
+<<<<<<< Updated upstream
         `http://localhost:4000/api/categories/${categoryId}/archive`,
         {
           method: "PATCH",
@@ -499,6 +506,14 @@ function FinancialOverview() {
         }
       );
 
+=======
+        `${API_BASE_URL}/api/categories/${categoryId}/archive`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+>>>>>>> Stashed changes
       if (response.ok) {
         await refreshCategories();
         closeModal();
@@ -512,39 +527,37 @@ function FinancialOverview() {
     }
   };
 
-  // Add state for selected category
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const [expenseToEdit, setExpenseToEdit] = useState(null);
+  const [selectedExpense, setSelectedExpense] = useState(null);
 
-  // Create new expense function
   const handleCreateExpense = async (expenseData) => {
     try {
       console.log("Creating new expense:", expenseData);
-
-      // Call the new dedicated endpoint
-      const response = await fetch("http://localhost:4000/api/expenses", {
+      const response = await fetch(`${API_BASE_URL}/api/expenses`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(expenseData)
+        body: JSON.stringify(expenseData),
       });
-
       console.log("Create response status:", response.status);
-
       if (response.ok) {
         const result = await response.json();
         console.log("Create result:", result);
-
         if (result.success) {
-          // Add the new expense to the UI with the correct ID from the server
           const newExpense = {
             id: result.id,
             ...expenseData,
-            archived: false
+            archived: false,
           };
+<<<<<<< Updated upstream
 
           // Add the new expense to the beginning of the list
           setExpensesData((prevExpenses) => [newExpense, ...prevExpenses]);
 
           // Close the modal
+=======
+          setExpensesData((prevExpenses) => [newExpense, ...prevExpenses]);
+>>>>>>> Stashed changes
           closeModal();
         } else {
           alert(result.message || "Error creating expense");
@@ -560,55 +573,44 @@ function FinancialOverview() {
     }
   };
 
-  // State for the expense to edit
-  const [expenseToEdit, setExpenseToEdit] = useState(null);
-
-  // Handler for clicking the edit button
   const handleEditClick = (expense) => {
-    // Format the expense data for the modal
     const formattedExpense = {
       amount: expense.expense,
       category: expense.category,
+<<<<<<< Updated upstream
       date: expense.date.split("T")[0] // Format date for input element
+=======
+      date: expense.date.split("T")[0],
+>>>>>>> Stashed changes
     };
-
-    // Set the expense state with both the formatted data and the original ID
     setExpenseToEdit({
       ...formattedExpense,
-      id: expense.id
+      id: expense.id,
     });
-
-    // Open the edit modal
     openModal("editMonthlyExpense");
   };
 
   const handleEditExpense = async (updatedData) => {
     try {
       console.log("Submitting updated expense data:", updatedData);
-
-      // Format the data to match API expectations
       const formattedData = {
         expense: parseFloat(updatedData.amount),
         category: updatedData.category,
-        date: updatedData.date
+        date: updatedData.date,
       };
-
       console.log("Formatted data for API:", formattedData);
       console.log("Expense ID being edited:", expenseToEdit.id);
-
-      const response = await fetch("http://localhost:4000/api/manage-record", {
+      const response = await fetch(`${API_BASE_URL}/api/manage-record`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           table: "expenses_tracker",
           id: expenseToEdit.id,
           action: "edit",
-          data: formattedData
-        })
+          data: formattedData,
+        }),
       });
-
       console.log("API response status:", response.status);
-
       if (response.ok) {
         await refreshExpensesData();
         closeModal();
@@ -617,42 +619,44 @@ function FinancialOverview() {
         console.error("Edit error response:", errorData);
       }
     } catch (error) {
-      console.error("Edit error:", error);
+      console.error("Edit expense error:", error);
     }
   };
 
+<<<<<<< Updated upstream
   const [selectedExpense, setSelectedExpense] = useState(null);
 
   // Handler for archive/delete action
+=======
+>>>>>>> Stashed changes
   const handleArchiveExpense = async () => {
     try {
       console.log("Archiving expense with ID:", selectedExpense.id);
-
-      const response = await fetch("http://localhost:4000/api/manage-record", {
+      const response = await fetch(`${API_BASE_URL}/api/manage-record`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           table: "expenses_tracker",
           id: selectedExpense.id,
-          action: "archive"
-        })
+          action: "archive",
+        }),
       });
-
       console.log("Archive response status:", response.status);
-
       if (response.ok) {
+<<<<<<< Updated upstream
         // remove the archived expense immediately
+=======
+>>>>>>> Stashed changes
         setExpensesData((prevExpenses) =>
           prevExpenses.filter((expense) => expense.id !== selectedExpense.id)
         );
-
         closeModal();
       } else {
         const errorData = await response.json();
         console.error("Archive error response:", errorData);
       }
     } catch (error) {
-      console.error("Archive error:", error);
+      console.error("Archive expense error:", error);
     }
   };
 
@@ -726,6 +730,7 @@ function FinancialOverview() {
               filteredSalesData.map((sale, index) => (
                 <TableRow key={index}>
                   <TableCell className="whitespace-nowrap">
+<<<<<<< Updated upstream
                     {sale.client ? sale.client.toUpperCase() : "N/A"}
                   </TableCell>
                   <TableCell className="whitespace-nowrap">
@@ -749,15 +754,39 @@ function FinancialOverview() {
                   </TableCell>
                   <TableCell className="whitespace-nowrap">
                     {sale.treatment ? sale.treatment.toUpperCase() : "N/A"}
+=======
+                    {(sale.client || "N/A").toUpperCase()}
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap">
+                    {(sale.person_in_charge || "N/A").toUpperCase()}
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap">
+                    {sale.date_transacted
+                      ? format(new Date(sale.date_transacted), "MMMM dd, yyyy").toUpperCase()
+                      : "N/A"}
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap">
+                    {(sale.payment_method || "N/A").toUpperCase()}
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap">
+                    {(sale.packages || "N/A").toUpperCase()}
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap">
+                    {(sale.treatment && sale.treatment.trim() ? sale.treatment.toUpperCase() : "N/A")}
+>>>>>>> Stashed changes
                   </TableCell>
                   <TableCell className="whitespace-nowrap">
                     {new Intl.NumberFormat("en-PH", {
                       style: "currency",
-                      currency: "PHP"
+                      currency: "PHP",
                     }).format(sale.payment)}
                   </TableCell>
                   <TableCell className="whitespace-nowrap">
+<<<<<<< Updated upstream
                     {sale.reference_no}
+=======
+                    {(sale.reference_no || "N/A").toUpperCase()}
+>>>>>>> Stashed changes
                   </TableCell>
                 </TableRow>
               ))
@@ -779,7 +808,9 @@ function FinancialOverview() {
           className="text-sm md:text-base"
         >
           <DownloadIcon />
-          <span className="hidden md:inline">DOWNLOAD WEEKLY SALES REPORT</span>
+          <span className="hidden md:inline">
+            DOWNLOAD WEEKLY SALES REPORT
+          </span>
           <span className="md:hidden">WEEKLY REPORT</span>
         </Button>
       </div>
@@ -807,7 +838,11 @@ function FinancialOverview() {
                   categories.map((category) => (
                     <TableRow key={category.id}>
                       <TableCell className="flex items-center justify-between gap-4 h-full w-full">
+<<<<<<< Updated upstream
                         {category.name ? category.name.toUpperCase() : "N/A"}
+=======
+                        {(category.name || "N/A").toUpperCase()}
+>>>>>>> Stashed changes
                         <DropdownMenu>
                           <DropdownMenuTrigger>
                             <EllipsisIcon />
@@ -878,6 +913,7 @@ function FinancialOverview() {
                 expensesData.map((expense, index) => (
                   <TableRow key={expense.id || index}>
                     <TableCell className="py-4 text-center whitespace-nowrap">
+<<<<<<< Updated upstream
                       {format(
                         new Date(expense.date),
                         "MMMM dd, yyyy"
@@ -887,11 +923,19 @@ function FinancialOverview() {
                       {expense.category
                         ? expense.category.toUpperCase()
                         : "N/A"}
+=======
+                      {expense.date
+                        ? format(new Date(expense.date), "MMMM dd, yyyy").toUpperCase()
+                        : "N/A"}
+                    </TableCell>
+                    <TableCell className="py-4 text-center whitespace-nowrap">
+                      {(expense.category || "N/A").toUpperCase()}
+>>>>>>> Stashed changes
                     </TableCell>
                     <TableCell className="py-4 text-center whitespace-nowrap">
                       {new Intl.NumberFormat("en-PH", {
                         style: "currency",
-                        currency: "PHP"
+                        currency: "PHP",
                       }).format(expense.expense)}
                     </TableCell>
                     <TableCell className="py-4 text-center">
@@ -903,16 +947,23 @@ function FinancialOverview() {
                           <DropdownMenuGroup>
                             <DropdownMenuItem
                               onClick={() => {
+<<<<<<< Updated upstream
                                 const expense = expensesData[index];
                                 console.log(
                                   "Setting expense to edit:",
                                   expense
                                 );
+=======
+>>>>>>> Stashed changes
                                 setExpenseToEdit({
                                   id: expense.id,
                                   expense: expense.expense,
                                   category: expense.category,
+<<<<<<< Updated upstream
                                   date: expense.date.split("T")[0]
+=======
+                                  date: expense.date.split("T")[0],
+>>>>>>> Stashed changes
                                 });
                                 openModal("editMonthlyExpense");
                               }}
@@ -951,7 +1002,7 @@ function FinancialOverview() {
           <span className="font-bold">
             {new Intl.NumberFormat("en-PH", {
               style: "currency",
-              currency: "PHP"
+              currency: "PHP",
             }).format(financialData.netIncome)}
           </span>
         </div>
@@ -969,7 +1020,9 @@ function FinancialOverview() {
             ADD ADDITIONAL EXPENSES
           </Button>
           <Button
-            onClick={() => generateMonthlySalesReport(salesData, expensesData)}
+            onClick={() =>
+              generateMonthlySalesReport(salesData, expensesData)
+            }
             className="w-full md:w-auto"
           >
             <DownloadIcon />
@@ -986,7 +1039,7 @@ function FinancialOverview() {
           isOpen={true}
           onClose={closeModal}
           onCreateSuccess={handleCreateExpense}
-          categories={categories} // Make sure this is passed correctly
+          categories={categories}
         />
       )}
 
@@ -995,11 +1048,11 @@ function FinancialOverview() {
           isOpen={true}
           onClose={closeModal}
           onEditSuccess={handleEditExpense}
-          categories={categories} // Make sure this is passed correctly
+          categories={categories}
           initialData={{
             amount: expenseToEdit.expense,
             category: expenseToEdit.category,
-            date: expenseToEdit.date
+            date: expenseToEdit.date,
           }}
         />
       )}
@@ -1017,7 +1070,7 @@ function FinancialOverview() {
           isOpen={true}
           onClose={closeModal}
           onCreateSuccess={handleCreateCategory}
-          categories={categories} // Pass the current categories for duplicate checking
+          categories={categories}
         />
       )}
 

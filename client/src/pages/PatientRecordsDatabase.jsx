@@ -130,7 +130,7 @@ function PatientRecordsDatabase() {
     fetchRecords();
   }, []);
 
-  // Wrap onClose to refresh the table data when a modal is closed
+  // Refresh data when a modal closes
   const handleModalClose = () => {
     closeModal();
     fetchRecords();
@@ -142,6 +142,7 @@ function PatientRecordsDatabase() {
     openModal("editEntry");
   };
 
+<<<<<<< Updated upstream
   // Open update entry modal
   const handleOpenUpdateEntry = (record) => {
     setSelectedEntry(record);
@@ -149,6 +150,9 @@ function PatientRecordsDatabase() {
   };
 
   // Open delete entry modal
+=======
+  // Open archive entry modal
+>>>>>>> Stashed changes
   const handleOpenArchiveEntry = (record) => {
     setSelectedEntry(record);
     openModal("archiveEntry");
@@ -166,9 +170,8 @@ function PatientRecordsDatabase() {
         action: "archive"
       })
     });
-
-    closeModal(); // instead of onClose()
-    fetchRecords(); // instead of refreshData()
+    closeModal();
+    fetchRecords();
   };
 
   const sanitizeData = (data) => {
@@ -194,12 +197,58 @@ function PatientRecordsDatabase() {
         data: safeData
       })
     });
-
     closeModal();
     fetchRecords();
   };
 
+<<<<<<< Updated upstream
   // Filter and sort records
+=======
+  // Handle Paid dropdown change
+  const handlePaidChange = async (record, newValue) => {
+    const newVal = newValue === "-" ? null : newValue;
+    try {
+      // Update the patient record's isPaid field
+      await fetch(`${API_BASE_URL}/api/manage-record`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          table: "patient_records",
+          id: record.id,
+          action: "edit",
+          data: { isPaid: newVal }
+        })
+      });
+
+      // If the new value is "yes", also insert a new record into the sales tracker table.
+      if (newVal === "yes") {
+        // Format the sales data based on your sales tracker table's requirements.
+        const salesData = {
+          client: record.client || record.patient_name,
+          // Use the session date (or date_transacted if available)
+          date_transacted: record.dateTransacted || record.date_of_session,
+          // Payment amount could be the amount paid; adjust if needed
+          payment: record.amount_paid,
+          reference_number: record.reference_number
+          // Add any other fields as required by your sales tracker table schema
+        };
+
+        await fetch(`${API_BASE_URL}/api/sales`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify(salesData)
+        });
+      }
+
+      fetchRecords();
+    } catch (error) {
+      console.error("Error updating isPaid or posting to sales tracker:", error);
+    }
+  };
+
+>>>>>>> Stashed changes
   const filteredRecords = [...records]
     .filter((record) => {
       const name = record.client || record.patient_name || "";
@@ -211,13 +260,11 @@ function PatientRecordsDatabase() {
         const nameB = (b.client || b.patient_name || "").toLowerCase();
         return nameA.localeCompare(nameB);
       }
-
       if (sortOption === "date") {
         const dateA = new Date(a.dateTransacted || a.date_of_session);
         const dateB = new Date(b.dateTransacted || b.date_of_session);
         return dateB - dateA; // Most recent first
       }
-
       return 0;
     });
 
@@ -337,15 +384,10 @@ function PatientRecordsDatabase() {
     const pageWidth = doc.internal.pageSize.width;
     const startY = margin + 10;
 
-    // Get formatted current date
     const currentDate = new Date();
-    const formattedCurrentDate = format(
-      currentDate,
-      "MMMM dd, yyyy"
-    ).toUpperCase(); // REPORT: ALL CAPS
-    const formattedDateForFilename = format(currentDate, "MMMM dd, yyyy"); // Filename: Only first letter capitalized
+    const formattedCurrentDate = format(currentDate, "MMMM dd, yyyy").toUpperCase();
+    const formattedDateForFilename = format(currentDate, "MMMM dd, yyyy");
 
-    // Add Title
     doc.setFont("helvetica", "bold");
     doc.setFontSize(16);
     doc.text(
@@ -355,7 +397,6 @@ function PatientRecordsDatabase() {
       { align: "center" }
     );
 
-    // Column headers
     const headers = [
       "CLIENT",
       "DATE OF SESSION",
@@ -368,20 +409,20 @@ function PatientRecordsDatabase() {
       "TOTAL AMOUNT",
       "AMOUNT PAID",
       "REMAINING BALANCE",
-      "REFERENCE NO."
+      "REFERENCE NO.",
+      "PAID"
     ];
 
-    // Format Date & Time properly
     const formatDate = (date) =>
       date ? format(new Date(date), "MMMM dd, yyyy").toUpperCase() : "N/A";
     const formatTime = (time) => {
       if (!time) return "N/A";
       const dateObj = new Date(`1970-01-01T${time}`);
-      return format(dateObj, "hh:mm a").toUpperCase(); // Convert to 12-hour format with AM/PM
+      return format(dateObj, "hh:mm a").toUpperCase();
     };
 
-    // Extract and standardize data for table
     const tableData = patientRecords.map((record) => {
+<<<<<<< Updated upstream
       const total = parseFloat(
         record.total_amount ?? record.total_amount ?? "0"
       );
@@ -410,6 +451,37 @@ function PatientRecordsDatabase() {
     });
 
     // Generate table
+=======
+      const total = parseFloat(record.total_amount ?? "0");
+      const paid = parseFloat(record.amount_paid || 0);
+      const remaining = total - paid;
+      const isPaidDisplay =
+        record.isPaid === null || record.isPaid === undefined
+          ? "-"
+          : record.isPaid.toUpperCase();
+
+      return [
+        record.client || record.patient_name?.toUpperCase() || "N/A",
+        formatDate(record.dateTransacted || record.date_of_session),
+        formatTime(record.nextSessionTime || record.time_of_session),
+        (record.personInCharge || record.person_in_charge)?.toUpperCase() || "N/A",
+        (record.package || record.package_name)?.toUpperCase() || "N/A",
+        record.treatment?.toUpperCase() || "N/A",
+        typeof record.consent_form_signed === "boolean"
+          ? record.consent_form_signed
+            ? "SIGNED"
+            : "NOT SIGNED"
+          : record.consentStatus || "N/A",
+        (record.paymentMethod || record.payment_method)?.toUpperCase() || "N/A",
+        `PHP ${total.toFixed(2)}`,
+        `PHP ${paid.toFixed(2)}`,
+        `PHP ${remaining.toFixed(2)}`,
+        record.reference_number || "N/A",
+        isPaidDisplay
+      ];
+    });
+
+>>>>>>> Stashed changes
     autoTable(doc, {
       head: [headers],
       body: tableData,
@@ -439,7 +511,6 @@ function PatientRecordsDatabase() {
       }
     });
 
-    // Save the PDF with only the first letter capitalized in the month
     doc.save(
       `Beautox_PatientRecordsReport_${formattedDateForFilename
         .replace(/,\s/g, "_")
@@ -598,6 +669,10 @@ function PatientRecordsDatabase() {
               <TableHead className="py-4 text-center whitespace-nowrap">
                 REFERENCE NO.
               </TableHead>
+<<<<<<< Updated upstream
+=======
+              <TableHead className="py-4 text-center whitespace-nowrap">PAID</TableHead>
+>>>>>>> Stashed changes
               <TableHead></TableHead>
             </TableRow>
           </TableHeader>
@@ -610,19 +685,15 @@ function PatientRecordsDatabase() {
                 <TableCell className="text-center whitespace-nowrap">
                   {record.dateTransacted || record.date_of_session
                     ? format(
-                        new Date(
-                          record.dateTransacted || record.date_of_session
-                        ),
+                        new Date(record.dateTransacted || record.date_of_session),
                         "MMMM dd, yyyy"
                       ).toUpperCase()
                     : "N/A"}
                 </TableCell>
-
                 <TableCell className="text-center whitespace-nowrap">
                   {record.nextSessionTime || record.time_of_session
                     ? (() => {
-                        const timeValue =
-                          record.nextSessionTime || record.time_of_session;
+                        const timeValue = record.nextSessionTime || record.time_of_session;
                         const parsedTime = new Date(`1970-01-01T${timeValue}`);
                         return isNaN(parsedTime.getTime())
                           ? "Invalid Time"
@@ -631,9 +702,7 @@ function PatientRecordsDatabase() {
                     : "N/A"}
                 </TableCell>
                 <TableCell className="text-center whitespace-nowrap">
-                  {(
-                    record.personInCharge || record.person_in_charge
-                  )?.toUpperCase()}
+                  {(record.personInCharge || record.person_in_charge)?.toUpperCase()}
                 </TableCell>
                 <TableCell className="whitespace-nowrap">
                   {(record.package || record.package_name)?.toUpperCase()}
@@ -655,11 +724,10 @@ function PatientRecordsDatabase() {
                       : record.consent_form_signed)}
                 </TableCell>
                 <TableCell className="whitespace-nowrap">
-                  {(
-                    record.paymentMethod || record.payment_method
-                  )?.toUpperCase()}
+                  {(record.paymentMethod || record.payment_method)?.toUpperCase()}
                 </TableCell>
                 <TableCell className="text-center">
+<<<<<<< Updated upstream
                   {(() => {
                     const total = parseFloat(record.total_amount || 0);
                     return new Intl.NumberFormat("en-PH", {
@@ -670,6 +738,13 @@ function PatientRecordsDatabase() {
                 </TableCell>
 
                 {/* AMOUNT PAID */}
+=======
+                  {new Intl.NumberFormat("en-PH", {
+                    style: "currency",
+                    currency: "PHP",
+                  }).format(parseFloat(record.total_amount || 0))}
+                </TableCell>
+>>>>>>> Stashed changes
                 <TableCell className="text-center">
                   {record.amount_paid
                     ? new Intl.NumberFormat("en-PH", {
@@ -678,13 +753,15 @@ function PatientRecordsDatabase() {
                       }).format(record.amount_paid)
                     : "₱0.00"}
                 </TableCell>
-
-                {/* REMAINING BALANCE */}
                 <TableCell className="text-center">
                   {(() => {
+<<<<<<< Updated upstream
                     const total = parseFloat(
                       record.total_amount || record.total_amount || 0
                     );
+=======
+                    const total = parseFloat(record.total_amount || 0);
+>>>>>>> Stashed changes
                     const paid = parseFloat(record.amount_paid || 0);
                     const remaining = total - paid;
                     return new Intl.NumberFormat("en-PH", {
@@ -696,7 +773,23 @@ function PatientRecordsDatabase() {
                 <TableCell className="text-center">
                   {record.reference_number || "N/A"}
                 </TableCell>
-
+                <TableCell className="text-center">
+                  <Select
+                    value={record.isPaid ? record.isPaid.toLowerCase() : "-"}
+                    onValueChange={(val) => handlePaidChange(record, val)}
+                  >
+                    <SelectTrigger className="w-16">
+                      <SelectValue>
+                        {record.isPaid ? record.isPaid.toUpperCase() : "-"}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="-">-</SelectItem>
+                      <SelectItem value="yes">YES</SelectItem>
+                      <SelectItem value="no">NO</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </TableCell>
                 <TableCell>
                   <DropdownMenu>
                     <DropdownMenuTrigger>
@@ -704,12 +797,11 @@ function PatientRecordsDatabase() {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
                       <DropdownMenuGroup>
-                        <DropdownMenuItem
-                          onClick={() => handleOpenEditEntry(record)}
-                        >
+                        <DropdownMenuItem onClick={() => handleOpenEditEntry(record)}>
                           <EditIcon />
                           <p className="font-semibold">Edit</p>
                         </DropdownMenuItem>
+<<<<<<< Updated upstream
                         <DropdownMenuItem
                           onClick={() => handleOpenUpdateEntry(record)}
                         >
@@ -719,6 +811,9 @@ function PatientRecordsDatabase() {
                         <DropdownMenuItem
                           onClick={() => handleOpenArchiveEntry(record)}
                         >
+=======
+                        <DropdownMenuItem onClick={() => handleOpenArchiveEntry(record)}>
+>>>>>>> Stashed changes
                           <ArchiveIcon />
                           <p className="font-semibold">Archive</p>
                         </DropdownMenuItem>
@@ -763,7 +858,7 @@ function PatientRecordsDatabase() {
           isOpen={true}
           onClose={handleModalClose}
           entryData={selectedEntry}
-          onSubmit={handleEditPatientEntry} // Pass the handleEditPatientEntry function to the modal
+          onSubmit={handleEditPatientEntry}
         />
       )}
       {currentModal === "updateEntry" && selectedEntry && (

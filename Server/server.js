@@ -649,15 +649,6 @@ app.post('/api/manage-record', async (req, res) => {
    SALES AND EXPENSES ENDPOINTS
 --------------------------------------------- */
 
-// Fetch Sales Data
-app.get("/sales", async (req, res) => {
-  try {
-    const result = await pool.query("SELECT * FROM sales_tracker ORDER BY date_transacted DESC");
-    res.json(result.rows);
-  } catch (err) {
-    res.status(500).send(err.message);
-  }
-});
 
 // Create a new expense
 app.post("/api/expenses", async (req, res) => {
