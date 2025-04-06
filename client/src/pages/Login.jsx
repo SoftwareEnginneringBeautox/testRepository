@@ -18,7 +18,7 @@ import {
 
 function Login() {
   // Use a fallback URL if REACT_APP_API_URL is not defined.
-  const API_BASE_URL = import.meta.env.VITE_API_URL; 
+  const API_BASE_URL = import.meta.env.VITE_API_URL;
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -55,7 +55,10 @@ function Login() {
       );
 
       // If the response is HTML, log the text to help debug.
-      if (typeof response.data === "string" && response.data.startsWith("<!doctype html>")) {
+      if (
+        typeof response.data === "string" &&
+        response.data.startsWith("<!doctype html>")
+      ) {
         console.error("Received unexpected HTML response:", response.data);
         setErrorMessage("Login failed due to server misconfiguration.");
         return;
@@ -79,7 +82,10 @@ function Login() {
         // Redirect based on role.
         if (data.role === "admin") {
           navigate("/AdminDashboard");
-        } else if (data.role === "receptionist" || data.role === "aesthetician") {
+        } else if (
+          data.role === "receptionist" ||
+          data.role === "aesthetician"
+        ) {
           navigate("/StaffDashboard");
         } else {
           navigate("/dashboard");
@@ -89,7 +95,10 @@ function Login() {
         setErrorMessage(data.message || "Invalid username or password");
       }
     } catch (error) {
-      console.error(`Error during login attempt for "${trimmedUsername}":`, error);
+      console.error(
+        `Error during login attempt for "${trimmedUsername}":`,
+        error
+      );
       setErrorMessage("An error occurred. Please try again later.");
     }
   };
@@ -99,7 +108,7 @@ function Login() {
       {/* Mobile and Tablet View (smaller than xl screens) */}
       <div className="xl:hidden min-h-screen relative">
         {/* Background Image with Overlay */}
-        <div 
+        <div
           className="fixed inset-0 w-full h-full"
           style={{
             backgroundImage: "url('/images/BeautoxLoginImage.png')",
@@ -146,17 +155,20 @@ function Login() {
             )}
 
             {/* Login Form */}
-            <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5 w-full">
+            <form
+              onSubmit={handleSubmit}
+              className="space-y-4 sm:space-y-5 w-full"
+            >
               <div className="w-full">
                 <label className="block text-sm sm:text-base font-medium text-gray-700 mb-1.5 sm:mb-2">
                   Username
                 </label>
                 <div className="relative w-full">
-                  <input
+                  <Input
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    className="w-full px-3 sm:px-4 py-2 sm:py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1 focus:ring-purple-500 focus:border-purple-500 text-sm sm:text-base"
+                    // className="w-full px-3 sm:px-4 py-2 sm:py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1 focus:ring-purple-500 focus:border-purple-500 text-sm sm:text-base"
                     placeholder="Enter your username"
                     required
                   />
@@ -168,11 +180,11 @@ function Login() {
                   Password
                 </label>
                 <div className="relative w-full">
-                  <input
+                  <Input
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full px-3 sm:px-4 py-2 sm:py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1 focus:ring-purple-500 focus:border-purple-500 text-sm sm:text-base"
+                    // className="w-full px-3 sm:px-4 py-2 sm:py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1 focus:ring-purple-500 focus:border-purple-500 text-sm sm:text-base"
                     placeholder="Enter your password"
                     required
                   />
@@ -181,8 +193,8 @@ function Login() {
 
               <div className="flex items-center justify-between text-xs sm:text-sm pt-1">
                 <label className="flex items-center">
-                  <input 
-                    type="checkbox" 
+                  <input
+                    type="checkbox"
                     className="rounded border-gray-300 text-purple-600 focus:ring-purple-500 h-3 w-3 sm:h-4 sm:w-4"
                   />
                   <span className="ml-2 text-gray-600">Remember me</span>
@@ -200,14 +212,14 @@ function Login() {
               </div>
 
               <div className="space-y-2.5 sm:space-y-3 pt-4 sm:pt-5 w-full">
-                <Button 
+                <Button
                   type="submit"
                   className="w-full bg-purple-950 hover:bg-purple-900 text-white py-2 sm:py-2.5 rounded-lg text-sm sm:text-base font-medium transition-colors duration-200"
                 >
                   LOGIN
                 </Button>
 
-                <Button 
+                <Button
                   variant="outline"
                   onClick={() => navigate("/")}
                   type="button"
@@ -244,7 +256,8 @@ function Login() {
                 Welcome to PRISM,
               </h2>
               <p className="text-xs sm:text-sm md:text-base text-center mb-6 max-w-sm px-2">
-                BEAUTOX'S PATIENT RECORDS, INTEGRATION, SCHEDULING, AND MANAGEMENT
+                BEAUTOX'S PATIENT RECORDS, INTEGRATION, SCHEDULING, AND
+                MANAGEMENT
               </p>
             </div>
 
@@ -262,7 +275,11 @@ function Login() {
             )}
 
             {/* Login form */}
-            <form data-cy="login-form" onSubmit={handleSubmit} className="flex flex-col gap-4 sm:gap-5">
+            <form
+              data-cy="login-form"
+              onSubmit={handleSubmit}
+              className="flex flex-col gap-4 sm:gap-5"
+            >
               <InputContainer className="transition-all duration-200">
                 <InputLabel className="text-xs sm:text-sm">Username</InputLabel>
                 <InputTextField className="mt-1 sm:mt-2">
@@ -319,7 +336,7 @@ function Login() {
 
               {/* Responsive button */}
               <div className="space-y-3 pt-4">
-                <Button 
+                <Button
                   type="submit"
                   className="w-full bg-purple-950 hover:bg-purple-900 text-white py-2.5 rounded-lg text-sm font-medium transition-colors duration-200"
                 >
@@ -327,7 +344,7 @@ function Login() {
                   <span>LOGIN</span>
                 </Button>
 
-                <Button 
+                <Button
                   variant="outline"
                   onClick={() => navigate("/")}
                   type="button"

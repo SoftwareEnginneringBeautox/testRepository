@@ -18,6 +18,8 @@ import {
   TableRow
 } from "@/components/ui/Table";
 
+import { Badge } from "@/components/ui/Badge";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -276,21 +278,23 @@ function AdministratorServices() {
                 {console.log("Rendering pkg:", pkg)}
                 {console.log("pkg.treatments:", pkg.treatments)}
                 <TableCell className="py-4 text-left">
-                {Array.isArray(pkg.treatments) && pkg.treatments.length > 0 ? (
-                  <div className="flex flex-col gap-1">
-                    {pkg.treatments.map((t) =>
-                      t?.treatment_name ? (
-                        <span key={t.id} className="text-sm text-muted-foreground">
-                          + {t.treatment_name}
-                        </span>
-                      ) : null
-                    )}
-                  </div>
-                ) : (
-                  <span className="text-muted-foreground italic">No treatments found</span>
-                )}
-              </TableCell>
-
+                  {Array.isArray(pkg.treatments) &&
+                  pkg.treatments.length > 0 ? (
+                    <div className="flex flex-col gap-1">
+                      {pkg.treatments.map((t) =>
+                        t?.treatment_name ? (
+                          <Badge key={t.id} variant="outline">
+                            {t.treatment_name}
+                          </Badge>
+                        ) : null
+                      )}
+                    </div>
+                  ) : (
+                    <span className="text-muted-foreground italic">
+                      No treatments found
+                    </span>
+                  )}
+                </TableCell>
 
                 <TableCell className="py-4 text-center">
                   {pkg.sessions}
