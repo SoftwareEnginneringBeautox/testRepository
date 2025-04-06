@@ -367,7 +367,7 @@ function LandingPage() {
       <div className="flex flex-col items-center justify-center">
         <section
           id="hero"
-          className="relative w-full min-h-[100vh] flex items-center px-4 sm:px-8 md:px-16 lg:px-24"
+          className="relative w-full min-h-[100vh] flex items-center px-6 sm:px-8 md:px-12 lg:px-24"
           style={{
             backgroundImage:
               "linear-gradient(to right, rgba(242, 228, 246, 0.77), rgba(255, 255, 255, 0.5), rgba(234, 206, 241, 0.01)), url('/images/LandingImage.png')",
@@ -376,14 +376,14 @@ function LandingPage() {
             backgroundRepeat: "no-repeat"
           }}
         >
-          <div className="w-full md:w-1/2 lg:w-6/12 flex flex-col gap-2 relative z-8">
+          <div className="w-[92%] md:w-1/2 lg:w-6/12 flex flex-col gap-4 relative z-8">
             <img
               src={BeautoxLogo}
               alt="Beautox Logo"
-              className="mb-4 w-28 sm:w-32 md:w-36 lg:w-44 h-auto block mx-auto"
+              className="mb-4 w-28 sm:w-32 md:w-36 lg:w-44 h-auto"
             />
 
-            <div className="flex flex-col gap-2 text-left">
+            <div className="flex flex-col gap-2">
               <h3 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl leading-none text-[#4A3B89] font-semibold">
                 Welcome to Beautox
               </h3>
@@ -392,28 +392,28 @@ function LandingPage() {
               </p>
             </div>
 
-            <p className="text-base sm:text-lg text-gray-800 leading-relaxed text-left">
+            <p className="text-base sm:text-lg text-gray-800 leading-relaxed mb-8">
               Experience the pinnacle of skincare luxury with our personalized
               treatments. Whether you're seeking a rejuvenating facial, targeted
               acne treatment, or a relaxing massage, our expert team is here to
               pamper you and address your unique skincare needs.
             </p>
-          </div>
 
-          <button
-            className="absolute bottom-8 sm:bottom-16 left-4 sm:left-8 md:left-16 lg:left-24 flex items-center justify-center gap-2 px-4 sm:px-6 py-3 bg-purple-950 text-white rounded-lg text-base sm:text-lg font-semibold hover:bg-purple-900 transition w-[calc(100%-2rem)] sm:w-auto shadow-md"
-            onClick={() => setIsScheduleModalOpen(true)}
-          >
-            <CalendarIcon className="h-5 w-5" />
-            SET AN APPOINTMENT
-          </button>
+            <button
+              className="flex items-center justify-center gap-2 px-6 sm:px-8 py-3 bg-purple-950 text-white rounded-lg text-base sm:text-lg font-semibold hover:bg-purple-900 transition shadow-md w-fit"
+              onClick={() => setIsScheduleModalOpen(true)}
+            >
+              <CalendarIcon className="h-5 w-5" />
+              SET AN APPOINTMENT
+            </button>
+          </div>
         </section>
 
-        <div className="w-[90%] sm:w-3/4 mx-auto">
+        <div className="w-[85%] sm:w-[80%] mx-auto">
           <div className="h-0.5 bg-purple-900 my-8 sm:my-16"></div>
         </div>
 
-        <section className="w-[90%] sm:w-3/4 mx-auto py-8 sm:py-16">
+        <section className="w-[85%] sm:w-[80%] mx-auto py-8 sm:py-16">
           <div className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
             <h2 className="text-2xl sm:text-3xl font-semibold bg-gradient-to-r from-reflexBlue-300 to-lavender-300 text-transparent bg-clip-text text-center sm:text-left">
               FEATURED SERVICES
@@ -498,13 +498,13 @@ function LandingPage() {
           </div>
         </section>
 
-        <div className="w-[90%] sm:w-3/4 mx-auto">
+        <div className="w-[85%] sm:w-[80%] mx-auto">
           <div className="h-0.5 bg-purple-900 my-8 sm:my-16"></div>
         </div>
 
         <section
           id="services"
-          className="w-[90%] sm:w-3/4 mx-auto my-8 sm:my-12"
+          className="w-[85%] sm:w-[80%] mx-auto my-8 sm:my-12"
         >
           <div className="text-center mb-8">
             <h2 className="text-2xl sm:text-3xl font-semibold bg-gradient-to-r from-reflexBlue-300 to-lavender-300 text-transparent bg-clip-text mb-4">
@@ -548,13 +548,13 @@ function LandingPage() {
           </Tabs>
         </section>
 
-        <div className="w-[90%] sm:w-3/4 mx-auto">
+        <div className="w-[85%] sm:w-[80%] mx-auto">
           <div className="h-0.5 bg-purple-900 my-8 sm:my-16"></div>
         </div>
 
         <section
           id="about-clinic"
-          className="w-[90%] sm:w-3/4 flex flex-col items-center justify-center gap-4 mx-auto"
+          className="w-[85%] sm:w-[80%] flex flex-col items-center justify-center gap-4 mx-auto"
         >
           <h2 className="text-2xl sm:text-3xl font-semibold bg-gradient-to-r from-reflexBlue-300 to-lavender-300 text-transparent bg-clip-text mb-8 text-center">
             ABOUT OUR CLINIC
@@ -647,12 +647,12 @@ function LandingPage() {
           </div>
         </section>
 
-        <div className="w-[90%] sm:w-3/4 mx-auto">
+        <div className="w-[85%] sm:w-[80%] mx-auto">
           <div className="h-0.5 bg-purple-900 my-8 sm:my-16"></div>
         </div>
 
         {/* Testimonials Section */}
-        <section id="testimonials" className="w-[90%] sm:w-3/4 mx-auto mb-16">
+        <section id="testimonials" className="w-[85%] sm:w-[80%] mx-auto mb-16">
           <h2 className="text-2xl sm:text-3xl font-semibold bg-gradient-to-r from-reflexBlue-300 to-lavender-300 text-transparent bg-clip-text mb-8 text-center">
             WHAT OUR CLIENTS SAY
           </h2>
@@ -674,8 +674,8 @@ function LandingPage() {
                 </div>
               </div>
               <p className="text-gray-600 italic">
-                "Highly recommended! Staffs are very nice, they’re also very
-                accommodating! Ain’t gonna lie… mano-notice agad ang improvement
+                "Highly recommended! Staffs are very nice, they're also very
+                accommodating! Ain't gonna lie… mano-notice agad ang improvement
                 sa body. I also wanna mention that the clinic is always clean
                 and very pretty. "
               </p>
@@ -701,8 +701,8 @@ function LandingPage() {
               <p className="text-gray-600 italic">
                 "Highly recommended! I love the service here. The mesolipo is
                 really effective. My arms have gotten noticeably thinner even
-                after just 1 session, even my friends noticed it. So I’m
-                definitely availing more sessions and I’m eyeing other services,
+                after just 1 session, even my friends noticed it. So I'm
+                definitely availing more sessions and I'm eyeing other services,
                 as well."
               </p>
             </div>
@@ -735,13 +735,13 @@ function LandingPage() {
           </div>
         </section>
 
-        <div className="w-[90%] sm:w-3/4 mx-auto">
+        <div className="w-[85%] sm:w-[80%] mx-auto">
           <div className="h-0.5 bg-purple-900 my-8 sm:my-16"></div>
         </div>
 
         <section
           id="contact"
-          className="w-[90%] sm:w-3/4 flex flex-col-reverse lg:flex-row gap-8 justify-center mt-8 sm:mt-16 mb-12 sm:mb-20"
+          className="w-[85%] sm:w-[80%] flex flex-col-reverse lg:flex-row gap-8 justify-center mt-8 sm:mt-16 mb-12 sm:mb-20"
         >
           <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-base sm:text-lg w-full lg:w-1/2">
             <li className="flex gap-2 justify-center">
