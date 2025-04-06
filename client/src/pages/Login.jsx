@@ -159,10 +159,10 @@ function Login() {
             {/* Login Form */}
             <form onSubmit={handleSubmit} className="flex flex-col gap-3">
               <InputContainer className="transition-all duration-200">
-                <InputLabel className="text-[11px] mb-0.5">Username</InputLabel>
-                <InputTextField className="mt-0.5">
-                  <InputIcon className="text-gray-400">
-                    <UserIcon className="w-3.5 h-3.5" />
+                <InputLabel>Username</InputLabel>
+                <InputTextField>
+                  <InputIcon>
+                    <UserIcon />
                   </InputIcon>
                   <Input
                     type="text"
@@ -212,12 +212,17 @@ function Login() {
                 <Button
                   type="submit"
                   className="w-full bg-purple-950 hover:bg-purple-900 text-white h-8 rounded-md text-xs font-medium transition-colors duration-200 flex items-center justify-center gap-1.5"
+                  fullWidth="true"
                 >
-                  <LoginIcon className="w-3.5 h-3.5" />
+                  <LoginIcon className="sm:w-3.5 sm:h-3.5" />
                   <span>LOGIN</span>
                 </Button>
 
-                <Button variant="outline" onClick={() => navigate("/")}>
+                <Button
+                  variant="outline"
+                  onClick={() => navigate("/")}
+                  fullWidth="true"
+                >
                   RETURN
                 </Button>
               </div>

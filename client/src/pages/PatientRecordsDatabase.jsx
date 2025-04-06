@@ -2,6 +2,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import React, { useState, useEffect } from "react";
 import { useModal } from "@/hooks/useModal";
+import { cn } from "@/lib/utils";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -44,6 +45,8 @@ import {
   SelectValue
 } from "@/components/ui/Select";
 
+import { Checkbox } from "@/components/ui/Checkbox";
+
 // Import Pagination components from shadcn
 import {
   Pagination,
@@ -62,6 +65,7 @@ import ArchivePatientEntry from "@/components/modals/ArchivePatientEntry";
 
 // Import date-fns for date formatting
 import { format } from "date-fns";
+import FilterIcon from "@/assets/icons/FilterIcon";
 
 function PatientRecordsDatabase() {
   const { currentModal, openModal, closeModal } = useModal();
@@ -69,6 +73,36 @@ function PatientRecordsDatabase() {
   const [records, setRecords] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortOption, setSortOption] = useState("");
+
+  const [selectedColumns, setSelectedColumns] = useState([
+    "client",           // Mandatory
+    "dateofsession",    // Mandatory
+    "timeofsession",
+    "personincharge",
+    "package",
+    "treatment",
+    "consentformsigned",
+    "paymentmethod",
+    "totalamount",
+    "amountpaid",
+    "remainingbalance",
+    "referenceno"
+  ]);
+
+  const columns = [
+    { label: "CLIENT", value: "client", mandatory: true },
+    { label: "DATE OF SESSION", value: "dateofsession", mandatory: true },
+    { label: "TIME OF SESSION", value: "timeofsession" },
+    { label: "PERSON IN CHARGE", value: "personincharge" },
+    { label: "PACKAGE", value: "package" },
+    { label: "TREATMENT", value: "treatment" },
+    { label: "CONSENT FORM SIGNED", value: "consentformsigned" },
+    { label: "PAYMENT METHOD", value: "paymentmethod" },
+    { label: "TOTAL AMOUNT", value: "totalamount" },
+    { label: "AMOUNT PAID", value: "amountpaid" },
+    { label: "REMAINING BALANCE", value: "remainingbalance" },
+    { label: "REFERENCE NO.", value: "referenceno" }
+  ];
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
@@ -438,6 +472,85 @@ function PatientRecordsDatabase() {
             <SelectContent>
               <SelectItem value="alphabetical">ALPHABETICAL</SelectItem>
               <SelectItem value="date">DATE</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select className="w-full md:w-auto">
+            <SelectTrigger placeholder="FILTER COLUMN" icon={<FilterIcon />}>
+              <SelectValue>
+                {selectedColumns.length > 0
+                  ? `${selectedColumns.length} selected`
+                  : "Select columns"}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent className="min-w-[200px] p-2">
+              <div className="max-h-[300px] overflow-y-auto space-y-2">
+                {columns.map((option) => (
+                  <div
+                    key={option.value}
+                    className={cn(
+                      "flex items-center space-x-2 p-2 rounded-md",
+                      option.mandatory 
+                        ? "bg-gray-100 cursor-not-allowed opacity-60" 
+                        : "hover:bg-lavender-100 cursor-pointer"
+                    )}
+                    onClick={() => {
+                      if (option.mandatory) return; // Prevent clicking on mandatory columns
+                      
+                      const newSelection = selectedColumns.includes(option.value)
+                        ? selectedColumns.filter(
+                            (item) => item !== option.value
+                          )
+                        : [...selectedColumns, option.value];
+                      
+                      // Ensure mandatory columns are always included
+                      const mandatoryColumns = columns
+                        .filter(col => col.mandatory)
+                        .map(col => col.value);
+                      
+                      setSelectedColumns([...new Set([...mandatoryColumns, ...newSelection])]);
+                    }}
+                  >
+                    <Checkbox
+                      checked={selectedColumns.includes(option.value)}
+                      disabled={option.mandatory}
+                      onCheckedChange={() => {
+                        if (option.mandatory) return;
+                        
+                        const newSelection = selectedColumns.includes(option.value)
+                          ? selectedColumns.filter(
+                              (item) => item !== option.value
+                            )
+                          : [...selectedColumns, option.value];
+                        
+                        // Ensure mandatory columns are always included
+                        const mandatoryColumns = columns
+                          .filter(col => col.mandatory)
+                          .map(col => col.value);
+                        
+                        setSelectedColumns([...new Set([...mandatoryColumns, ...newSelection])]);
+                      }}
+                      id={`checkbox-${option.value}`}
+                      className={cn(
+                        "data-[state=checked]:bg-lavender-400 data-[state=checked]:border-lavender-400",
+                        option.mandatory && "opacity-60"
+                      )}
+                    />
+                    <label
+                      htmlFor={`checkbox-${option.value}`}
+                      className={cn(
+                        "flex-1 text-sm font-medium",
+                        option.mandatory ? "cursor-not-allowed" : "cursor-pointer"
+                      )}
+                    >
+                      {option.label}
+                      {option.mandatory && (
+                        <span className="ml-1 text-xs text-gray-500">(Required)</span>
+                      )}
+                    </label>
+                  </div>
+                ))}
+              </div>
             </SelectContent>
           </Select>
         </div>
