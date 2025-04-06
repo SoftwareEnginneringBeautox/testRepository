@@ -626,120 +626,96 @@ function FinancialOverview() {
   };
 
   return (
-    <div className="flex flex-col text-left w-full md:w-[90%] mx-auto gap-4 px-4 md:px-0">
+    <div className="flex flex-col text-left w-full md:w-[90%] mx-auto gap-4 px-4 md:px-0" data-cy="financial-overview-container">
       {/* Header */}
-      <div>
-        <h1 className="text-[28px] md:text-[40px] leading-[1.4] md:leading-[56px] font-bold">
+      <div data-cy="financial-overview-header">
+        <h1 className="text-[28px] md:text-[40px] leading-[1.4] md:leading-[56px] font-bold" data-cy="financial-overview-title">
           FINANCIAL OVERVIEW
         </h1>
-        <p className="text-sm md:text-base">
+        <p className="text-sm md:text-base" data-cy="financial-overview-subtitle">
           Summary of finances within Beautox
         </p>
       </div>
 
       {/* Sales Tracker Section */}
-      <h2 className="font-bold text-xl md:text-[2rem]">SALES TRACKER</h2>
-      <div>
-        <SalesChart chartData={chartData} chartConfig={chartConfig} />
+      <h2 className="font-bold text-xl md:text-[2rem]" data-cy="sales-tracker-title">SALES TRACKER</h2>
+      <div data-cy="sales-chart-container">
+        <SalesChart chartData={chartData} chartConfig={chartConfig} data-cy="sales-chart" />
       </div>
 
-      {/* <div className="flex justify-end">
+      <div className="flex justify-end gap-4" data-cy="filter-controls">
         <Select
           value={filterType}
           onValueChange={(value) => setFilterType(value)}
+          data-cy="sort-select"
         >
-          <SelectTrigger placeholder="FILTER BY" icon={<FilterIcon />}>
+          <SelectTrigger placeholder="SORT BY" icon={<SortIcon />} data-cy="sort-trigger">
             <SelectValue />
           </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">ALL DATA</SelectItem>
-            <SelectItem value="client">CLIENT NAME</SelectItem>
-            <SelectItem value="person_in_charge">PERSON IN CHARGE</SelectItem>
-            <SelectItem value="date_transacted">DATE TRANSACTED</SelectItem>
-          </SelectContent>
-        </Select>
-      </div> */}
-
-      <div className="flex justify-end gap-4">
-        <Select
-          value={filterType}
-          onValueChange={(value) => setFilterType(value)}
-        >
-          <SelectTrigger placeholder="SORT BY" icon={<SortIcon />}>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">ALL DATA</SelectItem>
-            <SelectItem value="client">CLIENT NAME</SelectItem>
-            <SelectItem value="person_in_charge">PERSON IN CHARGE</SelectItem>
-            <SelectItem value="date_transacted">DATE TRANSACTED</SelectItem>
+          <SelectContent data-cy="sort-content">
+            <SelectItem value="all" data-cy="sort-option-all">ALL DATA</SelectItem>
+            <SelectItem value="client" data-cy="sort-option-client">CLIENT NAME</SelectItem>
+            <SelectItem value="person_in_charge" data-cy="sort-option-pic">PERSON IN CHARGE</SelectItem>
+            <SelectItem value="date_transacted" data-cy="sort-option-date">DATE TRANSACTED</SelectItem>
           </SelectContent>
         </Select>
 
-        <Select className="w-full md:w-auto">
-          <SelectTrigger placeholder="FILTER COLUMNS" icon={<FilterIcon />}>
-            <SelectValue>
+        <Select className="w-full md:w-auto" data-cy="column-filter-select">
+          <SelectTrigger placeholder="FILTER COLUMNS" icon={<FilterIcon />} data-cy="column-filter-trigger">
+            <SelectValue data-cy="column-filter-value">
               {selectedColumns.length > 0
                 ? `${selectedColumns.length} selected`
                 : "Select columns"}
             </SelectValue>
           </SelectTrigger>
-          <SelectContent className="min-w-[200px] p-2">
-            <div className="max-h-[300px] overflow-y-auto space-y-2">
+          <SelectContent className="min-w-[200px] p-2" data-cy="column-filter-content">
+            <div className="max-h-[300px] overflow-y-auto space-y-2" data-cy="column-options-container">
               {columns.map((option) => (
                 <div
                   key={option.value}
                   className={cn(
                     "flex items-center space-x-2 p-2 rounded-md",
-                    option.mandatory
-                      ? "bg-gray-100 cursor-not-allowed opacity-60"
+                    option.mandatory 
+                      ? "bg-gray-100 cursor-not-allowed opacity-60" 
                       : "hover:bg-lavender-100 cursor-pointer"
                   )}
                   onClick={() => {
                     if (option.mandatory) return;
-
+                    
                     const newSelection = selectedColumns.includes(option.value)
                       ? selectedColumns.filter((item) => item !== option.value)
                       : [...selectedColumns, option.value];
-
-                    // Ensure mandatory columns are always included
+                    
                     const mandatoryColumns = columns
-                      .filter((col) => col.mandatory)
-                      .map((col) => col.value);
-
-                    setSelectedColumns([
-                      ...new Set([...mandatoryColumns, ...newSelection])
-                    ]);
+                      .filter(col => col.mandatory)
+                      .map(col => col.value);
+                    
+                    setSelectedColumns([...new Set([...mandatoryColumns, ...newSelection])]);
                   }}
+                  data-cy={`column-option-${option.value}`}
                 >
                   <Checkbox
                     checked={selectedColumns.includes(option.value)}
                     disabled={option.mandatory}
                     onCheckedChange={() => {
                       if (option.mandatory) return;
-
-                      const newSelection = selectedColumns.includes(
-                        option.value
-                      )
-                        ? selectedColumns.filter(
-                            (item) => item !== option.value
-                          )
+                      
+                      const newSelection = selectedColumns.includes(option.value)
+                        ? selectedColumns.filter((item) => item !== option.value)
                         : [...selectedColumns, option.value];
-
-                      // Ensure mandatory columns are always included
+                      
                       const mandatoryColumns = columns
-                        .filter((col) => col.mandatory)
-                        .map((col) => col.value);
-
-                      setSelectedColumns([
-                        ...new Set([...mandatoryColumns, ...newSelection])
-                      ]);
+                        .filter(col => col.mandatory)
+                        .map(col => col.value);
+                      
+                      setSelectedColumns([...new Set([...mandatoryColumns, ...newSelection])]);
                     }}
                     id={`checkbox-${option.value}`}
                     className={cn(
                       "data-[state=checked]:bg-lavender-400 data-[state=checked]:border-lavender-400",
                       option.mandatory && "opacity-60"
                     )}
+                    data-cy={`column-checkbox-${option.value}`}
                   />
                   <label
                     htmlFor={`checkbox-${option.value}`}
@@ -747,12 +723,11 @@ function FinancialOverview() {
                       "flex-1 text-sm font-medium",
                       option.mandatory ? "cursor-not-allowed" : "cursor-pointer"
                     )}
+                    data-cy={`column-label-${option.value}`}
                   >
                     {option.label}
                     {option.mandatory && (
-                      <span className="ml-1 text-xs text-gray-500">
-                        (Required)
-                      </span>
+                      <span className="ml-1 text-xs text-gray-500" data-cy={`mandatory-label-${option.value}`}>(Required)</span>
                     )}
                   </label>
                 </div>
@@ -762,9 +737,9 @@ function FinancialOverview() {
         </Select>
       </div>
 
-      <div className="w-full overflow-x-auto">
-        <Table>
-          <TableHeader>
+      <div className="w-full overflow-x-auto" data-cy="sales-table-container">
+        <Table data-cy="sales-table">
+          <TableHeader data-cy="sales-table-header">
             <TableRow>
               {columns
                 .filter((col) => selectedColumns.includes(col.value))
@@ -772,22 +747,24 @@ function FinancialOverview() {
                   <TableHead
                     key={column.value}
                     className="py-4 text-center whitespace-nowrap"
+                    data-cy={`table-header-${column.value}`}
                   >
                     {column.label}
                   </TableHead>
                 ))}
             </TableRow>
           </TableHeader>
-          <TableBody>
+          <TableBody data-cy="sales-table-body">
             {filteredSalesData && filteredSalesData.length > 0 ? (
               filteredSalesData.map((sale, index) => (
-                <TableRow key={index}>
+                <TableRow key={index} data-cy={`sales-row-${index}`}>
                   {columns
                     .filter((col) => selectedColumns.includes(col.value))
                     .map((column) => (
                       <TableCell
                         key={column.value}
                         className="whitespace-nowrap"
+                        data-cy={`sales-cell-${column.value}-${index}`}
                       >
                         {column.value === "date_transacted"
                           ? sale.date_transacted
@@ -811,6 +788,7 @@ function FinancialOverview() {
                 <TableCell
                   colSpan={selectedColumns.length}
                   className="text-center"
+                  data-cy="no-sales-data-message"
                 >
                   NO SALES DATA CURRENTLY AVAILABLE
                 </TableCell>
@@ -820,11 +798,12 @@ function FinancialOverview() {
         </Table>
       </div>
 
-      <div className="w-full flex justify-end gap-4">
+      <div className="w-full flex justify-end gap-4" data-cy="sales-actions">
         <Button
           variant="callToAction"
           onClick={() => generateWeeklySalesReport(salesData)}
           className="text-sm md:text-base"
+          data-cy="download-weekly-report-btn"
         >
           <DownloadIcon />
           <span className="hidden md:inline">DOWNLOAD WEEKLY SALES REPORT</span>
@@ -833,31 +812,31 @@ function FinancialOverview() {
       </div>
 
       {/* Monthly Expenses Tracker Section */}
-      <h2 className="font-bold text-xl md:text-[2rem]">
+      <h2 className="font-bold text-xl md:text-[2rem]" data-cy="monthly-expenses-title">
         MONTHLY EXPENSES TRACKER
       </h2>
-      <div className="grid gap-8 md:gap-14">
-        <div className="flex flex-col md:flex-row w-full gap-8">
-          <div className="w-full md:w-1/2">
-            <BeautoxPieChart className="shadow-custom" />
+      <div className="grid gap-8 md:gap-14" data-cy="monthly-expenses-container">
+        <div className="flex flex-col md:flex-row w-full gap-8" data-cy="expenses-charts-section">
+          <div className="w-full md:w-1/2" data-cy="pie-chart-container">
+            <BeautoxPieChart className="shadow-custom" data-cy="beautox-pie-chart" />
           </div>
-          <div className="flex flex-col w-full md:w-1/2 gap-2">
-            <Table className="overflow-x-hidden">
+          <div className="flex flex-col w-full md:w-1/2 gap-2" data-cy="categories-section">
+            <Table className="overflow-x-hidden" data-cy="categories-table">
               <TableHeader>
                 <TableRow>
-                  <TableHead className="text-lg md:text-xl text-left font-semibold py-4">
+                  <TableHead className="text-lg md:text-xl text-left font-semibold py-4" data-cy="categories-table-header">
                     CURRENT CATEGORIES
                   </TableHead>
                 </TableRow>
               </TableHeader>
-              <TableBody>
+              <TableBody data-cy="categories-table-body">
                 {categories.length > 0 ? (
                   categories.map((category) => (
-                    <TableRow key={category.id}>
-                      <TableCell className="flex items-center justify-between gap-4 h-full w-full">
+                    <TableRow key={category.id} data-cy={`category-row-${category.id}`}>
+                      <TableCell className="flex items-center justify-between gap-4 h-full w-full" data-cy={`category-cell-${category.id}`}>
                         {(category.name || "N/A").toUpperCase()}
                         <DropdownMenu>
-                          <DropdownMenuTrigger>
+                          <DropdownMenuTrigger data-cy={`category-actions-${category.id}`}>
                             <EllipsisIcon />
                           </DropdownMenuTrigger>
                           <DropdownMenuContent>
@@ -867,6 +846,7 @@ function FinancialOverview() {
                                   setSelectedCategory(category);
                                   openModal("editCategory");
                                 }}
+                                data-cy={`edit-category-${category.id}`}
                               >
                                 <EditIcon />
                                 <p className="font-semibold">Edit</p>
@@ -876,6 +856,7 @@ function FinancialOverview() {
                                   setSelectedCategory(category);
                                   openModal("archiveCategory");
                                 }}
+                                data-cy={`archive-category-${category.id}`}
                               >
                                 <ArchiveIcon />
                                 <p className="font-semibold">Archive</p>
@@ -888,7 +869,7 @@ function FinancialOverview() {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell className="text-center">
+                    <TableCell className="text-center" data-cy="no-categories-message">
                       No categories available
                     </TableCell>
                   </TableRow>
@@ -898,6 +879,7 @@ function FinancialOverview() {
             <Button
               fullWidth={true}
               onClick={() => openModal("createCategory")}
+              data-cy="add-category-btn"
             >
               <PlusIcon />
               ADD NEW CATEGORY
@@ -905,27 +887,27 @@ function FinancialOverview() {
           </div>
         </div>
 
-        <div className="w-full overflow-x-auto">
-          <Table>
+        <div className="w-full overflow-x-auto" data-cy="expenses-table-container">
+          <Table data-cy="expenses-table">
             <TableHeader>
               <TableRow>
-                <TableHead className="py-4 text-center whitespace-nowrap">
+                <TableHead className="py-4 text-center whitespace-nowrap" data-cy="expense-header-date">
                   DATE
                 </TableHead>
-                <TableHead className="py-4 text-center whitespace-nowrap">
+                <TableHead className="py-4 text-center whitespace-nowrap" data-cy="expense-header-category">
                   CATEGORY
                 </TableHead>
-                <TableHead className="py-4 text-center whitespace-nowrap">
+                <TableHead className="py-4 text-center whitespace-nowrap" data-cy="expense-header-amount">
                   EXPENSE
                 </TableHead>
-                <TableHead></TableHead>
+                <TableHead data-cy="expense-header-actions"></TableHead>
               </TableRow>
             </TableHeader>
-            <TableBody>
+            <TableBody data-cy="expenses-table-body">
               {expensesData.length > 0 ? (
                 expensesData.map((expense, index) => (
-                  <TableRow key={expense.id || index}>
-                    <TableCell className="py-4 text-center whitespace-nowrap">
+                  <TableRow key={expense.id || index} data-cy={`expense-row-${expense.id || index}`}>
+                    <TableCell className="py-4 text-center whitespace-nowrap" data-cy={`expense-date-${expense.id || index}`}>
                       {expense.date
                         ? format(
                             new Date(expense.date),
@@ -933,18 +915,18 @@ function FinancialOverview() {
                           ).toUpperCase()
                         : "N/A"}
                     </TableCell>
-                    <TableCell className="py-4 text-center whitespace-nowrap">
+                    <TableCell className="py-4 text-center whitespace-nowrap" data-cy={`expense-category-${expense.id || index}`}>
                       {(expense.category || "N/A").toUpperCase()}
                     </TableCell>
-                    <TableCell className="py-4 text-center whitespace-nowrap">
+                    <TableCell className="py-4 text-center whitespace-nowrap" data-cy={`expense-amount-${expense.id || index}`}>
                       {new Intl.NumberFormat("en-PH", {
                         style: "currency",
                         currency: "PHP"
                       }).format(expense.expense)}
                     </TableCell>
-                    <TableCell className="py-4 text-center">
+                    <TableCell className="py-4 text-center" data-cy={`expense-actions-${expense.id || index}`}>
                       <DropdownMenu>
-                        <DropdownMenuTrigger>
+                        <DropdownMenuTrigger data-cy={`expense-actions-trigger-${expense.id || index}`}>
                           <EllipsisIcon />
                         </DropdownMenuTrigger>
                         <DropdownMenuContent>
@@ -959,6 +941,7 @@ function FinancialOverview() {
                                 });
                                 openModal("editMonthlyExpense");
                               }}
+                              data-cy={`edit-expense-${expense.id || index}`}
                             >
                               <EditIcon />
                               <p className="font-semibold">Edit</p>
@@ -968,6 +951,7 @@ function FinancialOverview() {
                                 setSelectedExpense(expense);
                                 openModal("deleteMonthlyExpense");
                               }}
+                              data-cy={`archive-expense-${expense.id || index}`}
                             >
                               <ArchiveIcon />
                               <p className="font-semibold">Archive</p>
@@ -980,7 +964,7 @@ function FinancialOverview() {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan="4" className="text-center">
+                  <TableCell colSpan="4" className="text-center" data-cy="no-expenses-message">
                     No expenses recorded
                   </TableCell>
                 </TableRow>
@@ -989,9 +973,9 @@ function FinancialOverview() {
           </Table>
         </div>
 
-        <div className="w-full rounded-lg p-4 border-2 border-lavender-400 text-center text-xl md:text-3xl leading-normal md:leading-[67.2px]">
+        <div className="w-full rounded-lg p-4 border-2 border-lavender-400 text-center text-xl md:text-3xl leading-normal md:leading-[67.2px]" data-cy="total-profit-container">
           TOTAL PROFIT:{" "}
-          <span className="font-bold">
+          <span className="font-bold" data-cy="total-profit-amount">
             {new Intl.NumberFormat("en-PH", {
               style: "currency",
               currency: "PHP"
@@ -999,14 +983,15 @@ function FinancialOverview() {
           </span>
         </div>
 
-        <div className="w-full flex flex-col md:flex-row justify-end gap-4 mb-[10%]">
-          <Button variant="outline" className="w-full md:w-auto">
+        <div className="w-full flex flex-col md:flex-row justify-end gap-4 mb-[10%]" data-cy="bottom-actions">
+          <Button variant="outline" className="w-full md:w-auto" data-cy="return-btn">
             <ChevronLeftIcon />
             RETURN
           </Button>
           <Button
             onClick={() => openModal("createMonthlyExpense")}
             className="w-full md:w-auto"
+            data-cy="add-expense-btn"
           >
             <PlusIcon />
             ADD ADDITIONAL EXPENSES
@@ -1014,6 +999,7 @@ function FinancialOverview() {
           <Button
             onClick={() => generateMonthlySalesReport(salesData, expensesData)}
             className="w-full md:w-auto"
+            data-cy="download-monthly-report-btn"
           >
             <DownloadIcon />
             <span className="hidden md:inline">
@@ -1030,6 +1016,7 @@ function FinancialOverview() {
           onClose={closeModal}
           onCreateSuccess={handleCreateExpense}
           categories={categories}
+          data-cy="create-monthly-expense-modal"
         />
       )}
 
@@ -1044,6 +1031,7 @@ function FinancialOverview() {
             category: expenseToEdit.category,
             date: expenseToEdit.date
           }}
+          data-cy="edit-monthly-expense-modal"
         />
       )}
 
@@ -1052,6 +1040,7 @@ function FinancialOverview() {
           isOpen={true}
           onClose={closeModal}
           onArchive={handleArchiveExpense}
+          data-cy="delete-monthly-expense-modal"
         />
       )}
 
@@ -1061,6 +1050,7 @@ function FinancialOverview() {
           onClose={closeModal}
           onCreateSuccess={handleCreateCategory}
           categories={categories}
+          data-cy="create-category-modal"
         />
       )}
 
@@ -1070,6 +1060,7 @@ function FinancialOverview() {
           onClose={closeModal}
           category={selectedCategory}
           onEditSuccess={handleEditCategory}
+          data-cy="edit-category-modal"
         />
       )}
 
@@ -1079,6 +1070,7 @@ function FinancialOverview() {
           onClose={closeModal}
           onArchiveSuccess={handleArchiveCategory}
           category={selectedCategory}
+          data-cy="archive-category-modal"
         />
       )}
     </div>

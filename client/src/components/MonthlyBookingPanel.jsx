@@ -61,18 +61,26 @@ const MonthlyBookingPanel = ({
         table: "expenses_tracker",
         id: selectedExpenseId,
         action: "archive"
-      }),
+      })
     });
-  
+
     onClose(); // Close the modal
     refreshData(); // Refetch the list if needed
   };
-  
 
   return (
-    <div className="w-full overflow-x-auto">
-      <table className="w-full border-spacing-y-2 border-separate table-fixed min-w-[600px]">
-        <thead className="bg-lavender-400 text-customNeutral-100 text-center font-semibold text-xs sm:text-sm md:text-base lg:text-lg leading-6 sm:leading-7 md:leading-8">
+    <div
+      className="w-full overflow-x-auto"
+      data-cy="monthly-booking-panel-container"
+    >
+      <table
+        className="w-full border-spacing-y-2 border-separate table-fixed min-w-[600px]"
+        data-cy="monthly-booking-table"
+      >
+        <thead
+          className="bg-lavender-400 text-customNeutral-100 text-center font-semibold text-xs sm:text-sm md:text-base lg:text-lg leading-6 sm:leading-7 md:leading-8"
+          data-cy="monthly-booking-table-header"
+        >
           <tr className="rounded-lg">
             {days.map((day, index) => (
               <th
@@ -80,6 +88,7 @@ const MonthlyBookingPanel = ({
                 className={`p-1 sm:p-2 w-1/7 ${
                   index === 0 ? "rounded-l-[0.5rem]" : ""
                 } ${index === days.length - 1 ? "rounded-r-[0.5rem]" : ""}`}
+                data-cy={`day-column-header-${day.toLowerCase()}`}
               >
                 {day}
               </th>
@@ -87,9 +96,16 @@ const MonthlyBookingPanel = ({
           </tr>
         </thead>
 
-        <tbody className="space-y-1 sm:space-y-2">
+        <tbody
+          className="space-y-1 sm:space-y-2"
+          data-cy="monthly-booking-table-body"
+        >
           {calendarDays.map((week, weekIndex) => (
-            <tr key={weekIndex} className="shadow-sm">
+            <tr
+              key={weekIndex}
+              className="shadow-sm"
+              data-cy={`week-row-${weekIndex}`}
+            >
               {week.map((day, dayIndex) => {
                 const dayAppointments = getAppointmentsForDate(day);
                 const isCurrentDay = day && isToday(day);
@@ -100,7 +116,6 @@ const MonthlyBookingPanel = ({
                   <td
                     key={dayIndex}
                     className={`p-1 sm:p-2 align-top w-1/7 h-20 sm:h-24 md:h-28 lg:h-32 ${
-                      // Ensure all cells have the same height
                       !day
                         ? "bg-gray-100"
                         : isCurrentDay
@@ -113,23 +128,37 @@ const MonthlyBookingPanel = ({
                     } ${isFirstCell ? "rounded-l-lg" : ""} ${
                       isLastCell ? "rounded-r-lg" : ""
                     }`}
+                    data-cy={`day-cell-${weekIndex}-${dayIndex}`}
                   >
                     {day && (
-                      <div className="flex flex-col justify-between h-full">
-                        {/* Flex container for TODAY label and date number */}
-                        <div className="flex justify-between items-center">
+                      <div
+                        className="flex flex-col justify-between h-full"
+                        data-cy={`day-content-${weekIndex}-${dayIndex}`}
+                      >
+                        <div
+                          className="flex justify-between items-center"
+                          data-cy="day-header"
+                        >
                           {isCurrentDay && (
-                            <span className="text-lavender-400 text-[10px] sm:text-xs font-semibold">
+                            <span
+                              className="text-lavender-400 text-[10px] sm:text-xs font-semibold"
+                              data-cy="today-label"
+                            >
                               TODAY
                             </span>
                           )}
-                          <span className="text-right font-semibold text-xs sm:text-sm md:text-base">
+                          <span
+                            className="text-right font-semibold text-xs sm:text-sm md:text-base"
+                            data-cy="day-number"
+                          >
                             {day.getDate()}
                           </span>
                         </div>
 
-                        {/* Appointments Wrapper */}
-                        <div className="mt-1 sm:mt-2 space-y-0.5 sm:space-y-1 flex-1 flex flex-col">
+                        <div
+                          className="mt-1 sm:mt-2 space-y-0.5 sm:space-y-1 flex-1 flex flex-col"
+                          data-cy="appointments-wrapper"
+                        >
                           {dayAppointments.map((appointment, idx) => (
                             <div
                               key={idx}
@@ -138,11 +167,18 @@ const MonthlyBookingPanel = ({
                                 appointment.rawTime
                               )}`}
                               onClick={() => handleOpenModal(appointment)}
+                              data-cy={`appointment-${appointment.id}`}
                             >
-                              <div className="font-semibold truncate">
+                              <div
+                                className="font-semibold truncate"
+                                data-cy="appointment-name"
+                              >
                                 {appointment.name}
                               </div>
-                              <div className="truncate">
+                              <div
+                                className="truncate"
+                                data-cy="appointment-time"
+                              >
                                 {formatTimeDisplay(appointment.rawTime)}
                               </div>
                             </div>
@@ -163,6 +199,7 @@ const MonthlyBookingPanel = ({
           isOpen={true}
           onClose={closeModal}
           entryData={selectedEntry}
+          data-cy="display-entry-modal"
         />
       )}
     </div>

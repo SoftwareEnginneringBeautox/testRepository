@@ -72,31 +72,35 @@ const BeautoxPieChart = () => {
         console.log("Fetching expenses data...");
         const response = await axios.get("/expenses");
         console.log("API Response:", response);
-        
+
         // Ensure we're working with an array
         const expenses = Array.isArray(response.data) ? response.data : [];
 
         // Process expenses data
         if (expenses.length > 0) {
           // Group by category for the current month
-          const currentMonthExpenses = expenses.filter(expense => {
+          const currentMonthExpenses = expenses.filter((expense) => {
             const expenseDate = new Date(expense.date);
-            return expenseDate.getMonth() + 1 === currentMonth && 
-                   expenseDate.getFullYear() === currentYear;
+            return (
+              expenseDate.getMonth() + 1 === currentMonth &&
+              expenseDate.getFullYear() === currentYear
+            );
           });
 
           // Group by category for the previous month
-          const previousMonthExpenses = expenses.filter(expense => {
+          const previousMonthExpenses = expenses.filter((expense) => {
             const expenseDate = new Date(expense.date);
-            return expenseDate.getMonth() + 1 === previousMonth && 
-                   expenseDate.getFullYear() === previousYear;
+            return (
+              expenseDate.getMonth() + 1 === previousMonth &&
+              expenseDate.getFullYear() === previousYear
+            );
           });
 
           // Calculate total expenses by category for current month
           const categoryTotals = {};
-          
-          currentMonthExpenses.forEach(expense => {
-            const category = expense.category.toLowerCase().replace(/\s+/g, '');
+
+          currentMonthExpenses.forEach((expense) => {
+            const category = expense.category.toLowerCase().replace(/\s+/g, "");
             if (!categoryTotals[category]) {
               categoryTotals[category] = 0;
             }
@@ -105,26 +109,29 @@ const BeautoxPieChart = () => {
 
           // Calculate total expenses for current month
           const currentMonthTotal = currentMonthExpenses.reduce(
-            (sum, expense) => sum + parseFloat(expense.expense), 0
+            (sum, expense) => sum + parseFloat(expense.expense),
+            0
           );
-          
+
           // Calculate total expenses for previous month
           const prevMonthTotal = previousMonthExpenses.reduce(
-            (sum, expense) => sum + parseFloat(expense.expense), 0
+            (sum, expense) => sum + parseFloat(expense.expense),
+            0
           );
-          
+
           // Transform data for recharts
-          const transformedData = Object.keys(categoryTotals).map(key => {
+          const transformedData = Object.keys(categoryTotals).map((key) => {
             // Find the known category or use the original key
-            const categoryKey = Object.keys(chartConfig).find(
-              configKey => configKey.toLowerCase() === key.toLowerCase()
-            ) || key;
-            
+            const categoryKey =
+              Object.keys(chartConfig).find(
+                (configKey) => configKey.toLowerCase() === key.toLowerCase()
+              ) || key;
+
             const categoryConfig = chartConfig[categoryKey] || {
               label: key.charAt(0).toUpperCase() + key.slice(1),
-              color: `#${Math.floor(Math.random()*16777215).toString(16)}`
+              color: `#${Math.floor(Math.random() * 16777215).toString(16)}`
             };
-            
+
             return {
               category: categoryConfig.label,
               value: categoryTotals[key],
@@ -135,10 +142,11 @@ const BeautoxPieChart = () => {
           setChartData(transformedData);
           setTotalExpenses(currentMonthTotal);
           setPastMonthTotal(prevMonthTotal);
-          
+
           // Calculate trend
           if (prevMonthTotal > 0) {
-            const calculatedTrend = ((currentMonthTotal - prevMonthTotal) / prevMonthTotal) * 100;
+            const calculatedTrend =
+              ((currentMonthTotal - prevMonthTotal) / prevMonthTotal) * 100;
             setTrend(calculatedTrend);
           }
         }
@@ -184,23 +192,34 @@ const BeautoxPieChart = () => {
   const isTrendingUp = trend > 0;
 
   return (
-    <Card className="w-full h-full shadow-custom bg-ash-100">
-      <CardHeader className="items-center pb-2">
-        <CardTitle>MONTHLY EXPENSES</CardTitle>
-        <CardDescription>Breakdown of Expenses By Category</CardDescription>
+    <Card
+      className="w-full h-full shadow-custom bg-ash-100"
+      data-cy="beautox-pie-chart-card"
+    >
+      <CardHeader className="items-center pb-2" data-cy="card-header">
+        <CardTitle data-cy="card-title">MONTHLY EXPENSES</CardTitle>
+        <CardDescription data-cy="card-description">
+          Breakdown of Expenses By Category
+        </CardDescription>
       </CardHeader>
-      <CardContent className="pb-0">
+      <CardContent className="pb-0" data-cy="card-content">
         {chartData.length > 0 ? (
           <ChartContainer
             className="aspect-square w-full max-w-xs mx-auto"
             config={chartConfig}
+            data-cy="chart-container"
           >
             <PieChart
               margin={{ top: 10, right: 10, bottom: 10, left: 10 }}
               width={300}
               height={300}
+              data-cy="pie-chart"
             >
-              <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+              <ChartTooltip
+                cursor={false}
+                content={<ChartTooltipContent />}
+                data-cy="chart-tooltip"
+              />
               <Pie
                 data={chartData}
                 dataKey="value"
@@ -211,6 +230,7 @@ const BeautoxPieChart = () => {
                 outerRadius={100}
                 strokeWidth={2}
                 paddingAngle={1}
+                data-cy="pie"
               >
                 <Label
                   content={({ viewBox }) =>
@@ -220,13 +240,16 @@ const BeautoxPieChart = () => {
                         y={viewBox.cy}
                         textAnchor="middle"
                         dominantBaseline="middle"
+                        data-cy="pie-label"
                       >
                         <tspan
                           x={viewBox.cx}
                           y={viewBox.cy}
                           className="fill-foreground text-2xl font-bold"
+                          data-cy="total-expenses"
                         >
-                          ₱{totalExpenses.toLocaleString(undefined, {
+                          ₱
+                          {totalExpenses.toLocaleString(undefined, {
                             minimumFractionDigits: 2,
                             maximumFractionDigits: 2
                           })}
@@ -235,6 +258,7 @@ const BeautoxPieChart = () => {
                           x={viewBox.cx}
                           y={viewBox.cy + 20}
                           className="fill-muted-foreground text-sm"
+                          data-cy="total-expenses-label"
                         >
                           TOTAL EXPENSES
                         </tspan>
@@ -246,31 +270,50 @@ const BeautoxPieChart = () => {
             </PieChart>
           </ChartContainer>
         ) : (
-          <div className="flex justify-center items-center h-64 text-muted-foreground">
+          <div
+            className="flex justify-center items-center h-64 text-muted-foreground"
+            data-cy="no-data-message"
+          >
             No expense data available for this month
           </div>
         )}
       </CardContent>
-      <CardFooter className="flex-col gap-2 text-sm">
+      <CardFooter className="flex-col gap-2 text-sm" data-cy="card-footer">
         {trend !== null && (
-          <div className="flex items-center gap-2 font-medium leading-none">
+          <div
+            className="flex items-center gap-2 font-medium leading-none"
+            data-cy="trend-info"
+          >
             {isTrendingUp ? (
               <>
                 Trending up by {trend.toFixed(1)}%
-                <TrendUpIcon className="text-success-400" /> this month compared
-                to last month
+                <TrendUpIcon
+                  className="text-success-400"
+                  data-cy="trend-up-icon"
+                />{" "}
+                this month compared to last month
               </>
             ) : (
               <>
                 Trending down by {Math.abs(trend).toFixed(1)}%
-                <TrendDownIcon className="text-error-400" /> this month compared
-                to last month
+                <TrendDownIcon
+                  className="text-error-400"
+                  data-cy="trend-down-icon"
+                />{" "}
+                this month compared to last month
               </>
             )}
           </div>
         )}
-        <div className="leading-none text-muted-foreground">
-          Showing total expenses for {new Date(currentYear, currentMonth - 1).toLocaleString('default', { month: 'long' })} {currentYear}
+        <div
+          className="leading-none text-muted-foreground"
+          data-cy="footer-info"
+        >
+          Showing total expenses for{" "}
+          {new Date(currentYear, currentMonth - 1).toLocaleString("default", {
+            month: "long"
+          })}{" "}
+          {currentYear}
         </div>
       </CardFooter>
     </Card>

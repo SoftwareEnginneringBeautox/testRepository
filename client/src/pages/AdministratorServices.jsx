@@ -177,50 +177,93 @@ function AdministratorServices() {
   }, []);
 
   return (
-    <div className="flex flex-col gap-4 text-left w-[90%] mx-auto overflow-hidden">
-      <h4 className="text-[2rem] leading-[44.8px] font-semibold">
+    <div
+      className="flex flex-col gap-4 text-left w-[90%] mx-auto overflow-hidden"
+      data-cy="admin-services-container"
+    >
+      <h4
+        className="text-[2rem] leading-[44.8px] font-semibold"
+        data-cy="admin-services-title"
+      >
         ADMINISTRATOR SERVICES
       </h4>
 
       {/* Treatments Table */}
-      <Table data-cy="treatment-table">
-        <TableHeader>
+      <Table data-cy="treatments-table">
+        <TableHeader data-cy="treatments-table-header">
           <TableRow>
-            <TableHead className="py-4 text-center">TREATMENT ID</TableHead>
-            <TableHead className="py-4 text-center">TREATMENT NAME</TableHead>
-            <TableHead className="py-4 text-center">PRICE</TableHead>
-            <TableHead className="py-4 text-center"></TableHead>
+            <TableHead
+              className="py-4 text-center"
+              data-cy="treatment-id-header"
+            >
+              TREATMENT ID
+            </TableHead>
+            <TableHead
+              className="py-4 text-center"
+              data-cy="treatment-name-header"
+            >
+              TREATMENT NAME
+            </TableHead>
+            <TableHead
+              className="py-4 text-center"
+              data-cy="treatment-price-header"
+            >
+              PRICE
+            </TableHead>
+            <TableHead
+              className="py-4 text-center"
+              data-cy="treatment-actions-header"
+            ></TableHead>
           </TableRow>
         </TableHeader>
-        <TableBody>
+        <TableBody data-cy="treatments-table-body">
           {treatmentsData.length > 0 ? (
             treatmentsData.map((treatment) => (
-              <TableRow data-cy="treatment-row" key={treatment.id}>
-                <TableCell className="py-4 text-center">
+              <TableRow
+                key={treatment.id}
+                data-cy={`treatment-row-${treatment.id}`}
+              >
+                <TableCell
+                  className="py-4 text-center"
+                  data-cy={`treatment-id-${treatment.id}`}
+                >
                   {treatment.id}
                 </TableCell>
-                <TableCell className="py-4 text-center">
+                <TableCell
+                  className="py-4 text-center"
+                  data-cy={`treatment-name-${treatment.id}`}
+                >
                   {treatment.treatment_name}
                 </TableCell>
-                <TableCell className="py-4 text-center">
+                <TableCell
+                  className="py-4 text-center"
+                  data-cy={`treatment-price-${treatment.id}`}
+                >
                   ₱{treatment.price}
                 </TableCell>
-                <TableCell className="py-4 text-center">
+                <TableCell
+                  className="py-4 text-center"
+                  data-cy={`treatment-actions-${treatment.id}`}
+                >
                   <DropdownMenu>
-                    <DropdownMenuTrigger>
+                    <DropdownMenuTrigger
+                      data-cy={`treatment-actions-trigger-${treatment.id}`}
+                    >
                       <EllipsisIcon />
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent>
+                    <DropdownMenuContent
+                      data-cy={`treatment-actions-content-${treatment.id}`}
+                    >
                       <DropdownMenuGroup>
                         <DropdownMenuItem
-                          data-cy="edit-treatment-btn"
+                          data-cy={`edit-treatment-btn-${treatment.id}`}
                           onClick={() => handleSelectTreatmentToEdit(treatment)}
                         >
                           <EditIcon />
                           <p className="font-semibold">Edit</p>
                         </DropdownMenuItem>
                         <DropdownMenuItem
-                          data-cy="archive-treatment-btn"
+                          data-cy={`archive-treatment-btn-${treatment.id}`}
                           onClick={() =>
                             handleSelectTreatmentToArchive(treatment)
                           }
@@ -236,7 +279,11 @@ function AdministratorServices() {
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan="4" className="py-4 text-center">
+              <TableCell
+                colSpan="4"
+                className="py-4 text-center"
+                data-cy="no-treatments-message"
+              >
                 No treatments found.
               </TableCell>
             </TableRow>
@@ -245,7 +292,10 @@ function AdministratorServices() {
       </Table>
 
       {/* Button for Adding Treatments */}
-      <div className="w-full flex justify-end gap-4 mb-[2%]">
+      <div
+        className="w-full flex justify-end gap-4 mb-[2%]"
+        data-cy="add-treatment-container"
+      >
         <Button
           data-cy="add-treatment-btn"
           onClick={() => openModal("createTreatment")}
@@ -256,69 +306,136 @@ function AdministratorServices() {
       </div>
 
       {/* Packages Table */}
-      <Table data-cy="package-table">
-        <TableHeader>
+      <Table data-cy="packages-table">
+        <TableHeader data-cy="packages-table-header">
           <TableRow>
-            <TableHead className="py-4 text-center">PRODUCT ID</TableHead>
-            <TableHead className="py-4 text-center">PACKAGE</TableHead>
-            <TableHead className="py-4 text-center">TREATMENT</TableHead>
-            <TableHead className="py-4 text-center">SESSIONS</TableHead>
-            <TableHead className="py-4 text-center">PRICE</TableHead>
-            <TableHead className="py-4 text-center"></TableHead>
+            <TableHead className="py-4 text-center" data-cy="package-id-header">
+              PRODUCT ID
+            </TableHead>
+            <TableHead
+              className="py-4 text-center"
+              data-cy="package-name-header"
+            >
+              PACKAGE
+            </TableHead>
+            <TableHead
+              className="py-4 text-center"
+              data-cy="package-treatment-header"
+            >
+              TREATMENT
+            </TableHead>
+            <TableHead
+              className="py-4 text-center"
+              data-cy="package-sessions-header"
+            >
+              SESSIONS
+            </TableHead>
+            <TableHead
+              className="py-4 text-center"
+              data-cy="package-price-header"
+            >
+              PRICE
+            </TableHead>
+            <TableHead
+              className="py-4 text-center"
+              data-cy="package-actions-header"
+            ></TableHead>
           </TableRow>
         </TableHeader>
-        <TableBody>
+        <TableBody data-cy="packages-table-body">
           {packagesData.length > 0 ? (
             packagesData.map((pkg) => (
-              <TableRow data-cy="package-row" key={pkg.id}>
-                <TableCell className="py-4 text-center">{pkg.id}</TableCell>
-                <TableCell className="py-4 text-center">
+              <TableRow key={pkg.id} data-cy={`package-row-${pkg.id}`}>
+                <TableCell
+                  className="py-4 text-center"
+                  data-cy={`package-id-${pkg.id}`}
+                >
+                  {pkg.id}
+                </TableCell>
+                <TableCell
+                  className="py-4 text-center"
+                  data-cy={`package-name-${pkg.id}`}
+                >
                   {pkg.package_name}
                 </TableCell>
-                {console.log("packagesData:", packagesData)}
-                {console.log("treatmentsData:", treatmentsData)}
-                <TableCell className="py-4 text-left">
-                {treatmentsData.length > 0 && Array.isArray(pkg.treatment_ids) && pkg.treatment_ids.length > 0 ? (
-                <div className="flex flex-col gap-1">
-                  {pkg.treatment_ids.map((id) => {
-                    const treatment = treatmentsData.find((t) => t.id === Number(id));
-                    return treatment ? (
-                      <Badge key={treatment.id} variant="outline">
-                        + {treatment.treatment_name}
-                      </Badge>
-                    ) : (
-                      <span key={id} className="text-red-500 text-sm italic">
-                        Not found: {id}
-                      </span>
-                    );
-                  })}
-                </div>
-              ) : (
-                <span className="text-muted-foreground italic">No treatments found</span>
-              )}
-              </TableCell>
-
-
-                <TableCell className="py-4 text-center">
+                <TableCell
+                  className="py-4 text-left"
+                  data-cy={`package-treatments-${pkg.id}`}
+                >
+                  {treatmentsData.length > 0 &&
+                  Array.isArray(pkg.treatment_ids) &&
+                  pkg.treatment_ids.length > 0 ? (
+                    <div
+                      className="flex flex-col gap-1"
+                      data-cy={`package-treatments-list-${pkg.id}`}
+                    >
+                      {pkg.treatment_ids.map((id) => {
+                        const treatment = treatmentsData.find(
+                          (t) => t.id === Number(id)
+                        );
+                        return treatment ? (
+                          <Badge
+                            key={treatment.id}
+                            variant="outline"
+                            data-cy={`package-treatment-badge-${pkg.id}-${treatment.id}`}
+                          >
+                            + {treatment.treatment_name}
+                          </Badge>
+                        ) : (
+                          <span
+                            key={id}
+                            className="text-red-500 text-sm italic"
+                            data-cy={`package-treatment-not-found-${pkg.id}-${id}`}
+                          >
+                            Not found: {id}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <span
+                      className="text-muted-foreground italic"
+                      data-cy={`package-no-treatments-${pkg.id}`}
+                    >
+                      No treatments found
+                    </span>
+                  )}
+                </TableCell>
+                <TableCell
+                  className="py-4 text-center"
+                  data-cy={`package-sessions-${pkg.id}`}
+                >
                   {pkg.sessions}
                 </TableCell>
-                <TableCell className="py-4 text-center">₱{pkg.price}</TableCell>
-                <TableCell className="py-4 text-center">
+                <TableCell
+                  className="py-4 text-center"
+                  data-cy={`package-price-${pkg.id}`}
+                >
+                  ₱{pkg.price}
+                </TableCell>
+                <TableCell
+                  className="py-4 text-center"
+                  data-cy={`package-actions-${pkg.id}`}
+                >
                   <DropdownMenu>
-                    <DropdownMenuTrigger>
+                    <DropdownMenuTrigger
+                      data-cy={`package-actions-trigger-${pkg.id}`}
+                    >
                       <EllipsisIcon />
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent>
+                    <DropdownMenuContent
+                      data-cy={`package-actions-content-${pkg.id}`}
+                    >
                       <DropdownMenuGroup>
                         <DropdownMenuItem
-                          data-cy="edit-package-btn"
+                          data-cy={`edit-package-btn-${pkg.id}`}
                           onClick={() => handleSelectPackageToEdit(pkg)}
                         >
                           <EditIcon />
                           <p className="font-semibold">Edit</p>
                         </DropdownMenuItem>
                         <DropdownMenuItem
-                          data-cy="archive-package-btn"
+                          data-cy={`archive-package-btn-${pkg.id}`}
                           onClick={() => handleSelectPackageToArchive(pkg)}
                         >
                           <ArchiveIcon />
@@ -332,7 +449,11 @@ function AdministratorServices() {
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan="6" className="py-4 text-center">
+              <TableCell
+                colSpan="6"
+                className="py-4 text-center"
+                data-cy="no-packages-message"
+              >
                 No packages found.
               </TableCell>
             </TableRow>
@@ -340,8 +461,11 @@ function AdministratorServices() {
         </TableBody>
       </Table>
 
-      <div className="w-full flex justify-end gap-4 mb-[10%]">
-        <Button variant="outline">
+      <div
+        className="w-full flex justify-end gap-4 mb-[10%]"
+        data-cy="bottom-actions"
+      >
+        <Button variant="outline" data-cy="check-btn">
           <ChevronLeftIcon />
           CHECK
         </Button>
@@ -363,6 +487,7 @@ function AdministratorServices() {
             closeModal();
             fetchPackages();
           }}
+          data-cy="create-package-modal"
         />
       )}
       {currentModal === "editPackage" && selectedPackage && (
@@ -371,6 +496,7 @@ function AdministratorServices() {
           onClose={closeModal}
           entryData={selectedPackage}
           onSubmit={handleEditPackage}
+          data-cy="edit-package-modal"
         />
       )}
       {currentModal === "archivePackage" && selectedPackage && (
@@ -379,6 +505,7 @@ function AdministratorServices() {
           onClose={closeModal}
           entryData={selectedPackage}
           onArchive={handleArchivePackage}
+          data-cy="archive-package-modal"
         />
       )}
       {currentModal === "createTreatment" && (
@@ -388,6 +515,7 @@ function AdministratorServices() {
             closeModal();
             fetchTreatments();
           }}
+          data-cy="create-treatment-modal"
         />
       )}
       {currentModal === "archiveTreatment" && selectedTreatment && (
@@ -396,15 +524,16 @@ function AdministratorServices() {
           onClose={closeModal}
           entryData={selectedTreatment}
           onArchive={handleArchiveTreatment}
+          data-cy="archive-treatment-modal"
         />
       )}
-
       {currentModal === "editTreatment" && selectedTreatment && (
         <EditTreatment
           isOpen={true}
           onClose={closeModal}
           entryData={selectedTreatment}
           onSubmit={handleEditTreatment}
+          data-cy="edit-treatment-modal"
         />
       )}
     </div>

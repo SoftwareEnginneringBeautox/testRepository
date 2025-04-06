@@ -120,18 +120,28 @@ const SalesChart = ({ chartConfig }) => {
   const dateRangeLabel = `${formatDate(startDate)} - ${formatDate(endDate)}`;
 
   return (
-    <Card className="w-full bg-ash-100 shadow-custom">
-      <CardHeader>
-        <CardTitle>Weekly Sales Comparison</CardTitle>
-        <CardDescription>
+    <Card
+      className="w-full bg-ash-100 shadow-custom"
+      data-cy="sales-chart-card"
+    >
+      <CardHeader data-cy="card-header">
+        <CardTitle data-cy="card-title">Weekly Sales Comparison</CardTitle>
+        <CardDescription data-cy="card-description">
           Comparing current week's sales with the previous week
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent data-cy="card-content">
         {/* Date filter controls */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-4">
-          <div className="flex flex-col">
-            <label htmlFor="startDate" className="text-sm font-medium">
+        <div
+          className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-4"
+          data-cy="date-filter-controls"
+        >
+          <div className="flex flex-col" data-cy="start-date-control">
+            <label
+              htmlFor="startDate"
+              className="text-sm font-medium"
+              data-cy="start-date-label"
+            >
               Start Date:
             </label>
             <input
@@ -140,10 +150,15 @@ const SalesChart = ({ chartConfig }) => {
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
               className="border p-1 rounded"
+              data-cy="start-date-input"
             />
           </div>
-          <div className="flex flex-col">
-            <label htmlFor="endDate" className="text-sm font-medium">
+          <div className="flex flex-col" data-cy="end-date-control">
+            <label
+              htmlFor="endDate"
+              className="text-sm font-medium"
+              data-cy="end-date-label"
+            >
               End Date:
             </label>
             <input
@@ -152,36 +167,53 @@ const SalesChart = ({ chartConfig }) => {
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
               className="border p-1 rounded"
+              data-cy="end-date-input"
             />
           </div>
         </div>
 
         {error && (
-          <div className="p-2 mb-4 bg-red-100 text-red-700 rounded">
+          <div
+            className="p-2 mb-4 bg-red-100 text-red-700 rounded"
+            data-cy="error-message"
+          >
             Error: {error}. Showing sample data instead.
           </div>
         )}
 
-        <ChartContainer config={config}>
-          <div className="relative w-full h-0 pb-[55%]">
+        <ChartContainer config={config} data-cy="chart-container">
+          <div className="relative w-full h-0 pb-[55%]" data-cy="chart-wrapper">
             <div className="absolute w-full h-full">
               {loading ? (
-                <div className="flex items-center justify-center h-full">
+                <div
+                  className="flex items-center justify-center h-full"
+                  data-cy="loading-indicator"
+                >
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
                 </div>
               ) : (
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer
+                  width="100%"
+                  height="100%"
+                  data-cy="responsive-container"
+                >
                   <AreaChart
                     data={salesData}
                     margin={{ left: 8, right: 8, top: 20, bottom: 20 }}
                     style={{ backgroundColor: "#F5F3F0" }}
+                    data-cy="area-chart"
                   >
-                    <CartesianGrid vertical={false} stroke="#AAAAAA" />
+                    <CartesianGrid
+                      vertical={false}
+                      stroke="#AAAAAA"
+                      data-cy="cartesian-grid"
+                    />
                     <XAxis
                       dataKey="day"
                       tickLine={false}
                       axisLine={false}
                       tickMargin={8}
+                      data-cy="x-axis"
                     />
                     <YAxis
                       tickLine={false}
@@ -189,10 +221,12 @@ const SalesChart = ({ chartConfig }) => {
                       tickMargin={8}
                       tickFormatter={(value) => `₱${value}`}
                       domain={["dataMin - 100", "dataMax + 100"]}
+                      data-cy="y-axis"
                     />
                     <ChartTooltip
                       cursor={false}
                       content={<ChartTooltipContent />}
+                      data-cy="chart-tooltip"
                     />
                     <defs>
                       <linearGradient
@@ -201,6 +235,7 @@ const SalesChart = ({ chartConfig }) => {
                         y1="0"
                         x2="0"
                         y2="1"
+                        data-cy="gradient-current-week"
                       >
                         <stop
                           offset="5%"
@@ -219,6 +254,7 @@ const SalesChart = ({ chartConfig }) => {
                         y1="0"
                         x2="0"
                         y2="1"
+                        data-cy="gradient-previous-week"
                       >
                         <stop
                           offset="5%"
@@ -239,6 +275,7 @@ const SalesChart = ({ chartConfig }) => {
                       fillOpacity={0.4}
                       stroke={config.previousWeek.color}
                       strokeWidth={2}
+                      data-cy="area-previous-week"
                     />
                     <Area
                       dataKey="currentWeek"
@@ -247,6 +284,7 @@ const SalesChart = ({ chartConfig }) => {
                       fillOpacity={0.4}
                       stroke={config.currentWeek.color}
                       strokeWidth={2}
+                      data-cy="area-current-week"
                     />
                   </AreaChart>
                 </ResponsiveContainer>
@@ -255,14 +293,24 @@ const SalesChart = ({ chartConfig }) => {
           </div>
         </ChartContainer>
       </CardContent>
-      <CardFooter>
-        <div className="flex w-full items-start gap-2 text-sm">
+      <CardFooter data-cy="card-footer">
+        <div
+          className="flex w-full items-start gap-2 text-sm"
+          data-cy="footer-content"
+        >
           <div className="grid gap-2">
-            <div className="flex items-center gap-2 font-medium leading-none">
+            <div
+              className="flex items-center gap-2 font-medium leading-none"
+              data-cy="trend-info"
+            >
               {isIncrease ? (
                 <>
                   Current week up by {percentageChange}%
-                  <TrendUpIcon className="h-4 w-4" fill="#4CAF50" />
+                  <TrendUpIcon
+                    className="h-4 w-4"
+                    fill="#4CAF50"
+                    data-cy="trend-up-icon"
+                  />
                 </>
               ) : (
                 <>
@@ -270,11 +318,15 @@ const SalesChart = ({ chartConfig }) => {
                   <TrendDownIcon
                     className="h-4 w-4 text-red-500"
                     fill="#ef4444"
+                    data-cy="trend-down-icon"
                   />
                 </>
               )}
             </div>
-            <div className="flex items-center gap-2 leading-none text-customNeutral-300">
+            <div
+              className="flex items-center gap-2 leading-none text-customNeutral-300"
+              data-cy="date-range-label"
+            >
               {dateRangeLabel}
             </div>
           </div>
