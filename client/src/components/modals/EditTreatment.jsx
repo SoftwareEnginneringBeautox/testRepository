@@ -25,7 +25,7 @@ import EditIcon from "@/assets/icons/EditIcon";
 import TreatmentIcon from "@/assets/icons/TreatmentIcon";
 import PesoIcon from "@/assets/icons/PesoIcon";
 import ClockIcon from "@/assets/icons/ClockIcon";
-import e from "express";
+
 
 function EditTreatment({ isOpen, onClose, entryData, onSubmit }) {
   const [formData, setFormData] = useState({
