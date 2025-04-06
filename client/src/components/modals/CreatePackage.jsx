@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/Input";
 
 import { Button } from "../ui/Button";
-import { MultiSelectCheckbox } from "@/components/ui/MultiSelectCheckbox";
+import { TreatmentMultiSelect } from "@/components/ui/TreatmentMultiSelect";
 
 import ChevronLeftIcon from "@/assets/icons/ChevronLeftIcon";
 import PlusIcon from "@/assets/icons/PlusIcon";
@@ -33,38 +33,41 @@ function CreatePackage({ isOpen, onClose }) {
   const [numberOfTreatments, setNumberOfTreatments] = useState("");
   const [amount, setAmount] = useState("");
   const [treatmentsList, setTreatmentsList] = useState([]);
+  const [existingPackages, setExistingPackages] = useState([]);
   const API_BASE_URL = import.meta.env.VITE_API_URL;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Fetch treatments from the server
   useEffect(() => {
-    async function fetchTreatments() {
+    const fetchData = async () => {
       try {
-        const response = await axios.get(`${API_BASE_URL}/api/treatments?archived=false`, {
-          withCredentials: true
-        });
-        setTreatmentsList(response.data);
+        const [treatmentsRes, packagesRes] = await Promise.all([
+          axios.get(`${API_BASE_URL}/api/treatments?archived=false`, {
+            withCredentials: true
+          }),
+          axios.get(`${API_BASE_URL}/api/packages`, {
+            withCredentials: true
+          })
+        ]);
+
+        setTreatmentsList(treatmentsRes.data);
+        setExistingPackages(packagesRes.data);
       } catch (err) {
-        console.error("Error fetching treatments:", err);
+        console.error("Error fetching data:", err);
       }
-    }
-    fetchTreatments();
+    };
+    fetchData();
   }, []);
 
-  // Compute total amount based on selected treatments
   useEffect(() => {
     if (selectedTreatmentIds.length > 0 && numberOfTreatments) {
-      // Get the total price of all selected treatments
       const selectedTreatments = treatmentsList.filter((t) =>
-        selectedTreatmentIds.includes(String(t.id))
+        selectedTreatmentIds.includes(t.id)
       );
-
       const totalPerSession = selectedTreatments.reduce(
-        (sum, treatment) => sum + treatment.price,
+        (sum, t) => sum + t.price,
         0
       );
-
       const total = totalPerSession * parseInt(numberOfTreatments, 10);
       setAmount(total.toFixed(2));
     } else {
@@ -74,10 +77,9 @@ function CreatePackage({ isOpen, onClose }) {
 
   if (!isOpen) return null;
 
-  // Format treatments for the multi-select dropdown
-  const treatmentOptions = treatmentsList.map((treatment) => ({
-    value: String(treatment.id),
-    label: `${treatment.treatment_name} - ₱${treatment.price}`
+  const treatmentOptions = treatmentsList.map((t) => ({
+    value: t.id,
+    label: `${t.treatment_name} - ₱${t.price}`
   }));
 
   const handleSubmit = async (e) => {
@@ -85,28 +87,34 @@ function CreatePackage({ isOpen, onClose }) {
     setLoading(true);
     setError("");
 
-    // Get the names of selected treatments
+    const duplicate = existingPackages.find(
+      (pkg) =>
+        pkg.package_name.toLowerCase().trim() ===
+        packageName.toLowerCase().trim()
+    );
+    if (duplicate) {
+      setError("A package with this name already exists.");
+      setLoading(false);
+      return;
+    }
+
     const selectedTreatmentNames = treatmentsList
-      .filter((t) => selectedTreatmentIds.includes(String(t.id)))
+      .filter((t) => selectedTreatmentIds.includes(t.id))
       .map((t) => t.treatment_name);
 
     const payload = {
       package_name: packageName,
-      // Now we store multiple treatments
       treatments: selectedTreatmentNames,
       sessions: parseInt(numberOfTreatments, 10) || 0,
       price: parseFloat(amount) || 0,
-      // You may need to adjust your API to handle multiple treatments
-      treatment_ids: selectedTreatmentIds
+      treatment_ids: selectedTreatmentIds.map(Number)
     };
 
     try {
       const response = await axios.post(
         `${API_BASE_URL}/api/packages`,
         payload,
-        {
-          withCredentials: true
-        }
+        { withCredentials: true }
       );
       if (response.data.success) {
         onClose();
@@ -132,7 +140,6 @@ function CreatePackage({ isOpen, onClose }) {
       <ModalBody>
         <form onSubmit={handleSubmit} data-cy="create-package-form">
           <div className="flex flex-col gap-4">
-            {/* Package Name */}
             <InputContainer>
               <InputLabel>PACKAGE NAME</InputLabel>
               <InputTextField>
@@ -141,7 +148,7 @@ function CreatePackage({ isOpen, onClose }) {
                 </InputIcon>
                 <Input
                   data-cy="package-name"
-                  placeholder="Name of the Package"
+                  placeholder="e.g. Brazilian Package"
                   value={packageName}
                   onChange={(e) => setPackageName(e.target.value)}
                   required
@@ -150,11 +157,9 @@ function CreatePackage({ isOpen, onClose }) {
               </InputTextField>
             </InputContainer>
 
-            {/* Multi-Select Treatments Dropdown */}
             <InputContainer>
               <InputLabel>TREATMENTS</InputLabel>
-              <MultiSelectCheckbox
-                data-cy="package-treatments"
+              <TreatmentMultiSelect
                 options={treatmentOptions}
                 value={selectedTreatmentIds}
                 onChange={setSelectedTreatmentIds}
@@ -163,16 +168,15 @@ function CreatePackage({ isOpen, onClose }) {
               />
             </InputContainer>
 
-            {/* Number of Treatments */}
             <InputContainer>
-              <InputLabel>NUMBER OF TREATMENTS</InputLabel>
+              <InputLabel>NUMBER OF SESSIONS</InputLabel>
               <InputTextField>
                 <InputIcon>
                   <PackageIcon />
                 </InputIcon>
                 <Input
                   data-cy="package-sessions"
-                  placeholder="Number of treatments to be taken"
+                  placeholder="e.g. 5 sessions"
                   type="number"
                   min="0"
                   step="1"
@@ -184,7 +188,6 @@ function CreatePackage({ isOpen, onClose }) {
               </InputTextField>
             </InputContainer>
 
-            {/* Amount (Computed) */}
             <InputContainer>
               <InputLabel>AMOUNT</InputLabel>
               <InputTextField>
@@ -213,13 +216,14 @@ function CreatePackage({ isOpen, onClose }) {
                 <Input
                   name="date"
                   type="date"
-                  placeholder="Expiration Date of the Package"
+                  placeholder="Select expiration date"
                   required
                   className="text-input"
                 />
               </InputTextField>
             </InputContainer>
           </div>
+
           <div className="flex flex-row gap-4 mt-6 w-full">
             <Button
               data-cy="cancel-package-btn"
@@ -241,6 +245,7 @@ function CreatePackage({ isOpen, onClose }) {
               {loading ? "CREATING..." : "CREATE PACKAGE"}
             </Button>
           </div>
+
           {error && (
             <p className="text-red-500 mt-2" data-cy="error-message">
               {error}

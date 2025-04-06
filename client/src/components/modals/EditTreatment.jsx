@@ -79,7 +79,7 @@ function EditTreatment({ isOpen, onClose, entryData, onSubmit }) {
                 </InputIcon>
                 <Input
                   data-cy="treatment-name"
-                  placeholder="Name of the Treatment"
+                  placeholder="e.g. Diamond Peel Facial"
                   value={formData.treatment_name}
                   onChange={(e) =>
                     setFormData({ ...formData, treatment_name: e.target.value })
@@ -115,7 +115,7 @@ function EditTreatment({ isOpen, onClose, entryData, onSubmit }) {
               </InputIcon>
               <Input
                 data-cy="treatment-duration"
-                placeholder="Duration in minutes"
+                placeholder="e.g. 45"
                 type="number"
                 min="0"
                 step="1"
@@ -130,7 +130,7 @@ function EditTreatment({ isOpen, onClose, entryData, onSubmit }) {
             <InputAreaField>
               <InputArea
                 data-cy="treatment-description"
-                placeholder="Brief description of the treatment"
+                placeholder="e.g. A deep exfoliation facial treatment"
               />
             </InputAreaField>
           </InputContainer>

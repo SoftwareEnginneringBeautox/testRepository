@@ -454,18 +454,18 @@ app.get('/api/treatments', async (req, res) => {
 // Create a new package
 app.post('/api/packages', async (req, res) => {
   try {
-    const { package_name, treatment, sessions, price } = req.body;
+    const { package_name, treatment_ids, sessions, price } = req.body;
     const insertQuery = `
       INSERT INTO packages (
         package_name,
-        treatment,
+        treatment_ids,
         sessions,
         price
       )
       VALUES ($1, $2, $3, $4)
       RETURNING id;
     `;
-    const result = await pool.query(insertQuery, [package_name, treatment, sessions, price]);
+    const result = await pool.query(insertQuery, [package_name, treatment_ids, sessions, price]);
     res.json({ success: true, message: 'Package created', packageId: result.rows[0].id });
   } catch (error) {
     console.error('Error creating package:', error);
@@ -474,6 +474,7 @@ app.post('/api/packages', async (req, res) => {
 });
 
 // Retrieve all packages
+/* 
 app.get('/api/packages', async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM packages ORDER BY id ASC');
@@ -482,7 +483,34 @@ app.get('/api/packages', async (req, res) => {
     console.error('Error retrieving packages:', error);
     res.status(500).json({ success: false, error: 'Error retrieving packages' });
   }
+}); 
+*/
+
+app.get('/api/packages', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT 
+        p.*,
+        json_agg(
+          json_build_object('id', t.id, 'treatment_name', t.treatment_name, 'price', t.price)
+        ) AS treatments
+      FROM packages p
+      LEFT JOIN LATERAL (
+        SELECT *
+        FROM treatments
+        WHERE id = ANY(p.treatment_ids)
+      ) t ON true
+      GROUP BY p.id
+      ORDER BY p.id ASC;
+    `);
+
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error retrieving packages with treatments:', error);
+    res.status(500).json({ success: false, error: 'Error retrieving packages' });
+  }
 });
+
 
 /* --------------------------------------------
    EMAIL + OTP ENDPOINTS
