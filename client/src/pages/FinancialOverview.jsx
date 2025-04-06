@@ -87,6 +87,51 @@ function FinancialOverview() {
     }
   };
 
+  const [filterType, setFilterType] = useState("all");
+  const [filteredSalesData, setFilteredSalesData] = useState([]);
+
+  useEffect(() => {
+    if (filterType === "all" || !salesData) {
+      setFilteredSalesData(salesData);
+      return;
+    }
+
+    let filtered;
+    switch (filterType) {
+      case "client":
+        // Group by client name and sort alphabetically
+        filtered = [...salesData].sort((a, b) => {
+          const clientA = a.client ? a.client.toUpperCase() : "";
+          const clientB = b.client ? b.client.toUpperCase() : "";
+          return clientA.localeCompare(clientB);
+        });
+        break;
+      case "person_in_charge":
+        // Group by person in charge and sort alphabetically
+        filtered = [...salesData].sort((a, b) => {
+          const picA = a.person_in_charge ? a.person_in_charge.toUpperCase() : "";
+          const picB = b.person_in_charge ? b.person_in_charge.toUpperCase() : "";
+          return picA.localeCompare(picB);
+        });
+        break;
+      case "date_transacted":
+        // Sort by date (most recent first)
+        filtered = [...salesData].sort((a, b) => {
+          return new Date(b.date_transacted) - new Date(a.date_transacted);
+        });
+        break;
+      default:
+        filtered = salesData;
+    }
+
+    setFilteredSalesData(filtered);
+  }, [filterType, salesData]);
+
+  // Update the initial setting of filteredSalesData when salesData changes
+  useEffect(() => {
+    setFilteredSalesData(salesData);
+  }, [salesData]);
+
   // Fetch data from endpoints
   useEffect(() => {
     fetch("http://localhost:4000/financial-overview")
@@ -628,15 +673,20 @@ function FinancialOverview() {
       <div className="w-full overflow-x-auto">
         <SalesChart chartData={chartData} chartConfig={chartConfig} />
       </div>
+
       <div className="flex justify-end">
-        <Select>
+        <Select
+          value={filterType}
+          onValueChange={(value) => setFilterType(value)}
+        >
           <SelectTrigger placeholder="FILTER BY" icon={<FilterIcon />}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="option1">Option 1</SelectItem>
-            <SelectItem value="option2">Option 2</SelectItem>
-            <SelectItem value="option3">Option 3</SelectItem>
+            <SelectItem value="all">ALL DATA</SelectItem>
+            <SelectItem value="client">CLIENT NAME</SelectItem>
+            <SelectItem value="person_in_charge">PERSON IN CHARGE</SelectItem>
+            <SelectItem value="date_transacted">DATE TRANSACTED</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -672,8 +722,8 @@ function FinancialOverview() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {salesData.length > 0 ? (
-              salesData.map((sale, index) => (
+            {filteredSalesData && filteredSalesData.length > 0 ? (
+              filteredSalesData.map((sale, index) => (
                 <TableRow key={index}>
                   <TableCell className="whitespace-nowrap">
                     {sale.client ? sale.client.toUpperCase() : "N/A"}
