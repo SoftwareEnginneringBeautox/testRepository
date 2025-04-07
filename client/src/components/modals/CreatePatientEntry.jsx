@@ -43,6 +43,7 @@ import PercentageIcon from "@/assets/icons/PercentageIcon";
 import TreatmentIcon from "@/assets/icons/TreatmentIcon";
 
 import axios from "axios";
+import { arch } from "os";
 
 function CreatePatientEntry({ isOpen, onClose }) {
   const [patientName, setPatientName] = useState("");
@@ -75,6 +76,10 @@ function CreatePatientEntry({ isOpen, onClose }) {
   // List for packages and treatments fetched from the database
   const [packagesList, setPackagesList] = useState([]);
   const [treatmentsList, setTreatmentsList] = useState([]);
+
+  const [contactNumber, setContactNumber] = useState("");
+  const [age, setAge] = useState("");
+  const [email, setEmail] = useState("");
 
   useEffect(() => {
     if (packageName) {
@@ -230,6 +235,9 @@ function CreatePatientEntry({ isOpen, onClose }) {
   
     const payload = {
       patient_name: patientName,
+      contact_number: contactNumber,
+      age: age ? parseInt(age) : null,
+      email,
       person_in_charge: personInCharge,
       package_name: packageName,
       treatments: selectedTreatmentNames,
@@ -253,8 +261,37 @@ function CreatePatientEntry({ isOpen, onClose }) {
       });
   
       if (response.ok) {
+        // Also insert into appointments table
+        try {
+          const appointmentPayload = {
+            full_name: patientName,
+            contact_number: contactNumber,
+            age: age ? parseInt(age) : null,
+            email,
+            date_of_session: dateOfSession,
+            time_of_session: timeOfSession,
+            archived: false,
+          };
+      
+          const appointmentRes = await fetch(`${API_BASE_URL}/api/appointments`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(appointmentPayload)
+          });
+      
+          if (!appointmentRes.ok) {
+            const errText = await appointmentRes.text();
+            console.error("❌ Failed to insert appointment:", errText);
+          } else {
+            console.log("✅ Appointment successfully inserted");
+          }
+        } catch (err) {
+          console.error("❌ Error inserting into appointments:", err);
+        }
+      
         onClose();
-      } else {
+      }
+      else {
         const errorText = await response.text();
         console.error("Submission failed:", errorText);
       }
@@ -293,6 +330,48 @@ function CreatePatientEntry({ isOpen, onClose }) {
                   value={patientName}
                   onChange={(e) => setPatientName(e.target.value)}
                   required
+                  className="bg-[#F5F3F0]"
+                />
+              </InputTextField>
+            </InputContainer>
+
+            {/* CONTACT NUMBER */}
+            <InputContainer>
+              <InputLabel>CONTACT NUMBER</InputLabel>
+              <InputTextField>
+                <Input
+                  placeholder="e.g. 09XXXXXXXXX"
+                  value={contactNumber}
+                  onChange={(e) => setContactNumber(e.target.value)}
+                  className="bg-[#F5F3F0]"
+                />
+              </InputTextField>
+            </InputContainer>
+
+            {/* AGE */}
+            <InputContainer>
+              <InputLabel>AGE</InputLabel>
+              <InputTextField>
+                <Input
+                  type="number"
+                  min="0"
+                  placeholder="Age"
+                  value={age}
+                  onChange={(e) => setAge(e.target.value)}
+                  className="bg-[#F5F3F0]"
+                />
+              </InputTextField>
+            </InputContainer>
+
+            {/* EMAIL */}
+            <InputContainer>
+              <InputLabel>EMAIL</InputLabel>
+              <InputTextField>
+                <Input
+                  type="email"
+                  placeholder="example@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="bg-[#F5F3F0]"
                 />
               </InputTextField>

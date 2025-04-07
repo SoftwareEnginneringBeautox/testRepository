@@ -80,6 +80,9 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
         person_in_charge: entryData.person_in_charge || "",
         patient_name: entryData.patient_name || "", 
         total_amount: entryData.total_amount || "",
+        contact_number: entryData.contact_number || "",
+        age: entryData.age || "",
+        email: entryData.email || "",
       };
   
       setOriginalData(initial);
@@ -191,6 +194,7 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
               <span>CURRENT PACKAGE:</span>{" "}
               {originalData.package_name?.toUpperCase() || "N/A"}
             </p>
+
             <InputContainer>
               <InputLabel>PATIENT NAME</InputLabel>
               <InputTextField>
@@ -204,6 +208,51 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
                   value={formData.patient_name ?? ""}
                   onChange={(e) =>
                     setFormData({ ...formData, patient_name: e.target.value })
+                  }
+                />
+              </InputTextField>
+            </InputContainer>
+            
+             {/* CONTACT NUMBER */}
+            <InputContainer>
+              <InputLabel>CONTACT NUMBER</InputLabel>
+              <InputTextField>
+                <Input
+                  placeholder="e.g. 09XXXXXXXXX"
+                  value={formData.contact_number ?? ""}
+                  onChange={(e) =>
+                    setFormData({ ...formData, contact_number: e.target.value })
+                  }
+                />
+              </InputTextField>
+            </InputContainer>
+
+            {/* AGE */}
+            <InputContainer>
+              <InputLabel>AGE</InputLabel>
+              <InputTextField>
+                <Input
+                  type="number"
+                  min="0"
+                  placeholder="Age"
+                  value={formData.age ?? ""}
+                  onChange={(e) =>
+                    setFormData({ ...formData, age: e.target.value })
+                  }
+                />
+              </InputTextField>
+            </InputContainer>
+
+            {/* EMAIL */}
+            <InputContainer>
+              <InputLabel>EMAIL</InputLabel>
+              <InputTextField>
+                <Input
+                  type="email"
+                  placeholder="example@email.com"
+                  value={formData.email ?? ""}
+                  onChange={(e) =>
+                    setFormData({ ...formData, email: e.target.value })
                   }
                 />
               </InputTextField>

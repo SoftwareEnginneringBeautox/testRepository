@@ -86,7 +86,10 @@ function PatientRecordsDatabase() {
     "totalamount",
     "amountpaid",
     "remainingbalance",
-    "referenceno"
+    "referenceno",
+    "contactnumber",     // ✅ NEW
+    "age",               // ✅ NEW
+    "email"   
   ]);
 
   // State for temp column selection (before applying)
@@ -96,8 +99,12 @@ function PatientRecordsDatabase() {
 
   const columns = [
     { label: "CLIENT", value: "client", mandatory: true },
+
     { label: "DATE OF SESSION", value: "dateofsession", mandatory: true },
     { label: "TIME OF SESSION", value: "timeofsession" },
+    { label: "CONTACT NUMBER", value: "contactnumber" },
+    { label: "AGE", value: "age" },
+    { label: "EMAIL", value: "email" },
     { label: "PERSON IN CHARGE", value: "personincharge" },
     { label: "PACKAGE", value: "package" },
     { label: "TREATMENT", value: "treatment" },
@@ -132,6 +139,10 @@ function PatientRecordsDatabase() {
   const [currentPage, setCurrentPage] = useState(1);
   const recordsPerPage = 10;
 
+  useEffect(() => {
+    console.log("📅 Client date today:", new Date().toISOString().split("T")[0]);
+  }, []);
+  
   // Fetch patient records from the API
   const fetchRecords = async () => {
     try {
@@ -252,6 +263,27 @@ function PatientRecordsDatabase() {
         data: safeData
       })
     });
+
+    try {
+      const appointmentPayload = {
+        full_name: updatedData.patient_name,
+        contact_number: updatedData.contact_number,
+        age: updatedData.age ? parseInt(updatedData.age) : null,
+        email: updatedData.email,
+        date_of_session: updatedData.date_of_session,
+        time_of_session: updatedData.time_of_session
+      };
+    
+      await fetch(`${API_BASE_URL}/api/appointments`, {
+        method: "POST", // or PUT if your backend handles updates
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(appointmentPayload)
+      });
+    } catch (err) {
+      console.error("❌ Failed to update appointment record:", err);
+    }
+        
     closeModal();
     fetchRecords();
   };
@@ -305,7 +337,7 @@ function PatientRecordsDatabase() {
           date_transacted: record.dateTransacted || record.date_of_session,
           // Payment amount could be the amount paid; adjust if needed
           payment: record.amount_paid,
-          reference_number: record.reference_number
+          reference_no: record.reference_number
           // Add any other fields as required by your sales tracker table schema
         };
 
@@ -481,6 +513,9 @@ function PatientRecordsDatabase() {
       "CLIENT",
       "DATE OF SESSION",
       "TIME OF SESSION",
+      "CONTACT NUMBER",
+      "AGE",
+      "EMAIL",
       "PERSON IN CHARGE",
       "PACKAGE",
       "TREATMENT",
@@ -514,6 +549,9 @@ function PatientRecordsDatabase() {
         record.client || record.patient_name?.toUpperCase() || "N/A",
         formatDate(record.dateTransacted || record.date_of_session),
         formatTime(record.nextSessionTime || record.time_of_session),
+        record.contact_number || "N/A",
+        record.age || "N/A",
+        record.email || "N/A",
         (record.personInCharge || record.person_in_charge)?.toUpperCase() ||
           "N/A",
         (record.package || record.package_name)?.toUpperCase() || "N/A",
@@ -575,6 +613,9 @@ function PatientRecordsDatabase() {
     client: true, // Always true - mandatory
     dateofsession: true, // Always true - mandatory
     timeofsession: selectedColumns.includes("timeofsession"),
+    contactnumber: selectedColumns.includes("contactnumber"),
+    age: selectedColumns.includes("age"),
+    email: selectedColumns.includes("email"),
     personincharge: selectedColumns.includes("personincharge"),
     package: selectedColumns.includes("package"),
     treatment: selectedColumns.includes("treatment"),
@@ -651,6 +692,16 @@ function PatientRecordsDatabase() {
                 <TableHead className="py-4 text-center whitespace-nowrap">
                   TIME OF SESSION
                 </TableHead>
+              )}
+
+              {isColumnVisible.contactnumber && (
+                <TableHead className="py-4 text-center whitespace-nowrap">CONTACT NUMBER</TableHead>
+              )}
+              {isColumnVisible.age && (
+                <TableHead className="py-4 text-center whitespace-nowrap">AGE</TableHead>
+              )}
+              {isColumnVisible.email && (
+                <TableHead className="py-4 text-center whitespace-nowrap">EMAIL</TableHead>
               )}
 
               {isColumnVisible.personincharge && (
@@ -750,6 +801,21 @@ function PatientRecordsDatabase() {
                             : format(parsedTime, "hh:mm a");
                         })()
                       : "N/A"}
+                  </TableCell>
+                )}
+                {isColumnVisible.contactnumber && (
+                  <TableCell className="text-center whitespace-nowrap">
+                    {record.contact_number || "N/A"}
+                  </TableCell>
+                )}
+                {isColumnVisible.age && (
+                  <TableCell className="text-center whitespace-nowrap">
+                    {record.age || "N/A"}
+                  </TableCell>
+                )}
+                {isColumnVisible.email && (
+                  <TableCell className="text-center whitespace-nowrap">
+                    {record.email || "N/A"}
                   </TableCell>
                 )}
 
