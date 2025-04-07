@@ -433,6 +433,8 @@ function FinancialOverview() {
     );
     const totalSales = computeTotalSales();
     const totalProfit = totalSales - monthlyExpenses;
+    
+    
 
     const doc = new jsPDF({
       orientation: "portrait",

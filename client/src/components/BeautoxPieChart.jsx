@@ -13,18 +13,7 @@ import {
 // Simple color palette
 const COLORS = ['#4361ee', '#3a0ca3', '#7209b7', '#f72585', '#4cc9f0'];
 
-// Demo data - only shown if API fails
-const DEMO_DATA = [
-  { name: "Office Supplies", value: 15000 },
-  { name: "Utilities", value: 32000 },
-  { name: "Rent", value: 45000 },
-  { name: "Salaries", value: 83000 },
-  { name: "Marketing", value: 27500 },
-  // Example row with null data - will be ignored:
-  { name: null, value: 10000 }
-];
-
-const MinimalExpensesChart = () => {
+const BeautoxPieChart = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [expensesData, setExpensesData] = useState([]);
@@ -74,8 +63,8 @@ const MinimalExpensesChart = () => {
       } catch (err) {
         console.error("Error fetching expenses:", err);
         setError(err.message);
-        // Fall back to demo data on error
-        setExpensesData(DEMO_DATA);
+        // Set empty data instead of using demo data
+        setExpensesData([]);
       } finally {
         setLoading(false);
       }
@@ -85,8 +74,7 @@ const MinimalExpensesChart = () => {
   }, []);
   
   // Filter out rows with null for critical data fields
-  const filteredData = (expensesData.length > 0 ? expensesData : DEMO_DATA)
-    .filter(item => item.name !== null && item.value !== null);
+  const filteredData = expensesData.filter(item => item.name !== null && item.value !== null);
 
   // Process the filtered data to include color fill
   const chartData = filteredData.map((item, index) => ({
@@ -105,13 +93,53 @@ const MinimalExpensesChart = () => {
     })}`;
   };
   
+  // Custom label renderer for external labels to avoid overlap
+  const renderCustomizedLabel = ({ name, percent, cx, cy, midAngle, innerRadius, outerRadius, index }) => {
+    // Truncate long category names
+    const shortenedName = name.length > 10 ? `${name.substring(0, 8)}...` : name;
+    const RADIAN = Math.PI / 180;
+    
+    // Position labels outside the pie chart
+    const radius = outerRadius * 1.2;
+    const x = cx + radius * Math.cos(-midAngle * RADIAN);
+    const y = cy + radius * Math.sin(-midAngle * RADIAN);
+    
+    // Get the segment's color
+    const fill = COLORS[index % COLORS.length];
+    
+    // Determine if label should be on left or right side for text anchor
+    const textAnchor = x > cx ? 'start' : 'end';
+    
+    return (
+      <g>
+        {/* Draw line from segment to label */}
+        <path 
+          d={`M${cx + outerRadius * Math.cos(-midAngle * RADIAN)},${cy + outerRadius * Math.sin(-midAngle * RADIAN)}L${x},${y}`} 
+          stroke={fill} 
+          fill="none" 
+        />
+        {/* Draw the text label */}
+        <text 
+          x={x} 
+          y={y} 
+          fill={fill}
+          textAnchor={textAnchor}
+          dominantBaseline="central"
+          fontSize="12"
+          fontWeight="bold"
+        >
+          {`${shortenedName}: ${(percent * 100).toFixed(0)}%`}
+        </text>
+      </g>
+    );
+  };
+  
   return (
     <Card className="w-full h-full shadow-md bg-white">
       <CardHeader className="items-center pb-2">
         <CardTitle>MONTHLY EXPENSES</CardTitle>
         <CardDescription>
           April 2025
-          {expensesData.length === 0 && <span className="text-amber-500 ml-2">(Demo Data)</span>}
         </CardDescription>
       </CardHeader>
       <CardContent className="pb-0">
@@ -121,46 +149,52 @@ const MinimalExpensesChart = () => {
           </div>
         ) : error ? (
           <div className="px-3 py-2 bg-red-50 border border-red-200 rounded text-red-700 text-xs mb-4">
-            Error loading data: {error}. Showing demo data instead.
+            Error loading data: {error}
           </div>
-        ) : expensesData.length === 0 ? (
-          <div className="px-3 py-2 bg-blue-50 border border-blue-200 rounded text-blue-700 text-xs mb-4">
-            This is a demo visualization while API issues are being resolved.
+        ) : chartData.length === 0 ? (
+          <div className="flex flex-col justify-center items-center h-64 text-gray-400">
+            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="8" y1="12" x2="16" y2="12" />
+            </svg>
+            <p className="mt-4 text-lg font-medium">No expense data</p>
           </div>
-        ) : null}
-        
-        <ResponsiveContainer width="100%" height={250}>
-          <PieChart>
-            <Pie
-              data={chartData}
-              dataKey="value"
-              nameKey="name"
-              cx="50%"
-              cy="50%"
-              innerRadius={60}
-              outerRadius={80}
-              label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-              labelLine={false}
-            >
-              {chartData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.fill} />
-              ))}
-            </Pie>
-            <Legend />
-          </PieChart>
-        </ResponsiveContainer>
-        
-        <div className="text-center mt-4">
-          <div className="text-2xl font-bold">
-            {formatCurrency(totalExpenses)}
-          </div>
-          <div className="text-sm text-gray-500">
-            TOTAL EXPENSES
-          </div>
-        </div>
+        ) : (
+          <>
+            <ResponsiveContainer width="100%" height={250}>
+              <PieChart>
+                <Pie
+                  data={chartData}
+                  dataKey="value"
+                  nameKey="name"
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={60}
+                  outerRadius={80}
+                  labelLine={true}
+                  label={renderCustomizedLabel}
+                >
+                  {chartData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.fill} />
+                  ))}
+                </Pie>
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+            
+            <div className="text-center mt-4">
+              <div className="text-2xl font-bold">
+                {formatCurrency(totalExpenses)}
+              </div>
+              <div className="text-sm text-gray-500">
+                TOTAL EXPENSES
+              </div>
+            </div>
+          </>
+        )}
       </CardContent>
     </Card>
   );
 };
 
-export default MinimalExpensesChart;
+export default BeautoxPieChart;
