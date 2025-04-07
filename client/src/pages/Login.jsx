@@ -9,6 +9,7 @@ import BeautoxLogo from "../assets/logos/Beautox.svg";
 import axios from "axios";
 import ForgotPassword from "@/components/modals/ForgotPassword";
 import ChevronLeftIcon from "@/assets/icons/ChevronLeftIcon";
+import { LoaderWrapper, Loader } from "@/components/ui/Loader";
 
 import {
   InputContainer,
@@ -25,6 +26,7 @@ function Login() {
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const { currentModal, openModal, closeModal } = useModal();
   const navigate = useNavigate();
@@ -46,6 +48,7 @@ function Login() {
     e.preventDefault();
     setErrorMessage("");
     setSuccessMessage("");
+    setIsLoading(true);
     const trimmedUsername = username.trim();
 
     try {
@@ -102,11 +105,18 @@ function Login() {
         error
       );
       setErrorMessage("An error occurred. Please try again later.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <div className="min-h-screen">
+      {isLoading && (
+        <LoaderWrapper fullScreen={true} overlay={true}>
+          <Loader size={100} text="Logging in..." />
+        </LoaderWrapper>
+      )}
       {/* Mobile and Tablet View (smaller than xl screens) */}
       <div className="xl:hidden min-h-screen relative">
         {/* Background Image with Overlay */}

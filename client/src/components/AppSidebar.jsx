@@ -80,22 +80,25 @@ export function AppSidebar({ ...props }) {
   // Retrieve the user role from localStorage and normalize it.
   const userRole = localStorage.getItem("role")?.toLowerCase();
 
-  // Adjust the sidebar items based on the user role
+  // Filter out items based on user role
   const navItems = sideBarInformation.filter((item) => {
-    if (userRole === "admin") {
-      return true; // Admins see all items
-    } else {
-      // Staff roles
-      if (item.title === "FINANCIAL OVERVIEW") {
-        return false; // Remove Financial Overview for staff
-      }
-      if (item.title === "SERVICES") {
-        // Replace AdministratorServices with StaffServices for staff
-        item.url = "/StaffServices";
-        item.onClick = handleRedirectStaffServices;
-      }
-      return true;
+    // Hide SERVICES from receptionist and aesthetician
+    if (
+      item.title === "SERVICES" &&
+      (userRole === "receptionist" || userRole === "aesthetician")
+    ) {
+      return false;
     }
+    
+    // Hide FINANCIAL OVERVIEW from receptionist and aesthetician
+    if (
+      item.title === "FINANCIAL OVERVIEW" &&
+      (userRole === "receptionist" || userRole === "aesthetician")
+    ) {
+      return false;
+    }
+    
+    return true;
   });
 
   return (

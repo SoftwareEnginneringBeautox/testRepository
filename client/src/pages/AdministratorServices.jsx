@@ -40,6 +40,8 @@ import CalendarIcon from "../assets/icons/CalendarIcon";
 import ArchiveIcon from "../assets/icons/ArchiveIcon";
 import EditIcon from "../assets/icons/EditIcon";
 
+import { Loader } from "@/components/ui/Loader";
+
 import axios from "axios";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
@@ -211,11 +213,11 @@ function AdministratorServices() {
               PRICE
             </TableHead>
             <TableHead
-            className="py-4 text-center"
-            data-cy="treatment-expiration-header"
-          >
-            EXPIRATION
-          </TableHead>
+              className="py-4 text-center"
+              data-cy="treatment-expiration-header"
+            >
+              EXPIRATION
+            </TableHead>
 
             <TableHead
               className="py-4 text-center"
@@ -252,7 +254,11 @@ function AdministratorServices() {
                   className="py-4 text-center"
                   data-cy={`treatment-expiration-${treatment.id}`}
                 >
-                  {treatment.expiration ? `${treatment.expiration} week${treatment.expiration > 1 ? "s" : ""}` : "-"}
+                  {treatment.expiration
+                    ? `${treatment.expiration} week${
+                        treatment.expiration > 1 ? "s" : ""
+                      }`
+                    : "-"}
                 </TableCell>
 
                 <TableCell
@@ -435,11 +441,13 @@ function AdministratorServices() {
                   ₱{pkg.price}
                 </TableCell>
                 <TableCell
-                className="py-4 text-center"
-                data-cy={`package-expiration-${pkg.id}`}
-              >
-                {pkg.expiration ? `${pkg.expiration} week${pkg.expiration > 1 ? "s" : ""}` : "-"}
-              </TableCell>
+                  className="py-4 text-center"
+                  data-cy={`package-expiration-${pkg.id}`}
+                >
+                  {pkg.expiration
+                    ? `${pkg.expiration} week${pkg.expiration > 1 ? "s" : ""}`
+                    : "-"}
+                </TableCell>
 
                 <TableCell
                   className="py-4 text-center"
@@ -564,6 +572,7 @@ function AdministratorServices() {
           data-cy="edit-treatment-modal"
         />
       )}
+      <Loader />
     </div>
   );
 }
