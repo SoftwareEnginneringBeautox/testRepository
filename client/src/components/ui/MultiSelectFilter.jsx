@@ -9,30 +9,25 @@ import {
 } from "@/components/ui/Select";
 import { Button } from "@/components/ui/Button";
 import FilterIcon from "@/assets/icons/FilterIcon";
-import SortIcon from "@/assets/icons/SortIcon";
 
-// Refactored MultiSelectFilter Component
 const MultiSelectFilter = ({
   options,
   selectedValues,
   setSelectedValues,
   placeholder = "Select options"
 }) => {
-  // Create a temporary state to track changes before applying
   const [tempSelectedValues, setTempSelectedValues] = useState([
     ...selectedValues
   ]);
 
-  // Handler for when select is opened - initialize the temp values
   const handleOpenChange = (open) => {
     if (open) {
-      // When opening, set temp values to current selected values
       setTempSelectedValues([...selectedValues]);
     }
   };
 
-  // Handle checkbox changes (updates temporary state only)
   const handleChange = (optionValue) => {
+    if (optionValue === "client") return; // Prevent unchecking "client"
     const newSelected = tempSelectedValues.includes(optionValue)
       ? tempSelectedValues.filter((v) => v !== optionValue)
       : [...tempSelectedValues, optionValue];
@@ -40,17 +35,15 @@ const MultiSelectFilter = ({
     setTempSelectedValues(newSelected);
   };
 
-  // Handle select all (updates temporary state only)
   const handleSelectAll = (isChecked) => {
     if (isChecked) {
       const allValues = options.map((opt) => opt.value);
       setTempSelectedValues(allValues);
     } else {
-      setTempSelectedValues([]);
+      setTempSelectedValues(["client"]); // Ensure "client" is always selected
     }
   };
 
-  // Apply changes when the apply button is clicked
   const handleApply = () => {
     setSelectedValues(tempSelectedValues);
   };
@@ -101,12 +94,14 @@ const MultiSelectFilter = ({
                   onCheckedChange={() => handleChange(option.value)}
                   id={`checkbox-${option.value}`}
                   data-cy={`checkbox-${option.value}`}
+                  disabled={option.value === "client"} // Disable unchecking "client"
                 />
                 <label
                   htmlFor={`checkbox-${option.value}`}
                   className="flex-1 cursor-pointer text-sm"
                 >
                   {option.label}
+                  {option.value === "client" && " (required)"}
                 </label>
               </div>
             ))}
