@@ -37,24 +37,27 @@ function EditCategory({ isOpen, onClose, category, onEditSuccess }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!categoryName || !categoryName.trim()) {
       alert("Please enter a category name");
       return;
     }
-    
+
     setIsSubmitting(true);
-    
+
     try {
       // Call the API to update the category
-      const response = await fetch(`http://localhost:4000/api/categories/${category.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: categoryName })
-      });
-      
+      const response = await fetch(
+        `http://localhost:4000/api/categories/${category.id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: categoryName })
+        }
+      );
+
       const result = await response.json();
-      
+
       if (result.success) {
         // If onEditSuccess callback is provided, call it
         if (onEditSuccess) {
@@ -84,7 +87,9 @@ function EditCategory({ isOpen, onClose, category, onEditSuccess }) {
         <ModalIcon>
           <ExpenseTypeIcon />
         </ModalIcon>
-        <ModalTitle data-cy="edit-category-title">EDIT EXPENSE CATEGORY</ModalTitle>
+        <ModalTitle data-cy="edit-category-title">
+          EDIT EXPENSE CATEGORY
+        </ModalTitle>
       </ModalHeader>
       <ModalBody>
         <form onSubmit={handleSubmit} data-cy="edit-category-form">
@@ -107,22 +112,22 @@ function EditCategory({ isOpen, onClose, category, onEditSuccess }) {
               </InputTextField>
             </InputContainer>
           </div>
-          <div className="flex flex-row gap-4 mt-6 w-full">
-            <Button 
+          <div className="flex sm:flex-row flex-col gap-4 mt-6 w-full">
+            <Button
               data-cy="cancel-edit-category-btn"
-              type="button" 
-              variant="outline" 
-              className="w-1/2" 
+              type="button"
+              variant="outline"
+              className="md:w-1/2"
               onClick={onClose}
               disabled={isSubmitting}
             >
               <ChevronLeftIcon />
               CANCEL AND RETURN
             </Button>
-            <Button 
+            <Button
               data-cy="submit-edit-category"
-              type="submit" 
-              className="w-1/2"
+              type="submit"
+              className="md:w-1/2"
               disabled={isSubmitting}
             >
               <EditIcon />

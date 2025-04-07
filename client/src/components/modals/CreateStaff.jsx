@@ -127,8 +127,12 @@ function CreateStaff({ isOpen, onClose }) {
                   placeholder="Select staff role"
                 />
                 <ModalSelectContent>
-                  <SelectItem data-cy="role-aesthetician" value="aesthetician">Aesthetician</SelectItem>
-                  <SelectItem data-cy="role-receptionist" value="receptionist">Receptionist</SelectItem>
+                  <SelectItem data-cy="role-aesthetician" value="aesthetician">
+                    Aesthetician
+                  </SelectItem>
+                  <SelectItem data-cy="role-receptionist" value="receptionist">
+                    Receptionist
+                  </SelectItem>
                 </ModalSelectContent>
               </Select>
             </InputContainer>
@@ -180,12 +184,22 @@ function CreateStaff({ isOpen, onClose }) {
             {error && <p className="text-red-500">{error}</p>}
           </div>
 
-          <div className="flex flex-row gap-4 mt-6 w-full">
-            <Button data-cy="cancel-create-staff" variant="outline" className="w-1/2" onClick={onClose}>
+          <div className="flex sm:flex-row flex-col gap-4 mt-6 w-full">
+            <Button
+              data-cy="cancel-create-staff"
+              variant="outline"
+              className="md:w-1/2"
+              onClick={onClose}
+            >
               <ChevronLeftIcon />
               CANCEL AND RETURN
             </Button>
-            <Button data-cy="submit-create-staff" type="submit" className="w-1/2" disabled={loading}>
+            <Button
+              data-cy="submit-create-staff"
+              type="submit"
+              className="md:w-1/2"
+              disabled={loading}
+            >
               <PlusIcon />
               {loading ? "CREATING..." : "CREATE STAFF"}
             </Button>

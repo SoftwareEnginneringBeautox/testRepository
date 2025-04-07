@@ -32,7 +32,6 @@ import PlusIcon from "@/assets/icons/PlusIcon";
 import ExpenseTypeIcon from "@/assets/icons/ExpenseTypeIcon";
 import CalendarIcon from "@/assets/icons/CalendarIcon";
 
-
 function CreateMonthlySales({ isOpen, onClose, onCreateSuccess, categories }) {
   // Ensure categories is always an array
   const safeCategories = Array.isArray(categories) ? categories : [];
@@ -40,7 +39,7 @@ function CreateMonthlySales({ isOpen, onClose, onCreateSuccess, categories }) {
   const [formData, setFormData] = useState({
     expenseType: "",
     amount: "",
-    date: new Date().toISOString().split('T')[0]
+    date: new Date().toISOString().split("T")[0]
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -125,8 +124,8 @@ function CreateMonthlySales({ isOpen, onClose, onCreateSuccess, categories }) {
                 <ModalSelectContent>
                   {safeCategories.length > 0 ? (
                     safeCategories.map((category) => (
-                      <SelectItem 
-                        key={category.id} 
+                      <SelectItem
+                        key={category.id}
                         value={category.name}
                         data-cy={`expense-type-option-${category.id}`}
                       >
@@ -134,7 +133,11 @@ function CreateMonthlySales({ isOpen, onClose, onCreateSuccess, categories }) {
                       </SelectItem>
                     ))
                   ) : (
-                    <SelectItem value="" disabled data-cy="no-categories-option">
+                    <SelectItem
+                      value=""
+                      disabled
+                      data-cy="no-categories-option"
+                    >
                       No categories available
                     </SelectItem>
                   )}
@@ -181,11 +184,11 @@ function CreateMonthlySales({ isOpen, onClose, onCreateSuccess, categories }) {
               </InputTextField>
             </InputContainer>
           </div>
-          <div className="flex flex-row gap-4 mt-6 w-full">
+          <div className="flex sm:flex-row flex-col gap-4 mt-6 w-full">
             <Button
               data-cy="cancel-expense-btn"
               variant="outline"
-              className="w-1/2"
+              className="md:w-1/2"
               onClick={onClose}
               type="button"
               disabled={isSubmitting}
@@ -193,9 +196,9 @@ function CreateMonthlySales({ isOpen, onClose, onCreateSuccess, categories }) {
               <ChevronLeftIcon />
               CANCEL AND RETURN
             </Button>
-            <Button 
+            <Button
               data-cy="submit-create-expense"
-              className="w-1/2" 
+              className="md:w-1/2"
               type="submit"
               disabled={isSubmitting}
             >

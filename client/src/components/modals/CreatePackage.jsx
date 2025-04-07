@@ -69,21 +69,19 @@ function CreatePackage({ isOpen, onClose }) {
       const selectedTreatments = treatmentsList.filter((t) =>
         selectedTreatmentIds.includes(t.id)
       );
-  
+
       const totalPerSession = selectedTreatments.reduce((sum, t) => {
         const price = parseFloat(t.price);
         return sum + (isNaN(price) ? 0 : price);
       }, 0);
-  
+
       const total = totalPerSession * parseInt(numberOfTreatments, 10);
       setAmount(total.toFixed(2));
     } else {
       setAmount("");
     }
   }, [selectedTreatmentIds, numberOfTreatments, treatmentsList]);
-  
 
-    
   if (!isOpen) return null;
 
   const treatmentOptions = treatmentsList.map((t) => ({
@@ -218,29 +216,29 @@ function CreatePackage({ isOpen, onClose }) {
             </InputContainer>
 
             <InputContainer>
-            <InputLabel>EXPIRATION (IN WEEKS)</InputLabel>
-          <InputTextField>
-            <InputIcon>
-              <CalendarIcon />
-            </InputIcon>
-            <Input
-              type="number"
-              min="1"
-              placeholder="e.g. 12 weeks"
-              value={expiration}
-              onChange={(e) => setExpiration(e.target.value)}
-              required
-              className="text-input"
-            />
-          </InputTextField>
+              <InputLabel>EXPIRATION (IN WEEKS)</InputLabel>
+              <InputTextField>
+                <InputIcon>
+                  <CalendarIcon />
+                </InputIcon>
+                <Input
+                  type="number"
+                  min="1"
+                  placeholder="e.g. 12 weeks"
+                  value={expiration}
+                  onChange={(e) => setExpiration(e.target.value)}
+                  required
+                  className="text-input"
+                />
+              </InputTextField>
             </InputContainer>
           </div>
 
-          <div className="flex flex-row gap-4 mt-6 w-full">
+          <div className="flex sm:flex-row flex-col gap-4 mt-6 w-full">
             <Button
               data-cy="cancel-package-btn"
               variant="outline"
-              className="w-1/2"
+              className="md:w-1/2"
               onClick={onClose}
               disabled={loading}
             >
@@ -250,7 +248,7 @@ function CreatePackage({ isOpen, onClose }) {
             <Button
               data-cy="save-package-btn"
               type="submit"
-              className="w-1/2"
+              className="md:w-1/2"
               disabled={loading}
             >
               <PlusIcon />

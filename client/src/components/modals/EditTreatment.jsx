@@ -26,7 +26,6 @@ import TreatmentIcon from "@/assets/icons/TreatmentIcon";
 import PesoIcon from "@/assets/icons/PesoIcon";
 import ClockIcon from "@/assets/icons/ClockIcon";
 
-
 function EditTreatment({ isOpen, onClose, entryData, onSubmit }) {
   const [formData, setFormData] = useState({
     treatment_name: "",
@@ -110,53 +109,53 @@ function EditTreatment({ isOpen, onClose, entryData, onSubmit }) {
                 />
               </InputTextField>
             </InputContainer>
+            <InputContainer>
+              <InputLabel>DURATION (MINUTES)</InputLabel>
+              <InputTextField>
+                <InputIcon>
+                  <ClockIcon />
+                </InputIcon>
+                <Input
+                  data-cy="treatment-duration"
+                  placeholder="e.g. 45"
+                  type="number"
+                  min="0"
+                  step="1"
+                  value={formData.duration}
+                  onChange={(e) =>
+                    setFormData({ ...formData, duration: e.target.value })
+                  }
+                  required
+                />
+              </InputTextField>
+            </InputContainer>
+
+            <InputContainer>
+              <InputLabel>EXPIRATION (IN WEEKS)</InputLabel>
+              <InputTextField>
+                <InputIcon>
+                  <TreatmentIcon />
+                </InputIcon>
+                <Input
+                  data-cy="treatment-expiration"
+                  placeholder="e.g. 12"
+                  type="number"
+                  min="0"
+                  step="1"
+                  value={formData.expiration}
+                  onChange={(e) =>
+                    setFormData({ ...formData, expiration: e.target.value })
+                  }
+                />
+              </InputTextField>
+            </InputContainer>
           </div>
 
-          <InputContainer>
-            <InputLabel>DURATION (MINUTES)</InputLabel>
-            <InputTextField>
-              <InputIcon>
-                <ClockIcon />
-              </InputIcon>
-              <Input
-                data-cy="treatment-duration"
-                placeholder="e.g. 45"
-                type="number"
-                min="0"
-                step="1"
-                value={formData.duration}
-                onChange={(e) =>
-                  setFormData({ ...formData, duration: e.target.value })
-                }
-                required
-              />
-            </InputTextField>
-          </InputContainer>
-          <InputContainer>
-          <InputLabel>EXPIRATION (IN WEEKS)</InputLabel>
-          <InputTextField>
-            <InputIcon>
-              <TreatmentIcon />
-            </InputIcon>
-            <Input
-              data-cy="treatment-expiration"
-              placeholder="e.g. 12"
-              type="number"
-              min="0"
-              step="1"
-              value={formData.expiration}
-              onChange={(e) =>
-                setFormData({ ...formData, expiration: e.target.value })
-              }
-            />
-          </InputTextField>
-        </InputContainer>
-
-          <div className="flex flex-row gap-4 mt-6 w-full">
+          <div className="flex sm:flex-row flex-col gap-4 mt-6 w-full">
             <Button
               data-cy="cancel-treatment-btn"
               variant="outline"
-              className="w-1/2"
+              className="md:w-1/2"
               onClick={onClose}
             >
               <ChevronLeftIcon />
@@ -164,7 +163,7 @@ function EditTreatment({ isOpen, onClose, entryData, onSubmit }) {
             </Button>
             <Button
               data-cy="save-treatment-btn"
-              className="w-1/2"
+              className="md:w-1/2"
               onClick={handleSubmit}
             >
               <EditIcon />

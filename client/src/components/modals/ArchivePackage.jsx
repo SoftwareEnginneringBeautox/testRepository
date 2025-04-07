@@ -23,11 +23,11 @@ function ArchivePackage({ isOpen, onClose, onArchive }) {
         ARCHIVE PACKAGE INFORMATION?
       </ModalTitle>
       <p>This will archive the package’s information within the system.</p>
-      <div className="flex flex-row gap-4 w-full">
+      <div className="flex sm:flex-row flex-col gap-4 w-full">
         <Button
           data-cy="cancel-archive-btn"
           variant="outline"
-          className="w-1/2"
+          className="md:w-1/2"
           onClick={onClose}
         >
           <ChevronLeftIcon />
@@ -35,7 +35,7 @@ function ArchivePackage({ isOpen, onClose, onArchive }) {
         </Button>
         <Button
           data-cy="confirm-archive-btn"
-          className="w-1/2"
+          className="md:w-1/2"
           onClick={onArchive}
         >
           <ArchiveIcon />
@@ -45,6 +45,5 @@ function ArchivePackage({ isOpen, onClose, onArchive }) {
     </ModalContainer>
   );
 }
-
 
 export default ArchivePackage;

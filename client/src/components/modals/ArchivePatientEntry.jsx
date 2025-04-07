@@ -23,12 +23,12 @@ function ArchivePatientEntry({ isOpen, onClose, onArchive }) {
         Deleting the chosen patient entry would mean there is no recovery for
         that entry.
       </p>
-      <div className=" flex flex-row gap-4 w-full">
-        <Button variant="outline" className="w-1/2" onClick={onClose}>
+      <div className=" flex sm:flex-row flex-col gap-4 w-full">
+        <Button variant="outline" className="md:w-1/2" onClick={onClose}>
           <ChevronLeftIcon />
           CANCEL AND RETURN
         </Button>
-        <Button className="w-1/2" onClick={onArchive}>
+        <Button className="md:w-1/2" onClick={onArchive}>
           <ArchiveIcon />
           ARCHIVE ENTRY
         </Button>

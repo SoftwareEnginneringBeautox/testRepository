@@ -135,10 +135,15 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
         <ModalIcon>
           <CircleUserIcon />
         </ModalIcon>
-        <ModalTitle data-cy="update-patient-title">UPDATE PATIENT RECORD</ModalTitle>
+        <ModalTitle data-cy="update-patient-title">
+          UPDATE PATIENT RECORD
+        </ModalTitle>
       </ModalHeader>
       <ModalBody>
-        <form onSubmit={(e) => e.preventDefault()} data-cy="update-patient-form">
+        <form
+          onSubmit={(e) => e.preventDefault()}
+          data-cy="update-patient-form"
+        >
           <div className="flex flex-col gap-4">
             <p data-cy="patient-name-display">
               PATIENT RECORD OF{" "}
@@ -147,7 +152,9 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
 
             <InputContainer>
               <InputLabel>PERSON IN CHARGE</InputLabel>
-              <p data-cy="person-in-charge-display">{originalData.person_in_charge}</p>
+              <p data-cy="person-in-charge-display">
+                {originalData.person_in_charge}
+              </p>
             </InputContainer>
 
             {/* PACKAGE */}
@@ -179,19 +186,25 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
 
             <InputContainer>
               <InputLabel>PAYMENT METHOD</InputLabel>
-              <p data-cy="payment-method-display">{originalData.payment_method}</p>
+              <p data-cy="payment-method-display">
+                {originalData.payment_method}
+              </p>
             </InputContainer>
           </div>
 
           <div className="flex flex-row w-full gap-4">
             <InputContainer className="flex-1">
               <InputLabel>DATE OF SESSION</InputLabel>
-              <p data-cy="date-of-session-display">{originalData.date_of_session}</p>
+              <p data-cy="date-of-session-display">
+                {originalData.date_of_session}
+              </p>
             </InputContainer>
 
             <InputContainer className="flex-1">
               <InputLabel>TIME OF SESSION</InputLabel>
-              <p data-cy="time-of-session-display">{originalData.time_of_session}</p>
+              <p data-cy="time-of-session-display">
+                {originalData.time_of_session}
+              </p>
             </InputContainer>
           </div>
 
@@ -272,19 +285,19 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
             </div>
           </div>
 
-          <div className="flex flex-row gap-4 mt-6 w-full">
-            <Button 
+          <div className="flex sm:flex-row flex-col gap-4 mt-6 w-full">
+            <Button
               data-cy="cancel-update-patient-btn"
-              variant="outline" 
-              className="w-1/2" 
+              variant="outline"
+              className="md:w-1/2"
               onClick={onClose}
             >
               <ChevronLeftIcon />
               CANCEL AND RETURN
             </Button>
-            <Button 
+            <Button
               data-cy="submit-update-patient"
-              className="w-1/2"
+              className="md:w-1/2"
               onClick={() => onSubmit(formData)}
             >
               <UpdateIcon />

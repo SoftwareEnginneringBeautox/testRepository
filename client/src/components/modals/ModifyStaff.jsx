@@ -5,7 +5,7 @@ import {
   ModalHeader,
   ModalTitle,
   ModalIcon,
-  ModalBody,
+  ModalBody
 } from "@/components/ui/Modal";
 
 import {
@@ -13,7 +13,7 @@ import {
   InputTextField,
   InputLabel,
   InputIcon,
-  Input,
+  Input
 } from "@/components/ui/Input";
 
 import {
@@ -21,9 +21,8 @@ import {
   ModalSelectTrigger,
   SelectValue,
   ModalSelectContent,
-  SelectItem,
+  SelectItem
 } from "@/components/ui/Select";
-
 
 import { Button } from "../ui/Button";
 
@@ -39,7 +38,7 @@ const ModifyStaff = ({ isOpen, onClose, entryData, onSubmit }) => {
     username: "",
     role: "",
     dayoff: "",
-    email: "",
+    email: ""
   });
 
   useEffect(() => {
@@ -48,7 +47,7 @@ const ModifyStaff = ({ isOpen, onClose, entryData, onSubmit }) => {
         username: entryData.username || "",
         role: entryData.role || "",
         dayoff: entryData.dayoff || "",
-        email: entryData.email || "",
+        email: entryData.email || ""
       });
     }
   }, [entryData]);
@@ -96,7 +95,7 @@ const ModifyStaff = ({ isOpen, onClose, entryData, onSubmit }) => {
                 />
               </InputTextField>
             </InputContainer>
-            
+
             <InputContainer>
               <InputLabel>STAFF EMAIL</InputLabel>
               <InputTextField>
@@ -116,56 +115,74 @@ const ModifyStaff = ({ isOpen, onClose, entryData, onSubmit }) => {
             </InputContainer>
 
             <InputContainer>
-            <InputLabel>STAFF ROLE</InputLabel>
-            <Select
-              value={formData.role}
-              onValueChange={(value) =>
-                setFormData({ ...formData, role: value })
-              }
-            >
-              <ModalSelectTrigger data-cy="edit-staff-role" className="w-full">
-                <UserIDIcon className="w-4 h-4 mr-2" />
-                <SelectValue placeholder="Role of the Staff" />
-              </ModalSelectTrigger>
-              <ModalSelectContent>
-                <SelectItem data-cy="role-aesthetician" value="aesthetician">Aesthetician</SelectItem>
-                <SelectItem data-cy="role-receptionist" value="receptionist">Receptionist</SelectItem>
-              </ModalSelectContent>
-            </Select>
-          </InputContainer>
+              <InputLabel>STAFF ROLE</InputLabel>
+              <Select
+                value={formData.role}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, role: value })
+                }
+              >
+                <ModalSelectTrigger
+                  data-cy="edit-staff-role"
+                  className="w-full"
+                >
+                  <UserIDIcon className="w-4 h-4 mr-2" />
+                  <SelectValue placeholder="Role of the Staff" />
+                </ModalSelectTrigger>
+                <ModalSelectContent>
+                  <SelectItem data-cy="role-aesthetician" value="aesthetician">
+                    Aesthetician
+                  </SelectItem>
+                  <SelectItem data-cy="role-receptionist" value="receptionist">
+                    Receptionist
+                  </SelectItem>
+                </ModalSelectContent>
+              </Select>
+            </InputContainer>
 
-          <InputContainer>
-            <InputLabel>DESIGNATED DAY OFF</InputLabel>
-            <Select
-              value={formData.dayoff}
-              onValueChange={(value) =>
-                setFormData({ ...formData, dayoff: value })
-              }
-            >
-              <ModalSelectTrigger data-cy="edit-staff-dayoff" className="w-full">
-                <CalendarIcon className="w-4 h-4 mr-2" />
-                <SelectValue placeholder="Day Off of the Staff" />
-              </ModalSelectTrigger>
-              <ModalSelectContent>
-                <SelectItem value="SUNDAY">SUNDAY</SelectItem>
-                <SelectItem value="MONDAY">MONDAY</SelectItem>
-                <SelectItem value="TUESDAY">TUESDAY</SelectItem>
-                <SelectItem value="WEDNESDAY">WEDNESDAY</SelectItem>
-                <SelectItem value="THURSDAY">THURSDAY</SelectItem>
-                <SelectItem value="FRIDAY">FRIDAY</SelectItem>
-                <SelectItem value="SATURDAY">SATURDAY</SelectItem>
-              </ModalSelectContent>
-            </Select>
-          </InputContainer>
-              
+            <InputContainer>
+              <InputLabel>DESIGNATED DAY OFF</InputLabel>
+              <Select
+                value={formData.dayoff}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, dayoff: value })
+                }
+              >
+                <ModalSelectTrigger
+                  data-cy="edit-staff-dayoff"
+                  className="w-full"
+                >
+                  <CalendarIcon className="w-4 h-4 mr-2" />
+                  <SelectValue placeholder="Day Off of the Staff" />
+                </ModalSelectTrigger>
+                <ModalSelectContent>
+                  <SelectItem value="SUNDAY">SUNDAY</SelectItem>
+                  <SelectItem value="MONDAY">MONDAY</SelectItem>
+                  <SelectItem value="TUESDAY">TUESDAY</SelectItem>
+                  <SelectItem value="WEDNESDAY">WEDNESDAY</SelectItem>
+                  <SelectItem value="THURSDAY">THURSDAY</SelectItem>
+                  <SelectItem value="FRIDAY">FRIDAY</SelectItem>
+                  <SelectItem value="SATURDAY">SATURDAY</SelectItem>
+                </ModalSelectContent>
+              </Select>
+            </InputContainer>
           </div>
 
-          <div className="flex flex-row gap-4 mt-6 w-full">
-            <Button data-cy="cancel-edit-staff" variant="outline" className="w-1/2" onClick={onClose}>
+          <div className="flex sm:flex-row flex-col  gap-4 mt-6 w-full">
+            <Button
+              data-cy="cancel-edit-staff"
+              variant="outline"
+              className="md:w-1/2"
+              onClick={onClose}
+            >
               <ChevronLeftIcon />
               CANCEL AND RETURN
             </Button>
-            <Button data-cy="submit-edit-staff" className="w-1/2" onClick={handleSubmit}>
+            <Button
+              data-cy="submit-edit-staff"
+              className="md:w-1/2"
+              onClick={handleSubmit}
+            >
               <EditIcon />
               EDIT STAFF
             </Button>

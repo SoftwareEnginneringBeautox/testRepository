@@ -78,43 +78,46 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
         time_of_session: entryData.time_of_session?.slice(0, 5) || "",
         consent_form_signed: entryData.consent_form_signed ?? false,
         person_in_charge: entryData.person_in_charge || "",
-        patient_name: entryData.patient_name || "", 
+        patient_name: entryData.patient_name || "",
         total_amount: entryData.total_amount || "",
         contact_number: entryData.contact_number || "",
         age: entryData.age || "",
-        email: entryData.email || "",
+        email: entryData.email || ""
       };
-  
+
       setOriginalData(initial);
       setFormData(initial);
     }
     const fetchAestheticians = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/getusers?archived=false`, {
-          credentials: "include"
-        });
-    
+        const response = await fetch(
+          `${API_BASE_URL}/getusers?archived=false`,
+          {
+            credentials: "include"
+          }
+        );
+
         if (!response.ok) {
           throw new Error(`HTTP ${response.status} - ${response.statusText}`);
         }
-    
+
         const data = await response.json(); // Correct way to get JSON from fetch
-    
+
         const aestheticians = Array.isArray(data)
-          ? data.filter((user) =>
-              user.role?.toLowerCase() === "aesthetician" &&
-              user.archived !== true
+          ? data.filter(
+              (user) =>
+                user.role?.toLowerCase() === "aesthetician" &&
+                user.archived !== true
             )
           : [];
-    
+
         setAestheticianList(aestheticians);
       } catch (error) {
         console.error("Error fetching aestheticians:", error);
         setAestheticianList([]); // fallback to empty list
       }
     };
-    
-    
+
     const fetchPackages = async () => {
       try {
         const res = await fetch(`${API_BASE_URL}/api/packages?archived=false`, {
@@ -129,9 +132,12 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
 
     const fetchTreatments = async () => {
       try {
-        const res = await fetch(`${API_BASE_URL}/api/treatments?archived=false`, {
-          credentials: "include"
-        });
+        const res = await fetch(
+          `${API_BASE_URL}/api/treatments?archived=false`,
+          {
+            credentials: "include"
+          }
+        );
         const data = await res.json();
         setTreatmentsList(data);
       } catch (err) {
@@ -142,37 +148,56 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
     fetchAestheticians();
     fetchPackages();
     fetchTreatments();
-    
   }, [entryData]);
-  
+
   useEffect(() => {
     // if no package or treatment selected, keep original total
-    if (!formData.package_name && (!formData.treatment_ids || formData.treatment_ids.length === 0)) {
-      setFormData(prev => ({ ...prev, total_amount: originalData.total_amount }));
+    if (
+      !formData.package_name &&
+      (!formData.treatment_ids || formData.treatment_ids.length === 0)
+    ) {
+      setFormData((prev) => ({
+        ...prev,
+        total_amount: originalData.total_amount
+      }));
       return;
     }
-  
+
     if (formData.package_name) {
-      const pkg = packagesList.find(p => p.package_name === formData.package_name);
+      const pkg = packagesList.find(
+        (p) => p.package_name === formData.package_name
+      );
       const price = parseFloat(pkg?.price);
       if (!isNaN(price)) {
-        setFormData(prev => ({ ...prev, total_amount: price.toFixed(2) }));
+        setFormData((prev) => ({ ...prev, total_amount: price.toFixed(2) }));
       }
-    } else if (Array.isArray(formData.treatment_ids) && formData.treatment_ids.length > 0) {
-      const selectedTreatments = treatmentsList.filter(t =>
+    } else if (
+      Array.isArray(formData.treatment_ids) &&
+      formData.treatment_ids.length > 0
+    ) {
+      const selectedTreatments = treatmentsList.filter((t) =>
         formData.treatment_ids.includes(t.id)
       );
       const total = selectedTreatments.reduce((sum, t) => {
         const price = parseFloat(t.price);
         return sum + (isNaN(price) ? 0 : price);
       }, 0);
-      setFormData(prev => ({ ...prev, total_amount: total.toFixed(2) }));
+      setFormData((prev) => ({ ...prev, total_amount: total.toFixed(2) }));
     }
-  }, [formData.package_name, formData.treatment_ids, treatmentsList, packagesList]);
-  
+  }, [
+    formData.package_name,
+    formData.treatment_ids,
+    treatmentsList,
+    packagesList
+  ]);
+
   if (!isOpen) return null;
-  const total = parseFloat(formData.total_amount ?? originalData.total_amount ?? "0");
-  const paid = parseFloat(formData.amount_paid ?? originalData.amount_paid ?? "0");
+  const total = parseFloat(
+    formData.total_amount ?? originalData.total_amount ?? "0"
+  );
+  const paid = parseFloat(
+    formData.amount_paid ?? originalData.amount_paid ?? "0"
+  );
   const remainingBalance = total - paid;
 
   return (
@@ -213,8 +238,8 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
                 />
               </InputTextField>
             </InputContainer>
-            
-             {/* CONTACT NUMBER */}
+
+            {/* CONTACT NUMBER */}
             <InputContainer>
               <InputLabel>CONTACT NUMBER</InputLabel>
               <InputTextField>
@@ -266,9 +291,7 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
               <InputLabel>PERSON IN CHARGE</InputLabel>
 
               <Select
-                value={
-                  formData.person_in_charge
-                }
+                value={formData.person_in_charge}
                 onValueChange={(value) =>
                   setFormData({ ...formData, person_in_charge: value })
                 }
@@ -276,26 +299,27 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
                 <ModalSelectTrigger
                   data-cy="person-in-charge-select"
                   icon={<UserIDIcon className="w-4 h-4" />}
-                  placeholder={formData.person_in_charge || "Select person in charge"}
+                  placeholder={
+                    formData.person_in_charge || "Select person in charge"
+                  }
                 />
                 <ModalSelectContent>
-                {aestheticianList.map((aesthetician) => (
-                  <SelectItem 
-                    data-cy="person-in-charge-option"
-                    key={aesthetician.id} 
-                    value={aesthetician.username}>
-                    {aesthetician.username}
-                  </SelectItem>
-                ))}
-              </ModalSelectContent>
-
+                  {aestheticianList.map((aesthetician) => (
+                    <SelectItem
+                      data-cy="person-in-charge-option"
+                      key={aesthetician.id}
+                      value={aesthetician.username}
+                    >
+                      {aesthetician.username}
+                    </SelectItem>
+                  ))}
+                </ModalSelectContent>
               </Select>
               {formSubmitAttempted && formErrors.person_in_charge && (
                 <p className="text-red-500 text-sm mt-1">
                   {formErrors.person_in_charge}
                 </p>
               )}
-
             </InputContainer>
 
             {/* PACKAGE */}
@@ -307,93 +331,90 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
                   setFormData((prev) => ({
                     ...prev,
                     package_name: value === "CLEAR" ? "" : value,
-                    treatment_ids: [], // clear treatments when package is selected
+                    treatment_ids: [] // clear treatments when package is selected
                   }));
                 }}
-                
-                
               >
                 <ModalSelectTrigger
                   data-cy="package-select"
                   icon={<PackageIcon className="w-4 h-4" />}
                   placeholder="Select package"
-            
                 />
                 <ModalSelectContent>
                   <SelectItem value="CLEAR">Clear Selection</SelectItem>
 
-                  {!Boolean(formData.treatment ?? originalData.treatment) && 
+                  {!Boolean(formData.treatment ?? originalData.treatment) &&
                     packagesList.map((pkg) => (
-                    <SelectItem 
-                      data-cy="package-option"
-                      key={pkg.id} 
-                      value={pkg.package_name}>
-                      {pkg.package_name} - ₱{pkg.price}
-                    </SelectItem>
-                  ))}
+                      <SelectItem
+                        data-cy="package-option"
+                        key={pkg.id}
+                        value={pkg.package_name}
+                      >
+                        {pkg.package_name} - ₱{pkg.price}
+                      </SelectItem>
+                    ))}
                 </ModalSelectContent>
               </Select>
-             
             </InputContainer>
 
             <InputContainer>
-            <InputLabel>TREATMENTS</InputLabel>
-            <TreatmentMultiSelect
-              data-cy="treatments-multiselect"
-              icon={<TreatmentIcon className="w-4 h-4" />}
-              options={[
-                { value: "CLEAR", label: "Clear Selection" },
-                ...treatmentsList.map((t) => ({
-                  value: t.id,
-                  label: `${t.treatment_name} - ₱${t.price}`
-                }))
-              ]}
-              value={Array.isArray(originalData.treatment_ids) ? originalData.treatment_ids : []}
-              onChange={(selected) => {
-                if (selected.includes("CLEAR")) {
-                  setFormData((prev) => ({
-                    ...prev,
-                    treatment_ids: [],
-                    package_name: "",
-                    total_amount: ""
-                  }));
-                } else {
-                  setFormData((prev) => ({
-                    ...prev,
-                    treatment_ids: selected,
-                    package_name: "", // Always clear package when treatments are selected
-                  }));
-                }
-              }}
-              
-              placeholder="Select treatments"
-            />
-
-          </InputContainer>
-
-          <InputContainer>
-            <InputLabel>TOTAL AMOUNT</InputLabel>
-            <InputTextField>
-              <InputIcon>
-                <PesoIcon />
-              </InputIcon>
-              <Input
-                data-cy="total-amount-input"
-                readOnly
-                className="bg-[#F5F3F0] text-gray-500"
+              <InputLabel>TREATMENTS</InputLabel>
+              <TreatmentMultiSelect
+                data-cy="treatments-multiselect"
+                icon={<TreatmentIcon className="w-4 h-4" />}
+                options={[
+                  { value: "CLEAR", label: "Clear Selection" },
+                  ...treatmentsList.map((t) => ({
+                    value: t.id,
+                    label: `${t.treatment_name} - ₱${t.price}`
+                  }))
+                ]}
                 value={
-                  isNaN(formData.total_amount)
-                    ? ""
-                    : new Intl.NumberFormat("en-PH", {
-                        style: "currency",
-                        currency: "PHP"
-                      }).format(formData.total_amount)
+                  Array.isArray(originalData.treatment_ids)
+                    ? originalData.treatment_ids
+                    : []
                 }
-                
+                onChange={(selected) => {
+                  if (selected.includes("CLEAR")) {
+                    setFormData((prev) => ({
+                      ...prev,
+                      treatment_ids: [],
+                      package_name: "",
+                      total_amount: ""
+                    }));
+                  } else {
+                    setFormData((prev) => ({
+                      ...prev,
+                      treatment_ids: selected,
+                      package_name: "" // Always clear package when treatments are selected
+                    }));
+                  }
+                }}
+                placeholder="Select treatments"
               />
-            </InputTextField>
-          </InputContainer>
+            </InputContainer>
 
+            <InputContainer>
+              <InputLabel>TOTAL AMOUNT</InputLabel>
+              <InputTextField>
+                <InputIcon>
+                  <PesoIcon />
+                </InputIcon>
+                <Input
+                  data-cy="total-amount-input"
+                  readOnly
+                  className="bg-[#F5F3F0] text-gray-500"
+                  value={
+                    isNaN(formData.total_amount)
+                      ? ""
+                      : new Intl.NumberFormat("en-PH", {
+                          style: "currency",
+                          currency: "PHP"
+                        }).format(formData.total_amount)
+                  }
+                />
+              </InputTextField>
+            </InputContainer>
 
             <InputContainer>
               <InputLabel>AMOUNT PAID</InputLabel>
@@ -407,9 +428,7 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
                   placeholder="₱0.00"
                   decimalsLimit={2}
                   allowNegativeValue={false}
-                  value={
-                    originalData.amount_paid 
-                  }
+                  value={originalData.amount_paid}
                   onChange={(e) =>
                     setFormData({ ...formData, amount_paid: e.target.value })
                   }
@@ -438,38 +457,30 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
               </InputTextField>
             </InputContainer>
 
-
             <InputContainer>
-            <InputLabel>PAYMENT METHOD</InputLabel>
-            <RadioGroup
-              value={originalData.payment_method}
-              onValueChange={(value) =>
-                setFormData({ ...formData, payment_method: value })
-              }
-              className="flex flex-col gap-2 mt-2"
-            >
-              <div className="flex items-center gap-2">
-                <RadioGroupItem
-                  value="full-payment"
-                  id="full-payment"
-                />
-                <label htmlFor="full-payment" className="text-sm">
-                  FULL PAYMENT
-                </label>
-              </div>
+              <InputLabel>PAYMENT METHOD</InputLabel>
+              <RadioGroup
+                value={originalData.payment_method}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, payment_method: value })
+                }
+                className="flex flex-col gap-2 mt-2"
+              >
+                <div className="flex items-center gap-2">
+                  <RadioGroupItem value="full-payment" id="full-payment" />
+                  <label htmlFor="full-payment" className="text-sm">
+                    FULL PAYMENT
+                  </label>
+                </div>
 
-              <div className="flex items-center gap-2">
-                <RadioGroupItem
-                  value="installment"
-                  id="installment"
-                />
-                <label htmlFor="installment" className="text-sm">
-                  INSTALLMENT
-                </label>
-              </div>
-            </RadioGroup>
-          </InputContainer>
-
+                <div className="flex items-center gap-2">
+                  <RadioGroupItem value="installment" id="installment" />
+                  <label htmlFor="installment" className="text-sm">
+                    INSTALLMENT
+                  </label>
+                </div>
+              </RadioGroup>
+            </InputContainer>
           </div>
 
           <div className="flex flex-row w-full gap-4">
@@ -575,11 +586,11 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
             </div>
           </div>
 
-          <div className="flex flex-row gap-4 mt-6 w-full">
+          <div className="flex sm:flex-row flex-col gap-4 mt-6 w-full">
             <Button
               type="button"
               variant="outline"
-              className="w-1/2"
+              className="md:w-1/2"
               onClick={onClose}
             >
               <ChevronLeftIcon />
@@ -587,11 +598,11 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
             </Button>
             <Button
               type="button"
-              className="w-1/2"
+              className="md:w-1/2"
               onClick={() => {
                 setFormSubmitAttempted(true);
                 const errors = {};
-                
+
                 // ✅ Validation: PERSON IN CHARGE is required
                 if (
                   !(formData.person_in_charge ?? originalData.person_in_charge)
@@ -601,30 +612,37 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
 
                 // Validate session date against package expiration
                 if (formData.package_name || originalData.package_name) {
-                  const pkgName = formData.package_name ?? originalData.package_name;
-                  const selectedPkg = packagesList.find((pkg) => pkg.package_name === pkgName);
-                  if (selectedPkg?.expiration_date && formData.date_of_session) {
+                  const pkgName =
+                    formData.package_name ?? originalData.package_name;
+                  const selectedPkg = packagesList.find(
+                    (pkg) => pkg.package_name === pkgName
+                  );
+                  if (
+                    selectedPkg?.expiration_date &&
+                    formData.date_of_session
+                  ) {
                     const sessionDate = new Date(formData.date_of_session);
-                    const expirationDate = new Date(selectedPkg.expiration_date);
+                    const expirationDate = new Date(
+                      selectedPkg.expiration_date
+                    );
                     if (sessionDate > expirationDate) {
                       errors.date_of_session = `Session date exceeds package expiration date (${selectedPkg.expiration_date})`;
                     }
                   }
                 }
-              
+
                 setFormErrors(errors);
                 if (Object.keys(errors).length > 0) return;
-              
+
                 const cleanedData = { ...formData };
                 Object.keys(cleanedData).forEach((key) => {
                   if (cleanedData[key] === "") {
                     cleanedData[key] = null; // force null to override DB
                   }
                 });
-              
+
                 onSubmit({ id: entryData.id, ...cleanedData });
               }}
-              
             >
               <EditIcon />
               EDIT ENTRY

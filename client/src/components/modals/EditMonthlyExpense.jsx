@@ -30,7 +30,13 @@ import EditIcon from "@/assets/icons/EditIcon";
 import ExpenseTypeIcon from "@/assets/icons/ExpenseTypeIcon";
 import CalendarIcon from "@/assets/icons/CalendarIcon";
 
-function EditMonthlySales({ isOpen, onClose, onEditSuccess, initialData, categories }) {
+function EditMonthlySales({
+  isOpen,
+  onClose,
+  onEditSuccess,
+  initialData,
+  categories
+}) {
   // Ensure categories is always an array
   const safeCategories = Array.isArray(categories) ? categories : [];
   const [formData, setFormData] = useState({
@@ -48,7 +54,7 @@ function EditMonthlySales({ isOpen, onClose, onEditSuccess, initialData, categor
         date: initialData.date || ""
       });
     }
-  }, [initialData, isOpen]); 
+  }, [initialData, isOpen]);
 
   if (!isOpen) return null;
 
@@ -76,7 +82,9 @@ function EditMonthlySales({ isOpen, onClose, onEditSuccess, initialData, categor
         <ModalIcon>
           <PesoIcon />
         </ModalIcon>
-        <ModalTitle data-cy="edit-expense-title">EDIT MONTHLY EXPENSE ENTRY</ModalTitle>
+        <ModalTitle data-cy="edit-expense-title">
+          EDIT MONTHLY EXPENSE ENTRY
+        </ModalTitle>
       </ModalHeader>
       <ModalBody>
         <form onSubmit={handleSubmit} data-cy="edit-expense-form">
@@ -86,7 +94,7 @@ function EditMonthlySales({ isOpen, onClose, onEditSuccess, initialData, categor
               <Select
                 value={formData.category}
                 onValueChange={(value) =>
-                  setFormData(prev => ({...prev, category: value}))
+                  setFormData((prev) => ({ ...prev, category: value }))
                 }
                 data-cy="expense-type-select"
               >
@@ -98,8 +106,8 @@ function EditMonthlySales({ isOpen, onClose, onEditSuccess, initialData, categor
                 <ModalSelectContent>
                   {safeCategories.length > 0 ? (
                     safeCategories.map((category) => (
-                      <SelectItem 
-                        key={category.id} 
+                      <SelectItem
+                        key={category.id}
                         value={category.name}
                         data-cy={`expense-type-option-${category.id}`}
                       >
@@ -107,7 +115,11 @@ function EditMonthlySales({ isOpen, onClose, onEditSuccess, initialData, categor
                       </SelectItem>
                     ))
                   ) : (
-                    <SelectItem value="" disabled data-cy="no-categories-option">
+                    <SelectItem
+                      value=""
+                      disabled
+                      data-cy="no-categories-option"
+                    >
                       No categories available
                     </SelectItem>
                   )}
@@ -155,20 +167,20 @@ function EditMonthlySales({ isOpen, onClose, onEditSuccess, initialData, categor
               </InputTextField>
             </InputContainer>
           </div>
-          <div className="flex flex-row gap-4 mt-6 w-full">
+          <div className="flex sm:flex-row flex-col gap-4 mt-6 w-full">
             <Button
               data-cy="cancel-edit-expense-btn"
               variant="outline"
-              className="w-1/2"
+              className="md:w-1/2"
               onClick={onClose}
               type="button"
             >
               <ChevronLeftIcon />
               CANCEL AND RETURN
             </Button>
-            <Button 
+            <Button
               data-cy="submit-edit-expense"
-              className="w-1/2" 
+              className="md:w-1/2"
               type="submit"
             >
               <EditIcon />

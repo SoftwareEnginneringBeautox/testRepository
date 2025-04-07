@@ -103,24 +103,26 @@ function ForgotPassword({ isOpen, onClose }) {
       <ModalBody>
         {step === 1 ? (
           <form onSubmit={sendOTP} className="flex flex-col gap-4 items-center">
-            <p>Kindly input the email of your account.</p>
-            <InputContainer data-cy="forgot-email-container">
-              <InputLabel>Email</InputLabel>
-              <InputTextField >
-                <InputIcon>
-                  <EmailIcon />
-                </InputIcon>
-                <Input
-                  type="email"
-                  id="email"
-                  placeholder="Enter your email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  data-cy="forgot-email"
-                />
-              </InputTextField>
-            </InputContainer>
+            <div className="flex gap-4 flex-col w-full">
+              <p>Kindly input the email of your account.</p>
+              <InputContainer data-cy="forgot-email-container">
+                <InputLabel>Email</InputLabel>
+                <InputTextField>
+                  <InputIcon>
+                    <EmailIcon />
+                  </InputIcon>
+                  <Input
+                    type="email"
+                    id="email"
+                    placeholder="Enter your email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    data-cy="forgot-email"
+                  />
+                </InputTextField>
+              </InputContainer>
+            </div>
             <div className="flex gap-4 w-full">
               <Button variant="outline" onClick={onClose} className="w-1/2">
                 <ChevronLeftIcon /> BACK
@@ -137,7 +139,12 @@ function ForgotPassword({ isOpen, onClose }) {
             className="flex flex-col gap-4 items-center"
           >
             <p>Enter the 6-digit code sent to your email.</p>
-            <InputOTP data-cy="otp-input" value={otp} onChange={setOtp} maxLength={6}>
+            <InputOTP
+              data-cy="otp-input"
+              value={otp}
+              onChange={setOtp}
+              maxLength={6}
+            >
               <InputOTPGroup>
                 <InputOTPSlot index={0} />
                 <InputOTPSlot index={1} />
@@ -172,42 +179,44 @@ function ForgotPassword({ isOpen, onClose }) {
             onSubmit={handleResetPassword}
             className="flex flex-col gap-4 items-center"
           >
-            <p>
-              Enter a new password for your account and retype it to verify.
-            </p>
-            <InputContainer>
-              <InputLabel>New Password</InputLabel>
-              <InputTextField>
-                <InputIcon>
-                  <PasswordIcon />
-                </InputIcon>
-                <Input
-                  data-cy="new-password"
-                  type="password"
-                  placeholder="New Password"
-                  // value={newPassword}
-                  // onChange={(e) => setNewPassword(e.target.value)}
-                  required
-                />
-              </InputTextField>
-            </InputContainer>
+            <div className="w-full">
+              <p>
+                Enter a new password for your account and retype it to verify.
+              </p>
+              <InputContainer>
+                <InputLabel>New Password</InputLabel>
+                <InputTextField>
+                  <InputIcon>
+                    <PasswordIcon />
+                  </InputIcon>
+                  <Input
+                    data-cy="new-password"
+                    type="password"
+                    placeholder="New Password"
+                    // value={newPassword}
+                    // onChange={(e) => setNewPassword(e.target.value)}
+                    required
+                  />
+                </InputTextField>
+              </InputContainer>
 
-            <InputContainer>
-              <InputLabel>Confirm Password</InputLabel>
-              <InputTextField>
-                <InputIcon>
-                  <ConfirmIcon />
-                </InputIcon>
-                <Input
-                  data-cy="confirm-password"
-                  type="password"
-                  placeholder="Confirm Password"
-                  // value={confirmPassword}
-                  // onChange={(e) => setConfirmPassword(e.target.value)}
-                  required
-                />
-              </InputTextField>
-            </InputContainer>
+              <InputContainer>
+                <InputLabel>Confirm Password</InputLabel>
+                <InputTextField>
+                  <InputIcon>
+                    <ConfirmIcon />
+                  </InputIcon>
+                  <Input
+                    data-cy="confirm-password"
+                    type="password"
+                    placeholder="Confirm Password"
+                    // value={confirmPassword}
+                    // onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                  />
+                </InputTextField>
+              </InputContainer>
+            </div>
 
             <div className="flex gap-4 w-full">
               <Button

@@ -48,7 +48,7 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
       const response = await fetch(`${API_BASE_URL}/api/appointments`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/json"
         },
         body: JSON.stringify({
           full_name: fullName,
@@ -58,7 +58,7 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
           date_of_session: dateOfSession,
           time_of_session: timeOfSession,
           created_at: createdAt
-        }),
+        })
       });
 
       const data = await response.json();
@@ -79,10 +79,16 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
   return (
     <ModalContainer data-cy="schedule-appointment-modal">
       <ModalHeader>
-        <ModalTitle data-cy="schedule-appointment-title">SCHEDULE APPOINTMENT</ModalTitle>
+        <ModalTitle data-cy="schedule-appointment-title">
+          SCHEDULE APPOINTMENT
+        </ModalTitle>
       </ModalHeader>
       <ModalBody>
-        <form className="flex flex-col gap-5" onSubmit={handleSubmit} data-cy="schedule-appointment-form">
+        <form
+          className="flex flex-col gap-5"
+          onSubmit={handleSubmit}
+          data-cy="schedule-appointment-form"
+        >
           {/* FULL NAME */}
           <InputContainer>
             <InputLabel>FULL NAME</InputLabel>
@@ -193,21 +199,26 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
           </div>
 
           {/* ACTION BUTTONS */}
-          <div className="flex flex-row gap-2 w-full" data-cy="schedule-appointment-actions">
+          <div
+            className="flex sm:flex-row flex-col gap-2 w-full"
+            data-cy="schedule-appointment-actions"
+          >
             <Button
               data-cy="schedule-return-btn"
               variant="outline"
               fullWidth={true}
               type="button"
               onClick={onClose}
+              className="md:w-1/2"
             >
               <ChevronLeftIcon />
               RETURN
             </Button>
-            <Button 
+            <Button
               data-cy="schedule-submit-btn"
-              fullWidth={true} 
+              fullWidth={true}
               type="submit"
+              className="md:w-1/2"
             >
               <ArrowNorthEastIcon />
               SUBMIT SCHEDULE APPOINTMENT

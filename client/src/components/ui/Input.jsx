@@ -55,7 +55,7 @@ const InputTextField = ({ children, className, fullWidth }) => {
   return (
     <div
       className={cn(
-        "flex items-center md:gap-2 h-12 bg-customNeutral-100 rounded-lg border-2 border-customNeutral-200 focus-within:border-lavender-400 dark:border-neutral-800 dark:bg-neutral-950 dark:ring-offset-neutral-950 dark:file:text-neutral-50 dark:placeholder:text-neutral-400 px-3",
+        "flex items-center sm:gap-1 md:gap-2 h-12 bg-customNeutral-100 rounded-lg border-2 border-customNeutral-200 focus-within:border-lavender-400 dark:border-neutral-800 dark:bg-neutral-950 dark:ring-offset-neutral-950 dark:file:text-neutral-50 dark:placeholder:text-neutral-400 px-3",
         fullWidth && "w-full",
         className
       )}

@@ -49,7 +49,8 @@ function CreateCategory({ isOpen, onClose, onCreateSuccess, categories = [] }) {
 
     // Check for duplicate category names (case insensitive)
     const isDuplicate = categories.some(
-      category => category.name.toLowerCase() === categoryName.trim().toLowerCase()
+      (category) =>
+        category.name.toLowerCase() === categoryName.trim().toLowerCase()
     );
 
     if (isDuplicate) {
@@ -90,7 +91,6 @@ function CreateCategory({ isOpen, onClose, onCreateSuccess, categories = [] }) {
     }
   };
 
-
   return (
     <ModalContainer data-cy="create-category-modal">
       <ModalHeader>
@@ -120,7 +120,7 @@ function CreateCategory({ isOpen, onClose, onCreateSuccess, categories = [] }) {
               </InputTextField>
             </InputContainer>
             {error && (
-              <div 
+              <div
                 data-cy="category-error-message"
                 className="bg-red-50 border border-red-200 text-red-600 px-4 py-2 rounded-md text-sm mt-2"
               >
@@ -128,12 +128,12 @@ function CreateCategory({ isOpen, onClose, onCreateSuccess, categories = [] }) {
               </div>
             )}
           </div>
-          <div className="flex flex-row gap-4 mt-6 w-full">
+          <div className="flex sm:flex-row flex-col gap-4 mt-6 w-full">
             <Button
               data-cy="cancel-category-btn"
               type="button"
               variant="outline"
-              className="w-1/2"
+              className="md:w-1/2"
               onClick={onClose}
               disabled={isSubmitting}
             >
@@ -143,7 +143,7 @@ function CreateCategory({ isOpen, onClose, onCreateSuccess, categories = [] }) {
             <Button
               data-cy="submit-create-category"
               type="submit"
-              className="w-1/2"
+              className="md:w-1/2"
               disabled={isSubmitting}
             >
               <PlusIcon />

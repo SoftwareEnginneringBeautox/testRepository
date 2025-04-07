@@ -74,8 +74,7 @@ function CreateTreatment({ isOpen, onClose }) {
     const payload = {
       treatment_name: treatmentName,
       price: parseFloat(price) || 0,
-      duration: parseInt(duration, 10) || 0,
-      
+      duration: parseInt(duration, 10) || 0
     };
 
     try {
@@ -157,8 +156,8 @@ function CreateTreatment({ isOpen, onClose }) {
                   data-cy="treatment-duration"
                   placeholder="e.g. 45"
                   type="number"
-                  min="0"
-                  step="1"
+                  // min="0"
+                  // step="1"
                   value={duration}
                   onChange={(e) => setDuration(e.target.value)}
                   required
@@ -166,16 +165,14 @@ function CreateTreatment({ isOpen, onClose }) {
               </InputTextField>
             </InputContainer>
 
-          
-
             {error && <p className="text-red-500">{error}</p>}
           </div>
 
-          <div className="flex flex-row gap-4 mt-6 w-full">
+          <div className="flex sm:flex-row flex-col gap-4 mt-6 w-full">
             <Button
               data-cy="cancel-treatment-btn"
               variant="outline"
-              className="w-1/2"
+              className="md:w-1/2"
               onClick={onClose}
               disabled={loading}
             >
@@ -185,7 +182,7 @@ function CreateTreatment({ isOpen, onClose }) {
             <Button
               data-cy="save-treatment-btn"
               type="submit"
-              className="w-1/2"
+              className="md:w-1/2"
               disabled={loading}
             >
               <PlusIcon />

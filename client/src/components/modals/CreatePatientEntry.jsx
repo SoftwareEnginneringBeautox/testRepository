@@ -86,8 +86,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
       const pkg = packagesList.find((p) => p.package_name === packageName);
       if (pkg && !isNaN(parseFloat(pkg.price))) {
         setAmount(parseFloat(pkg.price).toFixed(2));
-      }
-       else {
+      } else {
         setAmount(""); // fallback if price is not a number
       }
     } else if (Array.isArray(treatment) && treatment.length > 0) {
@@ -101,8 +100,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
       setAmount("");
     }
   }, [packageName, treatment, treatmentsList, packagesList]);
-  
-  
+
   // Compute total amount automatically whenever amount or discount changes
   useEffect(() => {
     const numericAmount = parseFloat(amount) || 0;
@@ -125,7 +123,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
             user.role.toLowerCase() === "aesthetician" &&
             !user.archived // assuming 'archived' is a boolean field
         );
-        
+
         setAestheticianList(aestheticians);
       } catch (error) {
         console.error("Error fetching aestheticians:", error);
@@ -155,20 +153,21 @@ function CreatePatientEntry({ isOpen, onClose }) {
   useEffect(() => {
     const fetchTreatments = async () => {
       try {
-        const res = await fetch(`${API_BASE_URL}/api/treatments?archived=false`, {
-          credentials: "include"
-        });
+        const res = await fetch(
+          `${API_BASE_URL}/api/treatments?archived=false`,
+          {
+            credentials: "include"
+          }
+        );
         const data = await res.json();
         setTreatmentsList(data);
       } catch (err) {
         console.error("Error fetching treatments:", err);
       }
     };
-  
+
     fetchTreatments();
   }, []);
-
- 
 
   useEffect(() => {
     if (isOpen) {
@@ -193,16 +192,17 @@ function CreatePatientEntry({ isOpen, onClose }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setFormSubmitAttempted(true);
-  
+
     const errors = {};
     if (!personInCharge) {
       errors.personInCharge = "Person in charge is required";
     }
-  
+
     if (!packageName && (!treatment || treatment.length === 0)) {
-      errors.packageOrTreatment = "Select either a package or at least one treatment";
+      errors.packageOrTreatment =
+        "Select either a package or at least one treatment";
     }
-  
+
     // Contact number validation - make required
     if (!contactNumber) {
       errors.contactNumber = "Contact number is required";
@@ -212,7 +212,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
         errors.contactNumber = "Contact number should be in 09XXXXXXXXX format";
       }
     }
-  
+
     // Age validation - make required
     if (!age) {
       errors.age = "Age is required";
@@ -222,7 +222,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
         errors.age = "Age must be between 0 and 120";
       }
     }
-  
+
     // Email validation - make required
     if (!email) {
       errors.email = "Email is required";
@@ -232,37 +232,43 @@ function CreatePatientEntry({ isOpen, onClose }) {
         errors.email = "Please enter a valid email address";
       }
     }
-  
+
     if (packageName && dateOfSession) {
-      const selectedPackage = packagesList.find((p) => p.package_name === packageName);
+      const selectedPackage = packagesList.find(
+        (p) => p.package_name === packageName
+      );
       const weeks = selectedPackage?.expiration;
-  
+
       if (weeks && !isNaN(weeks)) {
         const createdAt = new Date(); // form creation time
         const sessionDate = new Date(dateOfSession);
         const expirationLimit = new Date(createdAt);
         expirationLimit.setDate(expirationLimit.getDate() + weeks * 7); // add weeks
-  
+
         if (sessionDate > expirationLimit) {
-          errors.dateOfSession = `Session date exceeds package expiration limit of ${weeks} week(s) from today (${expirationLimit.toISOString().slice(0, 10)})`;
+          errors.dateOfSession = `Session date exceeds package expiration limit of ${weeks} week(s) from today (${expirationLimit
+            .toISOString()
+            .slice(0, 10)})`;
         }
       }
     }
-  
+
     setFormErrors(errors);
     if (Object.keys(errors).length > 0) return;
-  
+
     const numericTotal = parseFloat(totalAmount) || 0;
     const numericDiscount = parseFloat(packageDiscount) || 0;
     const numericAmount = parseFloat(amount) || 0;
     const numericAmountPaid = parseFloat(amountPaid) || 0;
-  
-    const selectedTreatmentIds = Array.isArray(treatment) ? treatment.map(Number) : [];
-  
+
+    const selectedTreatmentIds = Array.isArray(treatment)
+      ? treatment.map(Number)
+      : [];
+
     const selectedTreatmentNames = treatmentsList
       .filter((t) => selectedTreatmentIds.includes(t.id))
       .map((t) => t.treatment_name);
-  
+
     const payload = {
       patient_name: patientName,
       contact_number: contactNumber,
@@ -282,14 +288,14 @@ function CreatePatientEntry({ isOpen, onClose }) {
       consent_form_signed: consentFormSigned,
       reference_number: referenceNumber
     };
-  
+
     try {
       const response = await fetch(`${API_BASE_URL}/api/patients`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       });
-  
+
       if (response.ok) {
         // Also insert into appointments table
         const patientData = await response.json();
@@ -303,15 +309,18 @@ function CreatePatientEntry({ isOpen, onClose }) {
             email,
             date_of_session: dateOfSession,
             time_of_session: timeOfSession,
-            archived: false,
+            archived: false
           };
-      
-          const appointmentRes = await fetch(`${API_BASE_URL}/api/appointments`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(appointmentPayload)
-          });
-      
+
+          const appointmentRes = await fetch(
+            `${API_BASE_URL}/api/appointments`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(appointmentPayload)
+            }
+          );
+
           if (!appointmentRes.ok) {
             const errText = await appointmentRes.text();
             console.error("❌ Failed to insert appointment:", errText);
@@ -321,10 +330,9 @@ function CreatePatientEntry({ isOpen, onClose }) {
         } catch (err) {
           console.error("❌ Error inserting into appointments:", err);
         }
-      
+
         onClose();
-      }
-      else {
+      } else {
         const errorText = await response.text();
         console.error("Submission failed:", errorText);
       }
@@ -332,16 +340,13 @@ function CreatePatientEntry({ isOpen, onClose }) {
       console.error("Error submitting form:", error);
     }
   };
-  
-  
-  
 
   const numericTotalAmount = parseFloat(totalAmount) || 0;
   const numericAmountPaid = parseFloat(amountPaid) || 0;
   const remainingBalance = numericTotalAmount - numericAmountPaid;
 
   return (
-    <ModalContainer  data-cy="create-patient-entry-modal">
+    <ModalContainer data-cy="create-patient-entry-modal">
       <ModalHeader>
         <ModalIcon>
           <UserIcon />
@@ -359,7 +364,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
                   <UserIcon />
                 </InputIcon>
                 <Input
-                data-cy="patient-name-input"
+                  data-cy="patient-name-input"
                   placeholder="Full name of the patient"
                   value={patientName}
                   onChange={(e) => setPatientName(e.target.value)}
@@ -374,11 +379,15 @@ function CreatePatientEntry({ isOpen, onClose }) {
               <InputLabel>CONTACT NUMBER</InputLabel>
               <InputTextField>
                 <Input
-                data-cy="contact-number-input"
+                  data-cy="contact-number-input"
                   placeholder="e.g. 09XXXXXXXXX"
                   value={contactNumber}
                   onChange={(e) => setContactNumber(e.target.value)}
-                  className={`bg-[#F5F3F0] ${formSubmitAttempted && formErrors.contactNumber ? "border-red-500" : ""}`}
+                  className={`bg-[#F5F3F0] ${
+                    formSubmitAttempted && formErrors.contactNumber
+                      ? "border-red-500"
+                      : ""
+                  }`}
                 />
               </InputTextField>
               {formSubmitAttempted && formErrors.contactNumber && (
@@ -393,19 +402,21 @@ function CreatePatientEntry({ isOpen, onClose }) {
               <InputLabel>AGE</InputLabel>
               <InputTextField>
                 <Input
-                 data-cy="age-input"
+                  data-cy="age-input"
                   type="number"
                   min="0"
                   placeholder="Age"
                   value={age}
                   onChange={(e) => setAge(e.target.value)}
-                  className={`bg-[#F5F3F0] ${formSubmitAttempted && formErrors.age ? "border-red-500" : ""}`}
+                  className={`bg-[#F5F3F0] ${
+                    formSubmitAttempted && formErrors.age
+                      ? "border-red-500"
+                      : ""
+                  }`}
                 />
               </InputTextField>
               {formSubmitAttempted && formErrors.age && (
-                <p className="text-red-500 text-sm mt-1">
-                  {formErrors.age}
-                </p>
+                <p className="text-red-500 text-sm mt-1">{formErrors.age}</p>
               )}
             </InputContainer>
 
@@ -414,18 +425,20 @@ function CreatePatientEntry({ isOpen, onClose }) {
               <InputLabel>EMAIL</InputLabel>
               <InputTextField>
                 <Input
-                data-cy="email-input"
+                  data-cy="email-input"
                   type="email"
                   placeholder="example@email.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className={`bg-[#F5F3F0] ${formSubmitAttempted && formErrors.email ? "border-red-500" : ""}`}
+                  className={`bg-[#F5F3F0] ${
+                    formSubmitAttempted && formErrors.email
+                      ? "border-red-500"
+                      : ""
+                  }`}
                 />
               </InputTextField>
               {formSubmitAttempted && formErrors.email && (
-                <p className="text-red-500 text-sm mt-1">
-                  {formErrors.email}
-                </p>
+                <p className="text-red-500 text-sm mt-1">{formErrors.email}</p>
               )}
             </InputContainer>
 
@@ -440,7 +453,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
                 }}
               >
                 <ModalSelectTrigger
-                data-cy="person-in-charge-select"
+                  data-cy="person-in-charge-select"
                   icon={<UserIDIcon className="w-4 h-4" />}
                   placeholder="Select person in charge"
                   className={
@@ -451,7 +464,11 @@ function CreatePatientEntry({ isOpen, onClose }) {
                 />
                 <ModalSelectContent>
                   {aestheticianList.map((user) => (
-                    <SelectItem data-cy="person-in-charge-option" key={user.id} value={user.username}>
+                    <SelectItem
+                      data-cy="person-in-charge-option"
+                      key={user.id}
+                      value={user.username}
+                    >
                       {user.username}
                     </SelectItem>
                   ))}
@@ -481,7 +498,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
                 }}
               >
                 <ModalSelectTrigger
-                data-cy="package-select"
+                  data-cy="package-select"
                   icon={<PackageIcon className="w-4 h-4" />}
                   placeholder="Select package"
                   className={
@@ -491,9 +508,15 @@ function CreatePatientEntry({ isOpen, onClose }) {
                   }
                 />
                 <ModalSelectContent>
-                  <SelectItem data-cy="package-option" value="CLEAR">Clear Selection</SelectItem>
+                  <SelectItem data-cy="package-option" value="CLEAR">
+                    Clear Selection
+                  </SelectItem>
                   {packagesList.map((pkg) => (
-                    <SelectItem data-cy="package-option"  key={pkg.id} value={pkg.package_name}>
+                    <SelectItem
+                      data-cy="package-option"
+                      key={pkg.id}
+                      value={pkg.package_name}
+                    >
                       {pkg.package_name} - ₱{pkg.price}
                     </SelectItem>
                   ))}
@@ -507,40 +530,40 @@ function CreatePatientEntry({ isOpen, onClose }) {
             </InputContainer>
 
             {/* TREATMENTS */}
-              <InputContainer>
-                <InputLabel>TREATMENTS</InputLabel>
-                <TreatmentMultiSelect
+            <InputContainer>
+              <InputLabel>TREATMENTS</InputLabel>
+              <TreatmentMultiSelect
                 data-cy="treatment-select"
-                  options={[
-                    { value: "CLEAR", label: "Clear Selection" },
-                    ...treatmentsList.map((t) => ({
-                      value: t.id,
-                      label: `${t.treatment_name} - ₱${t.price}`
-                    }))
-                  ]}
-                  value={Array.isArray(treatment) ? treatment : []}
-                  onChange={(selected) => {
-                    if (selected.includes("CLEAR")) {
-                      setTreatment([]);
-                    } else {
-                      setTreatment(selected);
-                    }
-                    setPackageName(""); // <-- always clear package here
-                  }}
-                  placeholder="Select treatments"
-                  className={
-                    formSubmitAttempted && formErrors.packageOrTreatment
-                      ? "border-red-500"
-                      : ""
+                options={[
+                  { value: "CLEAR", label: "Clear Selection" },
+                  ...treatmentsList.map((t) => ({
+                    value: t.id,
+                    label: `${t.treatment_name} - ₱${t.price}`
+                  }))
+                ]}
+                value={Array.isArray(treatment) ? treatment : []}
+                onChange={(selected) => {
+                  if (selected.includes("CLEAR")) {
+                    setTreatment([]);
+                  } else {
+                    setTreatment(selected);
                   }
-                />
+                  setPackageName(""); // <-- always clear package here
+                }}
+                placeholder="Select treatments"
+                className={
+                  formSubmitAttempted && formErrors.packageOrTreatment
+                    ? "border-red-500"
+                    : ""
+                }
+              />
 
-                {formSubmitAttempted && formErrors.packageOrTreatment && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {formErrors.packageOrTreatment}
-                  </p>
-                )}
-              </InputContainer>
+              {formSubmitAttempted && formErrors.packageOrTreatment && (
+                <p className="text-red-500 text-sm mt-1">
+                  {formErrors.packageOrTreatment}
+                </p>
+              )}
+            </InputContainer>
 
             {/* AMOUNT (CURRENCY) */}
             <InputContainer>
@@ -550,7 +573,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
                   <PesoIcon />
                 </InputIcon>
                 <CurrencyInput
-                data-cy="amount-input"
+                  data-cy="amount-input"
                   className="outline-none flex-1 bg-[#F5F3F0]"
                   prefix="₱"
                   placeholder="₱0.00"
@@ -570,7 +593,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
                   <PercentageIcon />
                 </InputIcon>
                 <CurrencyInput
-                data-cy="package-discount-input"
+                  data-cy="package-discount-input"
                   className="outline-none flex-1 bg-[#F5F3F0]"
                   suffix="%"
                   placeholder="0%"
@@ -608,7 +631,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
                 <InputIcon>
                   <PesoIcon />
                 </InputIcon>
-                <CurrencyInput           
+                <CurrencyInput
                   data-cy="amount-paid-input"
                   className="outline-none flex-1 bg-[#F5F3F0]"
                   prefix="₱"
@@ -654,13 +677,21 @@ function CreatePatientEntry({ isOpen, onClose }) {
                 onValueChange={(val) => setPaymentMethod(val)}
               >
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem data-cy="payment-method-radio-full-payment" value="full-payment" id="full-payment" />
+                  <RadioGroupItem
+                    data-cy="payment-method-radio-full-payment"
+                    value="full-payment"
+                    id="full-payment"
+                  />
                   <label htmlFor="full-payment" className="text-sm">
                     FULL PAYMENT
                   </label>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem data-cy="payment-method-radio-installment"  value="installment" id="installment" />
+                  <RadioGroupItem
+                    data-cy="payment-method-radio-installment"
+                    value="installment"
+                    id="installment"
+                  />
                   <label htmlFor="installment" className="text-sm">
                     INSTALLMENT
                   </label>
@@ -678,7 +709,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
                   <CalendarIcon />
                 </InputIcon>
                 <Input
-                data-cy="date-of-session-input"
+                  data-cy="date-of-session-input"
                   type="date"
                   className="text-input bg-[#F5F3F0]"
                   placeholder="Date of Session"
@@ -701,7 +732,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
                   <ClockIcon />
                 </InputIcon>
                 <Input
-                data-cy="time-of-session-input"
+                  data-cy="time-of-session-input"
                   type="time"
                   className="text-input bg-[#F5F3F0]"
                   placeholder="Time of Session"
@@ -745,25 +776,25 @@ function CreatePatientEntry({ isOpen, onClose }) {
           </div>
 
           {/* ACTION BUTTONS */}
-          <div className="flex flex-row gap-4 mt-6 w-full">
+          <div className="flex sm:flex-row flex-col gap-4 mt-6 w-full">
             <Button
-            data-cy="submit-create-patient"
+              data-cy="submit-create-patient"
               type="button"
               variant="outline"
-              className="w-1/2"
+              className="md:w-1/2"
               onClick={onClose}
             >
               <ChevronLeftIcon />
               CANCEL AND RETURN
             </Button>
-            <Button type="submit" className="w-1/2">
+            <Button type="submit" className="md:w-1/2">
               <PlusIcon />
               ADD ENTRY
             </Button>
           </div>
         </form>
       </ModalBody>
-    </ModalContainer >
+    </ModalContainer>
   );
 }
 

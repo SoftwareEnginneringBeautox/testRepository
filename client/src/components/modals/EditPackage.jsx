@@ -26,7 +26,6 @@ import HashtagIcon from "@/assets/icons/HashtagIcon";
 import PesoIcon from "@/assets/icons/PesoIcon";
 import EditIcon from "@/assets/icons/EditIcon";
 
-
 function EditPackage({ isOpen, onClose, entryData, onSubmit }) {
   const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -45,9 +44,12 @@ function EditPackage({ isOpen, onClose, entryData, onSubmit }) {
   useEffect(() => {
     const fetchTreatments = async () => {
       try {
-        const res = await fetch(`${API_BASE_URL}/api/treatments?archived=false`, {
-          credentials: "include"
-        });
+        const res = await fetch(
+          `${API_BASE_URL}/api/treatments?archived=false`,
+          {
+            credentials: "include"
+          }
+        );
         const data = await res.json();
         const activeTreatments = Array.isArray(data)
           ? data.filter((t) => !t.is_archived)
@@ -63,15 +65,15 @@ function EditPackage({ isOpen, onClose, entryData, onSubmit }) {
 
   // ✅ Initialize formData only once per modal open
   useEffect(() => {
-    
     if (
       !isOpen ||
       !entryData ||
       !Array.isArray(entryData.treatments) ||
       entryData.treatments.length === 0 ||
       initialized.current
-    ) return;
-  
+    )
+      return;
+
     setFormData({
       package_name: entryData.package_name || "",
       treatment_ids: entryData.treatments.map((t) => t?.id).filter(Boolean),
@@ -83,7 +85,7 @@ function EditPackage({ isOpen, onClose, entryData, onSubmit }) {
 
     initialized.current = true;
   }, [isOpen, entryData]);
-  
+
   if (!isOpen) return null;
 
   const handleSubmit = () => {
@@ -135,20 +137,19 @@ function EditPackage({ isOpen, onClose, entryData, onSubmit }) {
 
             {/* Treatments */}
             <InputContainer>
-            <InputLabel>TREATMENTS</InputLabel>
-            <TreatmentMultiSelect
-              options={treatments.map((t) => ({
-                value: t.id,
-                label: `${t.treatment_name} - ₱${t.price}`
-              }))}
-              placeholder="Select treatments"
-              value={formData.treatment_ids}
-              onChange={(val) =>
-                setFormData({ ...formData, treatment_ids: val })
-              }
-            />
-          </InputContainer>
-
+              <InputLabel>TREATMENTS</InputLabel>
+              <TreatmentMultiSelect
+                options={treatments.map((t) => ({
+                  value: t.id,
+                  label: `${t.treatment_name} - ₱${t.price}`
+                }))}
+                placeholder="Select treatments"
+                value={formData.treatment_ids}
+                onChange={(val) =>
+                  setFormData({ ...formData, treatment_ids: val })
+                }
+              />
+            </InputContainer>
 
             {/* Sessions */}
             <InputContainer>
@@ -189,30 +190,30 @@ function EditPackage({ isOpen, onClose, entryData, onSubmit }) {
             </InputContainer>
 
             <InputContainer>
-            <InputLabel>EXPIRATION (IN WEEKS)</InputLabel>
-            <InputTextField>
-              <InputIcon>
-                <PackageIcon />
-              </InputIcon>
-              <Input
-                type="number"
-                min="1"
-                placeholder="e.g. 12 weeks"
-                value={formData.expiration}
-                onChange={(e) =>
-                  setFormData({ ...formData, expiration: e.target.value })
-                }
-              />
-            </InputTextField>
+              <InputLabel>EXPIRATION (IN WEEKS)</InputLabel>
+              <InputTextField>
+                <InputIcon>
+                  <PackageIcon />
+                </InputIcon>
+                <Input
+                  type="number"
+                  min="1"
+                  placeholder="e.g. 12 weeks"
+                  value={formData.expiration}
+                  onChange={(e) =>
+                    setFormData({ ...formData, expiration: e.target.value })
+                  }
+                />
+              </InputTextField>
             </InputContainer>
           </div>
 
           {/* Buttons */}
-          <div className="flex flex-row gap-4 mt-6 w-full">
+          <div className="flex sm:flex-row flex-col gap-4 mt-6 w-full">
             <Button
               data-cy="cancel-package-btn"
               variant="outline"
-              className="w-1/2"
+              className="md:w-1/2"
               onClick={onClose}
             >
               <ChevronLeftIcon />
@@ -220,7 +221,7 @@ function EditPackage({ isOpen, onClose, entryData, onSubmit }) {
             </Button>
             <Button
               data-cy="save-package-btn"
-              className="w-1/2"
+              className="md:w-1/2"
               onClick={handleSubmit}
             >
               <EditIcon />
