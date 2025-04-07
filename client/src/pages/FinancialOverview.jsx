@@ -740,7 +740,7 @@ function FinancialOverview() {
           </SelectContent>
         </Select>
 
-        {/* Use MultiSelectFilter for column selection */}
+        {/* Refactored MultiSelectFilter with apply button */}
         <MultiSelectFilter
           options={columns}
           selectedValues={selectedColumns}
@@ -818,59 +818,101 @@ function FinancialOverview() {
                   <PaginationPrevious
                     onClick={() => setSalesPage(Math.max(1, salesPage - 1))}
                     disabled={salesPage === 1}
-                    className={
-                      salesPage === 1
-                        ? "opacity-50 cursor-not-allowed"
-                        : "cursor-pointer"
-                    }
                     data-cy="sales-prev-page"
                   />
                 </PaginationItem>
 
-                {Array.from({ length: Math.min(5, totalSalesPages) }).map(
-                  (_, index) => {
-                    let pageNumber;
+                {(() => {
+                  const pages = [];
+                  let showEllipsis = false;
 
-                    // Logic to determine which page numbers to show
-                    if (totalSalesPages <= 5) {
-                      pageNumber = index + 1;
-                    } else if (salesPage <= 3) {
-                      pageNumber = index + 1;
-                    } else if (salesPage >= totalSalesPages - 2) {
-                      pageNumber = totalSalesPages - 4 + index;
-                    } else {
-                      pageNumber = salesPage - 2 + index;
+                  // Determine which page numbers to show
+                  if (totalSalesPages <= 5) {
+                    // Show all pages if 5 or fewer
+                    for (let i = 1; i <= totalSalesPages; i++) {
+                      pages.push(i);
                     }
+                  } else {
+                    // For more than 5 pages, use sliding window logic
+                    if (salesPage <= 3) {
+                      // Near the start: show first 4 pages
+                      for (let i = 1; i <= 4; i++) {
+                        pages.push(i);
+                      }
+                      showEllipsis = true;
 
-                    if (pageNumber > 0 && pageNumber <= totalSalesPages) {
+                      // Last page will be added separately in next check
+                    } else if (salesPage >= totalSalesPages - 2) {
+                      // Near the end: show last 4 pages
+                      pages.push(1); // Always show first page
+                      showEllipsis = true;
+
+                      for (
+                        let i = totalSalesPages - 3;
+                        i <= totalSalesPages;
+                        i++
+                      ) {
+                        pages.push(i);
+                      }
+                    } else {
+                      // Middle: show current page with neighbors
+                      pages.push(1); // Always show first page
+                      showEllipsis = true;
+
+                      for (let i = salesPage - 1; i <= salesPage + 1; i++) {
+                        pages.push(i);
+                      }
+
+                      // Add ellipsis after current page area
+                      pages.push(-1); // Marker for second ellipsis
+                      pages.push(totalSalesPages); // Always show last page
+                    }
+                  }
+
+                  // Display the determined page numbers
+                  return pages.map((pageNumber) => {
+                    if (pageNumber === -1) {
+                      // This is our marker for the second ellipsis
                       return (
-                        <PaginationItem key={pageNumber}>
-                          <PaginationLink
-                            isActive={pageNumber === salesPage}
-                            onClick={() => setSalesPage(pageNumber)}
-                            data-cy={`sales-page-${pageNumber}`}
-                          >
-                            {pageNumber}
-                          </PaginationLink>
+                        <PaginationItem key="ellipsis-end">
+                          <PaginationEllipsis />
                         </PaginationItem>
                       );
                     }
-                    return null;
-                  }
-                )}
 
-                {totalSalesPages > 5 && salesPage < totalSalesPages - 2 && (
-                  <PaginationItem>
+                    return (
+                      <PaginationItem key={`page-${pageNumber}`}>
+                        <PaginationLink
+                          isActive={pageNumber === salesPage}
+                          onClick={() => setSalesPage(pageNumber)}
+                          data-cy={`sales-page-${pageNumber}`}
+                        >
+                          {pageNumber}
+                        </PaginationLink>
+                      </PaginationItem>
+                    );
+                  });
+                })()}
+
+                {/* Show ellipsis if needed (applies only in specific cases) */}
+                {totalSalesPages > 5 && salesPage <= 3 && (
+                  <PaginationItem key="ellipsis-end">
                     <PaginationEllipsis />
                   </PaginationItem>
                 )}
 
-                <PaginationItem>
-                  <PaginationLast
-                    pageNumber={totalSalesPages}
-                    currentPage={salesPage}
-                  />
-                </PaginationItem>
+                {/* Show last page if not already included in our pages array */}
+                {totalSalesPages > 5 && salesPage <= 3 && (
+                  <PaginationItem key={`page-${totalSalesPages}`}>
+                    <PaginationLink
+                      isActive={totalSalesPages === salesPage}
+                      onClick={() => setSalesPage(totalSalesPages)}
+                      data-cy={`sales-page-${totalSalesPages}`}
+                    >
+                      {totalSalesPages}
+                    </PaginationLink>
+                  </PaginationItem>
+                )}
 
                 <PaginationItem>
                   <PaginationNext
@@ -878,11 +920,6 @@ function FinancialOverview() {
                       setSalesPage(Math.min(totalSalesPages, salesPage + 1))
                     }
                     disabled={salesPage === totalSalesPages}
-                    className={
-                      salesPage === totalSalesPages
-                        ? "opacity-50 cursor-not-allowed"
-                        : "cursor-pointer"
-                    }
                     data-cy="sales-next-page"
                   />
                 </PaginationItem>
