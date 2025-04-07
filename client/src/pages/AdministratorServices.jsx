@@ -40,7 +40,7 @@ import CalendarIcon from "../assets/icons/CalendarIcon";
 import ArchiveIcon from "../assets/icons/ArchiveIcon";
 import EditIcon from "../assets/icons/EditIcon";
 
-import Loader from "@/components/ui/Loader";
+import { Loader } from "@/components/ui/Loader";
 
 import axios from "axios";
 
