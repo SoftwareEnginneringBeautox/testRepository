@@ -10,6 +10,8 @@ import axios from "axios";
 import ForgotPassword from "@/components/modals/ForgotPassword";
 import ChevronLeftIcon from "@/assets/icons/ChevronLeftIcon";
 import { LoaderWrapper, Loader } from "@/components/ui/Loader";
+// Import the hook for reCAPTCHA v3
+import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 
 import {
   InputContainer,
@@ -27,9 +29,13 @@ function Login() {
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [recaptchaError, setRecaptchaError] = useState("");
 
   const { currentModal, openModal, closeModal } = useModal();
   const navigate = useNavigate();
+
+  // Get executeRecaptcha function from the v3 hook
+  const { executeRecaptcha } = useGoogleReCaptcha();
 
   // Listen for login events from other tabs.
   useEffect(() => {
@@ -48,11 +54,71 @@ function Login() {
     e.preventDefault();
     setErrorMessage("");
     setSuccessMessage("");
-    setIsLoading(true);
-    const trimmedUsername = username.trim();
+    setRecaptchaError("");
+
+    if (!executeRecaptcha) {
+      console.error("reCAPTCHA not yet available");
+      setRecaptchaError("reCAPTCHA is not yet available. Please try again in a moment.");
+      return;
+    }
 
     try {
+      setIsLoading(true);
+      // Execute reCAPTCHA for action "login" and get the token
+      const token = await executeRecaptcha("login");
+
+      if (!token) {
+        setRecaptchaError("reCAPTCHA verification failed. Please try again.");
+        setIsLoading(false);
+        return;
+      }
+
+      // Trim the username input
+      const trimmedUsername = username.trim();
+
       console.log("Attempting login for:", trimmedUsername);
+      const response = await axios.post(
+        `${API_BASE_URL}/login`,
+        { 
+          username: trimmedUsername, 
+          password,
+          recaptchaToken: token // Send the v3 token to your backend for verification
+        },
+        { withCredentials: true }
+      );
+
+      // Process the response from the server
+      if (response.data.success) {
+        setSuccessMessage("Login successful! Redirecting...");
+        console.log("Login successful for:", trimmedUsername);
+
+        // Save authentication details in localStorage.
+        localStorage.setItem("token", response.data.token);
+        localStorage.setItem("role", response.data.role);
+        localStorage.setItem("username", response.data.username);
+        localStorage.setItem("loginTime", Date.now());
+        localStorage.setItem("login", Date.now());
+        window.dispatchEvent(new Event("userProfileUpdated"));
+
+        // Redirect based on role.
+        if (response.data.role === "admin") {
+          navigate("/AdminDashboard");
+        } else if (response.data.role === "receptionist" || response.data.role === "aesthetician") {
+          navigate("/StaffDashboard");
+        } else {
+          navigate("/dashboard");
+        }
+      } else {
+        console.log(`Login failed for "${trimmedUsername}":`, response.data.message);
+        setErrorMessage(response.data.message || "Invalid username or password");
+      }
+    } catch (error) {
+      const trimmedUsername = username.trim();
+      console.error(`Error during login attempt for "${trimmedUsername}":`, error);
+      setErrorMessage("An error occurred. Please try again later.");
+    }
+    /*
+        console.log("Attempting login for:", trimmedUsername);
       const response = await axios.post(
         `${API_BASE_URL}/login`,
         { username: trimmedUsername, password },
@@ -60,10 +126,7 @@ function Login() {
       );
 
       // If the response is HTML, log the text to help debug.
-      if (
-        typeof response.data === "string" &&
-        response.data.startsWith("<!doctype html>")
-      ) {
+      if (typeof response.data === "string" && response.data.startsWith("<!doctype html>")) {
         console.error("Received unexpected HTML response:", response.data);
         setErrorMessage("Login failed due to server misconfiguration.");
         return;
@@ -71,7 +134,7 @@ function Login() {
 
       const data = response.data;
       console.log("Received login response:", data);
-
+     
       if (data.success) {
         setSuccessMessage("Login successful! Redirecting...");
         console.log("Login successful for:", trimmedUsername);
@@ -87,10 +150,7 @@ function Login() {
         // Redirect based on role.
         if (data.role === "admin") {
           navigate("/AdminDashboard");
-        } else if (
-          data.role === "receptionist" ||
-          data.role === "aesthetician"
-        ) {
+        } else if (data.role === "receptionist" || data.role === "aesthetician") {
           navigate("/StaffDashboard");
         } else {
           navigate("/dashboard");
@@ -100,14 +160,10 @@ function Login() {
         setErrorMessage(data.message || "Invalid username or password");
       }
     } catch (error) {
-      console.error(
-        `Error during login attempt for "${trimmedUsername}":`,
-        error
-      );
+      const trimmedUsername = username.trim();
+      console.error(`Error during login attempt for "${trimmedUsername}":`, error);
       setErrorMessage("An error occurred. Please try again later.");
-    } finally {
-      setIsLoading(false);
-    }
+    }*/
   };
 
   return (
@@ -130,9 +186,7 @@ function Login() {
             backgroundAttachment: "fixed"
           }}
         >
-          {/* White overlay with transparency */}
           <div className="absolute inset-0 bg-white/20"></div>
-          {/* Purple overlay with blur */}
           <div className="absolute inset-0 bg-purple-900/5 backdrop-blur-[1px]"></div>
         </div>
 
@@ -149,8 +203,7 @@ function Login() {
                 Welcome to PRISM,
               </h2>
               <p className="text-[10px] text-center mb-3 max-w-[260px] tracking-wide uppercase">
-                BEAUTOX'S PATIENT RECORDS, INTEGRATION, SCHEDULING, AND
-                MANAGEMENT
+                BEAUTOX&apos;S PATIENT RECORDS, INTEGRATION, SCHEDULING, AND MANAGEMENT
               </p>
             </div>
 
@@ -178,7 +231,7 @@ function Login() {
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    className="text-input text-xs sm:pl-2  text-left placeholder:text-left"
+                    className="text-input text-xs sm:pl-2 text-left placeholder:text-left"
                     placeholder="e.g. john_doe123"
                     required
                   />
@@ -195,12 +248,19 @@ function Login() {
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="text-input text-xs sm:pl-2  text-left placeholder:text-left"
+                    className="text-input text-xs sm:pl-2 text-left placeholder:text-left"
                     placeholder="e.g. P@ssw0rd123"
                     required
                   />
                 </InputTextField>
               </InputContainer>
+
+              {/* In reCAPTCHA v3, there is no visible widget */}
+              {recaptchaError && (
+                <div className="bg-red-50 border border-red-200 text-red-600 px-2.5 py-1.5 rounded-md text-[11px] text-center mb-2">
+                  {recaptchaError}
+                </div>
+              )}
 
               {/* Forgot password link */}
               <p className="text-gray-500 text-[10px] font-bold text-center mb-2.5">
@@ -219,11 +279,7 @@ function Login() {
 
               {/* Buttons */}
               <div className="space-y-2">
-                <Button
-                  type="submit"
-                  // className="w-full bg-purple-950 hover:bg-purple-900 text-white h-8 rounded-md text-xs font-medium flex items-center justify-center gap-1.5"
-                  fullWidth="true"
-                >
+                <Button type="submit" fullWidth="true">
                   <LoginIcon className="sm:w-3.5 sm:h-3.5" />
                   <span>LOGIN</span>
                 </Button>
@@ -249,11 +305,9 @@ function Login() {
             alt="Beautox Login"
             className="absolute inset-0 w-full h-full object-cover object-center"
           />
-          {/* Optional gradient overlay for better text visibility */}
           <div className="absolute inset-0 bg-gradient-to-r from-black/10 to-transparent pointer-events-none hidden lg:block"></div>
         </div>
 
-        {/* Login form section for Desktop */}
         <div className="flex items-center justify-center md:col-span-5 lg:col-span-4 py-6 px-4 sm:px-6 md:px-8">
           <div className="w-full max-w-md mx-auto">
             <div className="flex flex-col items-center mb-6">
@@ -266,12 +320,10 @@ function Login() {
                 Welcome to PRISM,
               </h2>
               <p className="text-xs sm:text-sm md:text-base text-center mb-6 max-w-sm px-2">
-                BEAUTOX&apos;S PATIENT RECORDS, INTEGRATION, SCHEDULING, AND
-                MANAGEMENT
+                BEAUTOX&apos;S PATIENT RECORDS, INTEGRATION, SCHEDULING, AND MANAGEMENT
               </p>
             </div>
 
-            {/* Alert messages */}
             {errorMessage && (
               <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-2 rounded-md text-sm text-center mb-4">
                 {errorMessage}
@@ -283,7 +335,6 @@ function Login() {
               </div>
             )}
 
-            {/* Login Form */}
             <form
               data-cy="login-form"
               onSubmit={handleSubmit}
@@ -327,7 +378,12 @@ function Login() {
                 </InputTextField>
               </InputContainer>
 
-              {/* Forgot password link */}
+              {recaptchaError && (
+                <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-2 rounded-md text-sm text-center mb-3">
+                  {recaptchaError}
+                </div>
+              )}
+
               <p className="text-customNeutral-300 text-xs font-bold leading-5 text-center transition-all duration-200 hover:text-customNeutral-400">
                 FORGOT PASSWORD?{" "}
                 <a
@@ -343,7 +399,6 @@ function Login() {
                 </a>
               </p>
 
-              {/* Responsive buttons */}
               <div className="space-y-3 pt-4">
                 <Button type="submit" fullWidth="true" data-cy="login-submit">
                   <LoginIcon />
@@ -366,7 +421,6 @@ function Login() {
         </div>
       </div>
 
-      {/* Forgot Password Modal */}
       {currentModal === "forgotPassword" && (
         <ForgotPassword isOpen={true} onClose={closeModal} />
       )}

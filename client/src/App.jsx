@@ -14,7 +14,7 @@ import ErrorPage from "./errors/Error404";
 import LandingPage from "@/pages/LandingPage";
 import ForgotPassword from "@/pages/ForgotPassword";
 import StaffServices from "@/pages/StaffServices";
-
+import { GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
 // PublicRoute prevents logged-in users from accessing login/landing pages.
 function PublicRoute({ children }) {
   const token = localStorage.getItem("token");
@@ -51,6 +51,10 @@ function AdminRoute({ children }) {
 
 function App() {
   return (
+    <GoogleReCaptchaProvider 
+    reCaptchaKey="6LfTPA0rAAAAAJQuZjo32e1CDmvMgb4l-yt47U3h"language="en"
+    useEnterprise={false}
+    useRecaptchaNet={false}>
     <Routes>
       {/* The root route ("/") uses <Layout> as a wrapper */}
       <Route path="/" element={<Layout />}>
@@ -123,6 +127,7 @@ function App() {
         <Route path="*" element={<ErrorPage />} />
       </Route>
     </Routes>
+    </GoogleReCaptchaProvider >
   );
 }
 
