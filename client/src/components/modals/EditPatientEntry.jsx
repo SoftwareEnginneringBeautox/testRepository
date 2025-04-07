@@ -68,23 +68,22 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
 
   useEffect(() => {
     if (entryData) {
-      /*setFormData({
-        patient_name: entryData.patient_name || "",
-        person_in_charge: entryData.person_in_charge || "",
-        treatment: entryData.treatment || "",
-        total_amount: entryData.total_amount || "",
-        payment_method: entryData.payment_method || "",
-        date_of_session: entryData.date_of_session || "",
-        time_of_session: entryData.time_of_session || "",
-        consent_form_signed: entryData.consent_form_signed || false
-      });*/
-      setOriginalData({
+      const initial = {
         ...entryData,
         package_name: entryData.package_name || "",
-        treatment: entryData.treatment || "",
+        treatment_ids: entryData.treatment_ids || [],
         payment_method: entryData.payment_method || "",
-      });
-      setFormData({});
+        amount_paid: entryData.amount_paid || "",
+        date_of_session: entryData.date_of_session?.slice(0, 10) || "",
+        time_of_session: entryData.time_of_session?.slice(0, 5) || "",
+        consent_form_signed: entryData.consent_form_signed ?? false,
+        person_in_charge: entryData.person_in_charge || "",
+        patient_name: entryData.patient_name || "", 
+        total_amount: entryData.total_amount || "",
+      };
+  
+      setOriginalData(initial);
+      setFormData(initial);
     }
     const fetchAestheticians = async () => {
       try {
@@ -144,6 +143,12 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
   }, [entryData]);
   
   useEffect(() => {
+    // if no package or treatment selected, keep original total
+    if (!formData.package_name && (!formData.treatment_ids || formData.treatment_ids.length === 0)) {
+      setFormData(prev => ({ ...prev, total_amount: originalData.total_amount }));
+      return;
+    }
+  
     if (formData.package_name) {
       const pkg = packagesList.find(p => p.package_name === formData.package_name);
       const price = parseFloat(pkg?.price);
@@ -159,22 +164,13 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
         return sum + (isNaN(price) ? 0 : price);
       }, 0);
       setFormData(prev => ({ ...prev, total_amount: total.toFixed(2) }));
-    } else {
-      setFormData(prev => ({ ...prev, total_amount: "" }));
     }
   }, [formData.package_name, formData.treatment_ids, treatmentsList, packagesList]);
-  
   
   if (!isOpen) return null;
   const total = parseFloat(formData.total_amount ?? originalData.total_amount ?? "0");
   const paid = parseFloat(formData.amount_paid ?? originalData.amount_paid ?? "0");
   const remainingBalance = total - paid;
-  const formattedRemainingBalance = isNaN(remainingBalance)
-    ? ""
-    : new Intl.NumberFormat("en-PH", {
-        style: "currency",
-        currency: "PHP"
-      }).format(remainingBalance);
 
   return (
     <ModalContainer>
@@ -193,7 +189,7 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
             </p>
             <p>
               <span>CURRENT PACKAGE:</span>{" "}
-              {entryData?.package_name?.toUpperCase() || "N/A"}
+              {originalData.package_name?.toUpperCase() || "N/A"}
             </p>
             <InputContainer>
               <InputLabel>PATIENT NAME</InputLabel>
@@ -218,7 +214,7 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
 
               <Select
                 value={
-                  formData.person_in_charge ?? originalData.person_in_charge ?? ""
+                  formData.person_in_charge
                 }
                 onValueChange={(value) =>
                   setFormData({ ...formData, person_in_charge: value })
@@ -226,7 +222,7 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
               >
                 <ModalSelectTrigger
                   icon={<UserIDIcon className="w-4 h-4" />}
-                  placeholder="Person in charge of the session"
+                  placeholder={formData.person_in_charge || "Select person in charge"}
                 />
                 <ModalSelectContent>
                 {aestheticianList.map((aesthetician) => (
@@ -249,7 +245,7 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
             <InputContainer>
               <InputLabel>PACKAGE</InputLabel>
               <Select
-                value={formData.package_name ?? originalData.package_name ?? ""}
+                value={originalData.package_name}
                 onValueChange={(value) => {
                   setFormData((prev) => ({
                     ...prev,
@@ -282,6 +278,7 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
             <InputContainer>
             <InputLabel>TREATMENTS</InputLabel>
             <TreatmentMultiSelect
+            icon={<TreatmentIcon className="w-4 h-4" />}
             options={[
               { value: "CLEAR", label: "Clear Selection" },
               ...treatmentsList.map((t) => ({
@@ -289,7 +286,7 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
                 label: `${t.treatment_name} - ₱${t.price}`
               }))
             ]}
-            value={Array.isArray(formData.treatment_ids) ? formData.treatment_ids : []}
+            value={Array.isArray(originalData.treatment_ids) ? originalData.treatment_ids : []}
             onChange={(selected) => {
               if (selected.includes("CLEAR")) {
                 setFormData((prev) => ({
@@ -322,13 +319,14 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
                 readOnly
                 className="bg-[#F5F3F0] text-gray-500"
                 value={
-                  isNaN(amount)
+                  isNaN(formData.total_amount)
                     ? ""
                     : new Intl.NumberFormat("en-PH", {
                         style: "currency",
                         currency: "PHP"
-                      }).format(amount)
+                      }).format(formData.total_amount)
                 }
+                
               />
             </InputTextField>
           </InputContainer>
@@ -346,7 +344,7 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
                   decimalsLimit={2}
                   allowNegativeValue={false}
                   value={
-                    formData.amount_paid ?? originalData.amount_paid ?? ""
+                    originalData.amount_paid 
                   }
                   onChange={(e) =>
                     setFormData({ ...formData, amount_paid: e.target.value })
@@ -380,7 +378,7 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
             <InputContainer>
             <InputLabel>PAYMENT METHOD</InputLabel>
             <RadioGroup
-              value={formData.payment_method ?? originalData.payment_method ?? ""}
+              value={originalData.payment_method}
               onValueChange={(value) =>
                 setFormData({ ...formData, payment_method: value })
               }
@@ -499,7 +497,7 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
             <div className="flex flex-row gap-3 items-center justify-start">
               <Checkbox
                 id="consent"
-                checked={formData.consent_form_signed}
+                checked={originalData.consent_form_signed}
                 onCheckedChange={(checked) =>
                   setFormData({ ...formData, consent_form_signed: checked })
                 }
