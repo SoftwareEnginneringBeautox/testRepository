@@ -52,11 +52,16 @@ const PaginationLink = ({ className, isActive, size = "icon", ...props }) => (
 );
 PaginationLink.displayName = "PaginationLink";
 
-const PaginationPrevious = ({ className, ...props }) => (
+const PaginationPrevious = ({ className, disabled, ...props }) => (
   <PaginationLink
     aria-label="Go to previous page"
     size="default"
-    className={cn("gap-1 pl-2.5", className)}
+    className={cn(
+      "gap-1 pl-2.5",
+      disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer",
+      className
+    )}
+    disabled={disabled}
     {...props}
   >
     <ChevronLeftIcon className="pointer-events-none size-6 shrink-0" />
@@ -64,11 +69,16 @@ const PaginationPrevious = ({ className, ...props }) => (
 );
 PaginationPrevious.displayName = "PaginationPrevious";
 
-const PaginationNext = ({ className, ...props }) => (
+const PaginationNext = ({ className, disabled, ...props }) => (
   <PaginationLink
     aria-label="Go to next page"
     size="default"
-    className={cn("gap-1 pr-2.5", className)}
+    className={cn(
+      "gap-1 pr-2.5",
+      disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer",
+      className
+    )}
+    disabled={disabled}
     {...props}
   >
     <ChevronRightIcon className="pointer-events-none size-6 shrink-0" />
@@ -88,19 +98,6 @@ const PaginationEllipsis = ({ className, ...props }) => (
 );
 PaginationEllipsis.displayName = "PaginationEllipsis";
 
-const PaginationLast = ({ className, pageNumber, currentPage, ...props }) => (
-  <PaginationLink
-    aria-label={`Go to page ${pageNumber}`}
-    size="default"
-    isActive={currentPage === pageNumber}
-    className={cn(className)}
-    {...props}
-  >
-    {pageNumber}
-  </PaginationLink>
-);
-PaginationLast.displayName = "PaginationLast";
-
 export {
   Pagination,
   PaginationContent,
@@ -108,6 +105,5 @@ export {
   PaginationItem,
   PaginationLink,
   PaginationNext,
-  PaginationPrevious,
-  PaginationLast
+  PaginationPrevious
 };
