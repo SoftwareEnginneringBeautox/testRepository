@@ -64,6 +64,9 @@ import { format } from "date-fns";
 import FilterIcon from "@/assets/icons/FilterIcon";
 import UpdateIcon from "@/assets/icons/UpdateIcon";
 
+// Add Checkbox import at the top of the file
+import { Checkbox } from "@/components/ui/Checkbox";
+
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 function PatientRecordsDatabase() {
@@ -311,9 +314,11 @@ function PatientRecordsDatabase() {
   };
   
 
-  // Handle Paid dropdown change
-  const handlePaidChange = async (record, newValue) => {
-    const newVal = newValue === "-" ? null : newValue;
+  // Replace the existing handlePaidChange function
+  const handlePaidChange = async (record, checked) => {
+    // Convert boolean to "yes"/"no" string for database consistency
+    const newValue = checked ? "yes" : "no";
+    
     try {
       // Update the patient record's isPaid field
       await fetch(`${API_BASE_URL}/api/manage-record`, {
@@ -324,23 +329,27 @@ function PatientRecordsDatabase() {
           table: "patient_records",
           id: record.id,
           action: "edit",
-          data: { isPaid: newVal }
+          data: { isPaid: newValue }
         })
       });
-
-      // If the new value is "yes", also insert a new record into the sales tracker table.
-      if (newVal === "yes") {
-        // Format the sales data based on your sales tracker table's requirements.
+  
+      // If checked (paid), add to sales tracker
+      if (checked) {
+        // Format the sales data based on your sales tracker table's requirements
         const salesData = {
           client: record.client || record.patient_name,
           // Use the session date (or date_transacted if available)
           date_transacted: record.dateTransacted || record.date_of_session,
           // Payment amount could be the amount paid; adjust if needed
           payment: record.amount_paid,
-          reference_no: record.reference_number
+          reference_no: record.reference_number,
+          person_in_charge: record.person_in_charge,
+          payment_method: record.payment_method,
+          packages: record.package_name,
+          treatment: record.treatment
           // Add any other fields as required by your sales tracker table schema
         };
-
+  
         await fetch(`${API_BASE_URL}/api/sales`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -348,13 +357,10 @@ function PatientRecordsDatabase() {
           body: JSON.stringify(salesData)
         });
       }
-
+  
       fetchRecords();
     } catch (error) {
-      console.error(
-        "Error updating isPaid or posting to sales tracker:",
-        error
-      );
+      console.error("Error updating paid status or posting to sales tracker:", error);
     }
   };
 
@@ -759,9 +765,9 @@ function PatientRecordsDatabase() {
                 </TableHead>
               )}
 
-              {/* Always show PAID column */}
+              {/* Update PAID column header */}
               <TableHead className="py-4 text-center whitespace-nowrap">
-                PAID
+                PAID STATUS
               </TableHead>
 
               <TableHead></TableHead>
@@ -903,23 +909,14 @@ function PatientRecordsDatabase() {
                   </TableCell>
                 )}
 
-                {/* Always show PAID column */}
-                <TableCell className="text-center" data-cy={`record-paid-select-${index}`}>
-                  <Select
-                    value={record.isPaid ? record.isPaid.toLowerCase() : "-"}
-                    onValueChange={(val) => handlePaidChange(record, val)}
-                  >
-                    <SelectTrigger className="w-16">
-                      <SelectValue>
-                        {record.isPaid ? record.isPaid.toUpperCase() : "-"}
-                      </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="-">-</SelectItem>
-                      <SelectItem value="yes">YES</SelectItem>
-                      <SelectItem value="no">NO</SelectItem>
-                    </SelectContent>
-                  </Select>
+                {/* Replace the PAID column Select dropdown with Checkbox */}
+                <TableCell className="text-center" data-cy={`record-paid-checkbox-${index}`}>
+                  <Checkbox
+                    checked={record.isPaid === "yes"}
+                    onCheckedChange={(checked) => handlePaidChange(record, checked)}
+                    className="mx-auto"
+                    data-cy={`paid-checkbox-${index}`}
+                  />
                 </TableCell>
 
                 <TableCell>
