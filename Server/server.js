@@ -300,7 +300,8 @@ app.post('/api/patients', async (req, res) => {
       archived,
       amount_paid,
       remaining_balance,
-      reference_number
+      reference_number,
+      isPaid
     } = req.body;
 
     const insertQuery = `
@@ -321,9 +322,10 @@ app.post('/api/patients', async (req, res) => {
         archived,
         amount_paid,
         remaining_balance,
-        reference_number
+        reference_number,
+        isPaid
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
       RETURNING id;
     `;
 
@@ -344,7 +346,8 @@ app.post('/api/patients', async (req, res) => {
       archived,
       amount_paid,
       remaining_balance,
-      reference_number
+      reference_number,
+      isPaid
     ];
 
     const result = await pool.query(insertQuery, values);
@@ -596,24 +599,38 @@ app.post("/reset-password", async (req, res) => {
 app.post('/api/manage-record', async (req, res) => {
   const { table, id, action, data } = req.body; // action: 'edit' or 'archive'
 
-  const editableTables = ['expenses_tracker', 'patient_records', 'accounts', 'packages', 'treatments', 'appointments'];
+  const editableTables = [
+    'expenses_tracker',
+    'patient_records',
+    'accounts',
+    'packages',
+    'treatments',
+    'appointments'
+  ];
+
   if (!editableTables.includes(table)) {
     return res.status(400).json({ success: false, message: 'Invalid table name' });
   }
 
+  if (!id) {
+    return res.status(400).json({ success: false, message: 'Missing record ID' });
+  }
+
   try {
     if (action === 'edit') {
-      if (!data || typeof data !== 'object') {
-        return res.status(400).json({ success: false, message: 'Missing or invalid data' });
+      if (!data || typeof data !== 'object' || Object.keys(data).length === 0) {
+        return res.status(400).json({ success: false, message: 'Missing or invalid data for edit' });
       }
+
+      console.log("🔧 Incoming update request body:", req.body);
 
       const fields = Object.keys(data);
       const values = Object.values(data);
-      const setClause = fields.map((field, idx) => `${field} = $${idx + 1}`).join(', ');
+      const setClause = fields.map((field, idx) => `"${field}" = $${idx + 1}`).join(', ');
       const query = `UPDATE ${table} SET ${setClause} WHERE id = $${fields.length + 1}`;
+
       await pool.query(query, [...values, id]);
-      console.log("🔧 Incoming update fields:", fields);
-      console.log("🧾 Incoming update values:", values);
+
       return res.json({ success: true, message: `${table} record updated` });
     }
 
@@ -626,10 +643,11 @@ app.post('/api/manage-record', async (req, res) => {
 
     return res.status(400).json({ success: false, message: 'Invalid action' });
   } catch (err) {
-    console.error(`Error in manage-record (${action}):`, err);
-    return res.status(500).json({ success: false, message: 'Server error' });
+    console.error(`❌ Error in manage-record (${action}):`, err.message);
+    return res.status(500).json({ success: false, message: `Server error: ${err.message}` });
   }
 });
+
 
 
 /* --------------------------------------------
