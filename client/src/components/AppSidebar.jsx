@@ -22,6 +22,9 @@ const handleRedirectAdmin = () => {
 const handleRedirectServices = () => {
   window.location.href = "/AdministratorServices";
 };
+const handleRedirectStaffServices = () => {
+  window.location.href = "/StaffServices";
+};
 const handleRedirectPatientRecords = () => {
   window.location.href = "/PatientRecordsDatabase";
 };
@@ -77,15 +80,22 @@ export function AppSidebar({ ...props }) {
   // Retrieve the user role from localStorage and normalize it.
   const userRole = localStorage.getItem("role")?.toLowerCase();
 
-  // Filter out the "SERVICES" item if the role is receptionist or aesthetician.
+  // Adjust the sidebar items based on the user role
   const navItems = sideBarInformation.filter((item) => {
-    if (
-      item.title === "SERVICES" &&
-      (userRole === "receptionist" || userRole === "aesthetician")
-    ) {
-      return false;
+    if (userRole === "admin") {
+      return true; // Admins see all items
+    } else {
+      // Staff roles
+      if (item.title === "FINANCIAL OVERVIEW") {
+        return false; // Remove Financial Overview for staff
+      }
+      if (item.title === "SERVICES") {
+        // Replace AdministratorServices with StaffServices for staff
+        item.url = "/StaffServices";
+        item.onClick = handleRedirectStaffServices;
+      }
+      return true;
     }
-    return true;
   });
 
   return (
