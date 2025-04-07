@@ -1251,17 +1251,47 @@ function FinancialOverview() {
         </div>
 
         <div
-          className="w-full rounded-lg p-4 border-2 border-lavender-400 text-center text-xl md:text-3xl leading-normal md:leading-[67.2px]"
-          data-cy="total-profit-container"
-        >
-          TOTAL PROFIT:{" "}
-          <span className="font-bold" data-cy="total-profit-amount">
+  className="w-full rounded-lg p-4 border-2 border-lavender-400 text-center"
+  data-cy="total-profit-container"
+>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+          <div className="text-lg md:text-xl leading-normal">
+            TOTAL SALES:{" "}
+            <span className="font-bold" data-cy="total-sales-amount">
+              {new Intl.NumberFormat("en-PH", {
+                style: "currency",
+                currency: "PHP"
+              }).format(financialData.totalSales)}
+            </span>
+          </div>
+          <div className="text-lg md:text-xl leading-normal">
+            TOTAL EXPENSES:{" "}
+            <span className="font-bold" data-cy="total-expenses-amount">
+              {new Intl.NumberFormat("en-PH", {
+                style: "currency",
+                currency: "PHP"
+              }).format(financialData.totalExpenses)}
+            </span>
+          </div>
+          <div className="text-lg md:text-xl leading-normal">
+            <div className="flex items-center justify-center gap-2">
+              <div>=</div>
+            </div>
+          </div>
+        </div>
+        <div className="text-xl md:text-3xl leading-normal md:leading-[67.2px]">
+          {financialData.netIncome < 0 ? "TOTAL LOSS: " : "TOTAL PROFIT: "}
+          <span 
+            className={`font-bold ${financialData.netIncome < 0 ? "text-red-500" : ""}`} 
+            data-cy="total-profit-amount"
+          >
             {new Intl.NumberFormat("en-PH", {
               style: "currency",
               currency: "PHP"
-            }).format(financialData.netIncome)}
+            }).format(Math.abs(financialData.netIncome))}
           </span>
         </div>
+      </div>
 
         <div
           className="w-full flex flex-col md:flex-row justify-end gap-4 mb-[10%]"
