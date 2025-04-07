@@ -79,9 +79,10 @@ function CreatePatientEntry({ isOpen, onClose }) {
   useEffect(() => {
     if (packageName) {
       const pkg = packagesList.find((p) => p.package_name === packageName);
-      if (pkg && typeof pkg.price === "number") {
-        setAmount(pkg.price.toFixed(2));
-      } else {
+      if (pkg && !isNaN(parseFloat(pkg.price))) {
+        setAmount(parseFloat(pkg.price).toFixed(2));
+      }
+       else {
         setAmount(""); // fallback if price is not a number
       }
     } else if (Array.isArray(treatment) && treatment.length > 0) {
@@ -114,8 +115,12 @@ function CreatePatientEntry({ isOpen, onClose }) {
           withCredentials: true
         });
         const aestheticians = response.data.filter(
-          (user) => user.role && user.role.toLowerCase() === "aesthetician"
+          (user) =>
+            user.role &&
+            user.role.toLowerCase() === "aesthetician" &&
+            !user.archived // assuming 'archived' is a boolean field
         );
+        
         setAestheticianList(aestheticians);
       } catch (error) {
         console.error("Error fetching aestheticians:", error);
@@ -185,9 +190,28 @@ function CreatePatientEntry({ isOpen, onClose }) {
     setFormSubmitAttempted(true);
   
     const errors = {};
-    if (!personInCharge) errors.personInCharge = "Person in charge is required";
+    if (!personInCharge) {
+      errors.personInCharge = "Person in charge is required";
+    }
+  
     if (!packageName && (!treatment || treatment.length === 0)) {
       errors.packageOrTreatment = "Select either a package or at least one treatment";
+    }
+  
+    if (packageName && dateOfSession) {
+      const selectedPackage = packagesList.find((p) => p.package_name === packageName);
+      const weeks = selectedPackage?.expiration;
+  
+      if (weeks && !isNaN(weeks)) {
+        const createdAt = new Date(); // form creation time
+        const sessionDate = new Date(dateOfSession);
+        const expirationLimit = new Date(createdAt);
+        expirationLimit.setDate(expirationLimit.getDate() + weeks * 7); // add weeks
+  
+        if (sessionDate > expirationLimit) {
+          errors.dateOfSession = `Session date exceeds package expiration limit of ${weeks} week(s) from today (${expirationLimit.toISOString().slice(0, 10)})`;
+        }
+      }
     }
   
     setFormErrors(errors);
@@ -208,8 +232,8 @@ function CreatePatientEntry({ isOpen, onClose }) {
       patient_name: patientName,
       person_in_charge: personInCharge,
       package_name: packageName,
-      treatments: selectedTreatmentNames, // names for UI/logging
-      treatment_ids: selectedTreatmentIds, // IDs for backend
+      treatments: selectedTreatmentNames,
+      treatment_ids: selectedTreatmentIds,
       amount: numericAmount,
       amount_paid: numericAmountPaid,
       package_discount: numericDiscount,
@@ -238,6 +262,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
       console.error("Error submitting form:", error);
     }
   };
+  
   
   
 
@@ -523,6 +548,11 @@ function CreatePatientEntry({ isOpen, onClose }) {
                   required
                 />
               </InputTextField>
+              {formSubmitAttempted && formErrors.dateOfSession && (
+                <p className="text-red-500 text-sm mt-1">
+                  {formErrors.dateOfSession}
+                </p>
+              )}
             </InputContainer>
 
             <InputContainer className="flex-1">

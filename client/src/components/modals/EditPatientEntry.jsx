@@ -45,9 +45,12 @@ import TreatmentIcon from "@/assets/icons/TreatmentIcon";
 import EditIcon from "@/assets/icons/EditIcon";
 
 function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
+  const API_BASE_URL = import.meta.env.VITE_API_URL;
   const [originalData, setOriginalData] = useState({});
   const [formData, setFormData] = useState({});
-  
+  const [formErrors, setFormErrors] = useState({});
+  const [formSubmitAttempted, setFormSubmitAttempted] = useState(false);
+
   const [amount, setAmount] = useState("");
   const [packagesList, setPackagesList] = useState([]);
   const [treatmentsList, setTreatmentsList] = useState([]);
@@ -85,7 +88,7 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
     }
     const fetchAestheticians = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/getusers?archived!=notTrue`, {
+        const response = await fetch(`${API_BASE_URL}/getusers?archived=false`, {
           credentials: "include"
         });
     
@@ -96,7 +99,10 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
         const data = await response.json(); // Correct way to get JSON from fetch
     
         const aestheticians = Array.isArray(data)
-          ? data.filter((user) => user.role?.toLowerCase() === "aesthetician")
+          ? data.filter((user) =>
+              user.role?.toLowerCase() === "aesthetician" &&
+              user.archived !== true
+            )
           : [];
     
         setAestheticianList(aestheticians);
@@ -109,7 +115,7 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
     
     const fetchPackages = async () => {
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/packages?archived=notTrue`, {
+        const res = await fetch(`${API_BASE_URL}/api/packages?archived=false`, {
           credentials: "include"
         });
         const data = await res.json();
@@ -121,7 +127,7 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
 
     const fetchTreatments = async () => {
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/treatments?archived!=notTrue`, {
+        const res = await fetch(`${API_BASE_URL}/api/treatments?archived=false`, {
           credentials: "include"
         });
         const data = await res.json();
@@ -231,6 +237,12 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
               </ModalSelectContent>
 
               </Select>
+              {formSubmitAttempted && formErrors.person_in_charge && (
+                <p className="text-red-500 text-sm mt-1">
+                  {formErrors.person_in_charge}
+                </p>
+              )}
+
             </InputContainer>
 
             {/* PACKAGE */}
@@ -424,6 +436,11 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
                   }
                 />
               </InputTextField>
+              {formSubmitAttempted && formErrors.date_of_session && (
+                <p className="text-red-500 text-sm mt-1">
+                  {formErrors.date_of_session}
+                </p>
+              )}
             </InputContainer>
 
             <InputContainer className="flex-1">
@@ -510,14 +527,42 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
               type="button"
               className="w-1/2"
               onClick={() => {
+                setFormSubmitAttempted(true);
+                const errors = {};
+                
+                // ✅ Validation: PERSON IN CHARGE is required
+                if (
+                  !(formData.person_in_charge ?? originalData.person_in_charge)
+                ) {
+                  errors.person_in_charge = "Person in charge is required.";
+                }
+
+                // Validate session date against package expiration
+                if (formData.package_name || originalData.package_name) {
+                  const pkgName = formData.package_name ?? originalData.package_name;
+                  const selectedPkg = packagesList.find((pkg) => pkg.package_name === pkgName);
+                  if (selectedPkg?.expiration_date && formData.date_of_session) {
+                    const sessionDate = new Date(formData.date_of_session);
+                    const expirationDate = new Date(selectedPkg.expiration_date);
+                    if (sessionDate > expirationDate) {
+                      errors.date_of_session = `Session date exceeds package expiration date (${selectedPkg.expiration_date})`;
+                    }
+                  }
+                }
+              
+                setFormErrors(errors);
+                if (Object.keys(errors).length > 0) return;
+              
                 const cleanedData = { ...formData };
                 Object.keys(cleanedData).forEach((key) => {
                   if (cleanedData[key] === "") {
                     cleanedData[key] = null; // force null to override DB
                   }
                 });
+              
                 onSubmit({ id: entryData.id, ...cleanedData });
               }}
+              
             >
               <EditIcon />
               EDIT ENTRY

@@ -486,8 +486,8 @@ function PatientRecordsDatabase() {
           "N/A",
         (record.package || record.package_name)?.toUpperCase() || "N/A",
         Array.isArray(record.treatments)
-          ? record.treatments.join(", ").toUpperCase()
-          : record.treatment?.toUpperCase() || "N/A",
+  ? getTreatmentNames(record.treatments).join(", ").toUpperCase()
+  : record.treatment?.toUpperCase() || "N/A",
         typeof record.consent_form_signed === "boolean"
           ? record.consent_form_signed
             ? "SIGNED"
