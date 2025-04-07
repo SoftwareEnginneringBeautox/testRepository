@@ -7,6 +7,7 @@ const API_BASE_URL = import.meta.env.VITE_API_URL;
 import ChevronLeftIcon from "@/assets/icons/ChevronLeftIcon";
 import ChevronRightIcon from "@/assets/icons/ChevronRightIcon";
 import SortIcon from "@/assets/icons/SortIcon";
+import FilterIcon from "@/assets/icons/FilterIcon";
 
 import MonthlyBookingPanel from "@/components/MonthlyBookingPanel";
 import WeeklyBookingPanel from "@/components/WeeklyBookingPanel";
@@ -19,16 +20,64 @@ import {
   SelectTrigger
 } from "@/components/ui/Select";
 
+import { Checkbox } from "@/components/ui/Checkbox";
+import MultiSelectFilter from "@/components/ui/MultiSelectFilter";
+
 function BookingCalendar() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [view, setView] = useState("monthly");
   const [appointments, setAppointments] = useState([]);
+  const [patientRecords, setPatientRecords] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const { currentModal, openModal, closeModal } = useModal();
   const [selectedEntry, setSelectedEntry] = useState(null);
 
+  // For the checkbox filter using MultiSelectFilter
+  const [staffList, setStaffList] = useState([]);
+  const [selectedStaff, setSelectedStaff] = useState([]);
+  const [tempSelectedStaff, setTempSelectedStaff] = useState([]);
+
+  // Create filter options for MultiSelectFilter
+  const [filterOptions, setFilterOptions] = useState([]);
+
   const month = currentDate.getMonth();
   const year = currentDate.getFullYear();
+
+  // Fetch staff list
+  useEffect(() => {
+    const fetchStaff = async () => {
+      try {
+        const response = await axios.get(`${API_BASE_URL}/getusers`, {
+          withCredentials: true
+        });
+
+        const staffData = response.data.filter(
+          (user) => !user.archived && (user.role === 'aesthetician')
+        );
+        setStaffList(staffData);
+      } catch (error) {
+        console.error("Error fetching staff:", error);
+      }
+    };
+
+    fetchStaff();
+  }, []);
+
+  // Fetch patient records to get person_in_charge
+  useEffect(() => {
+    const fetchPatientRecords = async () => {
+      try {
+        const response = await axios.get(`${API_BASE_URL}/api/patient-records`, {
+          withCredentials: true
+        });
+        setPatientRecords(response.data);
+      } catch (error) {
+        console.error("Error fetching patient records:", error);
+      }
+    };
+
+    fetchPatientRecords();
+  }, []);
 
   // Fetch appointments from the server
   useEffect(() => {
@@ -46,6 +95,22 @@ function BookingCalendar() {
 
     fetchAppointments();
   }, []);
+
+  // Update filter options when unique persons are determined
+  useEffect(() => {
+    if (appointments.length > 0) {
+      const personsInCharge = getUniquePersonsInCharge();
+      const options = personsInCharge.map(person => ({
+        label: person.toUpperCase(),
+        value: person
+      }));
+      setFilterOptions(options);
+
+      // Initialize temp selected values with all options (for "select all" initial state)
+      setTempSelectedStaff(personsInCharge);
+      setSelectedStaff(personsInCharge);
+    }
+  }, [appointments, patientRecords]);
 
   // Process appointments into events for the calendar
   const processAppointments = () => {
@@ -73,6 +138,17 @@ function BookingCalendar() {
       // Get day abbreviation
       const dayAbbreviation = getDayAbbreviation(appointmentDate.getDay());
 
+      // Find the corresponding patient record to get the person in charge
+      let personInCharge = "Unassigned";
+      if (appointment.patient_record_id) {
+        const patientRecord = patientRecords.find(
+          record => record.id === appointment.patient_record_id
+        );
+        if (patientRecord && patientRecord.person_in_charge) {
+          personInCharge = patientRecord.person_in_charge;
+        }
+      }
+
       return {
         id: appointment.id,
         day: dayAbbreviation,
@@ -84,7 +160,9 @@ function BookingCalendar() {
         contactNumber: appointment.contact_number,
         email: appointment.email,
         rawDate: appointment.date_of_session,
-        rawTime: appointment.time_of_session
+        rawTime: appointment.time_of_session,
+        personInCharge,
+        patientRecordId: appointment.patient_record_id
       };
     });
   };
@@ -160,13 +238,21 @@ function BookingCalendar() {
     }
   };
 
-  // Filter appointments based on the current view
+  // Apply filter changes
+  const applyStaffFilters = () => {
+    setSelectedStaff([...tempSelectedStaff]);
+  };
+
+  // Filter appointments based on the current view and selected staff
   const getFilteredAppointments = () => {
     const events = processAppointments();
 
+    // First filter by date range according to view
+    let dateFilteredEvents = events;
+
     if (view === "monthly") {
       // For monthly view, filter to current month
-      return events.filter((event) => {
+      dateFilteredEvents = events.filter((event) => {
         const eventDate = new Date(event.rawDate);
         return (
           eventDate.getMonth() === month && eventDate.getFullYear() === year
@@ -178,12 +264,42 @@ function BookingCalendar() {
       const weekEnd = new Date(weekStart);
       weekEnd.setDate(weekEnd.getDate() + 7);
 
-      return events.filter((event) => {
+      dateFilteredEvents = events.filter((event) => {
         const eventDate = new Date(event.rawDate);
         return eventDate >= weekStart && eventDate < weekEnd;
       });
     }
+
+    // Then filter by selected staff if any are selected
+    if (selectedStaff.length > 0 && selectedStaff.length < getUniquePersonsInCharge().length) {
+      return dateFilteredEvents.filter(
+        (event) => selectedStaff.includes(event.personInCharge)
+      );
+    }
+
+    return dateFilteredEvents;
   };
+
+  // Get all unique persons in charge from appointments (using patient records)
+  const getUniquePersonsInCharge = () => {
+    const events = processAppointments();
+    const uniquePersons = [...new Set(events.map(event => event.personInCharge))];
+    return uniquePersons.sort();
+  };
+
+  // Count appointments for each person in charge
+  const getStaffCounts = () => {
+    const events = processAppointments();
+    const counts = {};
+
+    getUniquePersonsInCharge().forEach(person => {
+      counts[person] = events.filter(event => event.personInCharge === person).length;
+    });
+
+    return counts;
+  };
+
+  const staffCounts = getStaffCounts();
 
   return (
     <div
@@ -241,7 +357,7 @@ function BookingCalendar() {
           </div>
 
           <div
-            className="flex flex-row gap-1 sm:gap-2 md:gap-3 items-center justify-between sm:justify-end w-full sm:w-auto"
+            className="flex flex-col sm:flex-row gap-1 sm:gap-2 md:gap-3 items-start sm:items-center justify-between sm:justify-end w-full sm:w-auto"
             data-cy="calendar-controls"
           >
             <div
@@ -251,9 +367,8 @@ function BookingCalendar() {
               <button
                 data-cy="calendar-view-monthly"
                 onClick={() => setView("monthly")}
-                className={`relative inline-block px-1 sm:px-2 py-1 font-semibold overflow-hidden group ${
-                  view === "monthly" ? "text-lavender-500" : ""
-                }`}
+                className={`relative inline-block px-1 sm:px-2 py-1 font-semibold overflow-hidden group ${view === "monthly" ? "text-lavender-500" : ""
+                  }`}
               >
                 <span
                   className="hidden sm:inline"
@@ -265,9 +380,8 @@ function BookingCalendar() {
                   MONTH
                 </span>
                 <span
-                  className={`absolute left-0 bottom-0 block h-0.5 bg-lavender-400 transition-all duration-300 ${
-                    view === "monthly" ? "w-full" : "w-0 group-hover:w-full"
-                  }`}
+                  className={`absolute left-0 bottom-0 block h-0.5 bg-lavender-400 transition-all duration-300 ${view === "monthly" ? "w-full" : "w-0 group-hover:w-full"
+                    }`}
                   data-cy="monthly-view-indicator"
                 ></span>
               </button>
@@ -275,9 +389,8 @@ function BookingCalendar() {
               <button
                 data-cy="calendar-view-weekly"
                 onClick={() => setView("weekly")}
-                className={`relative inline-block px-1 sm:px-2 py-1 font-semibold overflow-hidden group ${
-                  view === "weekly" ? "text-lavender-500" : ""
-                }`}
+                className={`relative inline-block px-1 sm:px-2 py-1 font-semibold overflow-hidden group ${view === "weekly" ? "text-lavender-500" : ""
+                  }`}
               >
                 <span
                   className="hidden sm:inline"
@@ -289,40 +402,59 @@ function BookingCalendar() {
                   WEEK
                 </span>
                 <span
-                  className={`absolute left-0 bottom-0 block h-0.5 bg-lavender-400 transition-all duration-300 ${
-                    view === "weekly" ? "w-full" : "w-0 group-hover:w-full"
-                  }`}
+                  className={`absolute left-0 bottom-0 block h-0.5 bg-lavender-400 transition-all duration-300 ${view === "weekly" ? "w-full" : "w-0 group-hover:w-full"
+                    }`}
                   data-cy="weekly-view-indicator"
                 ></span>
               </button>
             </div>
 
-            <Select data-cy="filter-select">
-              <SelectTrigger
-                data-cy="filter-bookings-btn"
-                placeholder="FILTER"
-                icon={
-                  <SortIcon
-                    className="w-3 h-3 sm:w-3 sm:h-3 md:w-4 md:h-4 lg:w-5 lg:h-5"
-                    data-cy="sort-icon"
-                  />
+            {/* <Select
+              onValueChange={(value) => {
+                if (value === "all") {
+                  setSelectedStaff(getUniquePersonsInCharge());
+                  setTempSelectedStaff(getUniquePersonsInCharge());
+                } else {
+                  setSelectedStaff([value]);
+                  setTempSelectedStaff([value]);
                 }
-                className="text-[10px] sm:text-xs md:text-sm lg:text-base p-1 sm:p-2"
+              }}
+              data-cy="sort-select"
+            >
+              <SelectTrigger
+                placeholder="SORT BY"
+                icon={<SortIcon />}
+                data-cy="sort-trigger"
               >
-                <SelectValue data-cy="filter-select-value" />
+                <SelectValue />
               </SelectTrigger>
-              <SelectContent data-cy="filter-select-content">
-                <SelectItem value="option1" data-cy="filter-option-1">
-                  Option 1
+              <SelectContent data-cy="sort-content">
+                <SelectItem value="all" data-cy="sort-option-all">
+                  ALL DATA
                 </SelectItem>
-                <SelectItem value="option2" data-cy="filter-option-2">
-                  Option 2
-                </SelectItem>
-                <SelectItem value="option3" data-cy="filter-option-3">
-                  Option 3
-                </SelectItem>
+                {getUniquePersonsInCharge().map((person, index) => (
+                  <SelectItem
+                    key={index}
+                    value={person}
+                    data-cy={`sort-option-${index}`}
+                  >
+                    {person.toUpperCase()}
+                  </SelectItem>
+                ))}
               </SelectContent>
-            </Select>
+            </Select> */}
+
+            {/* Using MultiSelectFilter component for Staff filtering */}
+            <MultiSelectFilter
+              options={filterOptions}
+              selectedValues={tempSelectedStaff}
+              setSelectedValues={setTempSelectedStaff}
+              placeholder="FILTER BY STAFF"
+              mandatoryValues={[]}
+              onApply={applyStaffFilters}
+              showApplyButton={true}
+              data-cy="staff-filter"
+            />
           </div>
         </div>
 
