@@ -203,6 +203,36 @@ function CreatePatientEntry({ isOpen, onClose }) {
       errors.packageOrTreatment = "Select either a package or at least one treatment";
     }
   
+    // Contact number validation - make required
+    if (!contactNumber) {
+      errors.contactNumber = "Contact number is required";
+    } else {
+      const phoneRegex = /^09\d{9}$/; // Philippine format: 09XXXXXXXXX
+      if (!phoneRegex.test(contactNumber)) {
+        errors.contactNumber = "Contact number should be in 09XXXXXXXXX format";
+      }
+    }
+  
+    // Age validation - make required
+    if (!age) {
+      errors.age = "Age is required";
+    } else {
+      const ageNum = parseInt(age);
+      if (isNaN(ageNum) || ageNum < 0 || ageNum > 120) {
+        errors.age = "Age must be between 0 and 120";
+      }
+    }
+  
+    // Email validation - make required
+    if (!email) {
+      errors.email = "Email is required";
+    } else {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        errors.email = "Please enter a valid email address";
+      }
+    }
+  
     if (packageName && dateOfSession) {
       const selectedPackage = packagesList.find((p) => p.package_name === packageName);
       const weeks = selectedPackage?.expiration;
@@ -262,8 +292,11 @@ function CreatePatientEntry({ isOpen, onClose }) {
   
       if (response.ok) {
         // Also insert into appointments table
+        const patientData = await response.json();
+        const patientId = patientData.patientId; // Assuming the response contains the new patient's ID
         try {
           const appointmentPayload = {
+            patient_record_id: patientId,
             full_name: patientName,
             contact_number: contactNumber,
             age: age ? parseInt(age) : null,
@@ -345,9 +378,14 @@ function CreatePatientEntry({ isOpen, onClose }) {
                   placeholder="e.g. 09XXXXXXXXX"
                   value={contactNumber}
                   onChange={(e) => setContactNumber(e.target.value)}
-                  className="bg-[#F5F3F0]"
+                  className={`bg-[#F5F3F0] ${formSubmitAttempted && formErrors.contactNumber ? "border-red-500" : ""}`}
                 />
               </InputTextField>
+              {formSubmitAttempted && formErrors.contactNumber && (
+                <p className="text-red-500 text-sm mt-1">
+                  {formErrors.contactNumber}
+                </p>
+              )}
             </InputContainer>
 
             {/* AGE */}
@@ -361,9 +399,14 @@ function CreatePatientEntry({ isOpen, onClose }) {
                   placeholder="Age"
                   value={age}
                   onChange={(e) => setAge(e.target.value)}
-                  className="bg-[#F5F3F0]"
+                  className={`bg-[#F5F3F0] ${formSubmitAttempted && formErrors.age ? "border-red-500" : ""}`}
                 />
               </InputTextField>
+              {formSubmitAttempted && formErrors.age && (
+                <p className="text-red-500 text-sm mt-1">
+                  {formErrors.age}
+                </p>
+              )}
             </InputContainer>
 
             {/* EMAIL */}
@@ -376,9 +419,14 @@ function CreatePatientEntry({ isOpen, onClose }) {
                   placeholder="example@email.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="bg-[#F5F3F0]"
+                  className={`bg-[#F5F3F0] ${formSubmitAttempted && formErrors.email ? "border-red-500" : ""}`}
                 />
               </InputTextField>
+              {formSubmitAttempted && formErrors.email && (
+                <p className="text-red-500 text-sm mt-1">
+                  {formErrors.email}
+                </p>
+              )}
             </InputContainer>
 
             {/* PERSON IN CHARGE */}

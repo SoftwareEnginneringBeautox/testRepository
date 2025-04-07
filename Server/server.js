@@ -323,7 +323,7 @@ app.post('/api/patients', async (req, res) => {
         amount_paid,
         remaining_balance,
         reference_number,
-        isPaid
+       "isPaid"
       )
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
       RETURNING id;
@@ -381,7 +381,7 @@ app.get('/api/patients', async (req, res) => {
 // Create a new appointment
 app.post('/api/appointments', async (req, res) => {
   try {
-    const { full_name, contact_number, age, email, date_of_session, time_of_session, archived } = req.body;
+    const { full_name, contact_number, age, email, date_of_session, time_of_session, patient_record_id, archived } = req.body;
     const insertQuery = `
       INSERT INTO appointments (
         full_name,
@@ -390,12 +390,13 @@ app.post('/api/appointments', async (req, res) => {
         email,
         date_of_session,
         time_of_session,
+        patient_record_id,
         archived
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
       RETURNING id;
     `;
-    const values = [full_name, contact_number, age, email, date_of_session, time_of_session, archived];
+    const values = [full_name, contact_number, age, email, date_of_session, time_of_session, patient_record_id, archived];
 
     const result = await pool.query(insertQuery, values);
 
