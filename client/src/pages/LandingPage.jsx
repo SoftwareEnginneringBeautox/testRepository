@@ -269,7 +269,11 @@ function LandingPage() {
                   data-cy="nav-services"
                 >
                   SERVICES
-                  {/* ... */}
+                  <span
+                    className={`absolute left-0 bottom-0 block w-0 h-0.5 ${
+                      isScrolled ? "bg-purple-800" : "bg-purple-800"
+                    } transition-all duration-300 group-hover:w-full`}
+                  ></span>
                 </a>
               </li>
               <li className="mt-2">
@@ -461,28 +465,73 @@ function LandingPage() {
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8"
             data-cy="featured-services-grid"
           >
-            {/* 40 Sessions Package Card */}
-            <div 
-              className="bg-white rounded-2xl overflow-hidden shadow-[0_4px_12px_rgba(0,0,0,0.15)] hover:shadow-[0_8px_20px_rgba(0,0,0,0.25)] transition-shadow duration-300 relative"
-              data-cy="service-card-40-sessions"
-            >
-              {/* ... */}
+             {/* 40 Sessions Package Card */}
+             <div className="bg-white rounded-2xl overflow-hidden shadow-[0_4px_12px_rgba(0,0,0,0.15)] hover:shadow-[0_8px_20px_rgba(0,0,0,0.25)] transition-shadow duration-300 relative">
+              <div className="h-[400px] relative">
+                <img
+                  src="/images/BeautoxModel1.png"
+                  alt="40 Sessions Package"
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute bottom-0 left-0 right-0 h-2/5 bg-gradient-to-t from-purple-950/90 via-purple-900/60 to-transparent">
+                  <div className="absolute bottom-0 p-6">
+                    <h3 className="text-2xl font-semibold mb-2 bg-gradient-to-r from-white via-purple-100 to-purple-200 text-transparent bg-clip-text drop-shadow-sm">
+                      40 Sessions Package
+                    </h3>
+                    <p className="text-xs leading-tight text-gray-200 max-w-[90%]">
+                      Get the ultimate beauty and wellness experience with 40
+                      sessions of treatments, including slimming, skin
+                      rejuvenation, and hair removal.
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Diode Laser Card */}
-            <div 
-              className="bg-white rounded-2xl overflow-hidden shadow-[0_4px_12px_rgba(0,0,0,0.15)] hover:shadow-[0_8px_20px_rgba(0,0,0,0.25)] transition-shadow duration-300 relative"
-              data-cy="service-card-diode-laser"
-            >
-              {/* ... */}
+            <div className="bg-white rounded-2xl overflow-hidden shadow-[0_4px_12px_rgba(0,0,0,0.15)] hover:shadow-[0_8px_20px_rgba(0,0,0,0.25)] transition-shadow duration-300 relative">
+              <div className="h-[400px] relative">
+                <img
+                  src="/images/BeautoxModel2.png"
+                  alt="Diode Laser"
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute bottom-0 left-0 right-0 h-2/5 bg-gradient-to-t from-purple-950/90 via-purple-900/60 to-transparent">
+                  <div className="absolute bottom-0 p-6">
+                    <h3 className="text-2xl font-semibold mb-2 bg-gradient-to-r from-white via-purple-100 to-purple-200 text-transparent bg-clip-text drop-shadow-sm">
+                      Diode Laser
+                    </h3>
+                    <p className="text-xs leading-tight text-gray-200 max-w-[90%]">
+                      Achieve long-lasting smoothness with our Diode Laser
+                      treatments, offering precise and effective hair removal
+                      for underarms, legs, and intimate areas.
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Intimate Secret Card */}
-            <div 
-              className="bg-white rounded-2xl overflow-hidden shadow-[0_4px_12px_rgba(0,0,0,0.15)] hover:shadow-[0_8px_20px_rgba(0,0,0,0.25)] transition-shadow duration-300 relative"
-              data-cy="service-card-intimate-secret"
-            >
-              {/* ... */}
+            <div className="bg-white rounded-2xl overflow-hidden shadow-[0_4px_12px_rgba(0,0,0,0.15)] hover:shadow-[0_8px_20px_rgba(0,0,0,0.25)] transition-shadow duration-300 relative">
+              <div className="h-[400px] relative">
+                <img
+                  src="/images/BeautoxModel3.png"
+                  alt="Intimate Secret"
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute bottom-0 left-0 right-0 h-2/5 bg-gradient-to-t from-purple-950/90 via-purple-900/60 to-transparent">
+                  <div className="absolute bottom-0 p-6">
+                    <h3 className="text-2xl font-semibold mb-2 bg-gradient-to-r from-white via-purple-100 to-purple-200 text-transparent bg-clip-text drop-shadow-sm">
+                      Intimate Secret
+                    </h3>
+                    <p className="text-xs leading-tight text-gray-200 max-w-[90%]">
+                      Feel confident in your own skin with our Intimate Secret
+                      package, designed for gentle yet effective hair removal in
+                      delicate areas.
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -708,28 +757,79 @@ function LandingPage() {
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
             data-cy="testimonials-grid"
           >
-            {/* Testimonial 1 */}
-            <div 
-              className="bg-white p-6 rounded-2xl shadow-md hover:shadow-lg transition-shadow"
-              data-cy="testimonial-1"
-            >
-              {/* Testimonial content */}
+             {/* Testimonial 1 */}
+             <div className="bg-white p-6 rounded-2xl shadow-md hover:shadow-lg transition-shadow">
+              <div className="flex items-center mb-4">
+                <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                  <span className="text-purple-800 font-semibold text-lg">
+                    MA
+                  </span>
+                </div>
+                <div className="ml-4">
+                  <h4 className="font-semibold text-gray-800">
+                    Maria Angeles (Alias){" "}
+                  </h4>
+                  <p className="text-sm text-purple-600">Regular Client</p>
+                </div>
+              </div>
+              <p className="text-gray-600 italic">
+                "Highly recommended! Staffs are very nice, they're also very
+                accommodating! Ain't gonna lie… mano-notice agad ang improvement
+                sa body. I also wanna mention that the clinic is always clean
+                and very pretty. "
+              </p>
             </div>
 
             {/* Testimonial 2 */}
-            <div 
-              className="bg-white p-6 rounded-2xl shadow-md hover:shadow-lg transition-shadow"
-              data-cy="testimonial-2"
-            >
-              {/* Testimonial content */}
+            <div className="bg-white p-6 rounded-2xl shadow-md hover:shadow-lg transition-shadow">
+              <div className="flex items-center mb-4">
+                <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                  <span className="text-purple-800 font-semibold text-lg">
+                    SR
+                  </span>
+                </div>
+                <div className="ml-4">
+                  <h4 className="font-semibold text-gray-800">
+                    Sarah Rodriguez (Alias){" "}
+                  </h4>
+                  <p className="text-sm text-purple-600">
+                    Me-So Sexy Package Client
+                  </p>
+                </div>
+              </div>
+              <p className="text-gray-600 italic">
+                "Highly recommended! I love the service here. The mesolipo is
+                really effective. My arms have gotten noticeably thinner even
+                after just 1 session, even my friends noticed it. So I'm
+                definitely availing more sessions and I'm eyeing other services,
+                as well."
+              </p>
             </div>
 
             {/* Testimonial 3 */}
-            <div 
-              className="bg-white p-6 rounded-2xl shadow-md hover:shadow-lg transition-shadow"
-              data-cy="testimonial-3"
-            >
-              {/* Testimonial content */}
+            <div className="bg-white p-6 rounded-2xl shadow-md hover:shadow-lg transition-shadow">
+              <div className="flex items-center mb-4">
+                <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                  <span className="text-purple-800 font-semibold text-lg">
+                    JD
+                  </span>
+                </div>
+                <div className="ml-4">
+                  <h4 className="font-semibold text-gray-800">
+                    Jane Dela Cruz (Alias){" "}
+                  </h4>
+                  <p className="text-sm text-purple-600">
+                    Gluta Drips Package Client
+                  </p>
+                </div>
+              </div>
+              <p className="text-gray-600 italic">
+                "Third Empress Gluta Drip ko na dito, and super happy ako! Ang
+                accommodating ng staff, ang ganda at bango ng clinic, at ang
+                gaan ng kamay ng nurse—hindi nakaka-intimidate. After a few
+                sessions, pumantay na skin tone ko at nag-lighten dark spots ko.
+                Super worth it! Babalik ako for more!"
+              </p>
             </div>
           </div>
         </section>
