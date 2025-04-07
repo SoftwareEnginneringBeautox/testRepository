@@ -316,12 +316,22 @@ function PatientRecordsDatabase() {
 
   // Replace the existing handlePaidChange function
   const handlePaidChange = async (record, checked) => {
-    // Convert boolean to "yes"/"no" string for database consistency
-    const newValue = checked ? "yes" : "no";
-    
     try {
-      // Update the patient record's isPaid field
-      await fetch(`${API_BASE_URL}/api/manage-record`, {
+      console.log("Updating paid status:", { id: record.id, newStatus: checked ? "yes" : "no" });
+      
+      // Store local copy of updated record for optimistic updates
+      const updatedRecord = {
+        ...record,
+        isPaid: checked ? "yes" : "no"
+      };
+      
+      // Update UI immediately (optimistic update)
+      setRecords(records.map(r => 
+        r.id === record.id ? updatedRecord : r
+      ));
+      
+      // 1. Update patient record's paid status
+      const updateResponse = await fetch(`${API_BASE_URL}/api/manage-record`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -329,38 +339,49 @@ function PatientRecordsDatabase() {
           table: "patient_records",
           id: record.id,
           action: "edit",
-          data: { isPaid: newValue }
+          data: { isPaid: checked ? "yes" : "no" }
         })
       });
   
-      // If checked (paid), add to sales tracker
+      if (!updateResponse.ok) {
+        throw new Error(`Error updating paid status: ${updateResponse.status}`);
+      }
+  
+      // 2. If marking as paid, add to sales tracker
       if (checked) {
-        // Format the sales data based on your sales tracker table's requirements
+        // Sales tracker code remains unchanged
         const salesData = {
           client: record.client || record.patient_name,
-          // Use the session date (or date_transacted if available)
-          date_transacted: record.dateTransacted || record.date_of_session,
-          // Payment amount could be the amount paid; adjust if needed
-          payment: record.amount_paid,
+          date_transacted: record.date_of_session,
+          payment: record.amount_paid || record.total_amount,
           reference_no: record.reference_number,
           person_in_charge: record.person_in_charge,
           payment_method: record.payment_method,
           packages: record.package_name,
-          treatment: record.treatment
-          // Add any other fields as required by your sales tracker table schema
+          treatment: record.treatment_ids ? getTreatmentNames(record.treatment_ids).join(", ") : ""
         };
   
-        await fetch(`${API_BASE_URL}/api/sales`, {
+        const salesResponse = await fetch(`${API_BASE_URL}/api/sales`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           credentials: "include",
           body: JSON.stringify(salesData)
         });
-      }
   
-      fetchRecords();
+        if (!salesResponse.ok) {
+          throw new Error(`Error adding to sales tracker: ${salesResponse.status}`);
+        }
+      }
+      
+      // Always fetch records to ensure UI is updated with server data
+      await fetchRecords();
+      console.log("Paid status updated successfully");
+      
     } catch (error) {
-      console.error("Error updating paid status or posting to sales tracker:", error);
+      console.error("Error updating paid status:", error);
+      // Revert the optimistic update by fetching fresh data
+      fetchRecords();
+      // You could add a toast notification here
     }
   };
 
@@ -909,14 +930,21 @@ function PatientRecordsDatabase() {
                   </TableCell>
                 )}
 
-                {/* Replace the PAID column Select dropdown with Checkbox */}
-                <TableCell className="text-center" data-cy={`record-paid-checkbox-${index}`}>
-                  <Checkbox
-                    checked={record.isPaid === "yes"}
-                    onCheckedChange={(checked) => handlePaidChange(record, checked)}
-                    className="mx-auto"
-                    data-cy={`paid-checkbox-${index}`}
-                  />
+                {/* Replace Checkbox with Select dropdown for PAID STATUS column */}
+                <TableCell className="text-center" data-cy={`record-paid-status-${index}`}>
+                  <Select 
+                    value={record.isPaid || "no"} 
+                    onValueChange={(value) => handlePaidChange(record, value === "yes")}
+                    data-cy={`paid-status-select-${index}`}
+                  >
+                    <SelectTrigger className="w-[80px] mx-auto">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="yes">YES</SelectItem>
+                      <SelectItem value="no">NO</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </TableCell>
 
                 <TableCell>
