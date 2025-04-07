@@ -77,14 +77,24 @@ export function AppSidebar({ ...props }) {
   // Retrieve the user role from localStorage and normalize it.
   const userRole = localStorage.getItem("role")?.toLowerCase();
 
-  // Filter out the "SERVICES" item if the role is receptionist or aesthetician.
+  // Filter out items based on user role
   const navItems = sideBarInformation.filter((item) => {
+    // Hide SERVICES from receptionist and aesthetician
     if (
       item.title === "SERVICES" &&
       (userRole === "receptionist" || userRole === "aesthetician")
     ) {
       return false;
     }
+    
+    // Hide FINANCIAL OVERVIEW from receptionist and aesthetician
+    if (
+      item.title === "FINANCIAL OVERVIEW" &&
+      (userRole === "receptionist" || userRole === "aesthetician")
+    ) {
+      return false;
+    }
+    
     return true;
   });
 
