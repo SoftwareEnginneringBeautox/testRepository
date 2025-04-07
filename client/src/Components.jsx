@@ -57,7 +57,7 @@ export const OutlineButton = ({
   );
 };
 
-// Pagination for Tables/Charts
+// for Tables/Charts
 export const Pagination = () => {
   return (
     <td colSpan="8" className="text-lavender-200 font-semibold">
