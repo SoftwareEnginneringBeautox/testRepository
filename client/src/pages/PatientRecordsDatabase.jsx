@@ -629,47 +629,48 @@ function PatientRecordsDatabase() {
   };
 
   return (
-    <div className="flex flex-col gap-4 md:gap-[1.5rem] text-left w-full md:w-[90%] mx-auto px-4 md:px-0">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <h4 className="font-semibold text-xl md:text-[2rem] leading-normal md:leading-[2.8rem]">
-          PATIENT RECORDS
-        </h4>
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-center gap-4 w-full md:w-auto">
-          <InputTextField className="w-full md:w-auto">
-            <Input
-              type="text"
-              id="search"
-              placeholder="Search by client name..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            <MagnifyingGlassIcon />
-          </InputTextField>
+<div className="flex flex-col gap-4 md:gap-[1.5rem] text-left w-full md:w-[90%] mx-auto px-4 md:px-0" data-cy="patient-records-database">
+  <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <h4 className="font-semibold text-xl md:text-[2rem] leading-normal md:leading-[2.8rem]" data-cy="patient-records-title">
+      PATIENT RECORDS
+    </h4>
+    <div className="flex flex-col md:flex-row items-start md:items-center justify-center gap-4 w-full md:w-auto">
+      <InputTextField className="w-full md:w-auto">
+        <Input
+          type="text"
+          id="search"
+          data-cy="patient-search"
+          placeholder="Search by client name..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        <MagnifyingGlassIcon />
+      </InputTextField>
 
-          <Select onValueChange={setSortOption} className="w-full md:w-auto">
-            <SelectTrigger placeholder="SORT BY" icon={<SortIcon />}>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="alphabetical">ALPHABETICAL</SelectItem>
-              <SelectItem value="date">DATE</SelectItem>
-            </SelectContent>
-          </Select>
+      <Select onValueChange={setSortOption} className="w-full md:w-auto">
+        <SelectTrigger placeholder="SORT BY" icon={<SortIcon />} data-cy="sort-select">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="alphabetical">ALPHABETICAL</SelectItem>
+          <SelectItem value="date">DATE</SelectItem>
+        </SelectContent>
+      </Select>
 
-          {/* Use modified MultiSelectFilter with Apply button */}
-          <MultiSelectFilter
-            options={columns}
-            selectedValues={tempSelectedColumns}
-            setSelectedValues={setTempSelectedColumns}
-            placeholder="FILTER COLUMNS"
-            mandatoryValues={["client", "dateofsession"]}
-            onApply={applyColumnFilters}
-            showApplyButton={true}
-          />
-        </div>
-      </div>
+      <MultiSelectFilter
+        options={columns}
+        selectedValues={tempSelectedColumns}
+        setSelectedValues={setTempSelectedColumns}
+        placeholder="FILTER COLUMNS"
+        mandatoryValues={["client", "dateofsession"]}
+        onApply={applyColumnFilters}
+        showApplyButton={true}
+        data-cy="column-filter"
+      />
+    </div>
+  </div>
 
-      <div className="w-full overflow-x-auto">
+  <div className="w-full overflow-x-auto" data-cy="patient-records-table">
         <Table
           className="min-w-[1200px]"
           showPagination={true}
@@ -768,14 +769,14 @@ function PatientRecordsDatabase() {
           </TableHeader>
           <TableBody>
             {currentRecords.map((record, index) => (
-              <TableRow key={index}>
+              <TableRow key={index} data-cy={`record-row-${index}`} >
                 {/* Always show CLIENT column */}
-                <TableCell className="whitespace-nowrap">
+                <TableCell className="whitespace-nowrap" data-cy={`record-client-${index}`}>
                   {record.client || record.patient_name?.toUpperCase() || "N/A"}
                 </TableCell>
 
                 {/* Always show DATE OF SESSION column */}
-                <TableCell className="text-center whitespace-nowrap">
+                <TableCell className="text-center whitespace-nowrap" data-cy={`record-date-${index}`}>
                   {record.dateTransacted || record.date_of_session
                     ? format(
                         new Date(
@@ -788,7 +789,7 @@ function PatientRecordsDatabase() {
 
                 {/* Conditionally show other cells based on selectedColumns */}
                 {isColumnVisible.timeofsession && (
-                  <TableCell className="text-center whitespace-nowrap">
+                  <TableCell className="text-center whitespace-nowrap" data-cy={`record-time-${index}`}>
                     {record.nextSessionTime || record.time_of_session
                       ? (() => {
                           const timeValue =
@@ -804,23 +805,23 @@ function PatientRecordsDatabase() {
                   </TableCell>
                 )}
                 {isColumnVisible.contactnumber && (
-                  <TableCell className="text-center whitespace-nowrap">
+                  <TableCell className="text-center whitespace-nowrap" data-cy={`record-contact-${index}`}>
                     {record.contact_number || "N/A"}
                   </TableCell>
                 )}
                 {isColumnVisible.age && (
-                  <TableCell className="text-center whitespace-nowrap">
+                  <TableCell className="text-center whitespace-nowrap" data-cy={`record-age-${index}`}>
                     {record.age || "N/A"}
                   </TableCell>
                 )}
                 {isColumnVisible.email && (
-                  <TableCell className="text-center whitespace-nowrap">
+                  <TableCell className="text-center whitespace-nowrap" data-cy={`record-email-${index}`}>
                     {record.email || "N/A"}
                   </TableCell>
                 )}
 
                 {isColumnVisible.personincharge && (
-                  <TableCell className="text-center whitespace-nowrap">
+                  <TableCell className="text-center whitespace-nowrap" data-cy={`record-personincharge-${index}`}>
                     {(
                       record.personInCharge || record.person_in_charge
                     )?.toUpperCase()}
@@ -828,13 +829,13 @@ function PatientRecordsDatabase() {
                 )}
 
                 {isColumnVisible.package && (
-                  <TableCell className="whitespace-nowrap">
+                  <TableCell className="whitespace-nowrap" data-cy={`record-package-${index}`}>
                     {(record.package || record.package_name)?.toUpperCase()}
                   </TableCell>
                 )}
 
                 {isColumnVisible.treatment && (
-                  <TableCell className="text-left whitespace-nowrap">
+                  <TableCell className="text-left whitespace-nowrap" data-cy={`record-treatment-${index}`}>
                     {Array.isArray(record.treatment_ids)
                       ? getTreatmentNames(record.treatment_ids)
                           .join(", ")
@@ -844,7 +845,7 @@ function PatientRecordsDatabase() {
                 )}
 
                 {isColumnVisible.consentformsigned && (
-                  <TableCell className="text-center whitespace-nowrap">
+                  <TableCell className="text-center whitespace-nowrap" data-cy={`record-consent-${index}`}>
                     {record.consentStatus ||
                       (typeof record.consent_form_signed === "boolean"
                         ? record.consent_form_signed
@@ -855,7 +856,7 @@ function PatientRecordsDatabase() {
                 )}
 
                 {isColumnVisible.paymentmethod && (
-                  <TableCell className="whitespace-nowrap">
+                  <TableCell className="whitespace-nowrap" data-cy={`record-paymentmethod-${index}`}>
                     {(
                       record.paymentMethod || record.payment_method
                     )?.toUpperCase()}
@@ -863,7 +864,7 @@ function PatientRecordsDatabase() {
                 )}
 
                 {isColumnVisible.totalamount && (
-                  <TableCell className="text-center">
+                  <TableCell className="text-center" data-cy={`record-total-${index}`}>
                     {new Intl.NumberFormat("en-PH", {
                       style: "currency",
                       currency: "PHP"
@@ -872,7 +873,7 @@ function PatientRecordsDatabase() {
                 )}
 
                 {isColumnVisible.amountpaid && (
-                  <TableCell className="text-center">
+                  <TableCell className="text-center" data-cy={`record-paid-${index}`}>
                     {record.amount_paid
                       ? new Intl.NumberFormat("en-PH", {
                           style: "currency",
@@ -883,7 +884,7 @@ function PatientRecordsDatabase() {
                 )}
 
                 {isColumnVisible.remainingbalance && (
-                  <TableCell className="text-center">
+                  <TableCell className="text-center" data-cy={`record-remaining-${index}`}>
                     {(() => {
                       const total = parseFloat(record.total_amount || 0);
                       const paid = parseFloat(record.amount_paid || 0);
@@ -897,13 +898,13 @@ function PatientRecordsDatabase() {
                 )}
 
                 {isColumnVisible.referenceno && (
-                  <TableCell className="text-center">
+                  <TableCell className="text-center"  data-cy={`record-refno-${index}`}>
                     {record.reference_number || "N/A"}
                   </TableCell>
                 )}
 
                 {/* Always show PAID column */}
-                <TableCell className="text-center">
+                <TableCell className="text-center" data-cy={`record-paid-select-${index}`}>
                   <Select
                     value={record.isPaid ? record.isPaid.toLowerCase() : "-"}
                     onValueChange={(val) => handlePaidChange(record, val)}
@@ -923,25 +924,28 @@ function PatientRecordsDatabase() {
 
                 <TableCell>
                   <DropdownMenu>
-                    <DropdownMenuTrigger>
+                    <DropdownMenuTrigger data-cy={`record-menu-trigger-${index}`}>
                       <EllipsisIcon />
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
                       <DropdownMenuGroup>
                         <DropdownMenuItem
                           onClick={() => handleOpenUpdateEntry(record)}
+                          data-cy={`record-update-button-${index}`}
                         >
                           <UpdateIcon />
                           <p className="font-semibold">Update</p>
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => handleOpenEditEntry(record)}
+                          data-cy={`record-edit-button-${index}`}
                         >
                           <EditIcon />
                           <p className="font-semibold">Edit</p>
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => handleOpenArchiveEntry(record)}
+                          data-cy={`record-archive-button-${index}`}
                         >
                           <ArchiveIcon />
                           <p className="font-semibold">Archive</p>
@@ -956,58 +960,62 @@ function PatientRecordsDatabase() {
         </Table>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-4 justify-end">
-        <Button variant="outline" className="w-full md:w-auto">
-          <ChevronLeftIcon />
-          RETURN
-        </Button>
-        <Button
-          onClick={() => openModal("createEntry")}
-          className="w-full md:w-auto"
-        >
-          <PlusIcon />
-          ADD NEW ENTRY
-        </Button>
-        <Button
-          variant="callToAction"
-          onClick={() => generatePRDReport(records)}
-          className="w-full md:w-auto"
-        >
-          <DownloadIcon />
-          <span className="hidden md:inline">DOWNLOAD PATIENT RECORDS</span>
-          <span className="md:hidden">DOWNLOAD RECORDS</span>
-        </Button>
-      </div>
+      <div className="flex flex-col md:flex-row gap-4 justify-end" data-cy="patient-records-actions">
+    <Button variant="outline" className="w-full md:w-auto" data-cy="return-button">
+      <ChevronLeftIcon />
+      RETURN
+    </Button>
+    <Button
+      onClick={() => openModal("createEntry")}
+      className="w-full md:w-auto"
+      data-cy="add-entry-button"
+    >
+      <PlusIcon />
+      ADD NEW ENTRY
+    </Button>
+    <Button
+      variant="callToAction"
+      onClick={() => generatePRDReport(records)}
+      className="w-full md:w-auto"
+      data-cy="download-records-button"
+    >
+      <DownloadIcon />
+      <span className="hidden md:inline">DOWNLOAD PATIENT RECORDS</span>
+      <span className="md:hidden">DOWNLOAD RECORDS</span>
+    </Button>
+  </div>
 
-      {currentModal === "createEntry" && (
-        <CreatePatientEntry isOpen={true} onClose={handleModalClose} />
-      )}
-      {currentModal === "editEntry" && selectedEntry && (
-        <EditPatientEntry
-          isOpen={true}
-          onClose={handleModalClose}
-          entryData={selectedEntry}
-          onSubmit={handleEditPatientEntry}
-        />
-      )}
-      {currentModal === "updateEntry" && selectedEntry && (
-        <UpdatePatientEntry
-          isOpen={true}
-          onClose={handleModalClose}
-          entryData={selectedEntry}
-          onSubmit={handleUpdatePatientEntry} // Pass the handleEditPatientEntry function to the modal
-          // Pass the handleEditPatientEntry function to the modal
-        />
-      )}
-      {currentModal === "archiveEntry" && selectedEntry && (
-        <ArchivePatientEntry
-          isOpen={true}
-          onClose={handleModalClose}
-          entryData={selectedEntry}
-          onArchive={handleArchive}
-        />
-      )}
-    </div>
+  {currentModal === "createEntry" && (
+    <CreatePatientEntry isOpen={true} onClose={handleModalClose} data-cy="create-patient-entry-modal" />
+  )}
+  {currentModal === "editEntry" && selectedEntry && (
+    <EditPatientEntry
+      isOpen={true}
+      onClose={handleModalClose}
+      entryData={selectedEntry}
+      onSubmit={handleEditPatientEntry}
+      data-cy="edit-patient-entry-modal"
+    />
+  )}
+  {currentModal === "updateEntry" && selectedEntry && (
+    <UpdatePatientEntry
+      isOpen={true}
+      onClose={handleModalClose}
+      entryData={selectedEntry}
+      onSubmit={handleUpdatePatientEntry}
+      data-cy="update-patient-entry-modal"
+    />
+  )}
+  {currentModal === "archiveEntry" && selectedEntry && (
+    <ArchivePatientEntry
+      isOpen={true}
+      onClose={handleModalClose}
+      entryData={selectedEntry}
+      onArchive={handleArchive}
+      data-cy="archive-patient-entry-modal"
+    />
+  )}
+</div>
   );
 }
 

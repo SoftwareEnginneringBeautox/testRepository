@@ -130,68 +130,68 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
   const remainingBalance = total - paid;
 
   return (
-    <ModalContainer>
+    <ModalContainer data-cy="update-patient-entry-modal">
       <ModalHeader>
         <ModalIcon>
           <CircleUserIcon />
         </ModalIcon>
-        <ModalTitle>UPDATE PATIENT RECORD</ModalTitle>
+        <ModalTitle data-cy="update-patient-title">UPDATE PATIENT RECORD</ModalTitle>
       </ModalHeader>
       <ModalBody>
-        <form onSubmit={(e) => e.preventDefault()}>
+        <form onSubmit={(e) => e.preventDefault()} data-cy="update-patient-form">
           <div className="flex flex-col gap-4">
-            <p>
+            <p data-cy="patient-name-display">
               PATIENT RECORD OF{" "}
               {originalData.patient_name?.toUpperCase() || "UNKNOWN"}
             </p>
 
             <InputContainer>
               <InputLabel>PERSON IN CHARGE</InputLabel>
-              <p>{originalData.person_in_charge}</p>
+              <p data-cy="person-in-charge-display">{originalData.person_in_charge}</p>
             </InputContainer>
 
             {/* PACKAGE */}
             <InputContainer>
               <InputLabel>PACKAGE</InputLabel>
-              <p>{originalData.package_name}</p>
+              <p data-cy="package-display">{originalData.package_name}</p>
             </InputContainer>
 
             {/* TREATMENT */}
             <InputContainer>
               <InputLabel>TREATMENT</InputLabel>
-              <p>{originalData.treatment}</p>
+              <p data-cy="treatment-display">{originalData.treatment}</p>
             </InputContainer>
 
             <InputContainer>
               <InputLabel>TOTAL AMOUNT</InputLabel>
-              <p>{originalData.total_amount}</p>
+              <p data-cy="total-amount-display">{originalData.total_amount}</p>
             </InputContainer>
 
             <InputContainer>
               <InputLabel>AMOUNT PAID</InputLabel>
-              <p>{originalData.amount_paid}</p>
+              <p data-cy="amount-paid-display">{originalData.amount_paid}</p>
             </InputContainer>
 
             <InputContainer>
               <InputLabel>REMAINING BALANCE</InputLabel>
-              <p>{remainingBalance}</p>
+              <p data-cy="remaining-balance-display">{remainingBalance}</p>
             </InputContainer>
 
             <InputContainer>
               <InputLabel>PAYMENT METHOD</InputLabel>
-              <p>{originalData.payment_method}</p>
+              <p data-cy="payment-method-display">{originalData.payment_method}</p>
             </InputContainer>
           </div>
 
           <div className="flex flex-row w-full gap-4">
             <InputContainer className="flex-1">
               <InputLabel>DATE OF SESSION</InputLabel>
-              <p>{originalData.date_of_session}</p>
+              <p data-cy="date-of-session-display">{originalData.date_of_session}</p>
             </InputContainer>
 
             <InputContainer className="flex-1">
               <InputLabel>TIME OF SESSION</InputLabel>
-              <p>{originalData.time_of_session}</p>
+              <p data-cy="time-of-session-display">{originalData.time_of_session}</p>
             </InputContainer>
           </div>
 
@@ -203,6 +203,7 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
                   <CalendarIcon />
                 </InputIcon>
                 <Input
+                  data-cy="next-date-of-session-input"
                   type="date"
                   className="text-input"
                   placeholder="Date of Session"
@@ -229,6 +230,7 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
                   <ClockIcon />
                 </InputIcon>
                 <Input
+                  data-cy="next-time-of-session-input"
                   type="time"
                   className="text-input"
                   required
@@ -254,6 +256,7 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
             </h5>
             <div className="flex flex-row gap-3 items-center justify-start">
               <Checkbox
+                data-cy="consent-checkbox"
                 id="consent"
                 checked={formData.consent_form_signed}
                 onCheckedChange={(checked) =>
@@ -270,11 +273,20 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
           </div>
 
           <div className="flex flex-row gap-4 mt-6 w-full">
-            <Button variant="outline" className="w-1/2" onClick={onClose}>
+            <Button 
+              data-cy="cancel-update-patient-btn"
+              variant="outline" 
+              className="w-1/2" 
+              onClick={onClose}
+            >
               <ChevronLeftIcon />
               CANCEL AND RETURN
             </Button>
-            <Button className="w-1/2">
+            <Button 
+              data-cy="submit-update-patient"
+              className="w-1/2"
+              onClick={() => onSubmit(formData)}
+            >
               <UpdateIcon />
               UPDATE ENTRY
             </Button>

@@ -98,7 +98,7 @@ function CreateMonthlySales({ isOpen, onClose, onCreateSuccess, categories }) {
   };
 
   return (
-    <ModalContainer>
+    <ModalContainer data-cy="create-monthly-expense-modal">
       <ModalHeader>
         <ModalIcon>
           <PesoIcon />
@@ -106,7 +106,7 @@ function CreateMonthlySales({ isOpen, onClose, onCreateSuccess, categories }) {
         <ModalTitle>CREATE MONTHLY EXPENSE ENTRY</ModalTitle>
       </ModalHeader>
       <ModalBody>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} data-cy="create-expense-form">
           <div className="flex flex-col gap-4">
             <InputContainer>
               <InputLabel>EXPENSE TYPE</InputLabel>
@@ -115,20 +115,26 @@ function CreateMonthlySales({ isOpen, onClose, onCreateSuccess, categories }) {
                 name="expenseType"
                 value={formData.expenseType}
                 onValueChange={handleExpenseTypeChange}
+                data-cy="expense-type-select"
               >
                 <ModalSelectTrigger
+                  data-cy="expense-type-trigger"
                   placeholder="Select expense type"
                   icon={<ExpenseTypeIcon className="w-4 h-4" />}
                 />
                 <ModalSelectContent>
                   {safeCategories.length > 0 ? (
                     safeCategories.map((category) => (
-                      <SelectItem key={category.id} value={category.name}>
+                      <SelectItem 
+                        key={category.id} 
+                        value={category.name}
+                        data-cy={`expense-type-option-${category.id}`}
+                      >
                         {category.name.toUpperCase()}
                       </SelectItem>
                     ))
                   ) : (
-                    <SelectItem value="" disabled>
+                    <SelectItem value="" disabled data-cy="no-categories-option">
                       No categories available
                     </SelectItem>
                   )}
@@ -142,6 +148,7 @@ function CreateMonthlySales({ isOpen, onClose, onCreateSuccess, categories }) {
                   <CoinsIcon />
                 </InputIcon>
                 <Input
+                  data-cy="expense-amount-input"
                   name="amount"
                   value={formData.amount}
                   onChange={handleChange}
@@ -162,6 +169,7 @@ function CreateMonthlySales({ isOpen, onClose, onCreateSuccess, categories }) {
                   <CalendarIcon />
                 </InputIcon>
                 <Input
+                  data-cy="expense-date-input"
                   name="date"
                   type="date"
                   placeholder="Date"
@@ -175,6 +183,7 @@ function CreateMonthlySales({ isOpen, onClose, onCreateSuccess, categories }) {
           </div>
           <div className="flex flex-row gap-4 mt-6 w-full">
             <Button
+              data-cy="cancel-expense-btn"
               variant="outline"
               className="w-1/2"
               onClick={onClose}
@@ -185,6 +194,7 @@ function CreateMonthlySales({ isOpen, onClose, onCreateSuccess, categories }) {
               CANCEL AND RETURN
             </Button>
             <Button 
+              data-cy="submit-create-expense"
               className="w-1/2" 
               type="submit"
               disabled={isSubmitting}

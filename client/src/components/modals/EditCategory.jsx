@@ -79,15 +79,15 @@ function EditCategory({ isOpen, onClose, category, onEditSuccess }) {
   if (!isOpen || !category) return null;
 
   return (
-    <ModalContainer>
+    <ModalContainer data-cy="edit-category-modal">
       <ModalHeader>
         <ModalIcon>
           <ExpenseTypeIcon />
         </ModalIcon>
-        <ModalTitle>EDIT EXPENSE CATEGORY</ModalTitle>
+        <ModalTitle data-cy="edit-category-title">EDIT EXPENSE CATEGORY</ModalTitle>
       </ModalHeader>
       <ModalBody>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} data-cy="edit-category-form">
           <div className="flex flex-col gap-4">
             <InputContainer>
               <InputLabel>CATEGORY NAME</InputLabel>
@@ -96,6 +96,7 @@ function EditCategory({ isOpen, onClose, category, onEditSuccess }) {
                   <ExpenseTypeIcon />
                 </InputIcon>
                 <Input
+                  data-cy="category-name-input"
                   type="text"
                   id="categoryName"
                   placeholder="Set the name of the category"
@@ -108,6 +109,7 @@ function EditCategory({ isOpen, onClose, category, onEditSuccess }) {
           </div>
           <div className="flex flex-row gap-4 mt-6 w-full">
             <Button 
+              data-cy="cancel-edit-category-btn"
               type="button" 
               variant="outline" 
               className="w-1/2" 
@@ -118,6 +120,7 @@ function EditCategory({ isOpen, onClose, category, onEditSuccess }) {
               CANCEL AND RETURN
             </Button>
             <Button 
+              data-cy="submit-edit-category"
               type="submit" 
               className="w-1/2"
               disabled={isSubmitting}

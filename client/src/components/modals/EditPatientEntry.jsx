@@ -176,7 +176,7 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
   const remainingBalance = total - paid;
 
   return (
-    <ModalContainer>
+    <ModalContainer data-cy="edit-patient-entry-modal">
       <ModalHeader>
         <ModalIcon>
           <CircleUserIcon />
@@ -202,6 +202,7 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
                   <UserIcon />
                 </InputIcon>
                 <Input
+                  data-cy="patient-name-input"
                   placeholder={
                     originalData.patient_name || "Full name of the patient"
                   }
@@ -218,6 +219,7 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
               <InputLabel>CONTACT NUMBER</InputLabel>
               <InputTextField>
                 <Input
+                  data-cy="contact-number-input"
                   placeholder="e.g. 09XXXXXXXXX"
                   value={formData.contact_number ?? ""}
                   onChange={(e) =>
@@ -232,6 +234,7 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
               <InputLabel>AGE</InputLabel>
               <InputTextField>
                 <Input
+                  data-cy="age-input"
                   type="number"
                   min="0"
                   placeholder="Age"
@@ -248,6 +251,7 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
               <InputLabel>EMAIL</InputLabel>
               <InputTextField>
                 <Input
+                  data-cy="email-input"
                   type="email"
                   placeholder="example@email.com"
                   value={formData.email ?? ""}
@@ -270,12 +274,16 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
                 }
               >
                 <ModalSelectTrigger
+                  data-cy="person-in-charge-select"
                   icon={<UserIDIcon className="w-4 h-4" />}
                   placeholder={formData.person_in_charge || "Select person in charge"}
                 />
                 <ModalSelectContent>
                 {aestheticianList.map((aesthetician) => (
-                  <SelectItem key={aesthetician.id} value={aesthetician.username}>
+                  <SelectItem 
+                    data-cy="person-in-charge-option"
+                    key={aesthetician.id} 
+                    value={aesthetician.username}>
                     {aesthetician.username}
                   </SelectItem>
                 ))}
@@ -306,6 +314,7 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
                 
               >
                 <ModalSelectTrigger
+                  data-cy="package-select"
                   icon={<PackageIcon className="w-4 h-4" />}
                   placeholder="Select package"
             
@@ -315,7 +324,10 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
 
                   {!Boolean(formData.treatment ?? originalData.treatment) && 
                     packagesList.map((pkg) => (
-                    <SelectItem key={pkg.id} value={pkg.package_name}>
+                    <SelectItem 
+                      data-cy="package-option"
+                      key={pkg.id} 
+                      value={pkg.package_name}>
                       {pkg.package_name} - ₱{pkg.price}
                     </SelectItem>
                   ))}
@@ -327,34 +339,35 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
             <InputContainer>
             <InputLabel>TREATMENTS</InputLabel>
             <TreatmentMultiSelect
-            icon={<TreatmentIcon className="w-4 h-4" />}
-            options={[
-              { value: "CLEAR", label: "Clear Selection" },
-              ...treatmentsList.map((t) => ({
-                value: t.id,
-                label: `${t.treatment_name} - ₱${t.price}`
-              }))
-            ]}
-            value={Array.isArray(originalData.treatment_ids) ? originalData.treatment_ids : []}
-            onChange={(selected) => {
-              if (selected.includes("CLEAR")) {
-                setFormData((prev) => ({
-                  ...prev,
-                  treatment_ids: [],
-                  package_name: "",
-                  total_amount: ""
-                }));
-              } else {
-                setFormData((prev) => ({
-                  ...prev,
-                  treatment_ids: selected,
-                  package_name: "", // Always clear package when treatments are selected
-                }));
-              }
-            }}
-            
-            placeholder="Select treatments"
-          />
+              data-cy="treatments-multiselect"
+              icon={<TreatmentIcon className="w-4 h-4" />}
+              options={[
+                { value: "CLEAR", label: "Clear Selection" },
+                ...treatmentsList.map((t) => ({
+                  value: t.id,
+                  label: `${t.treatment_name} - ₱${t.price}`
+                }))
+              ]}
+              value={Array.isArray(originalData.treatment_ids) ? originalData.treatment_ids : []}
+              onChange={(selected) => {
+                if (selected.includes("CLEAR")) {
+                  setFormData((prev) => ({
+                    ...prev,
+                    treatment_ids: [],
+                    package_name: "",
+                    total_amount: ""
+                  }));
+                } else {
+                  setFormData((prev) => ({
+                    ...prev,
+                    treatment_ids: selected,
+                    package_name: "", // Always clear package when treatments are selected
+                  }));
+                }
+              }}
+              
+              placeholder="Select treatments"
+            />
 
           </InputContainer>
 
@@ -365,6 +378,7 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
                 <PesoIcon />
               </InputIcon>
               <Input
+                data-cy="total-amount-input"
                 readOnly
                 className="bg-[#F5F3F0] text-gray-500"
                 value={
@@ -388,6 +402,7 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
                   <PesoIcon />
                 </InputIcon>
                 <Input
+                  data-cy="amount-paid-input"
                   prefix="₱"
                   placeholder="₱0.00"
                   decimalsLimit={2}
