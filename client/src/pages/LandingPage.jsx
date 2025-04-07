@@ -589,7 +589,7 @@ function LandingPage() {
             className="text-2xl sm:text-3xl font-semibold bg-gradient-to-r from-reflexBlue-300 to-lavender-300 text-transparent bg-clip-text mb-8 text-center"
             data-cy="about-clinic-title"
           >
-            ABOUT OUR CLINIC
+            FIND OUR CLINIC
           </h2>
 
           <div className="w-full flex flex-col lg:flex-row gap-8">
@@ -711,174 +711,208 @@ function LandingPage() {
           <div className="h-0.5 bg-purple-900 my-8 sm:my-16"></div>
         </div>
 
-        {/* Testimonials Section */}
-        <section 
+          {/* Testimonials Section */}
+          <section 
           id="testimonials" 
-          className="w-[85%] sm:w-[80%] mx-auto mb-16"
+          className="w-[85%] sm:w-[80%] mx-auto mb-8 bg-white py-8"
           data-cy="testimonials"
         >
-          <h2 
-            className="text-2xl sm:text-3xl font-semibold bg-gradient-to-r from-reflexBlue-300 to-lavender-300 text-transparent bg-clip-text mb-8 text-center"
-            data-cy="testimonials-title"
-          >
-            WHAT OUR CLIENTS SAY
-          </h2>
+          <div className="text-center mb-8">
+            <p className="text-purple-600 font-medium mb-2">Testimonials</p>
+            <h2 
+              className="text-3xl sm:text-4xl font-semibold bg-gradient-to-r from-reflexBlue-300 to-lavender-300 text-transparent bg-clip-text"
+              data-cy="testimonials-title"
+            >
+              Our Clients Review
+            </h2>
+          </div>
 
           <div 
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8"
             data-cy="testimonials-grid"
           >
-             {/* Testimonial 1 */}
-             <div className="bg-white p-6 rounded-2xl shadow-md hover:shadow-lg transition-shadow">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
-                  <span className="text-purple-800 font-semibold text-lg">
-                    MA
-                  </span>
-                </div>
-                <div className="ml-4">
-                  <h4 className="font-semibold text-gray-800">
-                    Maria Angeles (Alias){" "}
-                  </h4>
-                  <p className="text-sm text-purple-600">Regular Client</p>
+            {/* Testimonial 1 */}
+            <div className="bg-purple-100/70 rounded-2xl p-8 relative" data-cy="testimonial-1">
+              <div className="absolute top-0 left-8 transform -translate-y-1/2">
+                <div className="w-16 h-16 rounded-full overflow-hidden ring-4 ring-white bg-purple-100 flex items-center justify-center">
+                  <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
                 </div>
               </div>
-              <p className="text-gray-600 italic">
-                "Highly recommended! Staffs are very nice, they're also very
-                accommodating! Ain't gonna lie… mano-notice agad ang improvement
-                sa body. I also wanna mention that the clinic is always clean
-                and very pretty. "
-              </p>
+              <div className="text-center pt-10">
+                <h4 className="text-xl font-semibold text-gray-800 mb-1">Mae Angeles (Alias) </h4>
+                <p className="text-purple-600 text-sm mb-6">Regular Client</p>
+                <p className="text-gray-600 text-sm leading-relaxed mb-6">
+                  "Highly recommended! Staffs are very nice, they're also very
+                  accommodating! Ain't gonna lie… mano-notice agad ang improvement
+                  sa body. I also wanna mention that the clinic is always clean
+                  and very pretty."
+                </p>
+                <div className="flex items-center justify-center gap-1">
+                  {[1, 2, 3, 4].map((star) => (
+                    <svg key={star} className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                  ))}
+                  <svg className="w-5 h-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                  </svg>
+                </div>
+              </div>
             </div>
 
             {/* Testimonial 2 */}
-            <div className="bg-white p-6 rounded-2xl shadow-md hover:shadow-lg transition-shadow">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
-                  <span className="text-purple-800 font-semibold text-lg">
-                    SR
-                  </span>
-                </div>
-                <div className="ml-4">
-                  <h4 className="font-semibold text-gray-800">
-                    Sarah Rodriguez (Alias){" "}
-                  </h4>
-                  <p className="text-sm text-purple-600">
-                    Me-So Sexy Package Client
-                  </p>
+            <div className="bg-purple-100/70 rounded-2xl p-8 relative" data-cy="testimonial-2">
+              <div className="absolute top-0 left-8 transform -translate-y-1/2">
+                <div className="w-16 h-16 rounded-full overflow-hidden ring-4 ring-white bg-purple-100 flex items-center justify-center">
+                  <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
                 </div>
               </div>
-              <p className="text-gray-600 italic">
-                "Highly recommended! I love the service here. The mesolipo is
-                really effective. My arms have gotten noticeably thinner even
-                after just 1 session, even my friends noticed it. So I'm
-                definitely availing more sessions and I'm eyeing other services,
-                as well."
+              <div className="text-center pt-10">
+                <h4 className="text-xl font-semibold text-gray-800 mb-1"> Ali Rodriguez (Alias) </h4>
+                <p className="text-purple-600 text-sm mb-6">Me-So Sexy Package Client</p>
+                <p className="text-gray-600 text-sm leading-relaxed mb-6">
+                  "Highly recommended! I love the service here. The mesolipo is
+                  really effective. My arms have gotten noticeably thinner even
+                  after just 1 session, even my friends noticed it."
                 </p>
+                <div className="flex items-center justify-center gap-1">
+                  {[1, 2, 3, 4].map((star) => (
+                    <svg key={star} className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                  ))}
+                  <svg className="w-5 h-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                  </svg>
+                </div>
               </div>
+            </div>
 
             {/* Testimonial 3 */}
-            <div className="bg-white p-6 rounded-2xl shadow-md hover:shadow-lg transition-shadow">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
-                  <span className="text-purple-800 font-semibold text-lg">
-                    JD
-                  </span>
-                </div>
-                <div className="ml-4">
-                  <h4 className="font-semibold text-gray-800">
-                    Jane Dela Cruz (Alias){" "}
-                  </h4>
-                  <p className="text-sm text-purple-600">
-                    Gluta Drips Package Client
-                  </p>
+            <div className="bg-purple-100/70 rounded-2xl p-8 relative" data-cy="testimonial-3">
+              <div className="absolute top-0 left-8 transform -translate-y-1/2">
+                <div className="w-16 h-16 rounded-full overflow-hidden ring-4 ring-white bg-purple-100 flex items-center justify-center">
+                  <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
                 </div>
               </div>
-              <p className="text-gray-600 italic">
-                "Third Empress Gluta Drip ko na dito, and super happy ako! Ang
-                accommodating ng staff, ang ganda at bango ng clinic, at ang
-                gaan ng kamay ng nurse—hindi nakaka-intimidate. After a few
-                sessions, pumantay na skin tone ko at nag-lighten dark spots ko.
-                Super worth it! Babalik ako for more!"
-              </p>
+              <div className="text-center pt-10">
+                <h4 className="text-xl font-semibold text-gray-800 mb-1">Jane Almario (Alias) </h4>
+                <p className="text-purple-600 text-sm mb-6">Gluta Drips Package Client</p>
+                <p className="text-gray-600 text-sm leading-relaxed mb-6">
+                  "Third Empress Gluta Drip ko na dito, and super happy ako! After a few
+                  sessions, pumantay na skin tone ko at nag-lighten dark spots ko.
+                  Super worth it! Babalik ako for more!"
+                </p>
+                <div className="flex items-center justify-center gap-1">
+                  {[1, 2, 3, 4].map((star) => (
+                    <svg key={star} className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                  ))}
+                  <svg className="w-5 h-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                  </svg>
+                </div>
+              </div>
             </div>
           </div>
         </section>
+            
 
         <div className="w-[85%] sm:w-[80%] mx-auto">
           <div className="h-0.5 bg-purple-900 my-8 sm:my-16"></div>
         </div>
 
+        {/* Contact Section */}
         <section
           id="contact"
-          className="w-[85%] sm:w-[80%] flex flex-col-reverse lg:flex-row gap-8 justify-center mt-8 sm:mt-16 mb-12 sm:mb-20"
+          className="w-full bg-purple-950 py-16 mt-8"
           data-cy="contact"
         >
-          <ul 
-            className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-base sm:text-lg w-full lg:w-1/2"
-            data-cy="contact-links"
-          >
-            <li 
-              className="flex gap-2 justify-center"
-              data-cy="facebook-link"
+          <div className="w-[85%] sm:w-[80%] mx-auto flex flex-col-reverse lg:flex-row gap-8 justify-center">
+            <ul 
+              className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-base sm:text-lg w-full lg:w-1/2"
+              data-cy="contact-links"
             >
-              <FacebookIcon fill="#002B7F" />
-              <a
-                href="https://www.facebook.com/BeautoxAestheticClinicNewManila"
-                target="_blank"
-                rel="noreferrer"
-                className="hover:text-faintingLight-400 transition-colors"
+              <li 
+                className="flex gap-2 justify-center"
+                data-cy="facebook-link"
               >
-                FACEBOOK
-              </a>
-            </li>
+                <svg 
+                  className="w-6 h-6 text-white" 
+                  fill="currentColor" 
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                <a
+                  href="httpsk://www.facebook.com/BeautoxAestheticClinicNewManila"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-white hover:text-white/80 transition-colors"
+                >
+                  FACEBOOK
+                </a>
+              </li>
 
-            <li 
-              className="flex gap-2 justify-center"
-              data-cy="phone-contact"
-            >
-              <PhoneIcon />
-              0917-895-8825
-            </li>
-            
-            <li 
-              className="flex gap-2 justify-center"
-              data-cy="instagram-link"
-            >
-              <InstagramIcon fill="#E1306C" />
-              <a
-                href="https://www.instagram.com/beautoxnewmanila/"
-                target="_blank"
-                rel="noreferrer"
-                className="hover:text-faintingLight-400 transition-colors"
+              <li 
+                className="flex gap-2 justify-center text-white"
+                data-cy="phone-contact"
               >
-                INSTAGRAM
-              </a>
-            </li>
-            
-            <li 
-              className="flex gap-2 justify-center"
-              data-cy="email-contact"
+                <PhoneIcon className="text-white" />
+                0917-895-8825
+              </li>
+              
+              <li 
+                className="flex gap-2 justify-center"
+                data-cy="instagram-link"
+              >
+                <InstagramIcon fill="#FFFFFF" />
+                <a
+                  href="https://www.instagram.com/beautoxnewmanila/"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-white hover:text-white/80 transition-colors"
+                >
+                  INSTAGRAM
+                </a>
+              </li>
+              
+              <li 
+                className="flex gap-2 justify-center text-white"
+                data-cy="email-contact"
+              >
+                <EmailIcon className="text-white" />
+                beautoxph@gmail.com
+              </li>
+            </ul>
+            <h3 
+              className="w-full lg:w-1/2 text-2xl sm:text-3xl text-center lg:text-end font-bold text-white"
+              data-cy="find-us-title"
             >
-              <EmailIcon />
-              beautoxph@gmail.com
-            </li>
-          </ul>
-          <h3 
-            className="w-full lg:w-1/2 text-2xl sm:text-3xl text-center lg:text-end font-bold bg-gradient-to-r from-lavender-300 to-reflexBlue-400 text-transparent bg-clip-text"
-            data-cy="find-us-title"
-          >
-            WANT TO LEARN MORE ABOUT US? FIND US HERE
-          </h3>
+              WANT TO LEARN MORE ABOUT US? CONTACT US HERE
+            </h3>
+          </div>
         </section>
+
+        {/* Schedule Appointment Modal */}
+        <ScheduleAppointmentModal
+          isOpen={isScheduleModalOpen}
+          onClose={() => setIsScheduleModalOpen(false)}
+          data-cy="schedule-appointment-modal"
+        />
       </div>
-      
-      {/* Schedule Appointment Modal */}
-      <ScheduleAppointmentModal
-        isOpen={isScheduleModalOpen}
-        onClose={() => setIsScheduleModalOpen(false)}
-        data-cy="schedule-appointment-modal"
-      />
     </div>
   );
 }
