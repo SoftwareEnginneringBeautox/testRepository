@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import TrendUpIcon from "@/assets/icons/TrendUpIcon";
 import TrendDownIcon from "@/assets/icons/TrendDownIcon";
+import { Loader } from "@/components/ui/Loader";
 import {
   Area,
   AreaChart,
@@ -206,7 +207,7 @@ const SalesChart = ({ chartConfig }) => {
                   className="flex items-center justify-center h-full"
                   data-cy="loading-indicator"
                 >
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+                  <Loader />
                 </div>
               ) : (
                 <ResponsiveContainer

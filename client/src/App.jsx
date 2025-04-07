@@ -51,83 +51,85 @@ function AdminRoute({ children }) {
 
 function App() {
   return (
-    <GoogleReCaptchaProvider 
-    reCaptchaKey="6LfTPA0rAAAAAJQuZjo32e1CDmvMgb4l-yt47U3h"language="en"
-    useEnterprise={false}
-    useRecaptchaNet={false}>
-    <Routes>
-      {/* The root route ("/") uses <Layout> as a wrapper */}
-      <Route path="/" element={<Layout />}>
-        {/* Public routes (accessible only if not logged in) */}
-        <Route
-          index
-          element={
-            <PublicRoute>
-              <LandingPage />
-            </PublicRoute>
-          }
-        />
-        <Route
-          path="login"
-          element={
-            <PublicRoute>
-              <Login />
-            </PublicRoute>
-          }
-        />
+    <GoogleReCaptchaProvider
+      reCaptchaKey="6LfTPA0rAAAAAJQuZjo32e1CDmvMgb4l-yt47U3h"
+      language="en"
+      useEnterprise={false}
+      useRecaptchaNet={false}
+    >
+      <Routes>
+        {/* The root route ("/") uses <Layout> as a wrapper */}
+        <Route path="/" element={<Layout />}>
+          {/* Public routes (accessible only if not logged in) */}
+          <Route
+            index
+            element={
+              <PublicRoute>
+                <LandingPage />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="login"
+            element={
+              <PublicRoute>
+                <Login />
+              </PublicRoute>
+            }
+          />
 
-        {/* Admin-only routes (using wildcard to capture any trailing query parameters) */}
-        <Route
-          path="AdminDashboard/*"
-          element={
-            <AdminRoute>
-              <AdministratorDashboard />
-            </AdminRoute>
-          }
-        />
-        <Route
-          path="AdministratorServices/*"
-          element={
-            <AdminRoute>
-              <AdministratorServices />
-            </AdminRoute>
-          }
-        />
-        <Route
-          path="StaffServices/*"
-          element={
-            <AdminRoute>
-              <StaffServices />
-            </AdminRoute>
-          }
-        />
+          {/* Admin-only routes (using wildcard to capture any trailing query parameters) */}
+          <Route
+            path="AdminDashboard/*"
+            element={
+              <AdminRoute>
+                <AdministratorDashboard />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="AdministratorServices/*"
+            element={
+              <AdminRoute>
+                <AdministratorServices />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="StaffServices/*"
+            element={
+              <AdminRoute>
+                <StaffServices />
+              </AdminRoute>
+            }
+          />
 
-        {/* Other routes */}
-        <Route path="StaffDashboard" element={<StaffDashboard />} />
-        <Route
-          path="PatientRecordsDatabase"
-          element={<PatientRecordsDatabase />}
-        />
-        {/* <Route path="ScheduleAppointment" element={<ScheduleAppointment />} /> */}
-        <Route path="BookingCalendar" element={<BookingCalendar />} />
+          {/* Other routes */}
+          <Route path="StaffDashboard" element={<StaffDashboard />} />
+          <Route
+            path="PatientRecordsDatabase"
+            element={<PatientRecordsDatabase />}
+          />
+          {/* <Route path="ScheduleAppointment" element={<ScheduleAppointment />} /> */}
+          <Route path="BookingCalendar" element={<BookingCalendar />} />
 
-        <Route path="ForgotPassword" element={<ForgotPassword />} />
+          <Route path="ForgotPassword" element={<ForgotPassword />} />
 
-        {/* Protected route example */}
-        <Route
-          path="FinancialOverview"
-          element={
-            <ProtectedRoute>
-              <FinancialOverview />
-            </ProtectedRoute>
-          }
-        />
+          {/* Protected route example */}
+          <Route
+            path="FinancialOverview"
+            element={
+              <ProtectedRoute>
+                <FinancialOverview />
+              </ProtectedRoute>
+            }
+          />
 
-        {/* Catch-all error page */}
-        <Route path="*" element={<ErrorPage />} />
-      </Route>
-    </Routes>
-    </GoogleReCaptchaProvider >
+          {/* Catch-all error page */}
+          <Route path="*" element={<ErrorPage />} />
+        </Route>
+      </Routes>
+    </GoogleReCaptchaProvider>
   );
 }
 
