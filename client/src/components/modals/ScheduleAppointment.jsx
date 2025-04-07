@@ -77,12 +77,12 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
   };
 
   return (
-    <ModalContainer>
+    <ModalContainer data-cy="schedule-appointment-modal">
       <ModalHeader>
-        <ModalTitle>SCHEDULE APPOINTMENT</ModalTitle>
+        <ModalTitle data-cy="schedule-appointment-title">SCHEDULE APPOINTMENT</ModalTitle>
       </ModalHeader>
       <ModalBody>
-        <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
+        <form className="flex flex-col gap-5" onSubmit={handleSubmit} data-cy="schedule-appointment-form">
           {/* FULL NAME */}
           <InputContainer>
             <InputLabel>FULL NAME</InputLabel>
@@ -91,6 +91,7 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
                 <UserIcon />
               </InputIcon>
               <Input
+                data-cy="schedule-fullname-input"
                 type="text"
                 placeholder="Full name"
                 value={fullName}
@@ -108,6 +109,7 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
                 <UserIDIcon />
               </InputIcon>
               <Input
+                data-cy="schedule-contact-input"
                 type="tel"
                 placeholder="Contact Number"
                 value={contactNumber}
@@ -125,6 +127,7 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
                 <AgeIcon />
               </InputIcon>
               <Input
+                data-cy="schedule-age-input"
                 type="number"
                 placeholder="Age"
                 value={age}
@@ -142,6 +145,7 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
                 <EmailIcon />
               </InputIcon>
               <Input
+                data-cy="schedule-email-input"
                 type="email"
                 placeholder="Email"
                 value={email}
@@ -160,6 +164,7 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
                   <CalendarIcon />
                 </InputIcon>
                 <Input
+                  data-cy="schedule-date-input"
                   type="date"
                   placeholder="Date of Session"
                   value={dateOfSession}
@@ -176,6 +181,7 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
                   <ClockIcon />
                 </InputIcon>
                 <Input
+                  data-cy="schedule-time-input"
                   type="time"
                   placeholder="Time of Session"
                   value={timeOfSession}
@@ -187,8 +193,9 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
           </div>
 
           {/* ACTION BUTTONS */}
-          <div className="flex flex-row gap-2 w-full">
+          <div className="flex flex-row gap-2 w-full" data-cy="schedule-appointment-actions">
             <Button
+              data-cy="schedule-return-btn"
               variant="outline"
               fullWidth={true}
               type="button"
@@ -197,7 +204,11 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
               <ChevronLeftIcon />
               RETURN
             </Button>
-            <Button fullWidth={true} type="submit">
+            <Button 
+              data-cy="schedule-submit-btn"
+              fullWidth={true} 
+              type="submit"
+            >
               <ArrowNorthEastIcon />
               SUBMIT SCHEDULE APPOINTMENT
             </Button>

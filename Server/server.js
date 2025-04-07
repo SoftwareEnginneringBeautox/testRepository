@@ -285,6 +285,9 @@ app.post('/api/patients', async (req, res) => {
   try {
     const {
       patient_name,
+      contact_number,
+      age,
+      email,
       person_in_charge,
       package_name,
       treatment_ids,
@@ -303,6 +306,9 @@ app.post('/api/patients', async (req, res) => {
     const insertQuery = `
       INSERT INTO patient_records (
         patient_name,
+        contact_number,
+        age,
+        email,
         person_in_charge,
         package_name,
         treatment_ids,
@@ -317,12 +323,15 @@ app.post('/api/patients', async (req, res) => {
         remaining_balance,
         reference_number
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
       RETURNING id;
     `;
 
     const values = [
       patient_name,
+      contact_number,
+      age,
+      email,
       person_in_charge,
       package_name,
       treatment_ids,
@@ -369,7 +378,7 @@ app.get('/api/patients', async (req, res) => {
 // Create a new appointment
 app.post('/api/appointments', async (req, res) => {
   try {
-    const { full_name, contact_number, age, email, date_of_session, time_of_session } = req.body;
+    const { full_name, contact_number, age, email, date_of_session, time_of_session, archived } = req.body;
     const insertQuery = `
       INSERT INTO appointments (
         full_name,
@@ -377,12 +386,13 @@ app.post('/api/appointments', async (req, res) => {
         age,
         email,
         date_of_session,
-        time_of_session
+        time_of_session,
+        archived
       )
-      VALUES ($1, $2, $3, $4, $5, $6)
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
       RETURNING id;
     `;
-    const values = [full_name, contact_number, age, email, date_of_session, time_of_session];
+    const values = [full_name, contact_number, age, email, date_of_session, time_of_session, archived];
 
     const result = await pool.query(insertQuery, values);
 
@@ -400,6 +410,9 @@ app.post('/api/appointments', async (req, res) => {
 // Retrieve all appointments
 app.get('/api/appointments', async (req, res) => {
   try {
+    const today = new Date();
+    console.log("🕒 Server date today is:", today.toISOString().slice(0, 10));
+
     const result = await pool.query(
       'SELECT * FROM appointments ORDER BY date_of_session ASC, time_of_session ASC'
     );
@@ -409,6 +422,7 @@ app.get('/api/appointments', async (req, res) => {
     res.status(500).json({ success: false, error: 'Error retrieving appointments' });
   }
 });
+
 
 /* --------------------------------------------
    TREATMENTS ENDPOINTS
@@ -815,26 +829,40 @@ app.post("/api/expenses", async (req, res) => {
 // Fetch Expenses Data
 app.get("/expenses", async (req, res) => {
   try {
-    // Set proper content type header
+    // Ensure the content type is set to JSON
     res.setHeader('Content-Type', 'application/json');
+    
+    // Explicitly prevent caching
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
     
     // Get the data from the database
     const result = await pool.query("SELECT * FROM expenses_tracker ORDER BY date DESC");
-    console.log("API /api/expenses endpoint called, returning", result.rows.length, "records");
+    console.log("API /expenses endpoint called, returning", result.rows.length, "records");
     
-    // Count April 2025 records
+    // Count April 2025 records for debugging
     const april2025Count = result.rows.filter(row => {
+      if (!row.date) return false;
       const date = new Date(row.date);
       return date.getMonth() + 1 === 4 && date.getFullYear() === 2025;
     }).length;
     
     console.log("April 2025 expenses:", april2025Count);
     
-    // Return the data as JSON
-    res.json(result.rows);
+    // Return the data as JSON with explicit JSON.stringify
+    // This prevents any chance of returning HTML by mistake
+    const jsonResponse = JSON.stringify(result.rows);
+    return res.send(jsonResponse);
   } catch (err) {
+    // Handle errors by returning JSON, not HTML
     console.error("Error fetching expenses:", err);
-    res.status(500).json({ error: err.message });
+    
+    // Return a proper JSON error response
+    return res.status(500).json({ 
+      error: err.message,
+      timestamp: new Date().toISOString()
+    });
   }
 });
 app.get("/api/test-expenses", async (req, res) => {
@@ -888,6 +916,135 @@ app.get("/financial-overview", async (req, res) => {
     res.json({ totalSales, totalExpenses, netIncome });
   } catch (err) {
     res.status(500).send(err.message);
+  }
+});
+// Add this endpoint to your server.js file
+
+// Improved endpoint for expenses with more robust error handling and optional date filtering
+// Add this endpoint to your server.js file
+
+// Improved endpoint for expenses with more robust error handling and optional date filtering
+app.get("/api/expenses-by-month", async (req, res) => {
+  try {
+    // Set proper content type and caching headers
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Cache-Control', 'no-cache, no-store');
+    
+    // Get query parameters for optional filtering
+    const { month, year } = req.query;
+    let query = "SELECT * FROM expenses_tracker WHERE archived = FALSE";
+    const queryParams = [];
+    
+    // Add date filtering if month and year are provided
+    if (month && year) {
+      // SQL date filtering for PostgreSQL
+      query += ` AND EXTRACT(MONTH FROM date) = $1 AND EXTRACT(YEAR FROM date) = $2`;
+      queryParams.push(parseInt(month), parseInt(year));
+    }
+    
+    // Add ordering
+    query += " ORDER BY date DESC";
+    
+    // Execute the query
+    const result = await pool.query(query, queryParams);
+    
+    console.log(`API /api/expenses-by-month endpoint: Returning ${result.rows.length} records`);
+    if (month && year) {
+      console.log(`Filtered for month ${month}, year ${year}`);
+    }
+    
+    // Transform the data for easier consumption by the frontend
+    const transformedData = result.rows.map(row => ({
+      id: row.id,
+      category: row.category,
+      expense: parseFloat(row.expense), // Ensure numeric value
+      date: row.date,
+      formattedDate: new Date(row.date).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long', 
+        day: 'numeric'
+      })
+    }));
+    
+    // Group by category for convenience (optional)
+    const groupedByCategory = {};
+    transformedData.forEach(expense => {
+      if (!groupedByCategory[expense.category]) {
+        groupedByCategory[expense.category] = {
+          category: expense.category,
+          totalAmount: 0,
+          expenses: []
+        };
+      }
+      
+      groupedByCategory[expense.category].totalAmount += expense.expense;
+      groupedByCategory[expense.category].expenses.push(expense);
+    });
+    
+    // Return both raw data and the pre-grouped data
+    res.json({
+      success: true,
+      count: transformedData.length,
+      expenses: transformedData,
+      expensesByCategory: Object.values(groupedByCategory)
+    });
+  } catch (err) {
+    console.error("Error fetching expenses:", err);
+    res.status(500).json({ 
+      success: false, 
+      error: err.message,
+      stack: process.env.NODE_ENV === 'development' ? err.stack : undefined 
+    });
+  }
+});
+
+// Also add an endpoint that just returns the aggregated summary
+app.get("/api/expenses-summary", async (req, res) => {
+  try {
+    const { month, year } = req.query;
+    let whereClause = "WHERE archived = FALSE";
+    const queryParams = [];
+    
+    if (month && year) {
+      whereClause += ` AND EXTRACT(MONTH FROM date) = $1 AND EXTRACT(YEAR FROM date) = $2`;
+      queryParams.push(parseInt(month), parseInt(year));
+    }
+    
+    // SQL query using group by to aggregate by category
+    const query = `
+      SELECT 
+        category,
+        SUM(expense) as total_amount,
+        COUNT(*) as transaction_count
+      FROM expenses_tracker
+      ${whereClause}
+      GROUP BY category
+      ORDER BY total_amount DESC
+    `;
+    
+    const result = await pool.query(query, queryParams);
+    
+    console.log(`API /api/expenses-summary endpoint: Returning ${result.rows.length} categories`);
+    
+    // Calculate total across all categories
+    const totalExpenses = result.rows.reduce(
+      (sum, row) => sum + parseFloat(row.total_amount), 0
+    );
+    
+    res.json({
+      success: true,
+      totalExpenses,
+      categoryCount: result.rows.length,
+      categories: result.rows.map(row => ({
+        name: row.category,
+        amount: parseFloat(row.total_amount),
+        count: parseInt(row.transaction_count),
+        percentage: (parseFloat(row.total_amount) / totalExpenses * 100).toFixed(1)
+      }))
+    });
+  } catch (err) {
+    console.error("Error fetching expenses summary:", err);
+    res.status(500).json({ success: false, error: err.message });
   }
 });
 

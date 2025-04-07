@@ -69,13 +69,13 @@ function CreateCategory({ isOpen, onClose, onCreateSuccess, categories = [] }) {
 
       const result = await response.json();
       if (!response.ok) {
-        throw new Error(data.message || "Failed to create category");
+        throw new Error(result.message || "Failed to create category");
       }
 
       // Call the parent component's callback with the new category
       if (onCreateSuccess) {
         onCreateSuccess({
-          id: data.id,
+          id: result.id,
           name: categoryName.trim()
         });
       }
@@ -92,7 +92,7 @@ function CreateCategory({ isOpen, onClose, onCreateSuccess, categories = [] }) {
 
 
   return (
-    <ModalContainer>
+    <ModalContainer data-cy="create-category-modal">
       <ModalHeader>
         <ModalIcon>
           <ExpenseTypeIcon />
@@ -100,7 +100,7 @@ function CreateCategory({ isOpen, onClose, onCreateSuccess, categories = [] }) {
         <ModalTitle>CREATE EXPENSE CATEGORY</ModalTitle>
       </ModalHeader>
       <ModalBody>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} data-cy="create-category-form">
           <div className="flex flex-col gap-4">
             <InputContainer>
               <InputLabel>CATEGORY NAME</InputLabel>
@@ -109,6 +109,7 @@ function CreateCategory({ isOpen, onClose, onCreateSuccess, categories = [] }) {
                   <ExpenseTypeIcon />
                 </InputIcon>
                 <Input
+                  data-cy="category-name-input"
                   type="text"
                   id="categoryName"
                   placeholder="Set the name of the category"
@@ -119,13 +120,17 @@ function CreateCategory({ isOpen, onClose, onCreateSuccess, categories = [] }) {
               </InputTextField>
             </InputContainer>
             {error && (
-                  <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-2 rounded-md text-sm mt-2">
-                    {error}
-                  </div>
-                )}
+              <div 
+                data-cy="category-error-message"
+                className="bg-red-50 border border-red-200 text-red-600 px-4 py-2 rounded-md text-sm mt-2"
+              >
+                {error}
+              </div>
+            )}
           </div>
           <div className="flex flex-row gap-4 mt-6 w-full">
             <Button
+              data-cy="cancel-category-btn"
               type="button"
               variant="outline"
               className="w-1/2"
@@ -136,6 +141,7 @@ function CreateCategory({ isOpen, onClose, onCreateSuccess, categories = [] }) {
               CANCEL AND RETURN
             </Button>
             <Button
+              data-cy="submit-create-category"
               type="submit"
               className="w-1/2"
               disabled={isSubmitting}

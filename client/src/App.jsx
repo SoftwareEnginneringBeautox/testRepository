@@ -13,6 +13,7 @@ import BookingCalendar from "./pages/BookingCalendar";
 import ErrorPage from "./errors/Error404";
 import LandingPage from "@/pages/LandingPage";
 import ForgotPassword from "@/pages/ForgotPassword";
+import StaffServices from "@/pages/StaffServices";
 
 // PublicRoute prevents logged-in users from accessing login/landing pages.
 function PublicRoute({ children }) {
@@ -85,6 +86,14 @@ function App() {
           element={
             <AdminRoute>
               <AdministratorServices />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="StaffServices/*"
+          element={
+            <AdminRoute>
+              <StaffServices />
             </AdminRoute>
           }
         />

@@ -43,6 +43,7 @@ import PercentageIcon from "@/assets/icons/PercentageIcon";
 import TreatmentIcon from "@/assets/icons/TreatmentIcon";
 
 import axios from "axios";
+import { arch } from "os";
 
 function CreatePatientEntry({ isOpen, onClose }) {
   const [patientName, setPatientName] = useState("");
@@ -75,6 +76,10 @@ function CreatePatientEntry({ isOpen, onClose }) {
   // List for packages and treatments fetched from the database
   const [packagesList, setPackagesList] = useState([]);
   const [treatmentsList, setTreatmentsList] = useState([]);
+
+  const [contactNumber, setContactNumber] = useState("");
+  const [age, setAge] = useState("");
+  const [email, setEmail] = useState("");
 
   useEffect(() => {
     if (packageName) {
@@ -230,6 +235,9 @@ function CreatePatientEntry({ isOpen, onClose }) {
   
     const payload = {
       patient_name: patientName,
+      contact_number: contactNumber,
+      age: age ? parseInt(age) : null,
+      email,
       person_in_charge: personInCharge,
       package_name: packageName,
       treatments: selectedTreatmentNames,
@@ -253,8 +261,37 @@ function CreatePatientEntry({ isOpen, onClose }) {
       });
   
       if (response.ok) {
+        // Also insert into appointments table
+        try {
+          const appointmentPayload = {
+            full_name: patientName,
+            contact_number: contactNumber,
+            age: age ? parseInt(age) : null,
+            email,
+            date_of_session: dateOfSession,
+            time_of_session: timeOfSession,
+            archived: false,
+          };
+      
+          const appointmentRes = await fetch(`${API_BASE_URL}/api/appointments`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(appointmentPayload)
+          });
+      
+          if (!appointmentRes.ok) {
+            const errText = await appointmentRes.text();
+            console.error("❌ Failed to insert appointment:", errText);
+          } else {
+            console.log("✅ Appointment successfully inserted");
+          }
+        } catch (err) {
+          console.error("❌ Error inserting into appointments:", err);
+        }
+      
         onClose();
-      } else {
+      }
+      else {
         const errorText = await response.text();
         console.error("Submission failed:", errorText);
       }
@@ -271,7 +308,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
   const remainingBalance = numericTotalAmount - numericAmountPaid;
 
   return (
-    <ModalContainer>
+    <ModalContainer  data-cy="create-patient-entry-modal">
       <ModalHeader>
         <ModalIcon>
           <UserIcon />
@@ -289,10 +326,56 @@ function CreatePatientEntry({ isOpen, onClose }) {
                   <UserIcon />
                 </InputIcon>
                 <Input
+                data-cy="patient-name-input"
                   placeholder="Full name of the patient"
                   value={patientName}
                   onChange={(e) => setPatientName(e.target.value)}
                   required
+                  className="bg-[#F5F3F0]"
+                />
+              </InputTextField>
+            </InputContainer>
+
+            {/* CONTACT NUMBER */}
+            <InputContainer>
+              <InputLabel>CONTACT NUMBER</InputLabel>
+              <InputTextField>
+                <Input
+                data-cy="contact-number-input"
+                  placeholder="e.g. 09XXXXXXXXX"
+                  value={contactNumber}
+                  onChange={(e) => setContactNumber(e.target.value)}
+                  className="bg-[#F5F3F0]"
+                />
+              </InputTextField>
+            </InputContainer>
+
+            {/* AGE */}
+            <InputContainer>
+              <InputLabel>AGE</InputLabel>
+              <InputTextField>
+                <Input
+                 data-cy="age-input"
+                  type="number"
+                  min="0"
+                  placeholder="Age"
+                  value={age}
+                  onChange={(e) => setAge(e.target.value)}
+                  className="bg-[#F5F3F0]"
+                />
+              </InputTextField>
+            </InputContainer>
+
+            {/* EMAIL */}
+            <InputContainer>
+              <InputLabel>EMAIL</InputLabel>
+              <InputTextField>
+                <Input
+                data-cy="email-input"
+                  type="email"
+                  placeholder="example@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="bg-[#F5F3F0]"
                 />
               </InputTextField>
@@ -309,6 +392,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
                 }}
               >
                 <ModalSelectTrigger
+                data-cy="person-in-charge-select"
                   icon={<UserIDIcon className="w-4 h-4" />}
                   placeholder="Select person in charge"
                   className={
@@ -319,7 +403,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
                 />
                 <ModalSelectContent>
                   {aestheticianList.map((user) => (
-                    <SelectItem key={user.id} value={user.username}>
+                    <SelectItem data-cy="person-in-charge-option" key={user.id} value={user.username}>
                       {user.username}
                     </SelectItem>
                   ))}
@@ -349,6 +433,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
                 }}
               >
                 <ModalSelectTrigger
+                data-cy="package-select"
                   icon={<PackageIcon className="w-4 h-4" />}
                   placeholder="Select package"
                   className={
@@ -358,9 +443,9 @@ function CreatePatientEntry({ isOpen, onClose }) {
                   }
                 />
                 <ModalSelectContent>
-                  <SelectItem value="CLEAR">Clear Selection</SelectItem>
+                  <SelectItem data-cy="package-option" value="CLEAR">Clear Selection</SelectItem>
                   {packagesList.map((pkg) => (
-                    <SelectItem key={pkg.id} value={pkg.package_name}>
+                    <SelectItem data-cy="package-option"  key={pkg.id} value={pkg.package_name}>
                       {pkg.package_name} - ₱{pkg.price}
                     </SelectItem>
                   ))}
@@ -377,29 +462,30 @@ function CreatePatientEntry({ isOpen, onClose }) {
               <InputContainer>
                 <InputLabel>TREATMENTS</InputLabel>
                 <TreatmentMultiSelect
-  options={[
-    { value: "CLEAR", label: "Clear Selection" },
-    ...treatmentsList.map((t) => ({
-      value: t.id,
-      label: `${t.treatment_name} - ₱${t.price}`
-    }))
-  ]}
-  value={Array.isArray(treatment) ? treatment : []}
-  onChange={(selected) => {
-    if (selected.includes("CLEAR")) {
-      setTreatment([]);
-    } else {
-      setTreatment(selected);
-    }
-    setPackageName(""); // <-- always clear package here
-  }}
-  placeholder="Select treatments"
-  className={
-    formSubmitAttempted && formErrors.packageOrTreatment
-      ? "border-red-500"
-      : ""
-  }
-/>
+                data-cy="treatment-select"
+                  options={[
+                    { value: "CLEAR", label: "Clear Selection" },
+                    ...treatmentsList.map((t) => ({
+                      value: t.id,
+                      label: `${t.treatment_name} - ₱${t.price}`
+                    }))
+                  ]}
+                  value={Array.isArray(treatment) ? treatment : []}
+                  onChange={(selected) => {
+                    if (selected.includes("CLEAR")) {
+                      setTreatment([]);
+                    } else {
+                      setTreatment(selected);
+                    }
+                    setPackageName(""); // <-- always clear package here
+                  }}
+                  placeholder="Select treatments"
+                  className={
+                    formSubmitAttempted && formErrors.packageOrTreatment
+                      ? "border-red-500"
+                      : ""
+                  }
+                />
 
                 {formSubmitAttempted && formErrors.packageOrTreatment && (
                   <p className="text-red-500 text-sm mt-1">
@@ -416,6 +502,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
                   <PesoIcon />
                 </InputIcon>
                 <CurrencyInput
+                data-cy="amount-input"
                   className="outline-none flex-1 bg-[#F5F3F0]"
                   prefix="₱"
                   placeholder="₱0.00"
@@ -435,6 +522,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
                   <PercentageIcon />
                 </InputIcon>
                 <CurrencyInput
+                data-cy="package-discount-input"
                   className="outline-none flex-1 bg-[#F5F3F0]"
                   suffix="%"
                   placeholder="0%"
@@ -454,6 +542,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
                   <PesoIcon />
                 </InputIcon>
                 <CurrencyInput
+                  data-cy="total-amount-input"
                   className="outline-none flex-1 bg-[#F5F3F0]"
                   prefix="₱"
                   placeholder="₱0.00"
@@ -471,7 +560,8 @@ function CreatePatientEntry({ isOpen, onClose }) {
                 <InputIcon>
                   <PesoIcon />
                 </InputIcon>
-                <CurrencyInput
+                <CurrencyInput           
+                  data-cy="amount-paid-input"
                   className="outline-none flex-1 bg-[#F5F3F0]"
                   prefix="₱"
                   placeholder="₱0.00"
@@ -516,13 +606,13 @@ function CreatePatientEntry({ isOpen, onClose }) {
                 onValueChange={(val) => setPaymentMethod(val)}
               >
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="full-payment" id="full-payment" />
+                  <RadioGroupItem data-cy="payment-method-radio-full-payment" value="full-payment" id="full-payment" />
                   <label htmlFor="full-payment" className="text-sm">
                     FULL PAYMENT
                   </label>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="installment" id="installment" />
+                  <RadioGroupItem data-cy="payment-method-radio-installment"  value="installment" id="installment" />
                   <label htmlFor="installment" className="text-sm">
                     INSTALLMENT
                   </label>
@@ -540,6 +630,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
                   <CalendarIcon />
                 </InputIcon>
                 <Input
+                data-cy="date-of-session-input"
                   type="date"
                   className="text-input bg-[#F5F3F0]"
                   placeholder="Date of Session"
@@ -562,6 +653,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
                   <ClockIcon />
                 </InputIcon>
                 <Input
+                data-cy="time-of-session-input"
                   type="time"
                   className="text-input bg-[#F5F3F0]"
                   placeholder="Time of Session"
@@ -607,6 +699,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
           {/* ACTION BUTTONS */}
           <div className="flex flex-row gap-4 mt-6 w-full">
             <Button
+            data-cy="submit-create-patient"
               type="button"
               variant="outline"
               className="w-1/2"
@@ -622,7 +715,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
           </div>
         </form>
       </ModalBody>
-    </ModalContainer>
+    </ModalContainer >
   );
 }
 

@@ -37,6 +37,7 @@ import EditIcon from "@/assets/icons/EditIcon";
 import ArchiveIcon from "@/assets/icons/ArchiveIcon";
 import CalendarIcon from "@/assets/icons/CalendarIcon";
 import axios from "axios";
+import { format } from "date-fns";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -50,7 +51,8 @@ function AdministratorDashboard() {
 
   const month = currentDate.getMonth();
   const year = currentDate.getFullYear();
-
+  const [reminders, setReminders] = useState([]);
+  
   const [staffList, setStaffList] = useState([]);
   const [loadingStaff, setLoadingStaff] = useState(true);
   const [errorStaff, setErrorStaff] = useState(null);
@@ -130,9 +132,51 @@ function AdministratorDashboard() {
       setLoadingStaff(false);
     }
   };
+  const fetchReminders = async () => {
+    const today = new Date();
+    const tomorrow = new Date(today);
+    const dayAfterTomorrow = new Date(today);
+  
+    tomorrow.setDate(today.getDate() + 1);
+    dayAfterTomorrow.setDate(today.getDate() + 2);
+
+    const formatDate = (date) => date.toISOString().split("T")[0];
+
+    console.log("Today:", formatDate(today));
+    console.log("Checking for:", formatDate(tomorrow), "and", formatDate(dayAfterTomorrow));
+  
+    try {
+      const res = await axios.get(`${API_BASE_URL}/api/appointments`, {
+        withCredentials: true
+      });
+      const data = res.data || [];
+
+      console.log("Fetched appointments:", data); 
+      const filtered = data.filter((entry) => {
+        console.log("Raw date_of_session:", entry.date_of_session); // ← ✅ ADD HERE
+
+        const sessionDate = entry.date_of_session.slice(0, 10);
+        console.log("Comparing:", sessionDate, "with", formatDate(tomorrow), "and", formatDate(dayAfterTomorrow));
+
+        console.log("Session date:", sessionDate);
+        return (
+          sessionDate === formatDate(today) ||
+          sessionDate === formatDate(tomorrow) ||
+          sessionDate === formatDate(dayAfterTomorrow)
+        );
+      });
+      console.log("Filtered reminders:", filtered); // ← ✅ PUT HERE
+
+      setReminders(filtered);
+    } catch (error) {
+      console.error("Error fetching reminders:", error);
+    }
+  };
+  
 
   useEffect(() => {
     fetchStaff();
+    fetchReminders();
   }, []);
 
   const [showAlert, setShowAlert] = useState(false);
@@ -184,7 +228,23 @@ function AdministratorDashboard() {
       color: "#002B7F"
     }
   };
-
+  const getReminderLabel = (sessionDateStr) => {
+    const today = new Date();
+    const tomorrow = new Date();
+    const dayAfterTomorrow = new Date();
+  
+    tomorrow.setDate(today.getDate() + 1);
+    dayAfterTomorrow.setDate(today.getDate() + 2);
+  
+    const format = (date) => date.toISOString().split("T")[0];
+    const sessionDate = sessionDateStr.slice(0, 10);
+  
+    if (sessionDate === format(today)) return "Today";
+    if (sessionDate === format(tomorrow)) return "Tomorrow";
+    if (sessionDate === format(dayAfterTomorrow)) return "Day After Tomorrow";
+    return null;
+  };
+  
   return (
     <div
       className="flex flex-col lg:flex-row items-start gap-6 justify-center w-full p-3 sm:p-4 md:p-6 lg:w-[90%] mx-auto"
@@ -244,19 +304,30 @@ function AdministratorDashboard() {
             </TableHeader>
             <TableBody data-cy="reminders-body">
               <TableRow>
-                {[1, 2, 3, 4].map((num) => (
-                  <TableCell
-                    key={num}
-                    className="flex items-center gap-2 sm:gap-4 text-sm sm:text-base"
-                    data-cy={`reminder-item-${num}`}
-                  >
-                    <CalendarIcon
-                      className="w-4 h-4 sm:w-5 sm:h-5"
-                      data-cy={`calendar-icon-${num}`}
-                    />
-                    Check {num}
-                  </TableCell>
-                ))}
+              {reminders.length > 0 ? (
+              reminders.map((item, index) => (
+                <TableCell key={index} className="flex items-center gap-2 sm:gap-4 text-sm sm:text-base">
+                <CalendarIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                <span>
+                  {item.full_name} has an appointment on{" "}
+                  <strong>{format(new Date(item.date_of_session), "MMMM dd, yyyy")}</strong>{" "}
+                  at{" "}
+                  <strong>
+                    {format(new Date(`1970-01-01T${item.time_of_session}`), "hh:mm a")}
+                  </strong>
+                </span>
+                {getReminderLabel(item.date_of_session) && (
+                  <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-lavender-300 text-white font-semibold">
+                    {getReminderLabel(item.date_of_session)}
+                  </span>
+                )}
+              </TableCell>
+              ))
+            ) : (
+              <TableCell className="text-sm sm:text-base">
+                No recent appointments needing reminders.
+              </TableCell>
+            )}
               </TableRow>
             </TableBody>
           </Table>

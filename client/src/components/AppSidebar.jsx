@@ -22,6 +22,9 @@ const handleRedirectAdmin = () => {
 const handleRedirectServices = () => {
   window.location.href = "/AdministratorServices";
 };
+const handleRedirectStaffServices = () => {
+  window.location.href = "/StaffServices";
+};
 const handleRedirectPatientRecords = () => {
   window.location.href = "/PatientRecordsDatabase";
 };
@@ -79,22 +82,12 @@ export function AppSidebar({ ...props }) {
 
   // Filter out items based on user role
   const navItems = sideBarInformation.filter((item) => {
-    // Hide SERVICES from receptionist and aesthetician
     if (
       item.title === "SERVICES" &&
       (userRole === "receptionist" || userRole === "aesthetician")
     ) {
       return false;
     }
-    
-    // Hide FINANCIAL OVERVIEW from receptionist and aesthetician
-    if (
-      item.title === "FINANCIAL OVERVIEW" &&
-      (userRole === "receptionist" || userRole === "aesthetician")
-    ) {
-      return false;
-    }
-    
     return true;
   });
 

@@ -24,6 +24,15 @@ import {
   ChartTooltip,
   ChartTooltipContent
 } from "@/components/ui/Chart";
+import {
+  InputContainer,
+  InputLabel,
+  InputIcon,
+  InputTextField,
+  Input
+} from "./ui/Input";
+
+import CalendarIcon from "@/assets/icons/CalendarIcon";
 
 // Calculate percentage change between current and previous week values
 const calculatePercentageChange = (salesData) => {
@@ -136,40 +145,48 @@ const SalesChart = ({ chartConfig }) => {
           className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-4"
           data-cy="date-filter-controls"
         >
-          <div className="flex flex-col" data-cy="start-date-control">
-            <label
-              htmlFor="startDate"
+          <InputContainer data-cy="start-date-control">
+            <InputLabel
               className="text-sm font-medium"
               data-cy="start-date-label"
             >
-              Start Date:
-            </label>
-            <input
-              id="startDate"
-              type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              className="border p-1 rounded"
-              data-cy="start-date-input"
-            />
-          </div>
-          <div className="flex flex-col" data-cy="end-date-control">
-            <label
+              Set Start Date:
+            </InputLabel>
+            <InputTextField>
+              <InputIcon>
+                <CalendarIcon />
+              </InputIcon>
+              <Input
+                id="startDate"
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                data-cy="start-date-input"
+              />
+            </InputTextField>
+          </InputContainer>
+
+          <InputContainer data-cy="end-date-control">
+            <InputLabel
               htmlFor="endDate"
               className="text-sm font-medium"
               data-cy="end-date-label"
             >
-              End Date:
-            </label>
-            <input
-              id="endDate"
-              type="date"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              className="border p-1 rounded"
-              data-cy="end-date-input"
-            />
-          </div>
+              Set End Date:
+            </InputLabel>
+            <InputTextField>
+              <InputIcon>
+                <CalendarIcon />
+              </InputIcon>
+              <Input
+                id="endDate"
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                data-cy="end-date-input"
+              />
+            </InputTextField>
+          </InputContainer>
         </div>
 
         {error && (
