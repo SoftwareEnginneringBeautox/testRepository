@@ -57,7 +57,7 @@ function LandingPage() {
             "Diamond Peel",
             "Bleaching"
           ],
-          note: "*If no package: ₱499/session" 
+          note: "*If no package: ₱499/session"
         },
         {
           name: "Diode Laser",
@@ -227,154 +227,86 @@ function LandingPage() {
     // Add wrapper with data-cy attribute
     <div className="w-full bg-white" data-cy="landing-page">
       {/* Header navigation */}
-      <header
-        className={`fixed w-full flex justify-between items-center p-4 z-50 transition-all duration-300
-    bg-transparent
-    md:bg-white/20 md:backdrop-blur-md `}
-        data-cy="header-nav"
-      >
-        {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center justify-end w-full" data-cy="desktop-nav">
-          <nav className="flex items-center mr-8">
-            <ul className="flex text-base font-semibold gap-8">
-              <li className="mt-2">
-                <a
-                  href="#hero"
-                  onClick={(e) => handleScroll(e, "hero")}
-                  className={`relative inline-block px-2 py-1 font-semibold overflow-hidden group ${
-                    isScrolled
-                      ? "text-purple-300 hover:text-purple-800"
-                      : "text-purple-900 hover:text-purple-800"
-                  }`}
-                  data-cy="nav-about"
-                >
-                  ABOUT US
-                  <span
-                    className={`absolute left-0 bottom-0 block w-0 h-0.5 ${
-                      isScrolled ? "bg-purple-800" : "bg-purple-800"
-                    } transition-all duration-300 group-hover:w-full`}
-                  ></span>
-                </a>
-              </li>
-              {/* Other nav items with data-cy */}
-              <li className="mt-2">
-                <a
-                  href="#services"
-                  onClick={(e) => handleScroll(e, "services")}
-                  className={`relative inline-block px-2 py-1 font-semibold overflow-hidden group ${
-                    isScrolled
-                      ? "text-purple-300 hover:text-purple-800"
-                      : "text-purple-900 hover:text-purple-800"
-                  }`}
-                  data-cy="nav-services"
-                >
-                  SERVICES
-                  <span
-                    className={`absolute left-0 bottom-0 block w-0 h-0.5 ${
-                      isScrolled ? "bg-purple-800" : "bg-purple-800"
-                    } transition-all duration-300 group-hover:w-full`}
-                  ></span>
-                </a>
-              </li>
-              <li className="mt-2">
-                <a
-                  href="#about-clinic"
-                  onClick={(e) => handleScroll(e, "about-clinic")}
-                  className={`relative inline-block px-2 py-1 font-semibold overflow-hidden group ${
-                    isScrolled
-                      ? "text-purple-300 hover:text-purple-800"
-                      : "text-purple-900 hover:text-purple-800"
-                  }`}
-                  data-cy="nav-find-us"
-                >
-                  FIND US
-                  {/* ... */}
-                </a>
-              </li>
-              <li className="mt-2">
-                <a
-                  href="#testimonials"
-                  onClick={(e) => handleScroll(e, "testimonials")}
-                  className={`relative inline-block px-2 py-1 font-semibold overflow-hidden group ${
-                    isScrolled
-                      ? "text-purple-300 hover:text-purple-800"
-                      : "text-purple-900 hover:text-purple-800"
-                  }`}
-                  data-cy="nav-testimonials"
-                >
-                  TESTIMONIALS
-                  {/* ... */}
-                </a>
-              </li>
-            </ul>
+      <header className="fixed top-4 left-0 right-0 z-50 px-4">
+        <div className="flex items-center justify-end w-full max-w-6xl mx-auto gap-4">
+          {/* Main Navigation with Login */}
+          <nav className="hidden md:block bg-white/30 backdrop-blur-2xl rounded-full px-3 py-2 shadow-sm">
+            <div className="flex items-center gap-5">
+              {/* Logo */}
+              <img src={BeautoxLogo} alt="Beautox Logo" className="h-6 w-auto" />
+              <ul className="flex items-center gap-4">
+                {[
+                  { label: "About Us", href: "hero" },
+                  { label: "Services", href: "services" },
+                  { label: "Find Us", href: "about-clinic" },
+                  { label: "Testimonials", href: "testimonials" },
+                ].map(({ label, href }) => (
+                  <li key={href} className="relative group">
+                    <a
+                      href={`#${href}`}
+                      onClick={(e) => handleScroll(e, href)}
+                      className="text-purple-900 text-base font-semibold"
+                    >
+                      {label}
+                      <span className="absolute left-0 bottom-0 block h-0.5 bg-lavender-400 transition-all duration-300 w-0 group-hover:w-full" />
+                    </a>
+                  </li>
+                ))}
+                <li className="relative group">
+                  <button
+                    onClick={() => navigate("/login")}
+                    className="text-purple-900 text-base font-semibold flex items-center gap-2 px-3 py-1.5 rounded-full hover:bg-purple-950 hover:text-white transition-all duration-300"
+                  >
+                    <LoginIcon className="h-3 w-3" />
+                    Login
+                  </button>
+                </li>
+              </ul>
+            </div>
           </nav>
-          <Button
-            onClick={() => navigate("/login")}
-            variant="outline"
-            className={`border-none ${
-              isScrolled
-                ? "text-purple-300 hover:text-purple-800"
-                : "text-purple-900 hover:text-purple-800"
-            }`}
-            data-cy="login-btn"
-          >
-            <LoginIcon />
-            LOGIN
-          </Button>
-        </div>
-
-        {/* Mobile Navigation - dropdown menu */}
-        <div className="flex md:hidden justify-end w-full" data-cy="mobile-nav">
-          <DropdownMenu>
-            <DropdownMenuTrigger 
-              className="focus:outline-none mt-2 mr-2" 
-              data-cy="mobile-menu-trigger"
-            >
-              <MenuIcon
-                className={isScrolled ? "text-purple-300" : "text-purple-900"}
-                size={32}
-              />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="bg-white rounded-lg shadow-lg p-2 mt-2 w-48" data-cy="mobile-menu-content">
-              <DropdownMenuGroup>
-                <DropdownMenuItem
-                  className="px-4 py-2 text-gray-800 hover:bg-purple-100 rounded-md cursor-pointer"
-                  onClick={(e) => handleScroll(e, "hero")}
-                  data-cy="mobile-nav-about"
-                >
-                  ABOUT US
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  className="px-4 py-2 text-gray-800 hover:bg-purple-100 rounded-md cursor-pointer"
-                  onClick={(e) => handleScroll(e, "services")}
-                  data-cy="mobile-nav-services"
-                >
-                  SERVICES
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  className="px-4 py-2 text-gray-800 hover:bg-purple-100 rounded-md cursor-pointer"
-                  onClick={(e) => handleScroll(e, "about-clinic")}
-                  data-cy="mobile-nav-find-us"
-                >
-                  FIND US
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  className="px-4 py-2 text-gray-800 hover:bg-purple-100 rounded-md cursor-pointer"
-                  onClick={(e) => handleScroll(e, "testimonials")}
-                  data-cy="mobile-nav-testimonials"
-                >
-                  TESTIMONIALS
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  className="px-4 py-2 mt-2 text-gray-800 hover:bg-purple-100 rounded-md cursor-pointer flex items-center gap-2"
-                  onClick={() => navigate("/login")}
-                  data-cy="mobile-login-btn"
-                >
-                  <LoginIcon /> LOGIN
-                </DropdownMenuItem>
-              </DropdownMenuGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
+  
+          {/* Mobile menu */}
+          <div className="md:hidden">
+            <DropdownMenu>
+              <DropdownMenuTrigger className="focus:outline-none">
+                <MenuIcon className="text-white" size={24} />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="bg-white/80 backdrop-blur-md rounded-lg shadow-lg p-2 mt-2 w-48">
+                <DropdownMenuGroup>
+                  <DropdownMenuItem
+                    className="px-4 py-2 text-gray-800 hover:bg-purple-50 rounded-md cursor-pointer text-sm"
+                    onClick={(e) => handleScroll(e, "hero")}
+                  >
+                    About Us
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    className="px-4 py-2 text-gray-800 hover:bg-purple-50 rounded-md cursor-pointer text-sm"
+                    onClick={(e) => handleScroll(e, "services")}
+                  >
+                    Services
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    className="px-4 py-2 text-gray-800 hover:bg-purple-50 rounded-md cursor-pointer text-sm"
+                    onClick={(e) => handleScroll(e, "about-clinic")}
+                  >
+                    Find Us
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    className="px-4 py-2 text-gray-800 hover:bg-purple-50 rounded-md cursor-pointer text-sm"
+                    onClick={(e) => handleScroll(e, "testimonials")}
+                  >
+                    Testimonials
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    className="px-4 py-2 mt-2 bg-purple-950 text-white hover:bg-purple-900 rounded-md cursor-pointer flex items-center gap-2 text-sm"
+                    onClick={() => navigate("/login")}
+                  >
+                    <LoginIcon className="text-white" /> Login
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
       </header>
 
@@ -382,57 +314,96 @@ function LandingPage() {
         {/* Hero section */}
         <section
           id="hero"
-          className="relative w-full min-h-[100vh] flex items-center px-6 sm:px-8 md:px-12 lg:px-24"
-          style={{
-            backgroundImage:
-              "linear-gradient(to right, rgba(242, 228, 246, 0.77), rgba(255, 255, 255, 0.5), rgba(234, 206, 241, 0.01)), url('/images/LandingImage.png')",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            backgroundRepeat: "no-repeat"
-          }}
+          className="relative w-full min-h-[100vh] flex items-center bg-cover bg-center bg-no-repeat bg-[url('/images/BeautoxLoginImage.png')] md:bg-[url('/images/NewLanding.png')]"
           data-cy="hero-section"
         >
-          <div className="w-[92%] md:w-1/2 lg:w-6/12 flex flex-col gap-4 relative z-8">
+          {/* Mobile card container */}
+          <div className="md:hidden w-[80%] sm:w-[70%] max-w-[350px] mx-auto bg-white/95 backdrop-blur-sm rounded-xl shadow-lg p-4">
+            <div className="flex flex-col items-center gap-3">
+              <img
+                src={BeautoxLogo}
+                alt="Beautox Logo"
+                className="w-20 h-auto"
+                data-cy="hero-logo"
+              />
+
+              <div className="text-center space-y-2">
+                <h3 
+                  className="text-lg sm:text-xl leading-tight text-[#4A3B89] font-bold whitespace-nowrap"
+                  data-cy="hero-title"
+                >
+                  Welcome to Beautox
+                </h3>
+
+                <p 
+                  className="font-semibold text-base sm:text-lg bg-gradient-to-r from-reflexBlue-300 to-lavender-300 text-transparent bg-clip-text whitespace-nowrap"
+                  data-cy="hero-subtitle"
+                >
+                  Where Beauty meets Innovation
+                </p>
+
+                <p 
+                  className="text-xs sm:text-sm text-gray-800 leading-relaxed px-1 max-w-[280px] mx-auto"
+                  data-cy="hero-description"
+                >
+                  Experience the pinnacle of skincare luxury with our personalized
+                  treatments. Whether you're seeking a rejuvenating facial, targeted
+                  acne treatment, or a relaxing massage, our expert team is here to
+                  pamper you and address your unique skincare needs.
+                </p>
+
+                <button
+                  className="flex items-center justify-center gap-1.5 px-4 py-2 mt-2 bg-purple-950 text-white rounded-full text-xs sm:text-sm font-semibold hover:bg-purple-900 transition shadow-md mx-auto"
+                  onClick={() => setIsScheduleModalOpen(true)}
+                  data-cy="appointment-btn"
+                >
+                  <CalendarIcon className="h-3 w-3" />
+                  Set an Appointment
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Desktop content */}
+          <div className="hidden md:flex w-full max-w-[450px] flex-col gap-3 relative z-8 pl-8 sm:pl-12 md:pl-16 lg:pl-24">
             <img
               src={BeautoxLogo}
               alt="Beautox Logo"
-              className="mb-4 w-28 sm:w-32 md:w-36 lg:w-44 h-auto mx-auto"
+              className="mb-2 w-36 h-auto mx-auto"
               data-cy="hero-logo"
             />
 
-            <div className="flex flex-col gap-2">
-              <h3 
-                className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl leading-none text-[#4A3B89] font-semibold"
-                data-cy="hero-title"
-              >
-                Welcome to Beautox
-              </h3>
+            <h3 
+              className="text-2xl sm:text-3xl md:text-5xl lg:text-4xl leading-none text-[#4A3B89] font-bold w-fit whitespace-nowrap"
+              data-cy="hero-title"
+            >
+              Welcome to Beautox
+            </h3>
+
+            <div className="flex flex-col gap-3">
               <p 
-                className="font-semibold text-xl sm:text-2xl text-[#6B5BA5]"
+                className="font-semibold text-lg sm:text-xl md:text-2xl bg-gradient-to-r from-reflexBlue-300 to-lavender-300 text-transparent bg-clip-text whitespace-nowrap w-fit"
                 data-cy="hero-subtitle"
               >
                 Where Beauty meets Innovation
               </p>
+
+              <p 
+                className="text-base sm:text-lg text-gray-800 leading-relaxed max-w-[28ch] mb-3"
+                data-cy="hero-description"
+              >
+                Experience the pinnacle of skincare luxury with our personalized treatments. Whether you're seeking a rejuvenating facial, targeted acne treatment, or a relaxing massage, our expert team is here to pamper you and address your unique skincare needs.
+              </p>
+
+              <button
+                className="flex items-center justify-center gap-2 px-6 sm:px-8 py-3 bg-purple-950 text-white rounded-full text-base sm:text-lg font-semibold hover:bg-purple-900 transition shadow-md w-fit"
+                onClick={() => setIsScheduleModalOpen(true)}
+                data-cy="appointment-btn"
+              >
+                <CalendarIcon className="h-3 w-3" />
+                Set an Appointment
+              </button>
             </div>
-
-            <p 
-              className="text-base sm:text-lg text-gray-800 leading-relaxed mb-8"
-              data-cy="hero-description"
-            >
-              Experience the pinnacle of skincare luxury with our personalized
-              treatments. Whether you're seeking a rejuvenating facial, targeted
-              acne treatment, or a relaxing massage, our expert team is here to
-              pamper you and address your unique skincare needs.
-            </p>
-
-            <button
-              className="flex items-center justify-center gap-2 px-6 sm:px-8 py-3 bg-purple-950 text-white rounded-lg text-base sm:text-lg font-semibold hover:bg-purple-900 transition shadow-md w-fit"
-              onClick={() => setIsScheduleModalOpen(true)}
-              data-cy="appointment-btn"
-            >
-              <CalendarIcon className="h-5 w-5" />
-              SET AN APPOINTMENT
-            </button>
           </div>
         </section>
 
@@ -454,7 +425,7 @@ function LandingPage() {
             </h2>
             <Button
               onClick={(e) => handleScroll(e, "services")}
-              className="bg-purple-950 hover:bg-purple-900 text-white w-full sm:w-auto"
+              className="bg-purple-950 hover:bg-purple-900 text-white w-full sm:w-auto rounded-full"
               data-cy="see-all-services-btn"
             >
               See all
@@ -486,7 +457,7 @@ function LandingPage() {
                   </div>
                 </div>
               </div>
-            </div>
+                  </div>
 
             {/* Diode Laser Card */}
             <div className="bg-white rounded-2xl overflow-hidden shadow-[0_4px_12px_rgba(0,0,0,0.15)] hover:shadow-[0_8px_20px_rgba(0,0,0,0.25)] transition-shadow duration-300 relative">
@@ -509,7 +480,7 @@ function LandingPage() {
                   </div>
                 </div>
               </div>
-            </div>
+                  </div>
 
             {/* Intimate Secret Card */}
             <div className="bg-white rounded-2xl overflow-hidden shadow-[0_4px_12px_rgba(0,0,0,0.15)] hover:shadow-[0_8px_20px_rgba(0,0,0,0.25)] transition-shadow duration-300 relative">
@@ -531,8 +502,8 @@ function LandingPage() {
                     </p>
                   </div>
                 </div>
+                </div>
               </div>
-            </div>
           </div>
         </section>
 
@@ -567,41 +538,41 @@ function LandingPage() {
             data-cy="services-tabs"
           >
             <TabsList className="flex flex-row overflow-x-auto rounded-md shadow-md bg-white/5 backdrop-blur-[3.5px] p-1 no-scrollbar">
-              {services.map((service) => (
-                <TabsTrigger
-                  key={service.category}
-                  value={service.category}
+                {services.map((service) => (
+                  <TabsTrigger
+                    key={service.category}
+                    value={service.category}
                   className="px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-md font-semibold whitespace-nowrap transition-all rounded-md data-[state=active]:bg-[#4A3B89] data-[state=active]:text-white hover:bg-purple-100"
                   data-cy={`service-tab-${service.category.toLowerCase().replace(' ', '-')}`}
-                >
-                  {service.category}
-                </TabsTrigger>
-              ))}
-            </TabsList>
+                  >
+                    {service.category}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
 
-            {services.map((service) => (
-              <TabsContent
-                key={service.category}
-                value={service.category}
-                className="mt-4"
+              {services.map((service) => (
+                <TabsContent
+                  key={service.category}
+                  value={service.category}
+                  className="mt-4"
                 data-cy={`service-tab-content-${service.category.toLowerCase().replace(' ', '-')}`}
               >
                 <div 
                   className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6"
                   data-cy={`service-grid-${service.category.toLowerCase().replace(' ', '-')}`}
                 >
-                  {service.items.map((item, idx) => (
-                    <ProductCard
-                      key={idx}
-                      product={item}
-                      category={service.category}
+                    {service.items.map((item, idx) => (
+                      <ProductCard
+                        key={idx}
+                        product={item}
+                        category={service.category}
                       data-cy={`service-card-${idx}`}
-                    />
-                  ))}
-                </div>
-              </TabsContent>
-            ))}
-          </Tabs>
+                      />
+                    ))}
+                  </div>
+                </TabsContent>
+              ))}
+            </Tabs>
         </section>
 
         <div className="w-[85%] sm:w-[80%] mx-auto">
@@ -803,8 +774,8 @@ function LandingPage() {
                 after just 1 session, even my friends noticed it. So I'm
                 definitely availing more sessions and I'm eyeing other services,
                 as well."
-              </p>
-            </div>
+                </p>
+              </div>
 
             {/* Testimonial 3 */}
             <div className="bg-white p-6 rounded-2xl shadow-md hover:shadow-lg transition-shadow">
