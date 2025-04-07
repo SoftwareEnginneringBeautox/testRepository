@@ -285,6 +285,9 @@ app.post('/api/patients', async (req, res) => {
   try {
     const {
       patient_name,
+      contact_number,
+      age,
+      email,
       person_in_charge,
       package_name,
       treatment_ids,
@@ -303,6 +306,9 @@ app.post('/api/patients', async (req, res) => {
     const insertQuery = `
       INSERT INTO patient_records (
         patient_name,
+        contact_number,
+        age,
+        email,
         person_in_charge,
         package_name,
         treatment_ids,
@@ -317,12 +323,15 @@ app.post('/api/patients', async (req, res) => {
         remaining_balance,
         reference_number
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
       RETURNING id;
     `;
 
     const values = [
       patient_name,
+      contact_number,
+      age,
+      email,
       person_in_charge,
       package_name,
       treatment_ids,
@@ -369,7 +378,7 @@ app.get('/api/patients', async (req, res) => {
 // Create a new appointment
 app.post('/api/appointments', async (req, res) => {
   try {
-    const { full_name, contact_number, age, email, date_of_session, time_of_session } = req.body;
+    const { full_name, contact_number, age, email, date_of_session, time_of_session, archived } = req.body;
     const insertQuery = `
       INSERT INTO appointments (
         full_name,
@@ -377,12 +386,13 @@ app.post('/api/appointments', async (req, res) => {
         age,
         email,
         date_of_session,
-        time_of_session
+        time_of_session,
+        archived
       )
-      VALUES ($1, $2, $3, $4, $5, $6)
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
       RETURNING id;
     `;
-    const values = [full_name, contact_number, age, email, date_of_session, time_of_session];
+    const values = [full_name, contact_number, age, email, date_of_session, time_of_session, archived];
 
     const result = await pool.query(insertQuery, values);
 
@@ -400,6 +410,9 @@ app.post('/api/appointments', async (req, res) => {
 // Retrieve all appointments
 app.get('/api/appointments', async (req, res) => {
   try {
+    const today = new Date();
+    console.log("🕒 Server date today is:", today.toISOString().slice(0, 10));
+
     const result = await pool.query(
       'SELECT * FROM appointments ORDER BY date_of_session ASC, time_of_session ASC'
     );
@@ -409,6 +422,7 @@ app.get('/api/appointments', async (req, res) => {
     res.status(500).json({ success: false, error: 'Error retrieving appointments' });
   }
 });
+
 
 /* --------------------------------------------
    TREATMENTS ENDPOINTS
