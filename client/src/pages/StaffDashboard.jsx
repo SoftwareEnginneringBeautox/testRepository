@@ -36,6 +36,38 @@ function StaffDashboard() {
   const [packagesData, setPackagesData] = useState([]);
   const [treatmentsData, setTreatmentsData] = useState([]);
   const [reminders, setReminders] = useState([]);
+  const [staffList, setStaffList] = useState([]);
+  const [loadingStaff, setLoadingStaff] = useState(true);
+  const [errorStaff, setErrorStaff] = useState(null);
+
+  // Fetch Staff from API
+  const fetchStaff = async () => {
+    try {
+      setLoadingStaff(true);
+      const response = await axios.get(`${API_BASE_URL}/getusers`, {
+        withCredentials: true
+      });
+      
+      const data = response.data;
+      const filteredStaff = data.filter(
+        (user) =>
+          (user.role === "receptionist" || user.role === "aesthetician") &&
+          !user.archived
+      );
+
+      setStaffList(filteredStaff);
+      setErrorStaff(null);
+    } catch (error) {
+      console.error("Error fetching staff:", error);
+      if (error.response && error.response.status === 401) {
+        setErrorStaff("Session expired. Please log in again.");
+      } else {
+        setErrorStaff(error.message);
+      }
+    } finally {
+      setLoadingStaff(false);
+    }
+  };
 
   // Fetch Packages data from API
   const fetchPackages = async () => {
@@ -116,6 +148,7 @@ function StaffDashboard() {
     fetchPackages();
     fetchTreatments();
     fetchReminders();
+    fetchStaff();
   }, []);
 
   const month = currentDate.getMonth();
@@ -173,225 +206,242 @@ function StaffDashboard() {
     }
   };
 
-  const events = [
-    {
-      day: "WED",
-      startTime: "9:00AM",
-      endTime: "10:30AM",
-      name: "Alice Alex",
-      description: "Me So Sexy Package"
-    },
-    {
-      day: "FRI",
-      startTime: "5:00PM",
-      endTime: "6:00PM",
-      name: "Violet Jessica",
-      description: "Brazilian"
-    }
-  ];
-
-  const currentStaff = [
-    "Jessica Simpson",
-    "Alice Alex",
-    "Violet Jessica",
-    "Patrick Star "
-  ];
-
   const [showAlert, setShowAlert] = useState(false);
 
   const throwAlert = () => {
     setShowAlert(true);
     setTimeout(() => {
-      setAlertVisible(false);
+      setShowAlert(false);
     }, 15000);
   };
 
   return (
-    <div className="flex items-start gap-12 justify-center w-[90%] mx-auto">
-      <div className="w-full flex flex-col gap-8">
-        <div className="flex items-center rounded-lg gap-4">
-          <div className="w-12 h-12 bg-gradient-to-r from-reflexBlue-400 to-lavender-300 text-customNeutral-100 rounded-lg flex items-center justify-center">
-            <UserIcon size={32} />
+    <div className="flex flex-col lg:flex-row items-start gap-6 justify-center w-full p-3 sm:p-4 md:p-6 lg:w-[90%] mx-auto">
+      {/* Left Section */}
+      <div className="w-full lg:w-3/4 flex flex-col gap-4 sm:gap-6 md:gap-8">
+        <div className="flex items-center rounded-lg gap-2 sm:gap-4">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-reflexBlue-400 to-lavender-300 text-customNeutral-100 rounded-lg flex items-center justify-center">
+            <UserIcon size={24} className="sm:w-8 sm:h-8" />
           </div>
-          <h2 className="text-[2rem] leading-[2.8rem] font-semibold bg-gradient-to-r from-lavender-300 to-reflexBlue-400 text-transparent bg-clip-text">
+          <h2 className="text-lg sm:text-xl md:text-2xl lg:text-[2rem] leading-tight sm:leading-[2.8rem] font-semibold bg-gradient-to-r from-lavender-300 to-reflexBlue-400 text-transparent bg-clip-text">
             WELCOME BACK, {userName.toUpperCase()}
           </h2>
         </div>
-        {/* Updated Reminders Table */}
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="text-xl text-left font-semibold py-4 ">
-                REMINDERS
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            <TableRow>
-              {reminders.length > 0 ? (
-                reminders.map((item, index) => (
-                  <TableCell key={index} className="flex items-center gap-4">
-                    <CalendarIcon />
-                    <span>
-                      {item.full_name} has an appointment on{" "}
-                      <strong>{format(new Date(item.date_of_session), "MMMM dd, yyyy")}</strong>{" "}
-                      at{" "}
-                      <strong>
-                        {format(new Date(`1970-01-01T${item.time_of_session}`), "hh:mm a")}
-                      </strong>
-                    </span>
-                    {getReminderLabel(item.date_of_session) && (
-                      <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-lavender-300 text-white font-semibold">
-                        {getReminderLabel(item.date_of_session)}
+        
+        {/* Reminders Table */}
+        <div className="overflow-x-auto">
+          <Table className="min-w-full">
+            <TableHeader>
+              <TableRow>
+                <TableHead className="text-base sm:text-lg md:text-xl text-left font-semibold py-2 sm:py-4">
+                  REMINDERS
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <TableRow>
+                {reminders.length > 0 ? (
+                  reminders.map((item, index) => (
+                    <TableCell key={index} className="flex items-center gap-2 sm:gap-4 text-sm sm:text-base">
+                      <CalendarIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                      <span>
+                        {item.full_name} has an appointment on{" "}
+                        <strong>{format(new Date(item.date_of_session), "MMMM dd, yyyy")}</strong>{" "}
+                        at{" "}
+                        <strong>
+                          {format(new Date(`1970-01-01T${item.time_of_session}`), "hh:mm a")}
+                        </strong>
                       </span>
-                    )}
+                      {getReminderLabel(item.date_of_session) && (
+                        <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-lavender-300 text-white font-semibold">
+                          {getReminderLabel(item.date_of_session)}
+                        </span>
+                      )}
+                    </TableCell>
+                  ))
+                ) : (
+                  <TableCell className="text-sm sm:text-base">
+                    <CalendarIcon className="w-4 h-4 sm:w-5 sm:h-5 inline mr-2" />
+                    No upcoming appointments in the next 3 days.
                   </TableCell>
-                ))
-              ) : (
-                <TableCell className="flex items-center gap-4">
-                  <CalendarIcon />
-                  No upcoming appointments in the next 3 days.
-                </TableCell>
-              )}
-            </TableRow>
-          </TableBody>
-        </Table>
+                )}
+              </TableRow>
+            </TableBody>
+          </Table>
+        </div>
         
         {/* Treatments Table */}
-        <h4 className="text-xl font-semibold">TREATMENTS</h4>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="text-xl text-center font-semibold py-4">
-                TREATMENT ID
-              </TableHead>
-              <TableHead className="text-xl text-center font-semibold py-4">
-                TREATMENT NAME
-              </TableHead>
-              <TableHead className="text-xl text-center font-semibold py-4">
-                PRICE
-              </TableHead>
-              <TableHead className="text-xl text-center font-semibold py-4">
-                EXPIRATION
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {treatmentsData.length > 0 ? (
-              treatmentsData.map((treatment) => (
-                <TableRow key={treatment.id}>
-                  <TableCell className="text-center">
-                    {treatment.id}
-                  </TableCell>
-                  <TableCell className="text-center">
-                    {treatment.treatment_name}
-                  </TableCell>
-                  <TableCell className="text-center">
-                    ₱{treatment.price}
-                  </TableCell>
-                  <TableCell className="text-center">
-                    {treatment.expiration ? `${treatment.expiration} week${treatment.expiration > 1 ? "s" : ""}` : "-"}
+        <div className="overflow-x-auto">
+          <Table className="min-w-full">
+            <TableHeader>
+              <TableRow>
+                <TableHead className="text-center font-semibold py-4">
+                  TREATMENT ID
+                </TableHead>
+                <TableHead className="text-center font-semibold py-4">
+                  TREATMENT NAME
+                </TableHead>
+                <TableHead className="text-center font-semibold py-4">
+                  PRICE
+                </TableHead>
+                <TableHead className="text-center font-semibold py-4">
+                  EXPIRATION
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {treatmentsData.length > 0 ? (
+                treatmentsData.map((treatment) => (
+                  <TableRow key={treatment.id}>
+                    <TableCell className="text-center">
+                      {treatment.id}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {treatment.treatment_name}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      ₱{treatment.price}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {treatment.expiration ? `${treatment.expiration} week${treatment.expiration > 1 ? "s" : ""}` : "-"}
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan="4" className="text-center">
+                    No treatments found.
                   </TableCell>
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan="4" className="text-center">
-                  No treatments found.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+              )}
+            </TableBody>
+          </Table>
+        </div>
         
         {/* Packages Table */}
-        <h4 className="text-xl font-semibold">PACKAGES</h4>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="text-xl text-center font-semibold py-4">
-                PRODUCT ID
-              </TableHead>
-              <TableHead className="text-xl text-center font-semibold py-4">
-                PACKAGE
-              </TableHead>
-              <TableHead className="text-xl text-center font-semibold py-4">
-                TREATMENT
-              </TableHead>
-              <TableHead className="text-xl text-center font-semibold py-4">
-                SESSIONS
-              </TableHead>
-              <TableHead className="text-xl text-center font-semibold py-4">
-                PRICE
-              </TableHead>
-              <TableHead className="text-xl text-center font-semibold py-4">
-                EXPIRATION
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {packagesData.length > 0 ? (
-              packagesData.map((pkg) => (
-                <TableRow key={pkg.id}>
-                  <TableCell className="text-center">
-                    {pkg.id}
-                  </TableCell>
-                  <TableCell className="text-center">
-                    {pkg.package_name}
-                  </TableCell>
-                  <TableCell className="text-center">
-                    {treatmentsData.length > 0 &&
-                    Array.isArray(pkg.treatment_ids) &&
-                    pkg.treatment_ids.length > 0 ? (
-                      <div className="flex flex-col gap-1">
-                        {pkg.treatment_ids.map((id) => {
-                          const treatment = treatmentsData.find(
-                            (t) => t.id === Number(id)
-                          );
-                          return treatment ? (
-                            <Badge
-                              key={treatment.id}
-                              variant="outline"
-                            >
-                              + {treatment.treatment_name}
-                            </Badge>
-                          ) : (
-                            <span
-                              key={id}
-                              className="text-red-500 text-sm italic"
-                            >
-                              Not found: {id}
-                            </span>
-                          );
-                        })}
-                      </div>
-                    ) : (
-                      <span className="text-muted-foreground italic">
-                        No treatments found
-                      </span>
-                    )}
-                  </TableCell>
-                  <TableCell className="text-center">
-                    {pkg.sessions}
-                  </TableCell>
-                  <TableCell className="text-center">
-                    ₱{pkg.price}
-                  </TableCell>
-                  <TableCell className="text-center">
-                    {pkg.expiration ? `${pkg.expiration} week${pkg.expiration > 1 ? "s" : ""}` : "-"}
+        <div className="overflow-x-auto">
+          <Table className="min-w-full">
+            <TableHeader>
+              <TableRow>
+                <TableHead className="text-center font-semibold py-4">
+                  PRODUCT ID
+                </TableHead>
+                <TableHead className="text-center font-semibold py-4">
+                  PACKAGE
+                </TableHead>
+                <TableHead className="text-center font-semibold py-4">
+                  TREATMENT
+                </TableHead>
+                <TableHead className="text-center font-semibold py-4">
+                  SESSIONS
+                </TableHead>
+                <TableHead className="text-center font-semibold py-4">
+                  PRICE
+                </TableHead>
+                <TableHead className="text-center font-semibold py-4">
+                  EXPIRATION
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {packagesData.length > 0 ? (
+                packagesData.map((pkg) => (
+                  <TableRow key={pkg.id}>
+                    <TableCell className="text-center">
+                      {pkg.id}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {pkg.package_name}
+                    </TableCell>
+                    <TableCell className="text-left">
+                      {treatmentsData.length > 0 &&
+                      Array.isArray(pkg.treatment_ids) &&
+                      pkg.treatment_ids.length > 0 ? (
+                        <div className="flex flex-col gap-1">
+                          {pkg.treatment_ids.map((id) => {
+                            const treatment = treatmentsData.find(
+                              (t) => t.id === Number(id)
+                            );
+                            return treatment ? (
+                              <Badge key={treatment.id} variant="outline">
+                                + {treatment.treatment_name}
+                              </Badge>
+                            ) : (
+                              <span key={id} className="text-red-500 text-sm italic">
+                                Not found: {id}
+                              </span>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <span className="text-muted-foreground italic">
+                          No treatments found
+                        </span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {pkg.sessions}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      ₱{pkg.price}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {pkg.expiration ? `${pkg.expiration} week${pkg.expiration > 1 ? "s" : ""}` : "-"}
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan="6" className="text-center">
+                    No packages found.
                   </TableCell>
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan="6" className="text-center">
-                  No packages found.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-        <br />
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      </div>
+
+      {/* Right Section - Staff List */}
+      <div className="w-full lg:w-1/4 shadow-custom p-4 sm:p-6 md:p-8 lg:p-10 bg-ash-100 rounded-lg flex flex-col items-center gap-3 sm:gap-4 mt-4 lg:mt-0">
+        <h3 className="flex items-center gap-2 text-lg sm:text-xl md:text-2xl lg:text-[2rem] leading-tight sm:leading-[2.8rem] font-semibold">
+          <UserIcon size={24} className="sm:w-8 sm:h-8" />
+          STAFF LIST
+        </h3>
+        {loadingStaff ? (
+          <p className="text-sm sm:text-base">
+            Loading staff...
+          </p>
+        ) : errorStaff ? (
+          <p className="text-red-500 text-sm sm:text-base">
+            {errorStaff}
+          </p>
+        ) : staffList.length === 0 ? (
+          <p className="text-sm sm:text-base">
+            No staff found.
+          </p>
+        ) : (
+          <div className="w-full max-h-[300px] sm:max-h-[400px] overflow-y-auto">
+            {staffList.map((staff, index) => (
+              <div
+                key={index}
+                className="w-full flex justify-between border-2 border-reflexBlue-400 px-3 sm:px-4 py-2 sm:py-3 rounded-md mb-2"
+              >
+                <div className="flex flex-col">
+                  <span className="font-semibold text-sm sm:text-base">
+                    {staff.username}
+                  </span>
+                  {(staff.role === "receptionist" ||
+                    staff.role === "aesthetician") && (
+                    <span className="text-xs sm:text-sm text-gray-500 capitalize">
+                      ({staff.role})
+                    </span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
