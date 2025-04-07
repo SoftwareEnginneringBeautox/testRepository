@@ -248,27 +248,6 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
             </InputContainer>
           </div>
 
-          <div className="flex flex-col gap-2 mt-2">
-            <InputContainer>
-              <InputLabel>CLIENT TYPE</InputLabel>
-
-              <RadioGroup>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="full-payment" id="full-payment" />
-                  <label htmlFor="full-payment" className="text-sm">
-                    NEW
-                  </label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="installment" id="installment" />
-                  <label htmlFor="installment" className="text-sm">
-                    OLD
-                  </label>
-                </div>
-              </RadioGroup>
-            </InputContainer>
-          </div>
-
           <div className="flex flex-col gap-4 my-4">
             <h5 className="text-xl leading-8 font-semibold">
               PATIENT CONSENT FORM

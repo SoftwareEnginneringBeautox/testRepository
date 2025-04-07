@@ -62,6 +62,7 @@ import ArchivePatientEntry from "@/components/modals/ArchivePatientEntry";
 // Import date-fns for date formatting
 import { format } from "date-fns";
 import FilterIcon from "@/assets/icons/FilterIcon";
+import UpdateIcon from "@/assets/icons/UpdateIcon";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -192,6 +193,12 @@ function PatientRecordsDatabase() {
     fetchRecords();
   };
 
+  // Open update entry modal
+  const handleOpenUpdateEntry = (record) => {
+    setSelectedEntry(record);
+    openModal("updateEntry");
+  };
+
   // Open edit entry modal
   const handleOpenEditEntry = (record) => {
     setSelectedEntry(record);
@@ -246,6 +253,29 @@ function PatientRecordsDatabase() {
     closeModal();
     fetchRecords();
   };
+
+  const handleUpdatePatientEntry = async (updatedData) => {
+    const safeData = sanitizeData(updatedData);
+    console.log("🔁 Sent updated data:", safeData);
+    try {
+      await fetch(`${API_BASE_URL}/api/manage-record`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          table: "patient_records",
+          id: updatedData.id,
+          action: "edit", // or "update" if your backend expects a different action
+          data: safeData
+        })
+      });
+      closeModal();
+      fetchRecords();
+    } catch (error) {
+      console.error("❌ Failed to update patient entry:", error);
+    }
+  };
+  
 
   // Handle Paid dropdown change
   const handlePaidChange = async (record, newValue) => {
@@ -827,6 +857,12 @@ function PatientRecordsDatabase() {
                     <DropdownMenuContent>
                       <DropdownMenuGroup>
                         <DropdownMenuItem
+                          onClick={() => handleOpenUpdateEntry(record)}
+                        >
+                          <UpdateIcon />
+                          <p className="font-semibold">Update</p>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
                           onClick={() => handleOpenEditEntry(record)}
                         >
                           <EditIcon />
@@ -887,6 +923,7 @@ function PatientRecordsDatabase() {
           isOpen={true}
           onClose={handleModalClose}
           entryData={selectedEntry}
+          onSubmit={handleUpdatePatientEntry} // Pass the handleEditPatientEntry function to the modal
           // Pass the handleEditPatientEntry function to the modal
         />
       )}
