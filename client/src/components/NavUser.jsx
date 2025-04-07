@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/Sidebar";
 import LogoutIcon from "@/assets/icons/LogoutIcon";
 import ForgotPassword from "@/components/modals/ForgotPassword";
+import ContrastIcon from "@/assets/icons/ContrastIcon";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
 
@@ -23,7 +24,7 @@ export function NavUser({ user }) {
       // Using backticks ensures that API_BASE_URL is interpolated correctly.
       const response = await fetch(`${API_BASE_URL}/logout`, {
         method: "POST",
-        credentials: "include", // Include cookies for session management
+        credentials: "include" // Include cookies for session management
       });
 
       // For debugging: log the raw response text if needed.
@@ -84,6 +85,14 @@ export function NavUser({ user }) {
 
   return (
     <SidebarMenu>
+      <SidebarMenuItem>
+        <SidebarMenuButton tooltip="TEST">
+          <ContrastIcon />
+          <span className="flex flex-row gap-2 justify-center items-center">
+            Test
+          </span>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
       <SidebarMenuItem>
         <SidebarMenuButton tooltip="LOGOUT" onClick={handleLogout}>
           <LogoutIcon />
