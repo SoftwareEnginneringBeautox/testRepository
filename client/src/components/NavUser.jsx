@@ -10,6 +10,7 @@ import {
 import LogoutIcon from "@/assets/icons/LogoutIcon";
 import ForgotPassword from "@/components/modals/ForgotPassword";
 import ContrastIcon from "@/assets/icons/ContrastIcon";
+import { useTheme } from "@/components/ThemeProvider";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
 
@@ -18,6 +19,12 @@ export function NavUser({ user }) {
   const navigate = useNavigate();
   const [errorMessage, setErrorMessage] = useState("");
   const { currentModal, openModal, closeModal } = useSidebar();
+  const { theme, setTheme } = useTheme();
+
+  const toggleTheme = () => {
+    setTheme(theme === "light" ? "dark" : "light");
+    console.log("theme set to " + theme);
+  };
 
   const handleLogout = async () => {
     try {
@@ -86,7 +93,7 @@ export function NavUser({ user }) {
   return (
     <SidebarMenu>
       <SidebarMenuItem>
-        <SidebarMenuButton tooltip="TEST">
+        <SidebarMenuButton tooltip="TEST" onClick={toggleTheme}>
           <ContrastIcon />
           <span className="flex flex-row gap-2 justify-center items-center">
             Test
