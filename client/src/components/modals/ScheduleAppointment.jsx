@@ -40,12 +40,9 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     try {
-      // Generate timestamp for when the appointment is created
-      const createdAt = new Date().toISOString();
-
-      const response = await fetch(`${API_BASE_URL}/api/appointments`, {
+      const response = await fetch(`${API_BASE_URL}/api/staged-appointments`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -56,15 +53,14 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
           age: parseInt(age, 10),
           email: email,
           date_of_session: dateOfSession,
-          time_of_session: timeOfSession,
-          created_at: createdAt
-        })
+          time_of_session: timeOfSession
+        }),
       });
-
+  
       const data = await response.json();
       if (response.ok) {
         // On success, you can show a message, reset the form, or close the modal
-        alert("Appointment scheduled successfully!");
+        alert("Appointment scheduled successfully! Awaiting confirmation.");
         onClose();
       } else {
         // Handle a failed response

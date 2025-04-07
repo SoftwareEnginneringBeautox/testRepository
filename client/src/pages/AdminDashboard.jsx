@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/Button";
 import CreateStaff from "@/components/modals/CreateStaff";
 import ModifyStaff from "@/components/modals/ModifyStaff";
 import ArchiveStaff from "@/components/modals/ArchiveStaff";
+import AppointmentDetailsModal from "@/components/modals/AppointmentDetailsModal"; 
 import SalesChart from "../components/SalesChart";
 import PlusIcon from "../assets/icons/PlusIcon";
 import UserIcon from "../assets/icons/UserIcon";
@@ -37,7 +38,7 @@ import EditIcon from "@/assets/icons/EditIcon";
 import ArchiveIcon from "@/assets/icons/ArchiveIcon";
 import CalendarIcon from "@/assets/icons/CalendarIcon";
 import axios from "axios";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -53,11 +54,19 @@ function AdministratorDashboard() {
   const year = currentDate.getFullYear();
   const [reminders, setReminders] = useState([]);
   
+  // Add state for staged appointments
+  const [stagedAppointments, setStagedAppointments] = useState([]);
+  const [selectedAppointment, setSelectedAppointment] = useState(null);
+  const [showAppointmentModal, setShowAppointmentModal] = useState(false);
+  
   const [staffList, setStaffList] = useState([]);
   const [loadingStaff, setLoadingStaff] = useState(true);
   const [errorStaff, setErrorStaff] = useState(null);
+  const [loadingAppointments, setLoadingAppointments] = useState(true);
+  const [appointmentError, setAppointmentError] = useState(null);
 
   const [selectedStaff, setSelectedStaff] = useState(null);
+  
   const handleEditStaff = async (updatedData) => {
     console.log("Sending to backend:", updatedData);
     try {
@@ -132,51 +141,139 @@ function AdministratorDashboard() {
       setLoadingStaff(false);
     }
   };
-  const fetchReminders = async () => {
-    const today = new Date();
-    const tomorrow = new Date(today);
-    const dayAfterTomorrow = new Date(today);
   
-    tomorrow.setDate(today.getDate() + 1);
-    dayAfterTomorrow.setDate(today.getDate() + 2);
-
-    const formatDate = (date) => date.toISOString().split("T")[0];
-
-    console.log("Today:", formatDate(today));
-    console.log("Checking for:", formatDate(tomorrow), "and", formatDate(dayAfterTomorrow));
-  
+  const fetchStagedAppointments = async () => {
     try {
-      const res = await axios.get(`${API_BASE_URL}/api/appointments`, {
+      setLoadingAppointments(true);
+      setAppointmentError(null);
+      
+      const res = await axios.get(`${API_BASE_URL}/api/staged-appointments/unconfirmed`, {
         withCredentials: true
       });
-      const data = res.data || [];
-
-      console.log("Fetched appointments:", data); 
-      const filtered = data.filter((entry) => {
-        console.log("Raw date_of_session:", entry.date_of_session); // ← ✅ ADD HERE
-
-        const sessionDate = entry.date_of_session.slice(0, 10);
-        console.log("Comparing:", sessionDate, "with", formatDate(tomorrow), "and", formatDate(dayAfterTomorrow));
-
-        console.log("Session date:", sessionDate);
-        return (
-          sessionDate === formatDate(today) ||
-          sessionDate === formatDate(tomorrow) ||
-          sessionDate === formatDate(dayAfterTomorrow)
-        );
-      });
-      console.log("Filtered reminders:", filtered); // ← ✅ PUT HERE
-
-      setReminders(filtered);
+      
+      console.log("Fetched staged appointments:", res.data);
+      
+      // Make sure we have data and it's an array
+      if (res.data && Array.isArray(res.data)) {
+        // Ensure all records have required fields for rendering
+        const validatedData = res.data.map(appointment => ({
+          ...appointment,
+          // Make sure date_of_session is a string
+          date_of_session: appointment.date_of_session || '2025-01-01',
+          // Make sure time_of_session is a string
+          time_of_session: appointment.time_of_session || '00:00:00',
+          // Make sure full_name is a string
+          full_name: appointment.full_name || 'Unknown Client'
+        }));
+        
+        setStagedAppointments(validatedData);
+        console.log("Validated staged appointments:", validatedData);
+      } else {
+        console.warn("Invalid staged appointments data:", res.data);
+        setStagedAppointments([]);
+      }
     } catch (error) {
-      console.error("Error fetching reminders:", error);
+      console.error("Error fetching staged appointments:", error);
+      setAppointmentError("Failed to load staged appointments");
+    } finally {
+      setLoadingAppointments(false);
     }
   };
   
+  const handleConfirmAppointment = async (id) => {
+    try {
+      await axios.post(`${API_BASE_URL}/api/staged-appointments/${id}/confirm`, {}, {
+        withCredentials: true
+      });
+      
+      alert("Appointment confirmed successfully!");
+      setShowAppointmentModal(false);
+      fetchStagedAppointments(); // Refresh the list
+      fetchReminders(); // Refresh regular appointments
+    } catch (error) {
+      console.error("Error confirming appointment:", error);
+      alert("Failed to confirm appointment");
+    }
+  };
+  
+  const handleRejectAppointment = async (id) => {
+    try {
+      await axios.post(`${API_BASE_URL}/api/staged-appointments/${id}/reject`, {}, {
+        withCredentials: true
+      });
+      
+      alert("Appointment rejected");
+      setShowAppointmentModal(false);
+      fetchStagedAppointments(); // Refresh the list
+    } catch (error) {
+      console.error("Error rejecting appointment:", error);
+      alert("Failed to reject appointment");
+    }
+  };
+  
+  const viewAppointmentDetails = (appointment) => {
+    setSelectedAppointment(appointment);
+    setShowAppointmentModal(true);
+  };
+  
+  const fetchReminders = async () => {
+    try {
+      setLoadingAppointments(true);
+      setAppointmentError(null);
+      
+      const res = await axios.get(`${API_BASE_URL}/api/appointments`, {
+        withCredentials: true
+      });
+      
+      console.log("Fetched appointments:", res.data);
+      
+      if (res.data && Array.isArray(res.data)) {
+        const today = new Date();
+        const tomorrow = new Date(today);
+        const dayAfterTomorrow = new Date(today);
+      
+        tomorrow.setDate(today.getDate() + 1);
+        dayAfterTomorrow.setDate(today.getDate() + 2);
+    
+        const formatDate = (date) => date.toISOString().split("T")[0];
+    
+        console.log("Today:", formatDate(today));
+        console.log("Checking for:", formatDate(tomorrow), "and", formatDate(dayAfterTomorrow));
+        
+        const filtered = res.data.filter((entry) => {
+          // Ensure date_of_session exists and is a string
+          if (!entry.date_of_session || typeof entry.date_of_session !== 'string') {
+            console.warn("Invalid date format for entry:", entry);
+            return false;
+          }
+          
+          const sessionDate = entry.date_of_session.slice(0, 10);
+          
+          return (
+            sessionDate === formatDate(today) ||
+            sessionDate === formatDate(tomorrow) ||
+            sessionDate === formatDate(dayAfterTomorrow)
+          );
+        });
+        
+        console.log("Filtered reminders:", filtered);
+        setReminders(filtered);
+      } else {
+        console.warn("Invalid appointments data:", res.data);
+        setReminders([]);
+      }
+    } catch (error) {
+      console.error("Error fetching reminders:", error);
+      setAppointmentError("Failed to load appointments");
+    } finally {
+      setLoadingAppointments(false);
+    }
+  };
 
   useEffect(() => {
     fetchStaff();
     fetchReminders();
+    fetchStagedAppointments(); // Fetch staged appointments
   }, []);
 
   const [showAlert, setShowAlert] = useState(false);
@@ -228,6 +325,7 @@ function AdministratorDashboard() {
       color: "#002B7F"
     }
   };
+  
   const getReminderLabel = (sessionDateStr) => {
     const today = new Date();
     const tomorrow = new Date();
@@ -243,6 +341,48 @@ function AdministratorDashboard() {
     if (sessionDate === format(tomorrow)) return "Tomorrow";
     if (sessionDate === format(dayAfterTomorrow)) return "Day After Tomorrow";
     return null;
+  };
+  
+  // Safe date formatting function to handle potential invalid dates
+  const formatSafeDate = (dateString, formatStr) => {
+    try {
+      if (!dateString) return "Unknown Date";
+      
+      // Try to parse the date
+      const date = new Date(dateString);
+      
+      // Check if date is valid
+      if (isNaN(date.getTime())) {
+        console.warn("Invalid date:", dateString);
+        return "Invalid Date";
+      }
+      
+      return format(date, formatStr);
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return "Date Error";
+    }
+  };
+  
+  // Safe time formatting function
+  const formatSafeTime = (timeString) => {
+    try {
+      if (!timeString) return "Unknown Time";
+      
+      // Create a full date with the time component
+      const date = new Date(`1970-01-01T${timeString}`);
+      
+      // Check if time is valid
+      if (isNaN(date.getTime())) {
+        console.warn("Invalid time:", timeString);
+        return "Invalid Time";
+      }
+      
+      return format(date, "hh:mm a");
+    } catch (error) {
+      console.error("Error formatting time:", error);
+      return "Time Error";
+    }
   };
   
   return (
@@ -303,32 +443,83 @@ function AdministratorDashboard() {
               </TableRow>
             </TableHeader>
             <TableBody data-cy="reminders-body">
-              <TableRow>
-              {reminders.length > 0 ? (
-              reminders.map((item, index) => (
-                <TableCell key={index} className="flex items-center gap-2 sm:gap-4 text-sm sm:text-base">
-                <CalendarIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-                <span>
-                  {item.full_name} has an appointment on{" "}
-                  <strong>{format(new Date(item.date_of_session), "MMMM dd, yyyy")}</strong>{" "}
-                  at{" "}
-                  <strong>
-                    {format(new Date(`1970-01-01T${item.time_of_session}`), "hh:mm a")}
-                  </strong>
-                </span>
-                {getReminderLabel(item.date_of_session) && (
-                  <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-lavender-300 text-white font-semibold">
-                    {getReminderLabel(item.date_of_session)}
-                  </span>
-                )}
-              </TableCell>
-              ))
-            ) : (
-              <TableCell className="text-sm sm:text-base">
-                No recent appointments needing reminders.
-              </TableCell>
-            )}
-              </TableRow>
+              {loadingAppointments ? (
+                <TableRow>
+                  <TableCell>
+                    Loading appointments...
+                  </TableCell>
+                </TableRow>
+              ) : appointmentError ? (
+                <TableRow>
+                  <TableCell className="text-red-500">
+                    {appointmentError}
+                  </TableCell>
+                </TableRow>
+              ) : (
+                <>
+                  {/* Display any pending appointment confirmations */}
+                  {stagedAppointments.length > 0 ? (
+                    stagedAppointments.map((item, index) => (
+                      <TableRow key={`staged-${index}`}>
+                        <TableCell className="flex items-center gap-2 sm:gap-4 text-sm sm:text-base">
+                          <CalendarIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                          <span>
+                            <strong>{item.full_name}</strong> has scheduled an appointment on{" "}
+                            <strong>{formatSafeDate(item.date_of_session, "MMMM dd, yyyy")}</strong>{" "}
+                            at{" "}
+                            <strong>
+                              {formatSafeTime(item.time_of_session)}
+                            </strong>
+                          </span>
+                          <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-lavender-300 text-white font-semibold">
+                            Needs Confirmation
+                          </span>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="ml-auto"
+                            onClick={() => viewAppointmentDetails(item)}
+                          >
+                            View
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : null}
+                  
+                  {/* Display existing reminders for confirmed appointments */}
+                  {reminders.length > 0 ? (
+                    reminders.map((item, index) => (
+                      <TableRow key={`reminder-${index}`}>
+                        <TableCell className="flex items-center gap-2 sm:gap-4 text-sm sm:text-base">
+                          <CalendarIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                          <span>
+                            {item.full_name} has an appointment on{" "}
+                            <strong>{formatSafeDate(item.date_of_session, "MMMM dd, yyyy")}</strong>{" "}
+                            at{" "}
+                            <strong>
+                              {formatSafeTime(item.time_of_session)}
+                            </strong>
+                          </span>
+                          {getReminderLabel(item.date_of_session) && (
+                            <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-lavender-300 text-white font-semibold">
+                              {getReminderLabel(item.date_of_session)}
+                            </span>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    (!stagedAppointments.length && (
+                      <TableRow>
+                        <TableCell className="text-sm sm:text-base">
+                          No recent appointments needing reminders.
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </>
+              )}
             </TableBody>
           </Table>
         </div>
@@ -477,6 +668,17 @@ function AdministratorDashboard() {
           />
         )}
       </div>
+      
+      {/* Appointment details modal */}
+      {showAppointmentModal && selectedAppointment && (
+        <AppointmentDetailsModal
+          isOpen={showAppointmentModal}
+          onClose={() => setShowAppointmentModal(false)}
+          appointmentData={selectedAppointment}
+          onConfirm={handleConfirmAppointment}
+          onReject={handleRejectAppointment}
+        />
+      )}
     </div>
   );
 }

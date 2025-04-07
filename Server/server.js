@@ -443,6 +443,156 @@ app.post('/api/appointments', async (req, res) => {
     res.status(500).json({ success: false, error: 'Error scheduling appointment' });
   }
 });
+app.post('/api/staged-appointments', async (req, res) => {
+  try {
+    const { full_name, contact_number, age, email, date_of_session, time_of_session } = req.body;
+    const insertQuery = `
+      INSERT INTO staged_appointments (
+        full_name,
+        contact_number,
+        age,
+        email,
+        date_of_session,
+        time_of_session,
+        archived,
+        patient_confirmed
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      RETURNING id;
+    `;
+    const values = [
+      full_name, 
+      contact_number, 
+      age, 
+      email, 
+      date_of_session, 
+      time_of_session, 
+      false, 
+      'no'
+    ];
+
+    const result = await pool.query(insertQuery, values);
+
+    res.json({
+      success: true,
+      message: 'Appointment scheduled for confirmation',
+      appointmentId: result.rows[0].id
+    });
+  } catch (error) {
+    console.error('Error scheduling staged appointment:', error);
+    res.status(500).json({ success: false, error: 'Error scheduling appointment' });
+  }
+});
+// Get unconfirmed staged appointments
+app.get('/api/staged-appointments/unconfirmed', async (req, res) => {
+  try {
+    const result = await pool.query(
+      'SELECT * FROM staged_appointments WHERE patient_confirmed = $1 ORDER BY date_of_session ASC, time_of_session ASC',
+      ['no']
+    );
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error retrieving unconfirmed appointments:', error);
+    res.status(500).json({ success: false, error: 'Error retrieving unconfirmed appointments' });
+  }
+});
+
+// Confirm a staged appointment
+app.post('/api/staged-appointments/:id/confirm', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Get the staged appointment
+    const stagedResult = await pool.query(
+      'SELECT * FROM staged_appointments WHERE id = $1',
+      [id]
+    );
+    
+    if (stagedResult.rows.length === 0) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Staged appointment not found' 
+      });
+    }
+    
+    const appointment = stagedResult.rows[0];
+    
+    // Update the patient_confirmed status
+    await pool.query(
+      'UPDATE staged_appointments SET patient_confirmed = $1 WHERE id = $2',
+      ['yes', id]
+    );
+    
+    // Insert into the appointments table
+    const insertQuery = `
+      INSERT INTO appointments (
+        full_name,
+        contact_number,
+        age,
+        email,
+        date_of_session,
+        time_of_session,
+        archived
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      RETURNING id;
+    `;
+    
+    const result = await pool.query(insertQuery, [
+      appointment.full_name,
+      appointment.contact_number,
+      appointment.age,
+      appointment.email,
+      appointment.date_of_session,
+      appointment.time_of_session,
+      false
+    ]);
+    
+    res.json({
+      success: true,
+      message: 'Appointment confirmed',
+      appointmentId: result.rows[0].id
+    });
+  } catch (error) {
+    console.error('Error confirming appointment:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Error confirming appointment' 
+    });
+  }
+});
+
+// Reject a staged appointment
+app.post('/api/staged-appointments/:id/reject', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Update the patient_confirmed status to rejected
+    const result = await pool.query(
+      'UPDATE staged_appointments SET patient_confirmed = $1 WHERE id = $2 RETURNING *',
+      ['rejected', id]
+    );
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Staged appointment not found' 
+      });
+    }
+    
+    res.json({
+      success: true,
+      message: 'Appointment rejected',
+      appointment: result.rows[0]
+    });
+  } catch (error) {
+    console.error('Error rejecting appointment:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Error rejecting appointment' 
+    });
+  }
+});
 
 // Retrieve all appointments
 app.get('/api/appointments', async (req, res) => {
