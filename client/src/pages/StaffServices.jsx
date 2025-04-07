@@ -1,0 +1,287 @@
+import React, { useState, useEffect } from "react";
+import "../App.css";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
+} from "@/components/ui/Table";
+
+import { Badge } from "@/components/ui/Badge";
+
+import ChevronLeftIcon from "../assets/icons/ChevronLeftIcon";
+import PlusIcon from "../assets/icons/PlusIcon";
+import PackageIcon from "../assets/icons/PackageIcon";
+import EllipsisIcon from "../assets/icons/EllipsisIcon";
+import axios from "axios";
+
+const API_BASE_URL = import.meta.env.VITE_API_URL;
+
+function StaffServices() {
+  // State for treatments and packages loaded from the database
+  const [treatmentsData, setTreatmentsData] = useState([]);
+  const [packagesData, setPackagesData] = useState([]);
+
+  // Fetch Treatments from /api/treatments
+  const fetchTreatments = async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/api/treatments`, {
+        withCredentials: true
+      });
+      setTreatmentsData(response.data.filter((item) => !item.archived));
+    } catch (error) {
+      console.error("Error fetching treatments:", error);
+    }
+  };
+
+  // Fetch Packages from /api/packages
+  const fetchPackages = async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/api/packages`, {
+        withCredentials: true
+      });
+      setPackagesData(response.data.filter((item) => !item.archived));
+    } catch (error) {
+      console.error("Error fetching packages:", error);
+    }
+  };
+
+  // Initial load for treatments and packages
+  useEffect(() => {
+    fetchTreatments();
+    fetchPackages();
+  }, []);
+
+  return (
+    <div
+      className="flex flex-col gap-4 text-left w-[90%] mx-auto overflow-hidden"
+      data-cy="staff-services-container"
+    >
+      <h4
+        className="text-[2rem] leading-[44.8px] font-semibold"
+        data-cy="staff-services-title"
+      >
+        STAFF SERVICES
+      </h4>
+
+      {/* Treatments Table */}
+      <Table data-cy="treatments-table">
+        <TableHeader data-cy="treatments-table-header">
+          <TableRow>
+            <TableHead
+              className="py-4 text-center"
+              data-cy="treatment-id-header"
+            >
+              TREATMENT ID
+            </TableHead>
+            <TableHead
+              className="py-4 text-center"
+              data-cy="treatment-name-header"
+            >
+              TREATMENT NAME
+            </TableHead>
+            <TableHead
+              className="py-4 text-center"
+              data-cy="treatment-price-header"
+            >
+              PRICE
+            </TableHead>
+            <TableHead
+              className="py-4 text-center"
+              data-cy="treatment-expiration-header"
+            >
+              EXPIRATION
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody data-cy="treatments-table-body">
+          {treatmentsData.length > 0 ? (
+            treatmentsData.map((treatment) => (
+              <TableRow
+                key={treatment.id}
+                data-cy={`treatment-row-${treatment.id}`}
+              >
+                <TableCell
+                  className="py-4 text-center"
+                  data-cy={`treatment-id-${treatment.id}`}
+                >
+                  {treatment.id}
+                </TableCell>
+                <TableCell
+                  className="py-4 text-center"
+                  data-cy={`treatment-name-${treatment.id}`}
+                >
+                  {treatment.treatment_name}
+                </TableCell>
+                <TableCell
+                  className="py-4 text-center"
+                  data-cy={`treatment-price-${treatment.id}`}
+                >
+                  ₱{treatment.price}
+                </TableCell>
+                <TableCell
+                  className="py-4 text-center"
+                  data-cy={`treatment-expiration-${treatment.id}`}
+                >
+                  {treatment.expiration
+                    ? `${treatment.expiration} week${
+                        treatment.expiration > 1 ? "s" : ""
+                      }`
+                    : "-"}
+                </TableCell>
+              </TableRow>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell
+                colSpan="4"
+                className="py-4 text-center"
+                data-cy="no-treatments-message"
+              >
+                No treatments found.
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+
+      {/* Packages Table */}
+      <Table data-cy="packages-table">
+        <TableHeader data-cy="packages-table-header">
+          <TableRow>
+            <TableHead className="py-4 text-center" data-cy="package-id-header">
+              PRODUCT ID
+            </TableHead>
+            <TableHead
+              className="py-4 text-center"
+              data-cy="package-name-header"
+            >
+              PACKAGE
+            </TableHead>
+            <TableHead
+              className="py-4 text-center"
+              data-cy="package-treatment-header"
+            >
+              TREATMENT
+            </TableHead>
+            <TableHead
+              className="py-4 text-center"
+              data-cy="package-sessions-header"
+            >
+              SESSIONS
+            </TableHead>
+            <TableHead
+              className="py-4 text-center"
+              data-cy="package-price-header"
+            >
+              PRICE
+            </TableHead>
+            <TableHead
+              className="py-4 text-center"
+              data-cy="package-expiration-header"
+            >
+              EXPIRATION
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody data-cy="packages-table-body">
+          {packagesData.length > 0 ? (
+            packagesData.map((pkg) => (
+              <TableRow key={pkg.id} data-cy={`package-row-${pkg.id}`}>
+                <TableCell
+                  className="py-4 text-center"
+                  data-cy={`package-id-${pkg.id}`}
+                >
+                  {pkg.id}
+                </TableCell>
+                <TableCell
+                  className="py-4 text-center"
+                  data-cy={`package-name-${pkg.id}`}
+                >
+                  {pkg.package_name}
+                </TableCell>
+                <TableCell
+                  className="py-4 text-left"
+                  data-cy={`package-treatments-${pkg.id}`}
+                >
+                  {treatmentsData.length > 0 &&
+                  Array.isArray(pkg.treatment_ids) &&
+                  pkg.treatment_ids.length > 0 ? (
+                    <div
+                      className="flex flex-col gap-1"
+                      data-cy={`package-treatments-list-${pkg.id}`}
+                    >
+                      {pkg.treatment_ids.map((id) => {
+                        const treatment = treatmentsData.find(
+                          (t) => t.id === Number(id)
+                        );
+                        return treatment ? (
+                          <Badge
+                            key={treatment.id}
+                            variant="outline"
+                            data-cy={`package-treatment-badge-${pkg.id}-${treatment.id}`}
+                          >
+                            + {treatment.treatment_name}
+                          </Badge>
+                        ) : (
+                          <span
+                            key={id}
+                            className="text-red-500 text-sm italic"
+                            data-cy={`package-treatment-not-found-${pkg.id}-${id}`}
+                          >
+                            Not found: {id}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <span
+                      className="text-muted-foreground italic"
+                      data-cy={`package-no-treatments-${pkg.id}`}
+                    >
+                      No treatments found
+                    </span>
+                  )}
+                </TableCell>
+                <TableCell
+                  className="py-4 text-center"
+                  data-cy={`package-sessions-${pkg.id}`}
+                >
+                  {pkg.sessions}
+                </TableCell>
+                <TableCell
+                  className="py-4 text-center"
+                  data-cy={`package-price-${pkg.id}`}
+                >
+                  ₱{pkg.price}
+                </TableCell>
+                <TableCell
+                  className="py-4 text-center"
+                  data-cy={`package-expiration-${pkg.id}`}
+                >
+                  {pkg.expiration
+                    ? `${pkg.expiration} week${pkg.expiration > 1 ? "s" : ""}`
+                    : "-"}
+                </TableCell>
+              </TableRow>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell
+                colSpan="6"
+                className="py-4 text-center"
+                data-cy="no-packages-message"
+              >
+                No packages found.
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+    </div>
+  );
+}
+
+export default StaffServices;
