@@ -1,10 +1,9 @@
 import * as React from "react";
-import { ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react";
+import { MoreHorizontal } from "lucide-react";
 import ChevronLeftIcon from "@/assets/icons/ChevronLeftIcon";
 import ChevronRightIcon from "@/assets/icons/ChevronRightIcon";
 
 import { cn } from "@/lib/utils";
-import { buttonVariants } from "@/components/ui/Button";
 
 const Pagination = ({ className, ...props }) => (
   <nav
@@ -19,7 +18,7 @@ Pagination.displayName = "Pagination";
 const PaginationContent = React.forwardRef(({ className, ...props }, ref) => (
   <ul
     ref={ref}
-    className={cn("flex flex-row items-center gap-1 ", className)}
+    className={cn("flex flex-row items-center gap-1", className)}
     {...props}
   />
 ));
@@ -34,11 +33,18 @@ const PaginationLink = ({ className, isActive, size = "icon", ...props }) => (
   <a
     aria-current={isActive ? "page" : undefined}
     className={cn(
-      "cursor-pointer flex items-center justify-center rounded-full p-3",
-      buttonVariants({
-        variant: isActive ? "outline" : "ghost",
-        size
-      }),
+      "cursor-pointer flex items-center justify-center rounded-full transition-colors",
+      {
+        "bg-lavender-400 text-customNeutral-100 hover:bg-lavender-500 active:bg-lavender-200 active:text-lavender-500":
+          isActive,
+        "text-lavender-400 hover:bg-lavender-100 active:bg-lavender-200 active:text-customNeutral-100":
+          !isActive,
+        "disabled:pointer-events-none disabled:opacity-50": true,
+        "h-9 px-3": size === "sm",
+        "h-12 px-4 py-2": size === "default",
+        "h-11 px-8": size === "lg",
+        "h-10 w-10": size === "icon"
+      },
       className
     )}
     {...props}
@@ -53,7 +59,7 @@ const PaginationPrevious = ({ className, ...props }) => (
     className={cn("gap-1 pl-2.5", className)}
     {...props}
   >
-    <ChevronLeftIcon />
+    <ChevronLeftIcon className="pointer-events-none size-6 shrink-0" />
   </PaginationLink>
 );
 PaginationPrevious.displayName = "PaginationPrevious";
@@ -65,7 +71,7 @@ const PaginationNext = ({ className, ...props }) => (
     className={cn("gap-1 pr-2.5", className)}
     {...props}
   >
-    <ChevronRightIcon />
+    <ChevronRightIcon className="pointer-events-none size-6 shrink-0" />
   </PaginationLink>
 );
 PaginationNext.displayName = "PaginationNext";
@@ -82,6 +88,19 @@ const PaginationEllipsis = ({ className, ...props }) => (
 );
 PaginationEllipsis.displayName = "PaginationEllipsis";
 
+const PaginationLast = ({ className, pageNumber, currentPage, ...props }) => (
+  <PaginationLink
+    aria-label={`Go to page ${pageNumber}`}
+    size="default"
+    isActive={currentPage === pageNumber}
+    className={cn(className)}
+    {...props}
+  >
+    {pageNumber}
+  </PaginationLink>
+);
+PaginationLast.displayName = "PaginationLast";
+
 export {
   Pagination,
   PaginationContent,
@@ -89,5 +108,6 @@ export {
   PaginationItem,
   PaginationLink,
   PaginationNext,
-  PaginationPrevious
+  PaginationPrevious,
+  PaginationLast
 };
