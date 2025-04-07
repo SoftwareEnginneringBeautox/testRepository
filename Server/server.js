@@ -14,7 +14,7 @@ const bcrypt = require('bcrypt');
 const pgSession = require('connect-pg-simple')(session);
 const nodemailer = require("nodemailer");
 const isAuthenticated = require('./middleware/isAuthenticated');
-
+const axios = require('axios');
 // Check required environment variables
 const requiredEnvVars = [
   'DB_USER',
@@ -232,7 +232,40 @@ app.delete('/deleteuser/:id', async (req, res) => {
 // Login endpoint
 app.post('/login', async (req, res) => {
   try {
-    const { username, password } = req.body;
+    const { username, password, recaptchaToken } = req.body;
+    
+    // Verify reCAPTCHA token
+    if (!recaptchaToken) {
+      return res.json({ 
+        success: false, 
+        message: "reCAPTCHA verification required" 
+      });
+    }
+    
+    // Verify with Google reCAPTCHA v3
+    const recaptchaVerify = await axios.post(
+      'https://www.google.com/recaptcha/api/siteverify',
+      null,
+      {
+        params: {
+          secret: process.env.RECAPTCHA_SECRET || "6LfTPA0rAAAAAOI50u0vT-GAZhecX9qbgaNnQIEy",
+          response: recaptchaToken
+        }
+      }
+    );
+    
+    const { success, score, action } = recaptchaVerify.data;
+    
+    // Check if verification was successful and meets the minimum score threshold
+    if (!success || score < 0.5 || action !== "login") {
+      console.log("reCAPTCHA verification failed:", recaptchaVerify.data);
+      return res.json({ 
+        success: false, 
+        message: "reCAPTCHA verification failed" 
+      });
+    }
+    
+    // Proceed with normal login if reCAPTCHA passed
     const query = 'SELECT * FROM accounts WHERE username = $1';
     const result = await pool.query(query, [username]);
 
