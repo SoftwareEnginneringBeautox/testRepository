@@ -1,4 +1,8 @@
-const MagnifyingGlassIcon = ({ size = 24, fill = "currentColor" }) => (
+const MagnifyingGlassIcon = ({
+  size = 24,
+  fill = "currentColor",
+  className = ""
+}) => (
   <svg
     width={size}
     height={size}
@@ -6,6 +10,7 @@ const MagnifyingGlassIcon = ({ size = 24, fill = "currentColor" }) => (
     fill={fill}
     xmlns="http://www.w3.org/2000/svg"
     preserveAspectRatio="xMidYMid meet"
+    className={className}
   >
     <mask
       id="mask0_104_1246"

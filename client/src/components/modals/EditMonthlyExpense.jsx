@@ -99,7 +99,9 @@ function EditMonthlySales({
                 data-cy="expense-type-select"
               >
                 <ModalSelectTrigger
-                  icon={<ExpenseTypeIcon />}
+                  icon={
+                    <ExpenseTypeIcon className="dark:bg-customNeutral-100" />
+                  }
                   placeholder="Select category"
                   data-cy="expense-type-trigger"
                 />

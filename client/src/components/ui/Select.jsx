@@ -6,14 +6,14 @@ import ChevronDownIcon from "@/assets/icons/ChevronDownIcon";
 import { cva } from "class-variance-authority";
 
 const selectVariants = cva(
-  "flex gap-2 items-center justify-between rounded-lg whitespace-nowrap placeholder:text-muted-foreground focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1",
+  "flex gap-2 items-center justify-between rounded-lg whitespace-nowrap focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1",
   {
     variants: {
       variant: {
         default:
           "bg-lavender-400 text-customNeutral-100 px-4 py-3 font-semibold ",
         modal:
-          "bg-customNeutral-100 border-2 border-customNeutral-200 dark:border-neutral-800 dark:bg-neutral-950 px-3 py-2 max-h-12 outline-none flex-row font-normal text-sm"
+          "bg-customNeutral-100 border-2 border-customNeutral-200 dark:border-customNeutral-300 dark:bg-customNeutral-600 px-3 h-12 outline-none flex-row font-normal text-sm"
       }
     },
     defaultVariants: {
@@ -43,7 +43,7 @@ const SelectTrigger = React.forwardRef(
       {/* Selected Value or Placeholder */}
       <SelectValue
         placeholder={placeholder}
-        className="text-left truncate flex-1 "
+        className="text-left truncate flex-1 data-[placeholder=true]:text-customNeutral-300 data-[placeholder=false]:text-customNeutral-100 dark:data-[placeholder=true]:text-customNeutral-300 dark:data-[placeholder=false]:text-customNeutral-100"
       />
 
       {/* Optional Right Icon for Default Variant */}
@@ -63,8 +63,7 @@ const SelectIcon = ({ children, className, variant }) => (
       "[&_svg]:size-6 [&_svg]:shrink-0",
       variant === "default"
         ? "text-customNeutral-100"
-        : "text-customNeutral-700",
-      "data-[placeholder]:text-customNeutral-200", // Keep this for placeholders
+        : "text-customNeutral-700 dark:text-customNeutral-100",
       className
     )}
   >
@@ -79,7 +78,7 @@ const ModalSelectTrigger = React.forwardRef(
       ref={ref}
       className={cn(
         selectVariants({ variant: "modal" }),
-        "flex items-center justify-between gap-2 w-full px-3 py-2 bg-customNeutral-100 rounded-lg border-2 border-customNeutral-200 text-neutral-900",
+        "flex items-center justify-between gap-2 w-full px-3 py-2 bg-customNeutral-100 rounded-lg border-2 border-customNeutral-200 dark:border-customNeutral-300 dark:focus-within:border-lavender-100",
         className
       )}
       {...props}
@@ -87,8 +86,11 @@ const ModalSelectTrigger = React.forwardRef(
       <div className="flex items-center gap-2">
         {LeftIcon && <SelectIcon variant="modal">{LeftIcon}</SelectIcon>}
 
-        {/* Use the proper SelectValue component */}
-        <SelectValue placeholder={placeholder} />
+        {/* Updated SelectValue with conditional styling */}
+        <SelectValue
+          placeholder={placeholder}
+          className="text-left truncate flex-1 data-[placeholder=true]:text-customNeutral-300 data-[placeholder=false]:text-customNeutral-100 dark:data-[placeholder=true]:text-customNeutral-300 dark:data-[placeholder=false]:text-customNeutral-100"
+        />
       </div>
 
       <SelectIcon variant="modal">
@@ -105,7 +107,7 @@ const ModalSelectContent = React.forwardRef(
       <SelectPrimitive.Content
         ref={ref}
         className={cn(
-          "relative z-50 max-h-[90vh] w-full min-w-[var(--radix-select-trigger-width)] overflow-y-auto rounded-md border bg-customNeutral-100 dark:bg-customNeutral-400 dark:text-customNeutral-100 shadow-md text-sm",
+          "relative z-50 max-h-[90vh] w-full overflow-y-auto rounded-md bg-customNeutral-100 dark:bg-customNeutral-400 dark:text-customNeutral-100 shadow-md text-sm min-w-[var(--radix-select-trigger-width)]",
           className
         )}
         position="popper"

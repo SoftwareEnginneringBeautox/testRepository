@@ -12,59 +12,6 @@
 
 
 
-  --page-background: #f2f2f2; /* customNeutral-100 */
-
-  /* Component-level variables */
-  --component-background: #381b4c;
-  --component-text: #f2f2f2;
-  --component-primary: #381b4c;
-  --component-primary-text: #381b4c;
-  --component-hover: #f0d6f6;
-  --component-hover-text: #381b4c;
-  --component-border: #f0d6f6;
-  --component-ring: #381b4c;
-
-  /* Button-specific variables (no dark mode) */
-  --button-background: #381b4c; /* Same as component-primary */
-  --button-text: #f2f2f2; /* Same as component-text */
-  --button-hover-background: #f0d6f6; /* Same as component-hover */
-  --button-active-background: #381b4c; /* Same as component-primary-text */
-  --button-active-text: #381b4c; /* Same as component-primary */
-  --button-border: #f0d6f6; /* Same as component-border */
-
-  --sidebar-background: #381b4c;
-  --sidebar-foreground: #f2f2f2;
-  --sidebar-primary: #381b4c;
-  --sidebar-primary-foreground: #381b4c;
-  --sidebar-accent: #f0d6f6;
-  --sidebar-accent-foreground: #381b4c;
-  --sidebar-border: #f0d6f6;
-  --sidebar-ring: #381b4c;
-
-    --badge-bg: #f0f0f0;
-    --badge-text: #333;
-    --badge-bg-hover: #e0e0e0;
-    --badge-secondary-bg: #d0d0d0;
-    --badge-secondary-text: #444;
-    --badge-secondary-bg-hover: #c0c0c0;
-    --badge-destructive-bg: #ffdddd;
-    --badge-destructive-text: #ff0000;
-    --badge-destructive-bg-hover: #ffcccc;
-    --badge-outline-text: #555;
-
-    --table-header-bg: #381b4c; /* lavender-400 */
-    --table-row-odd-bg: #e5eeff; /* reflexBlue-100 */
-    --table-row-even-bg: #eef4f6; /* faintingLight-100 */
-    --table-text: #0d0d0d; /* customNeutral-100 */
-
-
-    /* Input styles */
-    --input-bg: #f2f2f2; /* customNeutral-100 */
-    --input-border: #aaaaaa; /* customNeutral-200 */
-    --input-placeholder: #626262; /* customNeutral-300 */
-    --input-file-text: #0d0d0d; /* customNeutral-700 */
-    --input-focus-border: #381b4c; /* lavender-400 */
-    --input-text: #0d0d0d; /* customNeutral-100 */
 
     /* For Chart */
     --chart-1: 12 76% 61%;
@@ -76,35 +23,6 @@
 
   /* Dark mode overrides */
   .dark {
-
-    --page-background: #1a1a1a; /* customNeutral-100 */
-
-    --component-background: #1a1a1a; /* customNeutral-400 */
-    --component-text: #f2f2f2; /* customNeutral-100 */
-    --component-primary: #1a1a1a; /* customNeutral-400 */
-    --component-primary-text: #f2f2f2; /* customNeutral-100 */
-    --component-hover: #626262; /* customNeutral-300 */
-    --component-hover-text: #f2f2f2; /* customNeutral-100 */
-    --component-border: #1a1a1a; /* customNeutral-400 */
-    --component-ring: #381b4c; /* lavender-400 */
-
-    --sidebar-background: #1a1a1a;
-
-
-
-    --table-header-bg: #1a1a1a; /* customNeutral-400 */
-    --table-row-odd-bg: #626262; /* customNeutral-300 */
-    --table-row-even-bg: #1a1a1a; /* customNeutral-400 */
-    --table-text: #f2f2f2; /* customNeutral-100 */
-
-
-    /* Input styles for dark mode */
-    --input-bg: #0d0d0d; /* customNeutral-700 */
-    --input-border: #1a1a1a; /* customNeutral-400 */
-    --input-placeholder: #626262; /* customNeutral-300 */
-    --input-file-text: #f2f2f2; /* customNeutral-100 */
-    --input-focus-border: #381b4c; /* lavender-400 */
-    --input-text: #f2f2f2; /* customNeutral-100 */
 
     /* For Chart in dark mode */
     --chart-1: 220 70% 50%;

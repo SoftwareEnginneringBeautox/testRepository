@@ -55,7 +55,7 @@ const InputTextField = ({ children, className, fullWidth }) => {
   return (
     <div
       className={cn(
-        "flex items-center sm:gap-1 md:gap-2 h-12 bg-customNeutral-100 rounded-lg border-2 border-customNeutral-200 focus-within:border-lavender-400 dark:border-neutral-800 dark:bg-neutral-950 dark:ring-offset-neutral-950 dark:file:text-neutral-50 dark:placeholder:text-neutral-400 px-3",
+        "flex items-center sm:gap-1 md:gap-2 h-12 bg-customNeutral-100 rounded-lg border-2 border-customNeutral-200 dark:border-customNeutral-300 focus-within:border-lavender-400 dark:focus-within:border-lavender-100  dark:bg-customNeutral-600  dark:placeholder:text-customNeutral-200 px-3",
         fullWidth && "w-full",
         className
       )}
@@ -77,7 +77,10 @@ const Input = React.forwardRef(
       <input
         type={type}
         className={cn(
-          "flex-1 outline-none bg-inherit file:bg-transparent file:text-sm file:font-medium placeholder:text-customNeutral-300 disabled:cursor-not-allowed disabled:opacity-50 dark:file:textcutomNeutral-100 md:text-sm",
+          "flex-1 outline-none bg-transparent file:text-customNeutral-100 file:text-sm file:font-medium placeholder:text-customNeutral-300 disabled:cursor-not-allowed disabled:opacity-50 dark:file:text-customNeutral-100 dark:caret-lavender-100 dark:text-customNeutral-100 md:text-sm",
+          // Filter styles for date inputs
+          type === "date" &&
+            "dark:[&::-webkit-calendar-picker-indicator]:invert dark:[&::-webkit-calendar-picker-indicator]:opacity-70",
           fullWidth && "w-full",
           className
         )}
@@ -110,7 +113,6 @@ const InputAreaField = ({ children, className, fullWidth }) => {
     <div
       className={cn(
         "flex bg-customNeutral-100 rounded-lg border-2 border-customNeutral-200 focus-within:border-lavender-400 dark:text-customNeutral-100 dark:border-customNeutral-200  dark:bg-neutral-950 dark:file:text-neutral-50 dark:placeholder:text-neutral-400 px-3 py-2",
-
         fullWidth && "w-full",
         className
       )}

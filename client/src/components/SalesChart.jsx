@@ -348,7 +348,7 @@ const SalesChart = ({ chartConfig }) => {
               )}
             </div>
             <div
-              className="flex items-center gap-2 leading-none text-customNeutral-200"
+              className="flex items-center gap-2 leading-none text-customNeutral-400 dark:text-customNeutral-200"
               data-cy="date-range-label"
             >
               {dateRangeLabel}

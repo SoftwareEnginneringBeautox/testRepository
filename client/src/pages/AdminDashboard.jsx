@@ -568,10 +568,7 @@ function AdministratorDashboard() {
           className="flex items-center gap-2 text-lg sm:text-xl md:text-2xl lg:text-[2rem] leading-tight sm:leading-[2.8rem] font-semibold dark:text-customNeutral-100"
           data-cy="staff-list-title"
         >
-          <UserIcon
-            className="sm:w-8 sm:h-8 dark:text-customNeutral-100"
-            data-cy="staff-icon"
-          />
+          <UserIcon className="sm:w-8 sm:h-8 " data-cy="staff-icon" />
           STAFF LIST
         </h3>
         {loadingStaff ? (

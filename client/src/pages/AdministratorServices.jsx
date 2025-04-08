@@ -501,10 +501,6 @@ function AdministratorServices() {
         className="w-full flex justify-end gap-4 mb-[10%]"
         data-cy="bottom-actions"
       >
-        <Button variant="outline" data-cy="check-btn">
-          <ChevronLeftIcon />
-          CHECK
-        </Button>
         <Button
           data-cy="add-package-btn"
           onClick={() => openModal("createPackage")}

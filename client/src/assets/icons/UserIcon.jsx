@@ -1,11 +1,12 @@
-const UserIcon = ({ size = 24, fill = "currentColor" }) => (
+const UserIcon = ({ size = 24, fill = "currentColor", className = "" }) => (
   <svg
     width={size}
     height={size}
     viewBox="0 0 24 24"
-    fill={fill}
+    fill={fill} // Use the `fill` prop, defaulting to "currentColor"
     xmlns="http://www.w3.org/2000/svg"
     preserveAspectRatio="xMidYMid meet"
+    className={className} // Forward the className to the <svg> element
   >
     <mask
       id="mask0_104_1246"

@@ -21,7 +21,9 @@ function ArchiveStaff({ isOpen, onClose, onArchive }) {
       <ModalTitle className="text-center">
         ARCHIVE STAFF INFORMATION?
       </ModalTitle>
-      <p>This will archive the staff’s information within the system.</p>
+      <p className="dark:text-customNeutral-100">
+        This will archive the staff’s information within the system.
+      </p>
       <div className="flex sm:flex-row flex-col gap-4 w-full">
         <Button
           data-cy="cancel-archive-staff"

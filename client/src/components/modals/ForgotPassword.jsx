@@ -46,6 +46,8 @@ function ForgotPassword({ isOpen, onClose }) {
   const sendOTP = async (e) => {
     e.preventDefault();
     setIsLoading(true); // Set loading to true when sending OTP
+    setMessage(""); // Clear any previous messages
+
     try {
       await axios.post("http://localhost:4000/forgot-password", { email });
       setStep(2);
@@ -54,13 +56,15 @@ function ForgotPassword({ isOpen, onClose }) {
       console.error("Failed to send OTP:", err);
       setMessage("Failed to send OTP. Make sure the email is correct.");
     } finally {
-      setIsLoading(false); // Set loading to false when operation completes
+      setIsLoading(false); // Ensure loading is set to false regardless of outcome
     }
   };
 
   const verifyOTP = async (e) => {
     e.preventDefault();
     setIsLoading(true); // Set loading to true when verifying OTP
+    setMessage(""); // Clear any previous messages
+
     try {
       console.log("Verifying OTP:", otp);
       const response = await axios.post("http://localhost:4000/verify-otp", {
@@ -81,25 +85,51 @@ function ForgotPassword({ isOpen, onClose }) {
       console.error("Error verifying OTP:", err);
       setMessage("Failed to verify OTP. Please try again.");
     } finally {
-      setIsLoading(false); // Set loading to false when operation completes
+      setIsLoading(false); // Ensure loading is set to false regardless of outcome
     }
   };
 
-  const handleResetPassword = (e) => {
+  const handleResetPassword = async (e) => {
     e.preventDefault();
     if (newPassword !== confirmPassword) {
       setMessage("Passwords do not match.");
       return;
     }
-    setMessage("Password reset functionality will be implemented soon.");
+
+    setIsLoading(true); // Set loading state
+    setMessage(""); // Clear previous messages
+
+    try {
+      // Add actual reset password implementation here
+      await axios.post("http://localhost:4000/reset-password", {
+        email,
+        otp,
+        newPassword
+      });
+      setMessage("Password reset successful!");
+      // Optional: close modal or navigate to login after successful reset
+      setTimeout(() => {
+        onClose();
+      }, 2000);
+    } catch (err) {
+      console.error("Error resetting password:", err);
+      setMessage("Failed to reset password. Please try again.");
+    } finally {
+      setIsLoading(false); // Ensure loading is set to false regardless of outcome
+    }
   };
 
   const resendOTP = async () => {
+    setIsLoading(true); // Set loading state
+    setMessage(""); // Clear previous messages
+
     try {
       await axios.post("http://localhost:4000/forgot-password", { email });
       setMessage("A new OTP has been sent.");
     } catch (err) {
       setMessage("Failed to resend OTP.");
+    } finally {
+      setIsLoading(false); // Ensure loading is set to false regardless of outcome
     }
   };
 
@@ -172,11 +202,16 @@ function ForgotPassword({ isOpen, onClose }) {
                 <InputOTPSlot index={5} />
               </InputOTPGroup>
             </InputOTP>
-            <button onClick={resendOTP} className="underline font-semibold">
+            <button
+              type="button"
+              onClick={resendOTP}
+              className="underline font-semibold"
+            >
               CLICK HERE TO RESEND
             </button>
             <div className="flex gap-4 w-full">
               <Button
+                type="button"
                 variant="outline"
                 onClick={() => setStep(1)}
                 className="w-1/2"
@@ -235,6 +270,7 @@ function ForgotPassword({ isOpen, onClose }) {
 
             <div className="flex gap-4 w-full">
               <Button
+                type="button"
                 variant="outline"
                 onClick={() => setStep(1)}
                 className="w-1/2"
@@ -246,7 +282,17 @@ function ForgotPassword({ isOpen, onClose }) {
               </Button>
             </div>
 
-            {message && <p className="text-red-500">{message}</p>}
+            {message && (
+              <p
+                className={
+                  message.includes("successful")
+                    ? "text-success-400"
+                    : "text-error-400"
+                }
+              >
+                {message}
+              </p>
+            )}
           </form>
         )}
       </ModalBody>

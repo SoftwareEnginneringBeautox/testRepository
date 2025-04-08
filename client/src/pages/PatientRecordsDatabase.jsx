@@ -683,7 +683,7 @@ function PatientRecordsDatabase() {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
-            <MagnifyingGlassIcon />
+            <MagnifyingGlassIcon className="dark:text-customNeutral-100" />
           </InputTextField>
 
           <Select onValueChange={setSortOption} className="w-full md:w-auto">

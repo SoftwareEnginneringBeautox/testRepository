@@ -55,7 +55,7 @@ function ArchiveCategory({ isOpen, onClose, category, onArchiveSuccess }) {
         <WarningIcon size={48} />
       </div>
       <ModalTitle className="text-center">ARCHIVE CATEGORY?</ModalTitle>
-      <p>
+      <p className="dark:text-customNeutral-100">
         This will archive the expense category "{category.name}" from the
         database.
       </p>

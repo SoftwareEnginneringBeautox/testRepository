@@ -7,7 +7,7 @@ import autoTable from "jspdf-autotable";
 
 import CreateMonthlyExpense from "@/components/modals/CreateMonthlyExpense";
 import EditMonthlyExpense from "@/components/modals/EditMonthlyExpense";
-import DeleteMonthlyExpense from "@/components/modals/DeleteMonthlyExpense";
+import ArchiveMonthlyExpense from "@/components/modals/ArchiveMonthlyExpense";
 import CreateCategory from "@/components/modals/CreateCategory";
 import EditCategory from "@/components/modals/EditCategory";
 import ArchiveCategory from "@/components/modals/ArchiveCategory";
@@ -1138,7 +1138,7 @@ function FinancialOverview() {
                             <DropdownMenuItem
                               onClick={() => {
                                 setSelectedExpense(expense);
-                                openModal("deleteMonthlyExpense");
+                                openModal("archiveMonthlyExpense");
                               }}
                               data-cy={`archive-expense-${expense.id || index}`}
                             >
@@ -1246,14 +1246,17 @@ function FinancialOverview() {
           )}
         </div>
 
-        <div
+        {/* <div
           className="w-full rounded-lg p-4 border-2 border-lavender-400 dark:border-lavender-100 text-center"
           data-cy="total-profit-container"
         >
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4 dark:text-customNeutral-100">
             <div className="text-lg md:text-xl leading-normal">
               TOTAL SALES:{" "}
-              <span className="font-bold" data-cy="total-sales-amount">
+              <span
+                className="font-bold text-success-400"
+                data-cy="total-sales-amount"
+              >
                 {new Intl.NumberFormat("en-PH", {
                   style: "currency",
                   currency: "PHP"
@@ -1262,7 +1265,10 @@ function FinancialOverview() {
             </div>
             <div className="text-lg md:text-xl leading-normal">
               TOTAL EXPENSES:{" "}
-              <span className="font-bold" data-cy="total-expenses-amount">
+              <span
+                className="font-bold text-error-400"
+                data-cy="total-expenses-amount"
+              >
                 {new Intl.NumberFormat("en-PH", {
                   style: "currency",
                   currency: "PHP"
@@ -1275,7 +1281,49 @@ function FinancialOverview() {
               </div>
             </div>
           </div>
-          <div className="text-xl md:text-3xl leading-normal md:leading-[67.2px]">
+          <div className="text-xl md:text-3xl leading-normal md:leading-[67.2px] FONT-SEMIBOLD">
+            {financialData.netIncome < 0 ? "TOTAL LOSS: " : "TOTAL PROFIT: "}
+            <span
+              className={`font-bold dark:text-customNeutral-100 ${
+                financialData.netIncome < 0 ? "text-error-400" : ""
+              }`}
+              data-cy="total-profit-amount"
+            >
+              {new Intl.NumberFormat("en-PH", {
+                style: "currency",
+                currency: "PHP"
+              }).format(Math.abs(financialData.netIncome))}
+            </span>
+          </div>
+        </div> */}
+        <div
+          className="w-full rounded-lg p-4 border-2 border-lavender-400 dark:border-lavender-100 text-center grid gap-4 md:gap-8 md:grid-cols-3 dark:text-customNeutral-100"
+          data-cy="total-profit-container"
+        >
+          <div className="text-lg md:text-xl leading-normal">
+            TOTAL SALES:{" "}
+            <span
+              className="font-bold text-success-400"
+              data-cy="total-sales-amount"
+            >
+              {new Intl.NumberFormat("en-PH", {
+                style: "currency",
+                currency: "PHP"
+              }).format(financialData.totalSales)}
+            </span>{" "}
+            - TOTAL EXPENSES:{" "}
+            <span
+              className="font-bold text-error-400"
+              data-cy="total-expenses-amount"
+            >
+              {new Intl.NumberFormat("en-PH", {
+                style: "currency",
+                currency: "PHP"
+              }).format(financialData.totalExpenses)}
+            </span>{" "}
+            =
+          </div>
+          <div className="text-xl md:text-3xl leading-normal md:leading-[67.2px] font-semibold col-span-full">
             {financialData.netIncome < 0 ? "TOTAL LOSS: " : "TOTAL PROFIT: "}
             <span
               className={`font-bold dark:text-customNeutral-100 ${
@@ -1342,8 +1390,8 @@ function FinancialOverview() {
         />
       )}
 
-      {currentModal === "deleteMonthlyExpense" && selectedExpense && (
-        <DeleteMonthlyExpense
+      {currentModal === "archiveMonthlyExpense" && selectedExpense && (
+        <ArchiveMonthlyExpense
           isOpen={true}
           onClose={closeModal}
           onArchive={handleArchiveExpense}

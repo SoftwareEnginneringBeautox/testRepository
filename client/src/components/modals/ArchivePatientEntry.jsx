@@ -19,7 +19,7 @@ function ArchivePatientEntry({ isOpen, onClose, onArchive }) {
       <ModalTitle className="text-center">
         ARCHIVE PATIENT INFORMATION?
       </ModalTitle>
-      <p>
+      <p className="dark:text-customNeutral-100">
         Deleting the chosen patient entry would mean there is no recovery for
         that entry.
       </p>

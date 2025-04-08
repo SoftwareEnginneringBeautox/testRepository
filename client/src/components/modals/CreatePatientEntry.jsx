@@ -368,7 +368,6 @@ function CreatePatientEntry({ isOpen, onClose }) {
                   value={patientName}
                   onChange={(e) => setPatientName(e.target.value)}
                   required
-                  className="bg-[#F5F3F0]"
                 />
               </InputTextField>
             </InputContainer>
@@ -382,15 +381,15 @@ function CreatePatientEntry({ isOpen, onClose }) {
                   placeholder="e.g. 09XXXXXXXXX"
                   value={contactNumber}
                   onChange={(e) => setContactNumber(e.target.value)}
-                  className={`bg-[#F5F3F0] ${
+                  className={` ${
                     formSubmitAttempted && formErrors.contactNumber
-                      ? "border-red-500"
+                      ? "border-error-400"
                       : ""
                   }`}
                 />
               </InputTextField>
               {formSubmitAttempted && formErrors.contactNumber && (
-                <p className="text-red-500 text-sm mt-1">
+                <p className="text-error-400 text-sm mt-1">
                   {formErrors.contactNumber}
                 </p>
               )}
@@ -407,15 +406,15 @@ function CreatePatientEntry({ isOpen, onClose }) {
                   placeholder="Age"
                   value={age}
                   onChange={(e) => setAge(e.target.value)}
-                  className={`bg-[#F5F3F0] ${
+                  className={` ${
                     formSubmitAttempted && formErrors.age
-                      ? "border-red-500"
+                      ? "border-error-400"
                       : ""
                   }`}
                 />
               </InputTextField>
               {formSubmitAttempted && formErrors.age && (
-                <p className="text-red-500 text-sm mt-1">{formErrors.age}</p>
+                <p className="text-error-400 text-sm mt-1">{formErrors.age}</p>
               )}
             </InputContainer>
 
@@ -429,15 +428,17 @@ function CreatePatientEntry({ isOpen, onClose }) {
                   placeholder="example@email.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className={`bg-[#F5F3F0] ${
+                  className={`${
                     formSubmitAttempted && formErrors.email
-                      ? "border-red-500"
+                      ? "border-error-400"
                       : ""
                   }`}
                 />
               </InputTextField>
               {formSubmitAttempted && formErrors.email && (
-                <p className="text-red-500 text-sm mt-1">{formErrors.email}</p>
+                <p className="text-error-400 text-sm mt-1">
+                  {formErrors.email}
+                </p>
               )}
             </InputContainer>
 
@@ -453,11 +454,13 @@ function CreatePatientEntry({ isOpen, onClose }) {
               >
                 <ModalSelectTrigger
                   data-cy="person-in-charge-select"
-                  icon={<UserIDIcon className="w-4 h-4" />}
+                  icon={
+                    <UserIDIcon className="w-4 h-4 dark:text-customNeutral-100" />
+                  }
                   placeholder="Select person in charge"
                   className={
                     formSubmitAttempted && formErrors.personInCharge
-                      ? "border-red-500"
+                      ? "border-error-400"
                       : ""
                   }
                 />
@@ -474,7 +477,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
                 </ModalSelectContent>
               </Select>
               {formSubmitAttempted && formErrors.personInCharge && (
-                <p className="text-red-500 text-sm mt-1">
+                <p className="text-error-400 text-sm mt-1">
                   {formErrors.personInCharge}
                 </p>
               )}
@@ -502,7 +505,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
                   placeholder="Select package"
                   className={
                     formSubmitAttempted && formErrors.packageOrTreatment
-                      ? "border-red-500"
+                      ? "border-error-400"
                       : ""
                   }
                 />
@@ -522,7 +525,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
                 </ModalSelectContent>
               </Select>
               {formSubmitAttempted && formErrors.packageOrTreatment && (
-                <p className="text-red-500 text-sm mt-1">
+                <p className="text-error-400 text-sm mt-1">
                   {formErrors.packageOrTreatment}
                 </p>
               )}
@@ -552,13 +555,13 @@ function CreatePatientEntry({ isOpen, onClose }) {
                 placeholder="Select treatments"
                 className={
                   formSubmitAttempted && formErrors.packageOrTreatment
-                    ? "border-red-500"
+                    ? "border-error-400"
                     : ""
                 }
               />
 
               {formSubmitAttempted && formErrors.packageOrTreatment && (
-                <p className="text-red-500 text-sm mt-1">
+                <p className="text-error-400 text-sm mt-1">
                   {formErrors.packageOrTreatment}
                 </p>
               )}
@@ -718,7 +721,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
                 />
               </InputTextField>
               {formSubmitAttempted && formErrors.dateOfSession && (
-                <p className="text-red-500 text-sm mt-1">
+                <p className="text-error-400 text-sm mt-1">
                   {formErrors.dateOfSession}
                 </p>
               )}

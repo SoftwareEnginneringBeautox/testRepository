@@ -8,7 +8,7 @@ import DeleteIcon from "@/assets/icons/DeleteIcon";
 import WarningIcon from "@/assets/icons/WarningIcon";
 import ChevronLeftIcon from "@/assets/icons/ChevronLeftIcon";
 
-function DeleteMonthlySales({ isOpen, onClose, onArchive }) {
+function ArchiveMonthlySales({ isOpen, onClose, onArchive }) {
   if (!isOpen) return null;
 
   return (
@@ -25,7 +25,10 @@ function DeleteMonthlySales({ isOpen, onClose, onArchive }) {
       <ModalTitle data-cy="archive-expense-title" className="text-center">
         ARCHIVE MONTHLY EXPENSE?
       </ModalTitle>
-      <p data-cy="archive-expense-description">
+      <p
+        data-cy="archive-expense-description"
+        className="dark:text-customNeutral-100"
+      >
         This will archive the expense within the system.
       </p>
       <div
@@ -54,4 +57,4 @@ function DeleteMonthlySales({ isOpen, onClose, onArchive }) {
   );
 }
 
-export default DeleteMonthlySales;
+export default ArchiveMonthlySales;

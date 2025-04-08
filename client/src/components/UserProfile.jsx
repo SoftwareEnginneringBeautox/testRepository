@@ -53,7 +53,7 @@ const UserProfile = () => {
         <UserIcon
           size={36}
           className={`h-full ${
-            theme === "dark" ? "text-customNeutral-100" : "text-gray-600"
+            theme === "dark" ? "text-customNeutral-100" : ""
           }`}
         />
       )}
