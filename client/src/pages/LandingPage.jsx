@@ -10,7 +10,6 @@ import FacebookIcon from "@/assets/icons/FacebookIcon";
 import InstagramIcon from "@/assets/icons/InstagramIcon";
 import PhoneIcon from "@/assets/icons/PhoneIcon";
 import ChevronRightIcon from "@/assets/icons/ChevronRightIcon";
-import { XIcon } from "lucide-react";
 
 import ProductCard from "@/components/ProductCard";
 import ScheduleAppointmentModal from "../components/modals/ScheduleAppointment";
@@ -28,7 +27,6 @@ function LandingPage() {
   const navigate = useNavigate();
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -217,34 +215,11 @@ function LandingPage() {
     }
   ];
 
-  const handleScroll = (e, targetId) => {
+  const handleScroll = (e, id) => {
     e.preventDefault();
-    const element = document.getElementById(targetId);
-    if (element) {
-      const offset = 80; // Adjust this value based on your header height
-      const elementPosition = element.getBoundingClientRect().top;
-      const offsetPosition = elementPosition + window.pageYOffset - offset;
-
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: "smooth"
-      });
-    }
-  };
-
-  // Add touch event handling for mobile devices
-  const handleTouchScroll = (e, targetId) => {
-    e.preventDefault();
-    const element = document.getElementById(targetId);
-    if (element) {
-      const offset = 80;
-      const elementPosition = element.getBoundingClientRect().top;
-      const offsetPosition = elementPosition + window.pageYOffset - offset;
-
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: "smooth"
-      });
+    const section = document.getElementById(id);
+    if (section) {
+      section.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   };
 
@@ -253,7 +228,7 @@ function LandingPage() {
     <div className="w-full bg-white" data-cy="landing-page">
       {/* Header navigation */}
       <header className="fixed top-4 left-0 right-0 z-50 px-4">
-        <div className="flex items-center justify-end w-full max-w-6xl mx-auto gap-4">
+        <div className="flex items-center justify-center w-full max-w-6xl mx-auto gap-4">
           {/* Main Navigation with Login */}
           <nav className="hidden md:block bg-white/30 backdrop-blur-2xl rounded-full px-3 py-2 shadow-sm">
             <div className="flex items-center gap-5">
@@ -270,7 +245,6 @@ function LandingPage() {
                     <a
                       href={`#${href}`}
                       onClick={(e) => handleScroll(e, href)}
-                      onTouchEnd={(e) => handleTouchScroll(e, href)}
                       className="text-purple-900 text-base font-semibold"
                     >
                       {label}
@@ -290,9 +264,9 @@ function LandingPage() {
               </ul>
             </div>
           </nav>
-  
+
           {/* Mobile menu */}
-          <div className="md:hidden">
+          <div className="md:hidden ml-auto">
             <DropdownMenu>
               <DropdownMenuTrigger className="focus:outline-none">
                 <MenuIcon className="text-white" size={24} />
@@ -325,7 +299,7 @@ function LandingPage() {
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     className="px-4 py-2 mt-2 bg-purple-950 text-white hover:bg-purple-900 rounded-md cursor-pointer flex items-center gap-2 text-sm"
-                    onClick={() => navigate("/login")}
+          onClick={() => navigate("/login")}
                   >
                     <LoginIcon className="text-white" /> Login
                   </DropdownMenuItem>
@@ -403,8 +377,8 @@ function LandingPage() {
               className="text-2xl sm:text-3xl md:text-5xl lg:text-4xl leading-none text-[#4A3B89] font-bold w-fit whitespace-nowrap"
               data-cy="hero-title"
             >
-              Welcome to Beautox
-            </h3>
+                Welcome to Beautox
+              </h3>
 
             <div className="flex flex-col gap-3">
               <p 
@@ -615,7 +589,7 @@ function LandingPage() {
             className="text-2xl sm:text-3xl font-semibold bg-gradient-to-r from-reflexBlue-300 to-lavender-300 text-transparent bg-clip-text mb-8 text-center"
             data-cy="about-clinic-title"
           >
-            FIND OUR CLINIC
+            ABOUT OUR CLINIC
           </h2>
 
           <div className="w-full flex flex-col lg:flex-row gap-8">
@@ -707,7 +681,6 @@ function LandingPage() {
 
               <Button
                 onClick={(e) => handleScroll(e, "location")}
-                onTouchEnd={(e) => handleTouchScroll(e, "location")}
                 className="bg-purple-950 hover:bg-purple-900 text-white w-full sm:w-fit px-6 sm:px-8 py-3 rounded-full flex items-center justify-center gap-2"
                 data-cy="view-map-btn"
               >
@@ -738,8 +711,8 @@ function LandingPage() {
           <div className="h-0.5 bg-purple-900 my-8 sm:my-16"></div>
         </div>
 
-          {/* Testimonials Section */}
-          <section 
+        {/* Testimonials Section */}
+        <section 
           id="testimonials" 
           className="w-[85%] sm:w-[80%] mx-auto mb-8 bg-white py-8"
           data-cy="testimonials"
@@ -768,7 +741,7 @@ function LandingPage() {
                 </div>
               </div>
               <div className="text-center pt-10">
-                <h4 className="text-xl font-semibold text-gray-800 mb-1">Mae Angeles (Alias) </h4>
+                <h4 className="text-xl font-semibold text-gray-800 mb-1">Maria Angeles</h4>
                 <p className="text-purple-600 text-sm mb-6">Regular Client</p>
                 <p className="text-gray-600 text-sm leading-relaxed mb-6">
                   "Highly recommended! Staffs are very nice, they're also very
@@ -799,7 +772,7 @@ function LandingPage() {
                 </div>
               </div>
               <div className="text-center pt-10">
-                <h4 className="text-xl font-semibold text-gray-800 mb-1"> Ali Rodriguez (Alias) </h4>
+                <h4 className="text-xl font-semibold text-gray-800 mb-1">Sarah Rodriguez</h4>
                 <p className="text-purple-600 text-sm mb-6">Me-So Sexy Package Client</p>
                 <p className="text-gray-600 text-sm leading-relaxed mb-6">
                   "Highly recommended! I love the service here. The mesolipo is
@@ -817,7 +790,7 @@ function LandingPage() {
                   </svg>
                 </div>
               </div>
-            </div>
+              </div>
 
             {/* Testimonial 3 */}
             <div className="bg-purple-100/70 rounded-2xl p-8 relative" data-cy="testimonial-3">
@@ -829,7 +802,7 @@ function LandingPage() {
                 </div>
               </div>
               <div className="text-center pt-10">
-                <h4 className="text-xl font-semibold text-gray-800 mb-1">Jane Almario (Alias) </h4>
+                <h4 className="text-xl font-semibold text-gray-800 mb-1">Jane Dela Cruz</h4>
                 <p className="text-purple-600 text-sm mb-6">Gluta Drips Package Client</p>
                 <p className="text-gray-600 text-sm leading-relaxed mb-6">
                   "Third Empress Gluta Drip ko na dito, and super happy ako! After a few
@@ -850,7 +823,6 @@ function LandingPage() {
             </div>
           </div>
         </section>
-            
 
         <div className="w-[85%] sm:w-[80%] mx-auto">
           <div className="h-0.5 bg-purple-900 my-8 sm:my-16"></div>
@@ -883,62 +855,62 @@ function LandingPage() {
                     clipRule="evenodd"
                   />
                 </svg>
-                <a
-                  href="httpsk://www.facebook.com/BeautoxAestheticClinicNewManila"
-                  target="_blank"
-                  rel="noreferrer"
+              <a
+                href="https://www.facebook.com/BeautoxAestheticClinicNewManila"
+                target="_blank"
+                rel="noreferrer"
                   className="text-white hover:text-white/80 transition-colors"
-                >
-                  FACEBOOK
-                </a>
-              </li>
+              >
+                FACEBOOK
+              </a>
+            </li>
 
               <li 
                 className="flex gap-2 justify-center text-white"
                 data-cy="phone-contact"
               >
                 <PhoneIcon className="text-white" />
-                0917-895-8825
-              </li>
+              0917-895-8825
+            </li>
               
               <li 
                 className="flex gap-2 justify-center"
                 data-cy="instagram-link"
               >
                 <InstagramIcon fill="#FFFFFF" />
-                <a
-                  href="https://www.instagram.com/beautoxnewmanila/"
-                  target="_blank"
-                  rel="noreferrer"
+              <a
+                href="https://www.instagram.com/beautoxnewmanila/"
+                target="_blank"
+                rel="noreferrer"
                   className="text-white hover:text-white/80 transition-colors"
-                >
-                  INSTAGRAM
-                </a>
-              </li>
+              >
+                INSTAGRAM
+              </a>
+            </li>
               
               <li 
                 className="flex gap-2 justify-center text-white"
                 data-cy="email-contact"
               >
                 <EmailIcon className="text-white" />
-                beautoxph@gmail.com
-              </li>
-            </ul>
+              beautoxph@gmail.com
+            </li>
+          </ul>
             <h3 
               className="w-full lg:w-1/2 text-2xl sm:text-3xl text-center lg:text-end font-bold text-white"
               data-cy="find-us-title"
             >
-              WANT TO LEARN MORE ABOUT US? CONTACT US HERE
-            </h3>
+            WANT TO LEARN MORE ABOUT US? CONTACT US HERE
+          </h3>
           </div>
         </section>
 
-        {/* Schedule Appointment Modal */}
-        <ScheduleAppointmentModal
-          isOpen={isScheduleModalOpen}
-          onClose={() => setIsScheduleModalOpen(false)}
+      {/* Schedule Appointment Modal */}
+      <ScheduleAppointmentModal
+        isOpen={isScheduleModalOpen}
+        onClose={() => setIsScheduleModalOpen(false)}
           data-cy="schedule-appointment-modal"
-        />
+      />
       </div>
     </div>
   );
