@@ -60,7 +60,7 @@ function StaffServices() {
       data-cy="staff-services-container"
     >
       <h4
-        className="text-[2rem] leading-[44.8px] font-semibold"
+        className="text-[2rem] leading-[44.8px] font-semibold dark:text-customNeutral-100"
         data-cy="staff-services-title"
       >
         STAFF SERVICES

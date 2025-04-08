@@ -86,10 +86,10 @@ const MonthlyBookingPanel = ({
                     className={`p-2 align-top w-1/7 h-32 ${
                       // Ensure all cells have the same height
                       !day
-                        ? "bg-gray-100"
+                        ? "bg-gray-100 dark:bg-customNeutral-600"
                         : isCurrentDay
-                        ? "bg-lavender-50 border-2 border-lavender-500 shadow-md"
-                        : "bg-white"
+                        ? "border-2 border-lavender-500 dark:border-lavender-100 dark:bg-customNeutral-400 shadow-md"
+                        : "bg-white dark:bg-customNeutral-400"
                     } ${
                       day && day.getMonth() !== currentMonth
                         ? "text-gray-400"
@@ -103,11 +103,11 @@ const MonthlyBookingPanel = ({
                         {/* Flex container for TODAY label and date number */}
                         <div className="flex justify-between items-center">
                           {isCurrentDay && (
-                            <span className="text-lavender-400 text-xs font-semibold">
+                            <span className="text-lavender-400 dark:text-white text-xs font-semibold">
                               TODAY
                             </span>
                           )}
-                          <span className="text-right font-semibold">
+                          <span className="text-right font-semibold dark:text-white">
                             {day.getDate()}
                           </span>
                         </div>

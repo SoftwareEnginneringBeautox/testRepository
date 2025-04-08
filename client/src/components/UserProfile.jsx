@@ -2,8 +2,10 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import UserIcon from "@/assets/icons/UserIcon";
+import { useTheme } from "@/components/ThemeProvider";
 
 const UserProfile = () => {
+  const { theme } = useTheme();
   const [userName, setUserName] = useState(
     localStorage.getItem("username") || ""
   );
@@ -42,10 +44,19 @@ const UserProfile = () => {
   return (
     <div className="flex items-center justify-end gap-2 p-3 bg-transparent">
       <div className="text-right">
-        <h6 className="text-base font-semibold">{userName.toUpperCase()}</h6>
+        <h6 className="text-base font-semibold dark:text-customNeutral-100">
+          {userName.toUpperCase()}
+        </h6>
         <p className="text-xs text-gray-600">{userRole?.toUpperCase()}</p>
       </div>
-      {isIconVisible && <UserIcon size={36} className="h-full" />}
+      {isIconVisible && (
+        <UserIcon
+          size={36}
+          className={`h-full ${
+            theme === "dark" ? "text-customNeutral-100" : "text-gray-600"
+          }`}
+        />
+      )}
     </div>
   );
 };

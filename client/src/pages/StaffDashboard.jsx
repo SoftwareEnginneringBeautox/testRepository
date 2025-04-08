@@ -6,10 +6,8 @@ import { format } from "date-fns";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
-import SalesChart from "../components/SalesChart";
-import PlusIcon from "../assets/icons/PlusIcon";
+import { Loader } from "@/components/ui/Loader";
 import UserIcon from "../assets/icons/UserIcon";
-import UserAdminIcon from "../assets/icons/UserAdminIcon";
 
 import {
   Table,
@@ -47,7 +45,7 @@ function StaffDashboard() {
       const response = await axios.get(`${API_BASE_URL}/getusers`, {
         withCredentials: true
       });
-      
+
       const data = response.data;
       const filteredStaff = data.filter(
         (user) =>
@@ -98,12 +96,12 @@ function StaffDashboard() {
     const today = new Date();
     const tomorrow = new Date(today);
     const dayAfterTomorrow = new Date(today);
-  
+
     tomorrow.setDate(today.getDate() + 1);
     dayAfterTomorrow.setDate(today.getDate() + 2);
 
     const formatDate = (date) => date.toISOString().split("T")[0];
-  
+
     try {
       const res = await axios.get(`${API_BASE_URL}/api/appointments`, {
         withCredentials: true
@@ -118,7 +116,7 @@ function StaffDashboard() {
           sessionDate === formatDate(dayAfterTomorrow)
         );
       });
-      
+
       setReminders(filtered);
     } catch (error) {
       console.error("Error fetching reminders:", error);
@@ -130,13 +128,13 @@ function StaffDashboard() {
     const today = new Date();
     const tomorrow = new Date();
     const dayAfterTomorrow = new Date();
-  
+
     tomorrow.setDate(today.getDate() + 1);
     dayAfterTomorrow.setDate(today.getDate() + 2);
-  
+
     const format = (date) => date.toISOString().split("T")[0];
     const sessionDate = sessionDateStr.slice(0, 10);
-  
+
     if (sessionDate === format(today)) return "Today";
     if (sessionDate === format(tomorrow)) return "Tomorrow";
     if (sessionDate === format(dayAfterTomorrow)) return "Day After Tomorrow";
@@ -227,7 +225,7 @@ function StaffDashboard() {
             WELCOME BACK, {userName.toUpperCase()}
           </h2>
         </div>
-        
+
         {/* Reminders Table */}
         <div className="overflow-x-auto">
           <Table className="min-w-full">
@@ -242,14 +240,25 @@ function StaffDashboard() {
               <TableRow>
                 {reminders.length > 0 ? (
                   reminders.map((item, index) => (
-                    <TableCell key={index} className="flex items-center gap-2 sm:gap-4 text-sm sm:text-base">
+                    <TableCell
+                      key={index}
+                      className="flex items-center gap-2 sm:gap-4 text-sm sm:text-base"
+                    >
                       <CalendarIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                       <span>
                         {item.full_name} has an appointment on{" "}
-                        <strong>{format(new Date(item.date_of_session), "MMMM dd, yyyy")}</strong>{" "}
+                        <strong>
+                          {format(
+                            new Date(item.date_of_session),
+                            "MMMM dd, yyyy"
+                          )}
+                        </strong>{" "}
                         at{" "}
                         <strong>
-                          {format(new Date(`1970-01-01T${item.time_of_session}`), "hh:mm a")}
+                          {format(
+                            new Date(`1970-01-01T${item.time_of_session}`),
+                            "hh:mm a"
+                          )}
                         </strong>
                       </span>
                       {getReminderLabel(item.date_of_session) && (
@@ -269,7 +278,7 @@ function StaffDashboard() {
             </TableBody>
           </Table>
         </div>
-        
+
         {/* Treatments Table */}
         <div className="overflow-x-auto">
           <Table className="min-w-full">
@@ -303,7 +312,11 @@ function StaffDashboard() {
                       ₱{treatment.price}
                     </TableCell>
                     <TableCell className="text-center">
-                      {treatment.expiration ? `${treatment.expiration} week${treatment.expiration > 1 ? "s" : ""}` : "-"}
+                      {treatment.expiration
+                        ? `${treatment.expiration} week${
+                            treatment.expiration > 1 ? "s" : ""
+                          }`
+                        : "-"}
                     </TableCell>
                   </TableRow>
                 ))
@@ -317,7 +330,7 @@ function StaffDashboard() {
             </TableBody>
           </Table>
         </div>
-        
+
         {/* Packages Table */}
         <div className="overflow-x-auto">
           <Table className="min-w-full">
@@ -347,9 +360,7 @@ function StaffDashboard() {
               {packagesData.length > 0 ? (
                 packagesData.map((pkg) => (
                   <TableRow key={pkg.id}>
-                    <TableCell className="text-center">
-                      {pkg.id}
-                    </TableCell>
+                    <TableCell className="text-center">{pkg.id}</TableCell>
                     <TableCell className="text-center">
                       {pkg.package_name}
                     </TableCell>
@@ -367,7 +378,10 @@ function StaffDashboard() {
                                 + {treatment.treatment_name}
                               </Badge>
                             ) : (
-                              <span key={id} className="text-red-500 text-sm italic">
+                              <span
+                                key={id}
+                                className="text-error-400 text-sm italic"
+                              >
                                 Not found: {id}
                               </span>
                             );
@@ -382,11 +396,13 @@ function StaffDashboard() {
                     <TableCell className="text-center">
                       {pkg.sessions}
                     </TableCell>
+                    <TableCell className="text-center">₱{pkg.price}</TableCell>
                     <TableCell className="text-center">
-                      ₱{pkg.price}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      {pkg.expiration ? `${pkg.expiration} week${pkg.expiration > 1 ? "s" : ""}` : "-"}
+                      {pkg.expiration
+                        ? `${pkg.expiration} week${
+                            pkg.expiration > 1 ? "s" : ""
+                          }`
+                        : "-"}
                     </TableCell>
                   </TableRow>
                 ))
@@ -403,23 +419,22 @@ function StaffDashboard() {
       </div>
 
       {/* Right Section - Staff List */}
-      <div className="w-full lg:w-1/4 shadow-custom p-4 sm:p-6 md:p-8 lg:p-10 bg-ash-100 rounded-lg flex flex-col items-center gap-3 sm:gap-4 mt-4 lg:mt-0">
-        <h3 className="flex items-center gap-2 text-lg sm:text-xl md:text-2xl lg:text-[2rem] leading-tight sm:leading-[2.8rem] font-semibold">
-          <UserIcon size={24} className="sm:w-8 sm:h-8" />
+      <div className="w-full lg:w-1/4 shadow-custom p-4 sm:p-6 md:p-8 lg:p-10 bg-ash-100 dark:bg-customNeutral-500 rounded-lg flex flex-col items-center gap-3 sm:gap-4 mt-4 lg:mt-0">
+        <h3 className="flex items-center gap-2 text-lg sm:text-xl md:text-2xl lg:text-[2rem] leading-tight sm:leading-[2.8rem] font-semibold dark:text-customNeutral-100">
+          <UserIcon
+            size={24}
+            className="sm:w-8 sm:h-8 dark:text-customNeutral-100"
+          />
           STAFF LIST
         </h3>
         {loadingStaff ? (
-          <p className="text-sm sm:text-base">
-            Loading staff...
-          </p>
+          <div className="w-full my-6" data-cy="loading-staff-message">
+            <Loader />
+          </div>
         ) : errorStaff ? (
-          <p className="text-red-500 text-sm sm:text-base">
-            {errorStaff}
-          </p>
+          <p className="text-error-400 text-sm sm:text-base">{errorStaff}</p>
         ) : staffList.length === 0 ? (
-          <p className="text-sm sm:text-base">
-            No staff found.
-          </p>
+          <p className="text-sm sm:text-base">No staff found.</p>
         ) : (
           <div className="w-full max-h-[300px] sm:max-h-[400px] overflow-y-auto">
             {staffList.map((staff, index) => (
@@ -428,7 +443,7 @@ function StaffDashboard() {
                 className="w-full flex justify-between border-2 border-reflexBlue-400 px-3 sm:px-4 py-2 sm:py-3 rounded-md mb-2"
               >
                 <div className="flex flex-col">
-                  <span className="font-semibold text-sm sm:text-base">
+                  <span className="font-semibold text-sm sm:text-base dark:text-customNeutral-100">
                     {staff.username}
                   </span>
                   {(staff.role === "receptionist" ||

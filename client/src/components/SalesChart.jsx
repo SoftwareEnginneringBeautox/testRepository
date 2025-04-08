@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTheme } from "@/components/ThemeProvider";
 import TrendUpIcon from "@/assets/icons/TrendUpIcon";
 import TrendDownIcon from "@/assets/icons/TrendDownIcon";
 import { Loader } from "@/components/ui/Loader";
+
 import {
   Area,
   AreaChart,
@@ -59,10 +61,12 @@ const calculatePercentageChange = (salesData) => {
 };
 
 const SalesChart = ({ chartConfig }) => {
+  const { theme } = useTheme();
+
   // Initialize with default chart config if not provided
   const config = chartConfig || {
     currentWeek: { color: "#4CAF50" },
-    previousWeek: { color: "#FF9800" }
+    previousWeek: { color: theme === "dark" ? "#F0D6F6" : "#FF9800" }
   };
 
   // State for sales data and date filtering
@@ -192,7 +196,7 @@ const SalesChart = ({ chartConfig }) => {
 
         {error && (
           <div
-            className="p-2 mb-4 bg-red-100 text-red-700 rounded"
+            className="p-2 mb-4 bg-red-100 text-error-400 rounded"
             data-cy="error-message"
           >
             Error: {error}. Showing sample data instead.
@@ -218,7 +222,9 @@ const SalesChart = ({ chartConfig }) => {
                   <AreaChart
                     data={salesData}
                     margin={{ left: 8, right: 8, top: 20, bottom: 20 }}
-                    style={{ backgroundColor: "#F5F3F0" }}
+                    style={{
+                      backgroundColor: "bg-ash-100 dark:bg-transparent"
+                    }}
                     data-cy="area-chart"
                   >
                     <CartesianGrid
@@ -334,15 +340,15 @@ const SalesChart = ({ chartConfig }) => {
                 <>
                   Current week down by {Math.abs(percentageChange)}%
                   <TrendDownIcon
-                    className="h-4 w-4 text-red-500"
-                    fill="#ef4444"
+                    className="h-4 w-4 error-400"
+                    fill="#E74C3C"
                     data-cy="trend-down-icon"
                   />
                 </>
               )}
             </div>
             <div
-              className="flex items-center gap-2 leading-none text-customNeutral-300"
+              className="flex items-center gap-2 leading-none text-customNeutral-200"
               data-cy="date-range-label"
             >
               {dateRangeLabel}

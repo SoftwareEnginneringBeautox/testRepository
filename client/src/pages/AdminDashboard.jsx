@@ -10,6 +10,7 @@ import SalesChart from "../components/SalesChart";
 import PlusIcon from "../assets/icons/PlusIcon";
 import UserIcon from "../assets/icons/UserIcon";
 import UserAdminIcon from "../assets/icons/UserAdminIcon";
+import { Loader } from "@/components/ui/Loader";
 import {
   AlertContainer,
   AlertDescription,
@@ -468,7 +469,7 @@ function AdministratorDashboard() {
                 </TableRow>
               ) : appointmentError ? (
                 <TableRow>
-                  <TableCell className="text-red-500">
+                  <TableCell className="text-error-400">
                     {appointmentError}
                   </TableCell>
                 </TableRow>
@@ -560,23 +561,26 @@ function AdministratorDashboard() {
 
       {/* Right Section */}
       <div
-        className="w-full lg:w-1/4 shadow-custom p-4 sm:p-6 md:p-8 lg:p-10 bg-ash-100 rounded-lg flex flex-col items-center gap-3 sm:gap-4 mt-4 lg:mt-0"
+        className="w-full lg:w-1/4 shadow-custom p-4 sm:p-6 md:p-8 lg:p-10 bg-ash-100 dark:bg-customNeutral-500 rounded-lg flex flex-col items-center gap-3 sm:gap-4 mt-4 lg:mt-0"
         data-cy="staff-section"
       >
         <h3
-          className="flex items-center gap-2 text-lg sm:text-xl md:text-2xl lg:text-[2rem] leading-tight sm:leading-[2.8rem] font-semibold"
+          className="flex items-center gap-2 text-lg sm:text-xl md:text-2xl lg:text-[2rem] leading-tight sm:leading-[2.8rem] font-semibold dark:text-customNeutral-100"
           data-cy="staff-list-title"
         >
-          <UserIcon size={24} className="sm:w-8 sm:h-8" data-cy="staff-icon" />
+          <UserIcon
+            className="sm:w-8 sm:h-8 dark:text-customNeutral-100"
+            data-cy="staff-icon"
+          />
           STAFF LIST
         </h3>
         {loadingStaff ? (
-          <p className="text-sm sm:text-base" data-cy="loading-staff-message">
-            Loading staff...
-          </p>
+          <div className="w-full my-6" data-cy="loading-staff-message">
+            <Loader />
+          </div>
         ) : errorStaff ? (
           <p
-            className="text-red-500 text-sm sm:text-base"
+            className="text-error-400 text-sm sm:text-base"
             data-cy="staff-error-message"
           >
             {errorStaff}
@@ -596,9 +600,9 @@ function AdministratorDashboard() {
                 className="w-full flex justify-between border-2 border-reflexBlue-400 px-3 sm:px-4 py-2 sm:py-3 rounded-md mb-2"
                 data-cy={`staff-card-${index}`}
               >
-                <div className="flex flex-col" data-cy={`staff-info-${index}`}>
+                <div className="flex flex-col " data-cy={`staff-info-${index}`}>
                   <span
-                    className="font-semibold text-sm sm:text-base"
+                    className="font-semibold text-sm sm:text-base dark:text-customNeutral-100"
                     data-cy={`staff-name-${index}`}
                   >
                     {staff.username}
@@ -617,7 +621,7 @@ function AdministratorDashboard() {
                   <DropdownMenuTrigger
                     data-cy={`staff-actions-trigger-${index}`}
                   >
-                    <EllipsisIcon className="w-5 h-5 sm:w-6 sm:h-6" />
+                    <EllipsisIcon className="w-5 h-5 sm:w-6 sm:h-6 dark:text-customNeutral-100" />
                   </DropdownMenuTrigger>
                   <DropdownMenuContent
                     data-cy={`staff-actions-content-${index}`}

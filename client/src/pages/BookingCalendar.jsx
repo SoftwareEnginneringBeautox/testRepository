@@ -307,7 +307,7 @@ function BookingCalendar() {
       data-cy="booking-calendar-container"
     >
       <h3
-        className="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl leading-tight sm:leading-[3.75rem] font-semibold my-2 sm:my-3 md:my-4 w-full md:w-[90%]"
+        className="text-lg dark:text-customNeutral-100 sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl leading-tight sm:leading-[3.75rem] font-semibold my-2 sm:my-3 md:my-4 w-full md:w-[90%]"
         data-cy="booking-calendar-title"
       >
         BOOKING CALENDAR
@@ -315,7 +315,7 @@ function BookingCalendar() {
       <div
         data-cy="calendar-view"
         id="booking-container"
-        className="flex flex-col shadow-custom items-center rounded-lg p-2 sm:p-3 md:p-4 lg:p-6 bg-ash-100 w-full md:w-[90%] mb-3 sm:mb-4 md:mb-6 lg:mb-8"
+        className="flex flex-col shadow-custom items-center rounded-lg p-2 sm:p-3 md:p-4 lg:p-6 bg-ash-100 dark:bg-customNeutral-500 w-full md:w-[90%] mb-3 sm:mb-4 md:mb-6 lg:mb-8"
       >
         {/* Header Section */}
         <div
@@ -328,7 +328,7 @@ function BookingCalendar() {
           >
             <button
               data-cy="previous-month-btn"
-              className="border border-transparent p-1 rounded hover:border-lavender-400 text-lavender-400"
+              className="border border-transparent p-1 rounded hover:border-lavender-400 text-lavender-400 dark:hover:border-lavender-100 dark:text-lavender-100"
               onClick={handlePrevious}
               aria-label="Previous"
             >
@@ -339,13 +339,13 @@ function BookingCalendar() {
             </button>
             <h2
               data-cy="calendar-month-label"
-              className="text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl font-semibold"
+              className="text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl font-semibold dark:text-customNeutral-100"
             >
               {currentDate.toLocaleString("default", { month: "long" })} {year}
             </h2>
             <button
               data-cy="next-month-btn"
-              className="border border-transparent p-1 rounded hover:border-lavender-400 text-lavender-400"
+              className="border border-transparent p-1 rounded hover:border-lavender-400 text-lavender-400 dark:hover:border-lavender-100 dark:text-lavender-100"
               onClick={handleNext}
               aria-label="Next"
             >
@@ -367,8 +367,8 @@ function BookingCalendar() {
               <button
                 data-cy="calendar-view-monthly"
                 onClick={() => setView("monthly")}
-                className={`relative inline-block px-1 sm:px-2 py-1 font-semibold overflow-hidden group ${
-                  view === "monthly" ? "text-lavender-500" : ""
+                className={`relative dark:text-customNeutral-100 inline-block px-1 sm:px-2 py-1 font-semibold overflow-hidden group ${
+                  view === "monthly" ? "text-lavender-500 " : ""
                 }`}
               >
                 <span
@@ -377,7 +377,7 @@ function BookingCalendar() {
                 >
                   MONTHLY
                 </span>
-                <span className="sm:hidden" data-cy="monthly-view-text-short">
+                <span className="sm:hidden " data-cy="monthly-view-text-short">
                   MONTH
                 </span>
                 <span
@@ -391,8 +391,10 @@ function BookingCalendar() {
               <button
                 data-cy="calendar-view-weekly"
                 onClick={() => setView("weekly")}
-                className={`relative inline-block px-1 sm:px-2 py-1 font-semibold overflow-hidden group ${
-                  view === "weekly" ? "text-lavender-500" : ""
+                className={`relative dark:text-customNeutral-100 inline-block px-1 sm:px-2 py-1 font-semibold overflow-hidden group ${
+                  view === "weekly"
+                    ? "text-lavender-500 dark:text-customNeutral-100"
+                    : ""
                 }`}
               >
                 <span
@@ -476,7 +478,7 @@ function BookingCalendar() {
           ) : view === "monthly" ? (
             <div
               data-cy="monthly-calendar-view"
-              className="w-full overflow-x-auto"
+              className="w-full overflow-x-auto "
             >
               <MonthlyBookingPanel
                 calendarDays={calendar}

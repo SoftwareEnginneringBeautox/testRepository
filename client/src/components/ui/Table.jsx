@@ -1,5 +1,6 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
+import { useEffect } from "react";
 
 import {
   Pagination,
@@ -29,7 +30,7 @@ const Table = React.forwardRef(
     const [rowCount, setRowCount] = React.useState(0);
 
     // Count logic for row background
-    React.useEffect(() => {
+    useEffect(() => {
       // Find TableBody in children and count its direct tr children
       React.Children.forEach(children, (child) => {
         if (child?.type?.displayName === "TableBody") {
@@ -48,7 +49,9 @@ const Table = React.forwardRef(
     }, [children]);
 
     const scrollbarBgClass =
-      rowCount % 2 === 0 ? "bg-faintingLight-100" : "bg-reflexBlue-100";
+      rowCount % 2 === 0
+        ? "bg-faintingLight-100 dark:bg-customNeutral-500"
+        : "bg-reflexBlue-100 dark:bg-customNeutral-400";
 
     // Function to handle pagination
     const paginate = (pageNumber) => {
@@ -216,7 +219,10 @@ Table.displayName = "Table";
 const TableHeader = React.forwardRef(({ className, ...props }, ref) => (
   <thead
     ref={ref}
-    className={cn("border-b bg-lavender-400", className)}
+    className={cn(
+      "border-b bg-lavender-400 dark:border-customNeutral-300",
+      className
+    )}
     {...props}
   />
 ));
@@ -226,7 +232,7 @@ const TableBody = React.forwardRef(({ className, ...props }, ref) => (
   <tbody
     ref={ref}
     className={cn(
-      "[&_tr:last-child]:border-0 text-[var(--table-text)]",
+      "[&_tr:last-child]:border-0 text-customNeutral-600 dark:text-customNeutral-200",
       className
     )}
     {...props}
@@ -238,7 +244,7 @@ const TableFooter = React.forwardRef(({ className, ...props }, ref) => (
   <tfoot
     ref={ref}
     className={cn(
-      "border-t bg-muted/50 font-medium [&>tr]:last:border-b-0 text-[var(--table-text)]",
+      "border-t bg-muted/50 font-medium [&>tr]:last:border-b-0 text-customNeutral-600 dark:text-customNeutral-200",
       className
     )}
     {...props}
@@ -250,7 +256,7 @@ const TableRow = React.forwardRef(({ className, ...props }, ref) => (
   <tr
     ref={ref}
     className={cn(
-      "border-b transition-colors hover:bg-muted/50 odd:bg-reflexBlue-100 even:bg-faintingLight-100",
+      "border-b transition-colors odd:bg-reflexBlue-100 dark:odd:bg-customNeutral-400 even:bg-faintingLight-100 dark:even:bg-customNeutral-500 dark:border-customNeutral-300",
       className
     )}
     {...props}
@@ -262,7 +268,7 @@ const TableHead = React.forwardRef(({ className, ...props }, ref) => (
   <th
     ref={ref}
     className={cn(
-      "h-12 px-4 py-4 align-middle font-semibold text-xl bg-lavender-400 text-customNeutral-100",
+      "h-12 px-4 py-4 align-middle font-semibold text-xl bg-lavender-400 text-customNeutral-100 dark:bg-customNeutral-500 dark:text-customNeutral-100",
       className
     )}
     {...props}
@@ -273,7 +279,10 @@ TableHead.displayName = "TableHead";
 const TableCell = React.forwardRef(({ className, ...props }, ref) => (
   <td
     ref={ref}
-    className={cn("p-4 align-middle text-[var(--table-text)]", className)}
+    className={cn(
+      "p-4 align-middle text-customNeutral-600 dark:text-customNeutral-100",
+      className
+    )}
     {...props}
   />
 ));
@@ -283,7 +292,7 @@ const TableCaption = React.forwardRef(({ className, ...props }, ref) => (
   <caption
     ref={ref}
     className={cn(
-      "mt-4 text-sm text-muted-foreground text-[var(--table-text)]",
+      "mt-4 text-sm text-customNeutral-600 dark:text-customNeutral-100",
       className
     )}
     {...props}

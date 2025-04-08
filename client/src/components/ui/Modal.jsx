@@ -13,7 +13,7 @@ const ModalContainer = React.forwardRef(
 
       <div
         className={cn(
-          "relative z-50 bg-ash-100 p-8 rounded-lg shadow-lg min-w-[40%] max-h-[90vh] overflow-y-auto",
+          "relative z-50 bg-ash-100 dark:bg-customNeutral-400 p-8 rounded-lg shadow-lg min-w-[40%] max-h-[90vh] overflow-y-auto",
           // Scrollbar-specific styling
           "[&::-webkit-scrollbar]:w-2",
           "[&::-webkit-scrollbar-thumb]:bg-gray-400",
@@ -50,7 +50,10 @@ ModalIcon.displayName = "ModalIcon";
 const ModalTitle = React.forwardRef(({ className, ...props }, ref) => (
   <h4
     ref={ref}
-    className={cn("text-[2rem] leading-[2.8rem] font-semibold", className)}
+    className={cn(
+      "text-[2rem] leading-[2.8rem] font-semibold dark:text-customNeutral-100",
+      className
+    )}
     {...props}
   />
 ));
@@ -59,7 +62,10 @@ ModalTitle.displayName = "ModalTitle";
 const ModalHeader = React.forwardRef(
   ({ className, children, ...props }, ref) => (
     <div
-      className={cn("flex items-center gap-4 mb-4", className)}
+      className={cn(
+        "flex items-center gap-4 mb-4 dark:text-customNeutral-100",
+        className
+      )}
       ref={ref}
       {...props}
     >
@@ -70,7 +76,11 @@ const ModalHeader = React.forwardRef(
 ModalHeader.displayName = "ModalHeader";
 
 const ModalBody = React.forwardRef(({ className, ...props }, ref) => (
-  <div ref={ref} className={cn("mt-4", className)} {...props} />
+  <div
+    ref={ref}
+    className={cn("mt-4 dark:text-customNeutral-100", className)}
+    {...props}
+  />
 ));
 ModalBody.displayName = "ModalBody";
 

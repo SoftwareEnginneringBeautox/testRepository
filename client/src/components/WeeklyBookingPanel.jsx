@@ -78,7 +78,7 @@ const WeeklyBookingPanel = ({ events = [], currentDate }) => {
         >
           <tr>
             <th
-              className="w-16 sm:w-20 md:w-24 bg-ash-100"
+              className="w-16 sm:w-20 md:w-24 bg-ash-100 dark:bg-customNeutral-500"
               data-cy="time-column-header"
             ></th>
             {days.map((day, idx) => (
@@ -167,7 +167,7 @@ const WeeklyBookingPanel = ({ events = [], currentDate }) => {
                   return (
                     <button
                       key={idx}
-                      className="absolute left-1 right-1 bg-lavender-400 text-white rounded-md p-1 sm:p-2 md:p-2.5 shadow-lg focus:outline-none text-left flex flex-col justify-end"
+                      className="absolute shadow-custom left-1 right-1 bg-lavender-400 text-white rounded-md p-1 sm:p-2 md:p-2.5 focus:outline-none text-left flex flex-col justify-end"
                       style={{ top, height }}
                       onClick={() => handleOpenModal(event)}
                       data-cy={`event-${event.id}`}

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useTheme } from "../ThemeProvider";
 
 // LoaderWrapper component that can contain the Loader and optional text
 const LoaderWrapper = ({
@@ -19,12 +20,14 @@ const LoaderWrapper = ({
 
 const Loader = ({
   size = 100,
-  fill = "#381B4C",
   className = "",
   duration = 2000,
   text = "LOADING",
   showText = true
 }) => {
+  const { theme } = useTheme();
+  const fill = theme === "dark" ? "#F0D6F6" : "#381B4C";
+
   const height = (size * 86) / 100;
   const [progress, setProgress] = useState(0);
 

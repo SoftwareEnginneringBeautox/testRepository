@@ -48,7 +48,7 @@ export default function Layout() {
 
       <main
         className={cn(
-          "w-dvw h-screen flex flex-col overflow-y-auto ",
+          "w-dvw h-screen flex flex-col overflow-y-auto  dark:bg-customNeutral-700 dark:text:customNeutral-100",
           "[&::-webkit-scrollbar]:w-2.5",
           "[&::-webkit-scrollbar-thumb]:bg-gray-400",
           "[&::-webkit-scrollbar-thumb]:rounded-full",

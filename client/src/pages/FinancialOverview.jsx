@@ -681,13 +681,13 @@ function FinancialOverview() {
       {/* Header */}
       <div data-cy="financial-overview-header">
         <h1
-          className="text-[28px] md:text-[40px] leading-[1.4] md:leading-[56px] font-bold"
+          className="text-[28px] md:text-[40px] leading-[1.4] md:leading-[56px] font-bold dark:text-customNeutral-100"
           data-cy="financial-overview-title"
         >
           FINANCIAL OVERVIEW
         </h1>
         <p
-          className="text-sm md:text-base"
+          className="text-sm md:text-base dark:text-customNeutral-200"
           data-cy="financial-overview-subtitle"
         >
           Summary of finances within Beautox
@@ -696,7 +696,7 @@ function FinancialOverview() {
 
       {/* Sales Tracker Section */}
       <h2
-        className="font-bold text-xl md:text-[2rem]"
+        className="font-bold text-xl md:text-[2rem] dark:text-customNeutral-100"
         data-cy="sales-tracker-title"
       >
         SALES TRACKER
@@ -942,7 +942,7 @@ function FinancialOverview() {
 
       {/* Monthly Expenses Tracker Section */}
       <h2
-        className="font-bold text-xl md:text-[2rem]"
+        className="font-bold text-xl md:text-[2rem] dark:text-customNeutral-100"
         data-cy="monthly-expenses-title"
       >
         MONTHLY EXPENSES TRACKER
@@ -1247,10 +1247,10 @@ function FinancialOverview() {
         </div>
 
         <div
-          className="w-full rounded-lg p-4 border-2 border-lavender-400 text-center"
+          className="w-full rounded-lg p-4 border-2 border-lavender-400 dark:border-lavender-100 text-center"
           data-cy="total-profit-container"
         >
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4 dark:text-customNeutral-100">
             <div className="text-lg md:text-xl leading-normal">
               TOTAL SALES:{" "}
               <span className="font-bold" data-cy="total-sales-amount">
@@ -1278,8 +1278,8 @@ function FinancialOverview() {
           <div className="text-xl md:text-3xl leading-normal md:leading-[67.2px]">
             {financialData.netIncome < 0 ? "TOTAL LOSS: " : "TOTAL PROFIT: "}
             <span
-              className={`font-bold ${
-                financialData.netIncome < 0 ? "text-red-500" : ""
+              className={`font-bold dark:text-customNeutral-100 ${
+                financialData.netIncome < 0 ? "text-error-400" : ""
               }`}
               data-cy="total-profit-amount"
             >
@@ -1295,14 +1295,6 @@ function FinancialOverview() {
           className="w-full flex flex-col md:flex-row justify-end gap-4 mb-[10%]"
           data-cy="bottom-actions"
         >
-          <Button
-            variant="outline"
-            className="w-full md:w-auto"
-            data-cy="return-btn"
-          >
-            <ChevronLeftIcon />
-            RETURN
-          </Button>
           <Button
             onClick={() => openModal("createMonthlyExpense")}
             className="w-full md:w-auto"

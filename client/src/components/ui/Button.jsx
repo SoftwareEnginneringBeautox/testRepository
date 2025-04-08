@@ -13,7 +13,7 @@ const buttonVariants = cva(
         callToAction:
           "bg-lavender-400 text-customNeutral-100 hover:bg-lavender-500 active:bg-lavender-200 active:text-lavender-500 active:border-lavender-200",
         outline:
-          "border-2 border-lavender-400 text-lavender-400 hover:bg-lavender-100 hover:border-lavender-100 active:bg-lavender-200 active:text-customNeutral-100 active:border-lavender-200"
+          "border-2 border-lavender-400 text-lavender-400 hover:bg-lavender-100 hover:border-lavender-100 active:bg-lavender-200 active:text-customNeutral-100 active:border-lavender-200 dark:border-customNeutral-100 dark:text-customNeutral-100 dark:hover:text-lavender-400 dark:hover:border-lavender-100"
       },
       size: {
         default: "h-12 px-4 py-2",

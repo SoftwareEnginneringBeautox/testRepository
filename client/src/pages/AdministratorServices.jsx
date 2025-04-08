@@ -184,7 +184,7 @@ function AdministratorServices() {
       data-cy="admin-services-container"
     >
       <h4
-        className="text-[2rem] leading-[44.8px] font-semibold"
+        className="text-[2rem] leading-[44.8px] font-semibold dark:text-customNeutral-100"
         data-cy="admin-services-title"
       >
         ADMINISTRATOR SERVICES

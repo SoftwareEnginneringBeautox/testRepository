@@ -77,7 +77,7 @@ const Input = React.forwardRef(
       <input
         type={type}
         className={cn(
-          "flex-1 outline-none bg-inherit file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-neutral-950 placeholder:text-customNeutral-300 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
+          "flex-1 outline-none bg-inherit file:bg-transparent file:text-sm file:font-medium placeholder:text-customNeutral-300 disabled:cursor-not-allowed disabled:opacity-50 dark:file:textcutomNeutral-100 md:text-sm",
           fullWidth && "w-full",
           className
         )}
@@ -109,7 +109,7 @@ const InputAreaField = ({ children, className, fullWidth }) => {
   return (
     <div
       className={cn(
-        "flex bg-customNeutral-100 rounded-lg border-2 border-customNeutral-200 focus-within:border-lavender-400 dark:border-neutral-800 dark:bg-neutral-950 dark:ring-offset-neutral-950 dark:file:text-neutral-50 dark:placeholder:text-neutral-400 px-3 py-2",
+        "flex bg-customNeutral-100 rounded-lg border-2 border-customNeutral-200 focus-within:border-lavender-400 dark:text-customNeutral-100 dark:border-customNeutral-200  dark:bg-neutral-950 dark:file:text-neutral-50 dark:placeholder:text-neutral-400 px-3 py-2",
 
         fullWidth && "w-full",
         className

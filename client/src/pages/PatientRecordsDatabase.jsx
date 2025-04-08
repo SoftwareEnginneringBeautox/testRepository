@@ -668,7 +668,7 @@ function PatientRecordsDatabase() {
     >
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <h4
-          className="font-semibold text-xl md:text-[2rem] leading-normal md:leading-[2.8rem]"
+          className="font-semibold dark:text-customNeutral-100 text-xl md:text-[2rem] leading-normal md:leading-[2.8rem]"
           data-cy="patient-records-title"
         >
           PATIENT RECORDS
@@ -1063,14 +1063,6 @@ function PatientRecordsDatabase() {
         className="flex flex-col md:flex-row gap-4 justify-end"
         data-cy="patient-records-actions"
       >
-        <Button
-          variant="outline"
-          className="w-full md:w-auto"
-          data-cy="return-button"
-        >
-          <ChevronLeftIcon />
-          RETURN
-        </Button>
         <Button
           onClick={() => openModal("createEntry")}
           className="w-full md:w-auto"

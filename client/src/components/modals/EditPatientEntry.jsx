@@ -323,7 +323,7 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
             </InputContainer>
 
             {/* PACKAGE */}
-            <InputContainer>
+            {/* <InputContainer>
               <InputLabel>PACKAGE</InputLabel>
               <Select
                 value={originalData.package_name}
@@ -480,7 +480,7 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
                   </label>
                 </div>
               </RadioGroup>
-            </InputContainer>
+            </InputContainer> */}
           </div>
 
           <div className="flex flex-row w-full gap-4">

@@ -71,7 +71,6 @@ const SelectIcon = ({ children, className, variant }) => (
     {children}
   </div>
 );
-
 SelectIcon.displayName = "SelectIcon";
 
 const ModalSelectTrigger = React.forwardRef(
@@ -106,7 +105,7 @@ const ModalSelectContent = React.forwardRef(
       <SelectPrimitive.Content
         ref={ref}
         className={cn(
-          "relative z-50 max-h-[90vh] w-full min-w-[var(--radix-select-trigger-width)] overflow-y-auto rounded-md border bg-customNeutral-100 text-popover-foreground shadow-md text-sm",
+          "relative z-50 max-h-[90vh] w-full min-w-[var(--radix-select-trigger-width)] overflow-y-auto rounded-md border bg-customNeutral-100 dark:bg-customNeutral-400 dark:text-customNeutral-100 shadow-md text-sm",
           className
         )}
         position="popper"
@@ -162,7 +161,7 @@ const SelectContent = React.forwardRef(
       <SelectPrimitive.Content
         ref={ref}
         className={cn(
-          "relative z-50 max-h-96 w-full min-w-[var(--radix-select-trigger-width)] overflow-y-auto rounded-md border bg-customNeutral-100 text-popover-foreground shadow-md",
+          "relative z-50 max-h-96 w-full min-w-[var(--radix-select-trigger-width)] overflow-y-auto rounded-md border bg-customNeutral-100 dark:bg-customNeutral-400 dark:text-customNeutral-100 dark:border-transparent shadow-md",
           position === "popper" &&
             "data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1",
           variant === "modal" && "text-sm",
@@ -199,7 +198,7 @@ const SelectItem = React.forwardRef(
     <SelectPrimitive.Item
       ref={ref}
       className={cn(
-        "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 outline-none focus:bg-accent hover:bg-lavender-100 focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+        "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 outline-none focus:bg-accent hover:bg-lavender-100 dark:hover:text-lavender-400 focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
         className
       )}
       {...props}

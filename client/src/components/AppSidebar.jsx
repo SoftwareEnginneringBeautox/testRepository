@@ -89,7 +89,7 @@ export function AppSidebar({ ...props }) {
     ) {
       return false;
     }
-    
+
     // Hide FINANCIAL OVERVIEW from receptionist and aesthetician
     if (
       item.title === "FINANCIAL OVERVIEW" &&
@@ -97,7 +97,7 @@ export function AppSidebar({ ...props }) {
     ) {
       return false;
     }
-    
+
     return true;
   });
 
