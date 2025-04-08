@@ -55,7 +55,7 @@ const InputTextField = ({ children, className, fullWidth }) => {
   return (
     <div
       className={cn(
-        "flex items-center sm:gap-1 md:gap-2 h-12 bg-[var(--input-bg)] rounded-lg border-2 border-[var(--input-border)] focus-within:border-[var(--input-focus-border)] px-3",
+        "flex items-center sm:gap-1 md:gap-2 h-12 bg-customNeutral-100 rounded-lg border-2 border-customNeutral-200 focus-within:border-lavender-400 dark:border-neutral-800 dark:bg-neutral-950 dark:ring-offset-neutral-950 dark:file:text-neutral-50 dark:placeholder:text-neutral-400 px-3",
         fullWidth && "w-full",
         className
       )}
@@ -77,7 +77,7 @@ const Input = React.forwardRef(
       <input
         type={type}
         className={cn(
-          "flex-1 outline-none bg-inherit text-[var(--input-text)] file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-[var(--input-file-text)] placeholder:text-[var(--input-placeholder)] disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
+          "flex-1 outline-none bg-inherit file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-neutral-950 placeholder:text-customNeutral-300 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
           fullWidth && "w-full",
           className
         )}
@@ -95,7 +95,7 @@ const InputArea = React.forwardRef(
       ref={ref}
       rows={rows}
       className={cn(
-        "flex-1 outline-none bg-inherit text-[var(--input-text)] file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-[var(--input-file-text)] placeholder:text-[var(--input-placeholder)] disabled:cursor-not-allowed disabled:opacity-50 md:text-sm resize-none",
+        "flex-1 outline-none bg-inherit file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-neutral-950 placeholder:text-customNeutral-300 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm resize-none",
         fullWidth && "w-full",
         className
       )}
@@ -109,7 +109,8 @@ const InputAreaField = ({ children, className, fullWidth }) => {
   return (
     <div
       className={cn(
-        "flex bg-[var(--input-bg)] rounded-lg border-2 border-[var(--input-border)] focus-within:border-[var(--input-focus-border)] px-3 py-2",
+        "flex bg-customNeutral-100 rounded-lg border-2 border-customNeutral-200 focus-within:border-lavender-400 dark:border-neutral-800 dark:bg-neutral-950 dark:ring-offset-neutral-950 dark:file:text-neutral-50 dark:placeholder:text-neutral-400 px-3 py-2",
+
         fullWidth && "w-full",
         className
       )}

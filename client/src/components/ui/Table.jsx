@@ -47,6 +47,9 @@ const Table = React.forwardRef(
       });
     }, [children]);
 
+    const scrollbarBgClass =
+      rowCount % 2 === 0 ? "bg-faintingLight-100" : "bg-reflexBlue-100";
+
     // Function to handle pagination
     const paginate = (pageNumber) => {
       if (pageNumber > 0 && pageNumber <= totalPages && onPageChange) {
@@ -142,6 +145,8 @@ const Table = React.forwardRef(
             className={cn(
               "w-full overflow-x-auto",
               "pb-8", // Increased padding to ensure space for the scrollbar
+              scrollbarBgClass,
+
               className
             )}
             style={{
@@ -170,7 +175,9 @@ const Table = React.forwardRef(
 
         {/* Pagination outside the scroll container with matching background color */}
         {showPagination && (
-          <div className={cn("w-full flex justify-center py-2")}>
+          <div
+            className={cn("w-full flex justify-center py-2", scrollbarBgClass)}
+          >
             <Pagination>
               <PaginationContent>
                 <PaginationItem>
@@ -209,10 +216,7 @@ Table.displayName = "Table";
 const TableHeader = React.forwardRef(({ className, ...props }, ref) => (
   <thead
     ref={ref}
-    className={cn(
-      "border-b bg-[var(--table-header-bg)] text-[var(--table-text)]",
-      className
-    )}
+    className={cn("border-b bg-lavender-400", className)}
     {...props}
   />
 ));
@@ -246,7 +250,7 @@ const TableRow = React.forwardRef(({ className, ...props }, ref) => (
   <tr
     ref={ref}
     className={cn(
-      "border-b transition-colors text-[var(--table-text)]",
+      "border-b transition-colors hover:bg-muted/50 odd:bg-reflexBlue-100 even:bg-faintingLight-100",
       className
     )}
     {...props}
@@ -258,7 +262,7 @@ const TableHead = React.forwardRef(({ className, ...props }, ref) => (
   <th
     ref={ref}
     className={cn(
-      "h-12 px-4 py-4 align-middle font-semibold text-xl bg-[var(--table-head-bg)] text-[var(--table-text)]",
+      "h-12 px-4 py-4 align-middle font-semibold text-xl bg-lavender-400 text-customNeutral-100",
       className
     )}
     {...props}
