@@ -9,7 +9,8 @@ import {
 } from "@/components/ui/Sidebar";
 import LogoutIcon from "@/assets/icons/LogoutIcon";
 import ForgotPassword from "@/components/modals/ForgotPassword";
-import ContrastIcon from "@/assets/icons/ContrastIcon";
+import LightIcon from "@/assets/icons/LightIcon";
+import DarkIcon from "@/assets/icons/DarkIcon";
 import { useTheme } from "@/components/ThemeProvider";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
@@ -93,10 +94,10 @@ export function NavUser({ user }) {
   return (
     <SidebarMenu>
       <SidebarMenuItem>
-        <SidebarMenuButton tooltip="TEST" onClick={toggleTheme}>
-          <ContrastIcon />
+        <SidebarMenuButton tooltip="TOGGLE THEME" onClick={toggleTheme}>
+          {theme === "light" ? <LightIcon /> : <DarkIcon />}
           <span className="flex flex-row gap-2 justify-center items-center">
-            Test
+            {theme === "light" ? "LIGHT" : "DARK"}
           </span>
         </SidebarMenuButton>
       </SidebarMenuItem>

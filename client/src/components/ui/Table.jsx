@@ -152,7 +152,7 @@ const Table = React.forwardRef(
           >
             <table
               ref={ref}
-              className="w-full border-collapse text-sm"
+              className="w-full border-collapse text-sm text-[var(--table-text)]"
               {...props}
             >
               {children}
@@ -209,7 +209,10 @@ Table.displayName = "Table";
 const TableHeader = React.forwardRef(({ className, ...props }, ref) => (
   <thead
     ref={ref}
-    className={cn("border-b bg-[var(--table-header-bg)]", className)}
+    className={cn(
+      "border-b bg-[var(--table-header-bg)] text-[var(--table-text)]",
+      className
+    )}
     {...props}
   />
 ));
@@ -218,7 +221,10 @@ TableHeader.displayName = "TableHeader";
 const TableBody = React.forwardRef(({ className, ...props }, ref) => (
   <tbody
     ref={ref}
-    className={cn("[&_tr:last-child]:border-0", className)}
+    className={cn(
+      "[&_tr:last-child]:border-0 text-[var(--table-text)]",
+      className
+    )}
     {...props}
   />
 ));
@@ -228,7 +234,7 @@ const TableFooter = React.forwardRef(({ className, ...props }, ref) => (
   <tfoot
     ref={ref}
     className={cn(
-      "border-t bg-muted/50 font-medium [&>tr]:last:border-b-0",
+      "border-t bg-muted/50 font-medium [&>tr]:last:border-b-0 text-[var(--table-text)]",
       className
     )}
     {...props}
@@ -240,7 +246,7 @@ const TableRow = React.forwardRef(({ className, ...props }, ref) => (
   <tr
     ref={ref}
     className={cn(
-      "border-b transition-colors odd:bg-[var(--table-row-odd-bg)] even:bg-[var(--table-row-even-bg)]",
+      "border-b transition-colors text-[var(--table-text)]",
       className
     )}
     {...props}
@@ -252,7 +258,7 @@ const TableHead = React.forwardRef(({ className, ...props }, ref) => (
   <th
     ref={ref}
     className={cn(
-      "h-12 px-4 py-4 align-middle font-semibold text-xl bg-[var(--table-head-bg)] text-[var(--table-head-text)]",
+      "h-12 px-4 py-4 align-middle font-semibold text-xl bg-[var(--table-head-bg)] text-[var(--table-text)]",
       className
     )}
     {...props}
@@ -261,14 +267,21 @@ const TableHead = React.forwardRef(({ className, ...props }, ref) => (
 TableHead.displayName = "TableHead";
 
 const TableCell = React.forwardRef(({ className, ...props }, ref) => (
-  <td ref={ref} className={cn("p-4 align-middle ", className)} {...props} />
+  <td
+    ref={ref}
+    className={cn("p-4 align-middle text-[var(--table-text)]", className)}
+    {...props}
+  />
 ));
 TableCell.displayName = "TableCell";
 
 const TableCaption = React.forwardRef(({ className, ...props }, ref) => (
   <caption
     ref={ref}
-    className={cn("mt-4 text-sm text-muted-foreground", className)}
+    className={cn(
+      "mt-4 text-sm text-muted-foreground text-[var(--table-text)]",
+      className
+    )}
     {...props}
   />
 ));
