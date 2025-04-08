@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import axios from "axios";
 
+import { LoaderWrapper, Loader } from "@/components/ui/Loader";
+
 import {
   ModalContainer,
   ModalHeader,
@@ -32,15 +34,18 @@ import PasswordIcon from "@/assets/icons/PasswordIcon";
 import ConfirmIcon from "@/assets/icons/ConfirmIcon";
 
 function ForgotPassword({ isOpen, onClose }) {
-  const [step, setStep] = useState(1); // 1 = email, 2 = otp, 3 = reset password
+  // 1 = email, 2 = otp, 3 = reset password
+  const [step, setStep] = useState(1);
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [message, setMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const sendOTP = async (e) => {
     e.preventDefault();
+    setIsLoading(true); // Set loading to true when sending OTP
     try {
       await axios.post("http://localhost:4000/forgot-password", { email });
       setStep(2);
@@ -48,11 +53,14 @@ function ForgotPassword({ isOpen, onClose }) {
     } catch (err) {
       console.error("Failed to send OTP:", err);
       setMessage("Failed to send OTP. Make sure the email is correct.");
+    } finally {
+      setIsLoading(false); // Set loading to false when operation completes
     }
   };
 
   const verifyOTP = async (e) => {
     e.preventDefault();
+    setIsLoading(true); // Set loading to true when verifying OTP
     try {
       console.log("Verifying OTP:", otp);
       const response = await axios.post("http://localhost:4000/verify-otp", {
@@ -72,6 +80,8 @@ function ForgotPassword({ isOpen, onClose }) {
     } catch (err) {
       console.error("Error verifying OTP:", err);
       setMessage("Failed to verify OTP. Please try again.");
+    } finally {
+      setIsLoading(false); // Set loading to false when operation completes
     }
   };
 
@@ -97,6 +107,11 @@ function ForgotPassword({ isOpen, onClose }) {
 
   return (
     <ModalContainer data-cy="forgot-password-modal">
+      {isLoading && (
+        <LoaderWrapper fullScreen={true} overlay={true}>
+          <Loader size={100} text="Processing..." />
+        </LoaderWrapper>
+      )}
       <ModalHeader>
         <ModalTitle>FORGOT YOUR PASSWORD?</ModalTitle>
       </ModalHeader>
@@ -193,8 +208,8 @@ function ForgotPassword({ isOpen, onClose }) {
                     data-cy="new-password"
                     type="password"
                     placeholder="New Password"
-                    // value={newPassword}
-                    // onChange={(e) => setNewPassword(e.target.value)}
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
                     required
                   />
                 </InputTextField>
@@ -210,8 +225,8 @@ function ForgotPassword({ isOpen, onClose }) {
                     data-cy="confirm-password"
                     type="password"
                     placeholder="Confirm Password"
-                    // value={confirmPassword}
-                    // onChange={(e) => setConfirmPassword(e.target.value)}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
                     required
                   />
                 </InputTextField>

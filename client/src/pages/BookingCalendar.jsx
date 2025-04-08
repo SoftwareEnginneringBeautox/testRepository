@@ -6,22 +6,12 @@ const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 import ChevronLeftIcon from "@/assets/icons/ChevronLeftIcon";
 import ChevronRightIcon from "@/assets/icons/ChevronRightIcon";
-import SortIcon from "@/assets/icons/SortIcon";
-import FilterIcon from "@/assets/icons/FilterIcon";
 
 import MonthlyBookingPanel from "@/components/MonthlyBookingPanel";
 import WeeklyBookingPanel from "@/components/WeeklyBookingPanel";
 
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectValue,
-  SelectTrigger
-} from "@/components/ui/Select";
-
-import { Checkbox } from "@/components/ui/Checkbox";
 import MultiSelectFilter from "@/components/ui/MultiSelectFilter";
+import { Loader } from "@/components/ui/Loader";
 
 function BookingCalendar() {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -52,7 +42,7 @@ function BookingCalendar() {
         });
 
         const staffData = response.data.filter(
-          (user) => !user.archived && (user.role === 'aesthetician')
+          (user) => !user.archived && user.role === "aesthetician"
         );
         setStaffList(staffData);
       } catch (error) {
@@ -67,9 +57,12 @@ function BookingCalendar() {
   useEffect(() => {
     const fetchPatientRecords = async () => {
       try {
-        const response = await axios.get(`${API_BASE_URL}/api/patient-records`, {
-          withCredentials: true
-        });
+        const response = await axios.get(
+          `${API_BASE_URL}/api/patient-records`,
+          {
+            withCredentials: true
+          }
+        );
         setPatientRecords(response.data);
       } catch (error) {
         console.error("Error fetching patient records:", error);
@@ -100,7 +93,7 @@ function BookingCalendar() {
   useEffect(() => {
     if (appointments.length > 0) {
       const personsInCharge = getUniquePersonsInCharge();
-      const options = personsInCharge.map(person => ({
+      const options = personsInCharge.map((person) => ({
         label: person.toUpperCase(),
         value: person
       }));
@@ -142,7 +135,7 @@ function BookingCalendar() {
       let personInCharge = "Unassigned";
       if (appointment.patient_record_id) {
         const patientRecord = patientRecords.find(
-          record => record.id === appointment.patient_record_id
+          (record) => record.id === appointment.patient_record_id
         );
         if (patientRecord && patientRecord.person_in_charge) {
           personInCharge = patientRecord.person_in_charge;
@@ -271,9 +264,12 @@ function BookingCalendar() {
     }
 
     // Then filter by selected staff if any are selected
-    if (selectedStaff.length > 0 && selectedStaff.length < getUniquePersonsInCharge().length) {
-      return dateFilteredEvents.filter(
-        (event) => selectedStaff.includes(event.personInCharge)
+    if (
+      selectedStaff.length > 0 &&
+      selectedStaff.length < getUniquePersonsInCharge().length
+    ) {
+      return dateFilteredEvents.filter((event) =>
+        selectedStaff.includes(event.personInCharge)
       );
     }
 
@@ -283,7 +279,9 @@ function BookingCalendar() {
   // Get all unique persons in charge from appointments (using patient records)
   const getUniquePersonsInCharge = () => {
     const events = processAppointments();
-    const uniquePersons = [...new Set(events.map(event => event.personInCharge))];
+    const uniquePersons = [
+      ...new Set(events.map((event) => event.personInCharge))
+    ];
     return uniquePersons.sort();
   };
 
@@ -292,8 +290,10 @@ function BookingCalendar() {
     const events = processAppointments();
     const counts = {};
 
-    getUniquePersonsInCharge().forEach(person => {
-      counts[person] = events.filter(event => event.personInCharge === person).length;
+    getUniquePersonsInCharge().forEach((person) => {
+      counts[person] = events.filter(
+        (event) => event.personInCharge === person
+      ).length;
     });
 
     return counts;
@@ -367,8 +367,9 @@ function BookingCalendar() {
               <button
                 data-cy="calendar-view-monthly"
                 onClick={() => setView("monthly")}
-                className={`relative inline-block px-1 sm:px-2 py-1 font-semibold overflow-hidden group ${view === "monthly" ? "text-lavender-500" : ""
-                  }`}
+                className={`relative inline-block px-1 sm:px-2 py-1 font-semibold overflow-hidden group ${
+                  view === "monthly" ? "text-lavender-500" : ""
+                }`}
               >
                 <span
                   className="hidden sm:inline"
@@ -380,8 +381,9 @@ function BookingCalendar() {
                   MONTH
                 </span>
                 <span
-                  className={`absolute left-0 bottom-0 block h-0.5 bg-lavender-400 transition-all duration-300 ${view === "monthly" ? "w-full" : "w-0 group-hover:w-full"
-                    }`}
+                  className={`absolute left-0 bottom-0 block h-0.5 bg-lavender-400 transition-all duration-300 ${
+                    view === "monthly" ? "w-full" : "w-0 group-hover:w-full"
+                  }`}
                   data-cy="monthly-view-indicator"
                 ></span>
               </button>
@@ -389,8 +391,9 @@ function BookingCalendar() {
               <button
                 data-cy="calendar-view-weekly"
                 onClick={() => setView("weekly")}
-                className={`relative inline-block px-1 sm:px-2 py-1 font-semibold overflow-hidden group ${view === "weekly" ? "text-lavender-500" : ""
-                  }`}
+                className={`relative inline-block px-1 sm:px-2 py-1 font-semibold overflow-hidden group ${
+                  view === "weekly" ? "text-lavender-500" : ""
+                }`}
               >
                 <span
                   className="hidden sm:inline"
@@ -402,8 +405,9 @@ function BookingCalendar() {
                   WEEK
                 </span>
                 <span
-                  className={`absolute left-0 bottom-0 block h-0.5 bg-lavender-400 transition-all duration-300 ${view === "weekly" ? "w-full" : "w-0 group-hover:w-full"
-                    }`}
+                  className={`absolute left-0 bottom-0 block h-0.5 bg-lavender-400 transition-all duration-300 ${
+                    view === "weekly" ? "w-full" : "w-0 group-hover:w-full"
+                  }`}
                   data-cy="weekly-view-indicator"
                 ></span>
               </button>
@@ -467,7 +471,7 @@ function BookingCalendar() {
               className="w-full py-4 sm:py-6 md:py-10 lg:py-20 text-center text-xs sm:text-sm md:text-base lg:text-lg"
               data-cy="loading-message"
             >
-              Loading appointments...
+              <Loader />
             </div>
           ) : view === "monthly" ? (
             <div

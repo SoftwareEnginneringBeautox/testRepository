@@ -43,7 +43,6 @@ import PercentageIcon from "@/assets/icons/PercentageIcon";
 import TreatmentIcon from "@/assets/icons/TreatmentIcon";
 
 import axios from "axios";
-import { arch } from "os";
 
 function CreatePatientEntry({ isOpen, onClose }) {
   const [patientName, setPatientName] = useState("");
@@ -742,17 +741,6 @@ function CreatePatientEntry({ isOpen, onClose }) {
                 />
               </InputTextField>
             </InputContainer>
-
-            <InputContainer>
-              <InputLabel>REFERENCE NUMBER</InputLabel>
-              <InputTextField>
-                <Input
-                  readOnly
-                  value={referenceNumber}
-                  className="bg-[#F5F3F0] text-gray-500"
-                />
-              </InputTextField>
-            </InputContainer>
           </div>
 
           {/* CONSENT FORM CHECKBOX */}
@@ -774,6 +762,11 @@ function CreatePatientEntry({ isOpen, onClose }) {
               </label>
             </div>
           </div>
+
+          <InputContainer>
+            <InputLabel>REFERENCE NUMBER</InputLabel>
+            <p>{referenceNumber}</p>
+          </InputContainer>
 
           {/* ACTION BUTTONS */}
           <div className="flex sm:flex-row flex-col gap-4 mt-6 w-full">

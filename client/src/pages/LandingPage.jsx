@@ -10,6 +10,7 @@ import FacebookIcon from "@/assets/icons/FacebookIcon";
 import InstagramIcon from "@/assets/icons/InstagramIcon";
 import PhoneIcon from "@/assets/icons/PhoneIcon";
 import ChevronRightIcon from "@/assets/icons/ChevronRightIcon";
+import { XIcon } from "lucide-react";
 
 import ProductCard from "@/components/ProductCard";
 import ScheduleAppointmentModal from "../components/modals/ScheduleAppointment";
@@ -27,6 +28,7 @@ function LandingPage() {
   const navigate = useNavigate();
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -215,11 +217,34 @@ function LandingPage() {
     }
   ];
 
-  const handleScroll = (e, id) => {
+  const handleScroll = (e, targetId) => {
     e.preventDefault();
-    const section = document.getElementById(id);
-    if (section) {
-      section.scrollIntoView({ behavior: "smooth", block: "start" });
+    const element = document.getElementById(targetId);
+    if (element) {
+      const offset = 80; // Adjust this value based on your header height
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - offset;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: "smooth"
+      });
+    }
+  };
+
+  // Add touch event handling for mobile devices
+  const handleTouchScroll = (e, targetId) => {
+    e.preventDefault();
+    const element = document.getElementById(targetId);
+    if (element) {
+      const offset = 80;
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - offset;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: "smooth"
+      });
     }
   };
 
@@ -245,6 +270,7 @@ function LandingPage() {
                     <a
                       href={`#${href}`}
                       onClick={(e) => handleScroll(e, href)}
+                      onTouchEnd={(e) => handleTouchScroll(e, href)}
                       className="text-purple-900 text-base font-semibold"
                     >
                       {label}
@@ -681,6 +707,7 @@ function LandingPage() {
 
               <Button
                 onClick={(e) => handleScroll(e, "location")}
+                onTouchEnd={(e) => handleTouchScroll(e, "location")}
                 className="bg-purple-950 hover:bg-purple-900 text-white w-full sm:w-fit px-6 sm:px-8 py-3 rounded-full flex items-center justify-center gap-2"
                 data-cy="view-map-btn"
               >
