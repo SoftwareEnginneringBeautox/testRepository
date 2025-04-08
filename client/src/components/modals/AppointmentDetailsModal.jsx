@@ -1,6 +1,6 @@
-// AppointmentDetailsModal.jsx
-import React from "react";
+import React, { useState } from "react";
 import PropTypes from "prop-types";
+import axios from "axios";
 import {
   ModalContainer,
   ModalHeader,
@@ -13,6 +13,8 @@ import CircleUserIcon from "@/assets/icons/CircleUserIcon";
 import PlusIcon from "@/assets/icons/PlusIcon";
 import { format } from "date-fns";
 
+const API_BASE_URL = import.meta.env.VITE_API_URL;
+
 function AppointmentDetailsModal({ 
   isOpen, 
   onClose, 
@@ -20,7 +22,100 @@ function AppointmentDetailsModal({
   onConfirm,
   onReject 
 }) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
   if (!isOpen || !appointmentData) return null;
+
+  const handleConfirm = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // 1. Create a minimal patient record
+      const patientPayload = {
+        patient_name: appointmentData.full_name,
+        contact_number: appointmentData.contact_number,
+        age: appointmentData.age,
+        email: appointmentData.email,
+        date_of_session: appointmentData.date_of_session,
+        time_of_session: appointmentData.time_of_session,
+        // Additional required fields with default values
+        person_in_charge: "Pending Assignment",
+        payment_method: "Not Specified",
+        total_amount: 0,
+        consent_form_signed: false,
+        archived: false,
+        reference_number: `REF${Date.now()}`
+      };
+      
+      // Add to patient_records
+      const patientResponse = await axios.post(
+        `${API_BASE_URL}/api/patients`, 
+        patientPayload,
+        { withCredentials: true }
+      );
+      
+      // 2. Update the staged appointment status
+      await axios.post(
+        `${API_BASE_URL}/api/staged-appointments/${appointmentData.id}/confirm`,
+        {},
+        { withCredentials: true }
+      );
+      
+      // 3. Send confirmation email
+      await axios.post(
+        `${API_BASE_URL}/send-email`,
+        {
+          to: appointmentData.email,
+          subject: "Appointment Confirmation",
+          text: `Dear ${appointmentData.full_name},\n\nYour appointment on ${format(new Date(appointmentData.date_of_session), "MMMM dd, yyyy")} at ${format(new Date(`1970-01-01T${appointmentData.time_of_session}`), "hh:mm a")} has been confirmed.\n\nThank you for choosing our services.\n\nThis is an automated email, please do not reply.`
+        },
+        { withCredentials: true }
+      );
+      
+      // Call the parent component's onConfirm handler
+      onConfirm(appointmentData.id);
+    } catch (err) {
+      console.error("Error confirming appointment:", err);
+      setError("Failed to confirm appointment. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const handleReject = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // 1. Update the staged appointment status
+      await axios.post(
+        `${API_BASE_URL}/api/staged-appointments/${appointmentData.id}/reject`,
+        {},
+        { withCredentials: true }
+      );
+      
+      // 2. Send rejection email
+      await axios.post(
+        `${API_BASE_URL}/send-email`,
+        {
+          to: appointmentData.email,
+          subject: "Appointment Request Update",
+          text: `Dear ${appointmentData.full_name},\n\nWe regret to inform you that your requested appointment on ${format(new Date(appointmentData.date_of_session), "MMMM dd, yyyy")} at ${format(new Date(`1970-01-01T${appointmentData.time_of_session}`), "hh:mm a")} is not available.\n\nPlease contact us to schedule a different time or date.\n\nThis is an automated email, please do not reply.`
+        },
+        { withCredentials: true }
+      );
+      
+      // Call the parent component's onReject handler
+      onReject(appointmentData.id);
+    } catch (err) {
+      console.error("Error rejecting appointment:", err);
+      setError("Failed to reject appointment. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <ModalContainer className="max-w-md w-full mx-auto p-4">
@@ -65,19 +160,27 @@ function AppointmentDetailsModal({
           ))}
         </div>
         
+        {error && (
+          <div className="mt-4 p-3 bg-red-100 text-red-700 rounded-md">
+            {error}
+          </div>
+        )}
+        
         <div className="flex flex-col sm:flex-row justify-between mt-6 gap-4">
           <Button 
             variant="destructive" 
-            onClick={() => onReject(appointmentData.id)}
+            onClick={handleReject}
+            disabled={loading}
             className="w-full sm:w-[48%]"
           >
-            REJECT
+            {loading ? "PROCESSING..." : "REJECT"}
           </Button>
           <Button 
-            onClick={() => onConfirm(appointmentData.id)}
+            onClick={handleConfirm}
+            disabled={loading}
             className="w-full sm:w-[48%]"
           >
-            CONFIRM
+            {loading ? "PROCESSING..." : "CONFIRM"}
           </Button>
         </div>
       </ModalBody>
