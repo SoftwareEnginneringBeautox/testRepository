@@ -43,7 +43,6 @@ import PercentageIcon from "@/assets/icons/PercentageIcon";
 import TreatmentIcon from "@/assets/icons/TreatmentIcon";
 
 import axios from "axios";
-import { arch } from "os";
 
 function CreatePatientEntry({ isOpen, onClose }) {
   const [patientName, setPatientName] = useState("");
