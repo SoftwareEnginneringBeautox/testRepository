@@ -47,10 +47,6 @@ const Table = React.forwardRef(
       });
     }, [children]);
 
-    // Determine background color based on odd/even row count
-    const scrollbarBgClass =
-      rowCount % 2 === 0 ? "bg-faintingLight-100" : "bg-reflexBlue-100";
-
     // Function to handle pagination
     const paginate = (pageNumber) => {
       if (pageNumber > 0 && pageNumber <= totalPages && onPageChange) {
@@ -145,7 +141,6 @@ const Table = React.forwardRef(
           <div
             className={cn(
               "w-full overflow-x-auto",
-              scrollbarBgClass,
               "pb-8", // Increased padding to ensure space for the scrollbar
               className
             )}
@@ -175,9 +170,7 @@ const Table = React.forwardRef(
 
         {/* Pagination outside the scroll container with matching background color */}
         {showPagination && (
-          <div
-            className={cn("w-full flex justify-center py-2", scrollbarBgClass)}
-          >
+          <div className={cn("w-full flex justify-center py-2")}>
             <Pagination>
               <PaginationContent>
                 <PaginationItem>
@@ -216,7 +209,7 @@ Table.displayName = "Table";
 const TableHeader = React.forwardRef(({ className, ...props }, ref) => (
   <thead
     ref={ref}
-    className={cn("border-b bg-lavender-400", className)}
+    className={cn("border-b bg-[var(--table-header-bg)]", className)}
     {...props}
   />
 ));
@@ -247,7 +240,7 @@ const TableRow = React.forwardRef(({ className, ...props }, ref) => (
   <tr
     ref={ref}
     className={cn(
-      "border-b transition-colors hover:bg-muted/50 odd:bg-reflexBlue-100 even:bg-faintingLight-100",
+      "border-b transition-colors odd:bg-[var(--table-row-odd-bg)] even:bg-[var(--table-row-even-bg)]",
       className
     )}
     {...props}
@@ -259,7 +252,7 @@ const TableHead = React.forwardRef(({ className, ...props }, ref) => (
   <th
     ref={ref}
     className={cn(
-      "h-12 px-4 py-4 align-middle font-semibold text-xl bg-lavender-400 text-customNeutral-100",
+      "h-12 px-4 py-4 align-middle font-semibold text-xl bg-[var(--table-head-bg)] text-[var(--table-head-text)]",
       className
     )}
     {...props}

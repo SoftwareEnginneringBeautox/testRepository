@@ -90,9 +90,9 @@ function PatientRecordsDatabase() {
     "amountpaid",
     "remainingbalance",
     "referenceno",
-    "contactnumber",     // ✅ NEW
-    "age",               // ✅ NEW
-    "email"   
+    "contactnumber", // ✅ NEW
+    "age", // ✅ NEW
+    "email"
   ]);
 
   // State for temp column selection (before applying)
@@ -143,9 +143,12 @@ function PatientRecordsDatabase() {
   const recordsPerPage = 10;
 
   useEffect(() => {
-    console.log("📅 Client date today:", new Date().toISOString().split("T")[0]);
+    console.log(
+      "📅 Client date today:",
+      new Date().toISOString().split("T")[0]
+    );
   }, []);
-  
+
   // Fetch patient records from the API
   const fetchRecords = async () => {
     try {
@@ -276,7 +279,7 @@ function PatientRecordsDatabase() {
         date_of_session: updatedData.date_of_session,
         time_of_session: updatedData.time_of_session
       };
-    
+
       await fetch(`${API_BASE_URL}/api/appointments`, {
         method: "POST", // or PUT if your backend handles updates
         headers: { "Content-Type": "application/json" },
@@ -286,7 +289,7 @@ function PatientRecordsDatabase() {
     } catch (err) {
       console.error("❌ Failed to update appointment record:", err);
     }
-        
+
     closeModal();
     fetchRecords();
   };
@@ -312,24 +315,24 @@ function PatientRecordsDatabase() {
       console.error("❌ Failed to update patient entry:", error);
     }
   };
-  
 
   // Replace the existing handlePaidChange function
   const handlePaidChange = async (record, checked) => {
     try {
-      console.log("Updating paid status:", { id: record.id, newStatus: checked ? "yes" : "no" });
-      
+      console.log("Updating paid status:", {
+        id: record.id,
+        newStatus: checked ? "yes" : "no"
+      });
+
       // Store local copy of updated record for optimistic updates
       const updatedRecord = {
         ...record,
         isPaid: checked ? "yes" : "no"
       };
-      
+
       // Update UI immediately (optimistic update)
-      setRecords(records.map(r => 
-        r.id === record.id ? updatedRecord : r
-      ));
-      
+      setRecords(records.map((r) => (r.id === record.id ? updatedRecord : r)));
+
       // 1. Update patient record's paid status
       const updateResponse = await fetch(`${API_BASE_URL}/api/manage-record`, {
         method: "POST",
@@ -342,11 +345,11 @@ function PatientRecordsDatabase() {
           data: { isPaid: checked ? "yes" : "no" }
         })
       });
-  
+
       if (!updateResponse.ok) {
         throw new Error(`Error updating paid status: ${updateResponse.status}`);
       }
-  
+
       // 2. If marking as paid, add to sales tracker
       if (checked) {
         // Sales tracker code remains unchanged
@@ -358,25 +361,28 @@ function PatientRecordsDatabase() {
           person_in_charge: record.person_in_charge,
           payment_method: record.payment_method,
           packages: record.package_name,
-          treatment: record.treatment_ids ? getTreatmentNames(record.treatment_ids).join(", ") : ""
+          treatment: record.treatment_ids
+            ? getTreatmentNames(record.treatment_ids).join(", ")
+            : ""
         };
-  
+
         const salesResponse = await fetch(`${API_BASE_URL}/api/sales`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           credentials: "include",
           body: JSON.stringify(salesData)
         });
-  
+
         if (!salesResponse.ok) {
-          throw new Error(`Error adding to sales tracker: ${salesResponse.status}`);
+          throw new Error(
+            `Error adding to sales tracker: ${salesResponse.status}`
+          );
         }
       }
-      
+
       // Always fetch records to ensure UI is updated with server data
       await fetchRecords();
       console.log("Paid status updated successfully");
-      
     } catch (error) {
       console.error("Error updating paid status:", error);
       // Revert the optimistic update by fetching fresh data
@@ -656,48 +662,58 @@ function PatientRecordsDatabase() {
   };
 
   return (
-<div className="flex flex-col gap-4 md:gap-[1.5rem] text-left w-full md:w-[90%] mx-auto px-4 md:px-0" data-cy="patient-records-database">
-  <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-    <h4 className="font-semibold text-xl md:text-[2rem] leading-normal md:leading-[2.8rem]" data-cy="patient-records-title">
-      PATIENT RECORDS
-    </h4>
-    <div className="flex flex-col md:flex-row items-start md:items-center justify-center gap-4 w-full md:w-auto">
-      <InputTextField className="w-full md:w-auto">
-        <Input
-          type="text"
-          id="search"
-          data-cy="patient-search"
-          placeholder="Search by client name..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-        <MagnifyingGlassIcon />
-      </InputTextField>
+    <div
+      className="flex flex-col gap-4 md:gap-[1.5rem] text-left w-full md:w-[90%] mx-auto px-4 md:px-0"
+      data-cy="patient-records-database"
+    >
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <h4
+          className="font-semibold text-xl md:text-[2rem] leading-normal md:leading-[2.8rem]"
+          data-cy="patient-records-title"
+        >
+          PATIENT RECORDS
+        </h4>
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-center gap-4 w-full md:w-auto">
+          <InputTextField className="w-full md:w-auto">
+            <Input
+              type="text"
+              id="search"
+              data-cy="patient-search"
+              placeholder="Search by client name..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <MagnifyingGlassIcon />
+          </InputTextField>
 
-      <Select onValueChange={setSortOption} className="w-full md:w-auto">
-        <SelectTrigger placeholder="SORT BY" icon={<SortIcon />} data-cy="sort-select">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="alphabetical">ALPHABETICAL</SelectItem>
-          <SelectItem value="date">DATE</SelectItem>
-        </SelectContent>
-      </Select>
+          <Select onValueChange={setSortOption} className="w-full md:w-auto">
+            <SelectTrigger
+              placeholder="SORT BY"
+              icon={<SortIcon />}
+              data-cy="sort-select"
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="alphabetical">ALPHABETICAL</SelectItem>
+              <SelectItem value="date">DATE</SelectItem>
+            </SelectContent>
+          </Select>
 
-      <MultiSelectFilter
-        options={columns}
-        selectedValues={tempSelectedColumns}
-        setSelectedValues={setTempSelectedColumns}
-        placeholder="FILTER COLUMNS"
-        mandatoryValues={["client", "dateofsession"]}
-        onApply={applyColumnFilters}
-        showApplyButton={true}
-        data-cy="column-filter"
-      />
-    </div>
-  </div>
+          <MultiSelectFilter
+            options={columns}
+            selectedValues={tempSelectedColumns}
+            setSelectedValues={setTempSelectedColumns}
+            placeholder="FILTER COLUMNS"
+            mandatoryValues={["client", "dateofsession"]}
+            onApply={applyColumnFilters}
+            showApplyButton={true}
+            data-cy="column-filter"
+          />
+        </div>
+      </div>
 
-  <div className="w-full overflow-x-auto" data-cy="patient-records-table">
+      <div className="w-full overflow-x-auto" data-cy="patient-records-table">
         <Table
           className="min-w-[1200px]"
           showPagination={true}
@@ -723,13 +739,19 @@ function PatientRecordsDatabase() {
               )}
 
               {isColumnVisible.contactnumber && (
-                <TableHead className="py-4 text-center whitespace-nowrap">CONTACT NUMBER</TableHead>
+                <TableHead className="py-4 text-center whitespace-nowrap">
+                  CONTACT NUMBER
+                </TableHead>
               )}
               {isColumnVisible.age && (
-                <TableHead className="py-4 text-center whitespace-nowrap">AGE</TableHead>
+                <TableHead className="py-4 text-center whitespace-nowrap">
+                  AGE
+                </TableHead>
               )}
               {isColumnVisible.email && (
-                <TableHead className="py-4 text-center whitespace-nowrap">EMAIL</TableHead>
+                <TableHead className="py-4 text-center whitespace-nowrap">
+                  EMAIL
+                </TableHead>
               )}
 
               {isColumnVisible.personincharge && (
@@ -796,14 +818,20 @@ function PatientRecordsDatabase() {
           </TableHeader>
           <TableBody>
             {currentRecords.map((record, index) => (
-              <TableRow key={index} data-cy={`record-row-${index}`} >
+              <TableRow key={index} data-cy={`record-row-${index}`}>
                 {/* Always show CLIENT column */}
-                <TableCell className="whitespace-nowrap" data-cy={`record-client-${index}`}>
+                <TableCell
+                  className="whitespace-nowrap"
+                  data-cy={`record-client-${index}`}
+                >
                   {record.client || record.patient_name?.toUpperCase() || "N/A"}
                 </TableCell>
 
                 {/* Always show DATE OF SESSION column */}
-                <TableCell className="text-center whitespace-nowrap" data-cy={`record-date-${index}`}>
+                <TableCell
+                  className="text-center whitespace-nowrap"
+                  data-cy={`record-date-${index}`}
+                >
                   {record.dateTransacted || record.date_of_session
                     ? format(
                         new Date(
@@ -816,7 +844,10 @@ function PatientRecordsDatabase() {
 
                 {/* Conditionally show other cells based on selectedColumns */}
                 {isColumnVisible.timeofsession && (
-                  <TableCell className="text-center whitespace-nowrap" data-cy={`record-time-${index}`}>
+                  <TableCell
+                    className="text-center whitespace-nowrap"
+                    data-cy={`record-time-${index}`}
+                  >
                     {record.nextSessionTime || record.time_of_session
                       ? (() => {
                           const timeValue =
@@ -832,23 +863,35 @@ function PatientRecordsDatabase() {
                   </TableCell>
                 )}
                 {isColumnVisible.contactnumber && (
-                  <TableCell className="text-center whitespace-nowrap" data-cy={`record-contact-${index}`}>
+                  <TableCell
+                    className="text-center whitespace-nowrap"
+                    data-cy={`record-contact-${index}`}
+                  >
                     {record.contact_number || "N/A"}
                   </TableCell>
                 )}
                 {isColumnVisible.age && (
-                  <TableCell className="text-center whitespace-nowrap" data-cy={`record-age-${index}`}>
+                  <TableCell
+                    className="text-center whitespace-nowrap"
+                    data-cy={`record-age-${index}`}
+                  >
                     {record.age || "N/A"}
                   </TableCell>
                 )}
                 {isColumnVisible.email && (
-                  <TableCell className="text-center whitespace-nowrap" data-cy={`record-email-${index}`}>
+                  <TableCell
+                    className="text-center whitespace-nowrap"
+                    data-cy={`record-email-${index}`}
+                  >
                     {record.email || "N/A"}
                   </TableCell>
                 )}
 
                 {isColumnVisible.personincharge && (
-                  <TableCell className="text-center whitespace-nowrap" data-cy={`record-personincharge-${index}`}>
+                  <TableCell
+                    className="text-center whitespace-nowrap"
+                    data-cy={`record-personincharge-${index}`}
+                  >
                     {(
                       record.personInCharge || record.person_in_charge
                     )?.toUpperCase()}
@@ -856,13 +899,19 @@ function PatientRecordsDatabase() {
                 )}
 
                 {isColumnVisible.package && (
-                  <TableCell className="whitespace-nowrap" data-cy={`record-package-${index}`}>
+                  <TableCell
+                    className="whitespace-nowrap"
+                    data-cy={`record-package-${index}`}
+                  >
                     {(record.package || record.package_name)?.toUpperCase()}
                   </TableCell>
                 )}
 
                 {isColumnVisible.treatment && (
-                  <TableCell className="text-left whitespace-nowrap" data-cy={`record-treatment-${index}`}>
+                  <TableCell
+                    className="text-left whitespace-nowrap"
+                    data-cy={`record-treatment-${index}`}
+                  >
                     {Array.isArray(record.treatment_ids)
                       ? getTreatmentNames(record.treatment_ids)
                           .join(", ")
@@ -872,7 +921,10 @@ function PatientRecordsDatabase() {
                 )}
 
                 {isColumnVisible.consentformsigned && (
-                  <TableCell className="text-center whitespace-nowrap" data-cy={`record-consent-${index}`}>
+                  <TableCell
+                    className="text-center whitespace-nowrap"
+                    data-cy={`record-consent-${index}`}
+                  >
                     {record.consentStatus ||
                       (typeof record.consent_form_signed === "boolean"
                         ? record.consent_form_signed
@@ -883,7 +935,10 @@ function PatientRecordsDatabase() {
                 )}
 
                 {isColumnVisible.paymentmethod && (
-                  <TableCell className="whitespace-nowrap" data-cy={`record-paymentmethod-${index}`}>
+                  <TableCell
+                    className="whitespace-nowrap"
+                    data-cy={`record-paymentmethod-${index}`}
+                  >
                     {(
                       record.paymentMethod || record.payment_method
                     )?.toUpperCase()}
@@ -891,7 +946,10 @@ function PatientRecordsDatabase() {
                 )}
 
                 {isColumnVisible.totalamount && (
-                  <TableCell className="text-center" data-cy={`record-total-${index}`}>
+                  <TableCell
+                    className="text-center"
+                    data-cy={`record-total-${index}`}
+                  >
                     {new Intl.NumberFormat("en-PH", {
                       style: "currency",
                       currency: "PHP"
@@ -900,7 +958,10 @@ function PatientRecordsDatabase() {
                 )}
 
                 {isColumnVisible.amountpaid && (
-                  <TableCell className="text-center" data-cy={`record-paid-${index}`}>
+                  <TableCell
+                    className="text-center"
+                    data-cy={`record-paid-${index}`}
+                  >
                     {record.amount_paid
                       ? new Intl.NumberFormat("en-PH", {
                           style: "currency",
@@ -911,7 +972,10 @@ function PatientRecordsDatabase() {
                 )}
 
                 {isColumnVisible.remainingbalance && (
-                  <TableCell className="text-center" data-cy={`record-remaining-${index}`}>
+                  <TableCell
+                    className="text-center"
+                    data-cy={`record-remaining-${index}`}
+                  >
                     {(() => {
                       const total = parseFloat(record.total_amount || 0);
                       const paid = parseFloat(record.amount_paid || 0);
@@ -925,16 +989,24 @@ function PatientRecordsDatabase() {
                 )}
 
                 {isColumnVisible.referenceno && (
-                  <TableCell className="text-center"  data-cy={`record-refno-${index}`}>
+                  <TableCell
+                    className="text-center"
+                    data-cy={`record-refno-${index}`}
+                  >
                     {record.reference_number || "N/A"}
                   </TableCell>
                 )}
 
                 {/* Replace Checkbox with Select dropdown for PAID STATUS column */}
-                <TableCell className="text-center" data-cy={`record-paid-status-${index}`}>
-                  <Select 
-                    value={record.isPaid || "no"} 
-                    onValueChange={(value) => handlePaidChange(record, value === "yes")}
+                <TableCell
+                  className="text-center"
+                  data-cy={`record-paid-status-${index}`}
+                >
+                  <Select
+                    value={record.isPaid || "no"}
+                    onValueChange={(value) =>
+                      handlePaidChange(record, value === "yes")
+                    }
                     data-cy={`paid-status-select-${index}`}
                   >
                     <SelectTrigger className="w-[80px] mx-auto">
@@ -949,7 +1021,9 @@ function PatientRecordsDatabase() {
 
                 <TableCell>
                   <DropdownMenu>
-                    <DropdownMenuTrigger data-cy={`record-menu-trigger-${index}`}>
+                    <DropdownMenuTrigger
+                      data-cy={`record-menu-trigger-${index}`}
+                    >
                       <EllipsisIcon />
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
@@ -985,62 +1059,73 @@ function PatientRecordsDatabase() {
         </Table>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-4 justify-end" data-cy="patient-records-actions">
-    <Button variant="outline" className="w-full md:w-auto" data-cy="return-button">
-      <ChevronLeftIcon />
-      RETURN
-    </Button>
-    <Button
-      onClick={() => openModal("createEntry")}
-      className="w-full md:w-auto"
-      data-cy="add-entry-button"
-    >
-      <PlusIcon />
-      ADD NEW ENTRY
-    </Button>
-    <Button
-      variant="callToAction"
-      onClick={() => generatePRDReport(records)}
-      className="w-full md:w-auto"
-      data-cy="download-records-button"
-    >
-      <DownloadIcon />
-      <span className="hidden md:inline">DOWNLOAD PATIENT RECORDS</span>
-      <span className="md:hidden">DOWNLOAD RECORDS</span>
-    </Button>
-  </div>
+      <div
+        className="flex flex-col md:flex-row gap-4 justify-end"
+        data-cy="patient-records-actions"
+      >
+        <Button
+          variant="outline"
+          className="w-full md:w-auto"
+          data-cy="return-button"
+        >
+          <ChevronLeftIcon />
+          RETURN
+        </Button>
+        <Button
+          onClick={() => openModal("createEntry")}
+          className="w-full md:w-auto"
+          data-cy="add-entry-button"
+        >
+          <PlusIcon />
+          ADD NEW ENTRY
+        </Button>
+        <Button
+          variant="callToAction"
+          onClick={() => generatePRDReport(records)}
+          className="w-full md:w-auto"
+          data-cy="download-records-button"
+        >
+          <DownloadIcon />
+          <span className="hidden md:inline">DOWNLOAD PATIENT RECORDS</span>
+          <span className="md:hidden">DOWNLOAD RECORDS</span>
+        </Button>
+      </div>
 
-  {currentModal === "createEntry" && (
-    <CreatePatientEntry isOpen={true} onClose={handleModalClose} data-cy="create-patient-entry-modal" />
-  )}
-  {currentModal === "editEntry" && selectedEntry && (
-    <EditPatientEntry
-      isOpen={true}
-      onClose={handleModalClose}
-      entryData={selectedEntry}
-      onSubmit={handleEditPatientEntry}
-      data-cy="edit-patient-entry-modal"
-    />
-  )}
-  {currentModal === "updateEntry" && selectedEntry && (
-    <UpdatePatientEntry
-      isOpen={true}
-      onClose={handleModalClose}
-      entryData={selectedEntry}
-      onSubmit={handleUpdatePatientEntry}
-      data-cy="update-patient-entry-modal"
-    />
-  )}
-  {currentModal === "archiveEntry" && selectedEntry && (
-    <ArchivePatientEntry
-      isOpen={true}
-      onClose={handleModalClose}
-      entryData={selectedEntry}
-      onArchive={handleArchive}
-      data-cy="archive-patient-entry-modal"
-    />
-  )}
-</div>
+      {currentModal === "createEntry" && (
+        <CreatePatientEntry
+          isOpen={true}
+          onClose={handleModalClose}
+          data-cy="create-patient-entry-modal"
+        />
+      )}
+      {currentModal === "editEntry" && selectedEntry && (
+        <EditPatientEntry
+          isOpen={true}
+          onClose={handleModalClose}
+          entryData={selectedEntry}
+          onSubmit={handleEditPatientEntry}
+          data-cy="edit-patient-entry-modal"
+        />
+      )}
+      {currentModal === "updateEntry" && selectedEntry && (
+        <UpdatePatientEntry
+          isOpen={true}
+          onClose={handleModalClose}
+          entryData={selectedEntry}
+          onSubmit={handleUpdatePatientEntry}
+          data-cy="update-patient-entry-modal"
+        />
+      )}
+      {currentModal === "archiveEntry" && selectedEntry && (
+        <ArchivePatientEntry
+          isOpen={true}
+          onClose={handleModalClose}
+          entryData={selectedEntry}
+          onArchive={handleArchive}
+          data-cy="archive-patient-entry-modal"
+        />
+      )}
+    </div>
   );
 }
 

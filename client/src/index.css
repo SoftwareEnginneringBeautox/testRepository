@@ -19,6 +19,21 @@
     --sidebar-border: #f0d6f6;
     --sidebar-ring: #381b4c;
 
+    --badge-bg: #f0f0f0;
+    --badge-text: #333;
+    --badge-bg-hover: #e0e0e0;
+    --badge-secondary-bg: #d0d0d0;
+    --badge-secondary-text: #444;
+    --badge-secondary-bg-hover: #c0c0c0;
+    --badge-destructive-bg: #ffdddd;
+    --badge-destructive-text: #ff0000;
+    --badge-destructive-bg-hover: #ffcccc;
+    --badge-outline-text: #555;
+
+    --table-header-bg: #381b4c; /* lavender-400 */
+    --table-row-odd-bg: #e5eeff; /* reflexBlue-100 */
+    --table-row-even-bg: #eef4f6; /* faintingLight-100 */
+
     /* For Chart */
     --chart-1: 12 76% 61%;
     --chart-2: 173 58% 39%;
@@ -29,14 +44,29 @@
 
   /* Dark mode overrides */
   .dark {
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: var(--customNeutral-100);
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-background: #1a1a1a; /* customNeutral color */
+    --sidebar-foreground: #f2f2f2;
+    --sidebar-primary: #381b4c;
+    --sidebar-primary-foreground: #F2F2F2;
+    --sidebar-accent: #1a1a1a; /* customNeutral color */
+    --sidebar-accent-foreground: #f2f2f2;
+    --sidebar-border: #1a1a1a; /* customNeutral color */
+    --sidebar-ring: #381b4c;
+
+    --badge-bg: #f0f0f0;
+    --badge-text: #333;
+    --badge-bg-hover: #e0e0e0;
+    --badge-secondary-bg: #d0d0d0;
+    --badge-secondary-text: #444;
+    --badge-secondary-bg-hover: #c0c0c0;
+    --badge-destructive-bg: #ffdddd;
+    --badge-destructive-text: #ff0000;
+    --badge-destructive-bg-hover: #ffcccc;
+    --badge-outline-text: #555;
+
+    --table-header-bg: #1a1a1a; /* customNeutral-400 */
+    --table-row-odd-bg: #626262; /* customNeutral-300 */
+    --table-row-even-bg: #1a1a1a; /* customNeutral-400 */
 
     /* For Chart in dark mode */
     --chart-1: 220 70% 50%;
