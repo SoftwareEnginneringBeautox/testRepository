@@ -347,21 +347,75 @@ function AdministratorDashboard() {
   };
 
   const getReminderLabel = (sessionDateStr) => {
-    const today = new Date();
-    const tomorrow = new Date();
-    const dayAfterTomorrow = new Date();
-
-    tomorrow.setDate(today.getDate() + 1);
-    dayAfterTomorrow.setDate(today.getDate() + 2);
-
-    const format = (date) => date.toISOString().split("T")[0];
-    const sessionDate = sessionDateStr.slice(0, 10);
-
-    if (sessionDate === format(today)) return "Today";
-    if (sessionDate === format(tomorrow)) return "Tomorrow";
-    if (sessionDate === format(dayAfterTomorrow)) return "Day After Tomorrow";
-    return null;
+    // Guard against invalid input
+    if (!sessionDateStr || typeof sessionDateStr !== 'string') {
+      console.warn('Invalid date format:', sessionDateStr);
+      return null;
+    }
+  
+    try {
+      // Create a date object from the full date string to properly handle timezone
+      const sessionDate = new Date(sessionDateStr);
+      
+      // Check if date is valid
+      if (isNaN(sessionDate.getTime())) {
+        console.warn('Invalid session date:', sessionDateStr);
+        return null;
+      }
+  
+      // Extract year, month, and day FROM THE LOCAL TIMEZONE representation
+      const sessionYear = sessionDate.getFullYear();
+      const sessionMonth = sessionDate.getMonth();
+      const sessionDay = sessionDate.getDate();
+      
+      // Get today's date in the same local timezone
+      const today = new Date();
+      
+      // Compare only year, month, day in the local timezone
+      const isSameDay = (year, month, day) => {
+        return (
+          year === today.getFullYear() &&
+          month === today.getMonth() &&
+          day === today.getDate()
+        );
+      };
+  
+      // Calculate tomorrow and day after tomorrow
+      const tomorrow = new Date(today);
+      tomorrow.setDate(today.getDate() + 1);
+      
+      const dayAfter = new Date(today);
+      dayAfter.setDate(today.getDate() + 2);
+      
+      // Debug logging with actual local dates
+      console.log(`Session local date: ${sessionDate.toLocaleDateString()}`);
+      console.log(`Today: ${today.toLocaleDateString()}`);
+      console.log(`Tomorrow: ${tomorrow.toLocaleDateString()}`);
+      
+      // Check if session date matches today/tomorrow/day after in LOCAL timezone
+      if (isSameDay(sessionYear, sessionMonth, sessionDay)) {
+        return 'Today';
+      } else if (
+        sessionYear === tomorrow.getFullYear() &&
+        sessionMonth === tomorrow.getMonth() &&
+        sessionDay === tomorrow.getDate()
+      ) {
+        return 'Tomorrow';
+      } else if (
+        sessionYear === dayAfter.getFullYear() &&
+        sessionMonth === dayAfter.getMonth() &&
+        sessionDay === dayAfter.getDate()
+      ) {
+        return 'Day After Tomorrow';
+      }
+      
+      return null;
+    } catch (error) {
+      console.error('Error in getReminderLabel:', error);
+      return null;
+    }
   };
+  
 
   // Safe date formatting function to handle potential invalid dates
   const formatSafeDate = (dateString, formatStr) => {
@@ -514,6 +568,7 @@ function AdministratorDashboard() {
                   {/* Display existing reminders for confirmed appointments */}
                   {reminders.length > 0
                     ? reminders.map((item, index) => (
+                      
                         <TableRow key={`reminder-${index}`}>
                           <TableCell className="flex items-center gap-2 sm:gap-4 text-sm sm:text-base">
                             <CalendarIcon className="w-4 h-4 sm:w-5 sm:h-5" />
