@@ -714,10 +714,10 @@ function LandingPage() {
         {/* Testimonials Section */}
         <section 
           id="testimonials" 
-          className="w-[85%] sm:w-[80%] mx-auto mb-8 bg-white py-8"
+          className="w-[92%] sm:w-[85%] md:w-[80%] mx-auto mb-8 bg-white py-12 sm:py-16"
           data-cy="testimonials"
         >
-          <div className="text-center mb-8">
+          <div className="text-center mb-16">
             <p className="text-purple-600 font-medium mb-2">Testimonials</p>
             <h2 
               className="text-3xl sm:text-4xl font-semibold bg-gradient-to-r from-reflexBlue-300 to-lavender-300 text-transparent bg-clip-text"
@@ -728,22 +728,22 @@ function LandingPage() {
           </div>
 
           <div 
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 sm:gap-8 mb-16 px-4 sm:px-0"
             data-cy="testimonials-grid"
           >
             {/* Testimonial 1 */}
-            <div className="bg-purple-100/70 rounded-2xl p-8 relative" data-cy="testimonial-1">
-              <div className="absolute top-0 left-8 transform -translate-y-1/2">
-                <div className="w-16 h-16 rounded-full overflow-hidden ring-4 ring-white bg-purple-100 flex items-center justify-center">
-                  <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="bg-purple-100/70 rounded-2xl p-4 sm:p-8 relative mt-8" data-cy="testimonial-1">
+              <div className="absolute top-0 left-4 sm:left-8 transform -translate-y-1/2">
+                <div className="w-14 sm:w-16 h-14 sm:h-16 rounded-full overflow-hidden ring-4 ring-white bg-purple-100 flex items-center justify-center">
+                  <svg className="w-7 sm:w-8 h-7 sm:h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
                 </div>
               </div>
-              <div className="text-center pt-10">
-                <h4 className="text-xl font-semibold text-gray-800 mb-1">Maria Angeles</h4>
-                <p className="text-purple-600 text-sm mb-6">Regular Client</p>
-                <p className="text-gray-600 text-sm leading-relaxed mb-6">
+              <div className="text-center pt-8 sm:pt-10">
+                <h4 className="text-lg sm:text-xl font-semibold text-gray-800 mb-1">Maria Angeles</h4>
+                <p className="text-purple-600 text-xs sm:text-sm mb-4 sm:mb-6">Regular Client</p>
+                <p className="text-gray-600 text-xs sm:text-sm leading-relaxed mb-4 sm:mb-6">
                   "Highly recommended! Staffs are very nice, they're also very
                   accommodating! Ain't gonna lie… mano-notice agad ang improvement
                   sa body. I also wanna mention that the clinic is always clean
@@ -751,11 +751,11 @@ function LandingPage() {
                 </p>
                 <div className="flex items-center justify-center gap-1">
                   {[1, 2, 3, 4].map((star) => (
-                    <svg key={star} className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                    <svg key={star} className="w-4 sm:w-5 h-4 sm:h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
                       <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                     </svg>
                   ))}
-                  <svg className="w-5 h-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-4 sm:w-5 h-4 sm:h-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                   </svg>
                 </div>
@@ -763,29 +763,29 @@ function LandingPage() {
             </div>
 
             {/* Testimonial 2 */}
-            <div className="bg-purple-100/70 rounded-2xl p-8 relative" data-cy="testimonial-2">
-              <div className="absolute top-0 left-8 transform -translate-y-1/2">
-                <div className="w-16 h-16 rounded-full overflow-hidden ring-4 ring-white bg-purple-100 flex items-center justify-center">
-                  <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="bg-purple-100/70 rounded-2xl p-4 sm:p-8 relative mt-8" data-cy="testimonial-2">
+              <div className="absolute top-0 left-4 sm:left-8 transform -translate-y-1/2">
+                <div className="w-14 sm:w-16 h-14 sm:h-16 rounded-full overflow-hidden ring-4 ring-white bg-purple-100 flex items-center justify-center">
+                  <svg className="w-7 sm:w-8 h-7 sm:h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
                 </div>
               </div>
-              <div className="text-center pt-10">
-                <h4 className="text-xl font-semibold text-gray-800 mb-1">Sarah Rodriguez</h4>
-                <p className="text-purple-600 text-sm mb-6">Me-So Sexy Package Client</p>
-                <p className="text-gray-600 text-sm leading-relaxed mb-6">
+              <div className="text-center pt-8 sm:pt-10">
+                <h4 className="text-lg sm:text-xl font-semibold text-gray-800 mb-1">Sarah Rodriguez</h4>
+                <p className="text-purple-600 text-xs sm:text-sm mb-4 sm:mb-6">Me-So Sexy Package Client</p>
+                <p className="text-gray-600 text-xs sm:text-sm leading-relaxed mb-4 sm:mb-6">
                   "Highly recommended! I love the service here. The mesolipo is
                   really effective. My arms have gotten noticeably thinner even
                   after just 1 session, even my friends noticed it."
                 </p>
                 <div className="flex items-center justify-center gap-1">
                   {[1, 2, 3, 4].map((star) => (
-                    <svg key={star} className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                    <svg key={star} className="w-4 sm:w-5 h-4 sm:h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
                       <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                     </svg>
                   ))}
-                  <svg className="w-5 h-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-4 sm:w-5 h-4 sm:h-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                   </svg>
                 </div>
@@ -793,29 +793,29 @@ function LandingPage() {
               </div>
 
             {/* Testimonial 3 */}
-            <div className="bg-purple-100/70 rounded-2xl p-8 relative" data-cy="testimonial-3">
-              <div className="absolute top-0 left-8 transform -translate-y-1/2">
-                <div className="w-16 h-16 rounded-full overflow-hidden ring-4 ring-white bg-purple-100 flex items-center justify-center">
-                  <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="bg-purple-100/70 rounded-2xl p-4 sm:p-8 relative mt-8" data-cy="testimonial-3">
+              <div className="absolute top-0 left-4 sm:left-8 transform -translate-y-1/2">
+                <div className="w-14 sm:w-16 h-14 sm:h-16 rounded-full overflow-hidden ring-4 ring-white bg-purple-100 flex items-center justify-center">
+                  <svg className="w-7 sm:w-8 h-7 sm:h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
                 </div>
               </div>
-              <div className="text-center pt-10">
-                <h4 className="text-xl font-semibold text-gray-800 mb-1">Jane Dela Cruz</h4>
-                <p className="text-purple-600 text-sm mb-6">Gluta Drips Package Client</p>
-                <p className="text-gray-600 text-sm leading-relaxed mb-6">
+              <div className="text-center pt-8 sm:pt-10">
+                <h4 className="text-lg sm:text-xl font-semibold text-gray-800 mb-1">Jane Dela Cruz</h4>
+                <p className="text-purple-600 text-xs sm:text-sm mb-4 sm:mb-6">Gluta Drips Package Client</p>
+                <p className="text-gray-600 text-xs sm:text-sm leading-relaxed mb-4 sm:mb-6">
                   "Third Empress Gluta Drip ko na dito, and super happy ako! After a few
                   sessions, pumantay na skin tone ko at nag-lighten dark spots ko.
                   Super worth it! Babalik ako for more!"
                 </p>
                 <div className="flex items-center justify-center gap-1">
                   {[1, 2, 3, 4].map((star) => (
-                    <svg key={star} className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                    <svg key={star} className="w-4 sm:w-5 h-4 sm:h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
                       <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                     </svg>
                   ))}
-                  <svg className="w-5 h-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-4 sm:w-5 h-4 sm:h-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                   </svg>
                 </div>
