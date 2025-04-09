@@ -248,140 +248,177 @@ function FinancialOverview() {
     }
 
     const doc = new jsPDF({
-      orientation: "portrait",
+      orientation: "portrait", // Changed from landscape to portrait
       unit: "pt",
       format: "a4"
     });
 
+    // Set document properties
     doc.setFont("helvetica");
+    doc.setFontSize(16);
 
-    const margin = 40;
+    // Page dimensions
     const pageWidth = doc.internal.pageSize.width;
-    const contentWidth = pageWidth - margin * 2;
-    const startY = margin + 10;
+    const pageHeight = doc.internal.pageSize.height;
+    const margin = 40;
+    const availableWidth = pageWidth - margin * 2;
 
+    // Format current date
     const currentDate = new Date();
-    const formattedCurrentDate = format(currentDate, "MMMM dd, yyyy");
-    const formattedMonthForFilename = format(
+    const formattedCurrentDate = format(
       currentDate,
       "MMMM dd, yyyy"
-    ).replace(/^([a-z])/, (match) => match.toUpperCase());
+    ).toUpperCase();
+    const formattedDateForFilename = format(currentDate, "MMMM_dd_yyyy");
 
+    // Add title (adjusted for portrait layout)
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(14);
-
-    const title = `BEAUTOX WEEKLY SALES REPORT`;
-    const dateSubtitle = `AS OF ${formattedCurrentDate.toUpperCase()}`;
-
-    doc.text(title, pageWidth / 2, margin, { align: "center" });
-    doc.text(dateSubtitle, pageWidth / 2, margin + 20, { align: "center" });
-
-    const headers = [
-      "CLIENT",
-      "PIC",
-      "DATE",
-      "PAYMENT",
-      "PACKAGES",
-      "TREATMENT",
-      "AMOUNT",
-      "REF NO"
-    ];
-
-    const tableData = salesData.map((sale) => {
-      const transactionDate = sale.date_transacted
-        ? format(new Date(sale.date_transacted), "MMMM dd, yyyy").toUpperCase()
-        : "N/A";
-      const paymentValue = (() => {
-        const rawPayment =
-          sale.payment || sale.totalAmount || sale.total_amount;
-        const numericPayment = parseFloat(rawPayment);
-        return !isNaN(numericPayment)
-          ? `PHP ${numericPayment.toFixed(2)}`
-          : "PHP 0.00";
-      })();
-      const treatmentValue =
-        sale.treatment && sale.treatment.trim().length > 0
-          ? sale.treatment.toUpperCase()
-          : "N/A";
-
-      return [
-        (sale.client || "N/A").toUpperCase(),
-        (sale.person_in_charge || "N/A").toUpperCase(),
-        transactionDate,
-        (sale.payment_method || "N/A").toUpperCase(),
-        (sale.packages || "N/A").toUpperCase(),
-        treatmentValue,
-        paymentValue,
-        (sale.reference_no || "N/A").toUpperCase()
-      ];
+    doc.text(`BEAUTOX WEEKLY`, pageWidth / 2, margin + 10, { align: "center" });
+    doc.text(`SALES REPORT`, pageWidth / 2, margin + 30, { align: "center" });
+    doc.text(`AS OF ${formattedCurrentDate}`, pageWidth / 2, margin + 50, {
+      align: "center"
     });
 
+    // Define base column configuration (adjusted for portrait layout)
+    const baseColumns = [
+      { header: "CLIENT", width: 80 },
+      { header: "PIC", width: 60 },
+      { header: "DATE", width: 60 },
+      { header: "MODE", width: 40 },
+      { header: "PKG", width: 70 }, // Shortened "PACKAGE" to "PKG" for space
+      { header: "TREATMENT", width: 90 },
+      { header: "TOTAL", width: 60 },
+      { header: "REF#", width: 50 }
+    ];
+
+    // Calculate total natural width
+    const naturalWidth = baseColumns.reduce((sum, col) => sum + col.width, 0);
+
+    // Calculate scaling factor to fit available width
+    const scaleFactor = availableWidth / naturalWidth;
+
+    // Scale column widths
+    const headers = baseColumns.map((col) => ({
+      header: col.header,
+      width: col.width * scaleFactor
+    }));
+
+    // Manual currency formatting function
+    const formatCurrency = (amount) => {
+      if (!amount || isNaN(amount) || parseFloat(amount) === 0) return "P0";
+      const num = Math.abs(Math.round(parseFloat(amount)));
+      const formatted = num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      return `P${formatted}`;
+    };
+
+    // Format payment method
+    const formatPaymentMethod = (method) => {
+      if (!method) return "N/A";
+      return method.toLowerCase().includes("full") ? "FULL" : "INST"; // Shortened "INSTALL" to "INST"
+    };
+
+    // Prepare table data with shorter formats for portrait layout
+    const tableData = salesData.map((sale) => [
+      (sale.client || "N/A").toUpperCase(),
+      (sale.person_in_charge || "N/A").toUpperCase(),
+      sale.date_transacted
+        ? format(new Date(sale.date_transacted), "MM/dd/yy").toUpperCase()
+        : "N/A",
+      formatPaymentMethod(sale.payment_method),
+      (sale.packages || "N/A").toUpperCase(),
+      (sale.treatment || "N/A").toUpperCase(),
+      formatCurrency(sale.payment),
+      (sale.reference_no || "N/A").toUpperCase()
+    ]);
+
+    // Configure and draw the table
     autoTable(doc, {
-      head: [headers],
+      head: [headers.map((h) => h.header)],
       body: tableData,
-      startY: startY + 40,
-      margin: { top: margin, left: margin, right: margin, bottom: margin },
-      theme: "grid",
+      startY: margin + 70, // Adjusted starting position for portrait layout
+      margin: { top: margin, right: margin, bottom: margin, left: margin },
+      columnStyles: {
+        ...headers.reduce((acc, col, index) => {
+          acc[index] = {
+            cellWidth: col.width,
+            fontSize: 8,
+            cellPadding: 3,
+            overflow: "linebreak"
+          };
+          return acc;
+        }, {}),
+        6: { halign: "right", cellPadding: { right: 5 } } // Total amount column
+      },
       styles: {
         font: "helvetica",
         fontSize: 8,
+        cellPadding: 3,
         overflow: "linebreak",
-        cellPadding: 2,
-        lineWidth: 0.5,
-        lineColor: "#000000"
+        cellWidth: "wrap",
+        minCellHeight: 14,
+        valign: "middle"
       },
       headStyles: {
         fillColor: "#381B4C",
         textColor: "#FFFFFF",
-        fontSize: 9,
+        fontSize: 8,
+        fontStyle: "bold",
         halign: "center",
         valign: "middle",
-        fontStyle: "bold",
-        minCellHeight: 20
+        lineWidth: 0 // Remove header borders
       },
-      bodyStyles: {
-        valign: "middle",
-        lineWidth: { top: 0.2, bottom: 0.2 },
-        lineColor: "#000000"
+      alternateRowStyles: {
+        fillColor: "#F8F8F8"
       },
-      columnStyles: {
-        0: { cellWidth: contentWidth * 0.15 },
-        1: { cellWidth: contentWidth * 0.1 },
-        2: { cellWidth: contentWidth * 0.15 },
-        3: { cellWidth: contentWidth * 0.1 },
-        4: { cellWidth: contentWidth * 0.15 },
-        5: { cellWidth: contentWidth * 0.15 },
-        6: { cellWidth: contentWidth * 0.1, halign: "right" },
-        7: { cellWidth: contentWidth * 0.1 }
-      },
-      didDrawPage: function () {
+      didDrawPage: function (data) {
         doc.setFontSize(8);
         doc.text(
-          `Page ${doc.getNumberOfPages()}`,
-          pageWidth - margin - 30,
-          doc.internal.pageSize.height - 10
+          `Page ${data.pageNumber} of ${doc.internal.getNumberOfPages()}`,
+          pageWidth - margin,
+          pageHeight - 10,
+          { align: "right" }
         );
+      },
+      willDrawCell: function (data) {
+        if (
+          data.cell.text &&
+          typeof data.cell.text === "string" &&
+          data.column.index !== 6
+        ) {
+          const maxWidth =
+            data.cell.styles.cellWidth - data.cell.styles.cellPadding * 2;
+          const textWidth =
+            doc.getStringUnitWidth(data.cell.text) * data.cell.styles.fontSize;
+
+          if (textWidth > maxWidth) {
+            const charactersPerLine = Math.floor(
+              (maxWidth / textWidth) * data.cell.text.length
+            );
+            data.cell.text =
+              data.cell.text.substring(0, charactersPerLine - 3) + "...";
+          }
+        }
       }
     });
 
-    const totalPayment = salesData.reduce((total, sale) => {
-      const payment = parseFloat(sale.payment);
-      return total + (isNaN(payment) ? 0 : payment);
+    // Calculate and add total
+    const totalAmount = salesData.reduce((sum, sale) => {
+      const amount = parseFloat(sale.payment) || 0;
+      return sum + amount;
     }, 0);
 
-    doc.setFontSize(11);
+    // Add total at the bottom
+    const finalY = doc.lastAutoTable.finalY + 20;
     doc.setFont("helvetica", "bold");
-    doc.text(`TOTAL`, margin, doc.lastAutoTable.finalY + 20);
     doc.text(
-      `PHP ${totalPayment}`,
-      pageWidth - margin - 50,
-      doc.lastAutoTable.finalY + 20
+      `BEAUTOX WEEKLY SALES REPORT AS OF ${formattedCurrentDate}`,
+      pageWidth / 2,
+      margin + 30,
+      { align: "center" }
     );
 
-    const filename = `Beautox_WeeklySalesReport_${formattedMonthForFilename
-      .replace(/,\s/g, "_")
-      .replace(/\s/g, "_")}.pdf`;
-    doc.save(filename);
+    // Save the PDF
+    doc.save(`Beautox_WeeklySalesReport_${formattedDateForFilename}.pdf`);
   };
 
   const generateMonthlySalesReport = (salesData, expensesData) => {
@@ -393,6 +430,39 @@ function FinancialOverview() {
       console.warn("No expense data available. Proceeding with zero expenses.");
     }
 
+    const doc = new jsPDF({
+      orientation: "portrait",
+      unit: "pt",
+      format: "a4"
+    });
+
+    // Set document properties
+    doc.setFont("helvetica");
+    doc.setFontSize(16);
+
+    // Page dimensions
+    const pageWidth = doc.internal.pageSize.width;
+    const pageHeight = doc.internal.pageSize.height;
+    const margin = 40;
+    const availableWidth = pageWidth - margin * 2;
+
+    // Format current date
+    const currentDate = new Date();
+    const formattedCurrentDate = format(
+      currentDate,
+      "MMMM dd, yyyy"
+    ).toUpperCase();
+    const formattedDateForFilename = format(currentDate, "MMMM_dd_yyyy");
+
+    // Add title
+    doc.setFont("helvetica", "bold");
+    doc.text(
+      `BEAUTOX PRISM MONTHLY SALES REPORT AS OF ${formattedCurrentDate}`,
+      pageWidth / 2,
+      margin + 30,
+      { align: "center" }
+    );
+
     // Compute expense totals grouped by category
     const computeExpenseCategoryTotals = () => {
       return expensesData.reduce((acc, expense) => {
@@ -403,7 +473,7 @@ function FinancialOverview() {
       }, {});
     };
 
-    // Compute total sales from salesData
+    // Compute total sales
     const computeTotalSales = () => {
       return salesData.reduce((sum, sale) => {
         const rawPayment =
@@ -421,51 +491,103 @@ function FinancialOverview() {
     const totalSales = computeTotalSales();
     const totalProfit = totalSales - monthlyExpenses;
 
-    const doc = new jsPDF({
-      orientation: "portrait",
-      unit: "mm",
-      format: "a4"
-    });
-    const pageWidth = doc.internal.pageSize.getWidth();
+    // Format currency
+    const formatCurrency = (amount) => {
+      if (!amount || isNaN(amount) || parseFloat(amount) === 0) return "P0";
+      const num = Math.abs(Math.round(parseFloat(amount)));
+      const formatted = num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      return `P${formatted}`;
+    };
 
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(16);
-    const reportTitle = "BEAUTOX PRISM MONTHLY SALES REPORT";
-    const currentDate = new Date();
-    const reportMonth = format(currentDate, "MMMM yyyy").toUpperCase();
-    doc.text(reportTitle, pageWidth / 2, 20, { align: "center" });
-    doc.setFontSize(12);
-    doc.text(reportMonth, pageWidth / 2, 28, { align: "center" });
-
-    let y = 40;
-    doc.setFont("helvetica", "normal");
-
-    Object.entries(expenseCategoryTotals)
+    // Prepare expenses data for table
+    const expensesTableData = Object.entries(expenseCategoryTotals)
       .sort((a, b) => a[0].localeCompare(b[0]))
-      .forEach(([category, total]) => {
-        doc.text(`${category.toUpperCase()}`, 10, y);
-        doc.text(`PHP ${total}`, pageWidth - 10, y, { align: "right" });
-        y += 10;
-      });
+      .map(([category, amount]) => [
+        category.toUpperCase(),
+        formatCurrency(amount)
+      ]);
 
-    y += 5;
+    // Configure and draw the expenses table
+    autoTable(doc, {
+      head: [["CATEGORY", "AMOUNT"]],
+      body: expensesTableData,
+      startY: margin + 70,
+      margin: { top: margin, right: margin, bottom: margin, left: margin },
+      columnStyles: {
+        0: { cellWidth: "auto", halign: "left" },
+        1: { cellWidth: "auto", halign: "right" }
+      },
+      styles: {
+        font: "helvetica",
+        fontSize: 10,
+        cellPadding: 5,
+        overflow: "linebreak",
+        cellWidth: "wrap",
+        minCellHeight: 14,
+        valign: "middle"
+      },
+      headStyles: {
+        fillColor: "#381B4C",
+        textColor: "#FFFFFF",
+        fontSize: 10,
+        fontStyle: "bold",
+        halign: "center",
+        valign: "middle",
+        lineWidth: 0
+      },
+      alternateRowStyles: {
+        fillColor: "#F8F8F8"
+      },
+      didDrawPage: function (data) {
+        doc.setFontSize(8);
+        doc.text(
+          `Page ${data.pageNumber} of ${doc.internal.getNumberOfPages()}`,
+          pageWidth - margin,
+          pageHeight - 10,
+          { align: "right" }
+        );
+      }
+    });
+
+    // Add summary section
+    const finalY = doc.lastAutoTable.finalY + 20;
     doc.setFont("helvetica", "bold");
-    doc.text("TOTAL SALES", 10, y);
-    doc.text(`PHP ${totalSales}`, pageWidth - 10, y, { align: "right" });
+    doc.setFontSize(12);
 
-    y += 10;
+    // Add total sales
+    doc.text("TOTAL SALES:", margin, finalY);
+    doc.text(formatCurrency(totalSales), pageWidth - margin, finalY, {
+      align: "right"
+    });
+
+    // Add total expenses
+    doc.text("TOTAL EXPENSES:", margin, finalY + 20);
+    doc.text(formatCurrency(monthlyExpenses), pageWidth - margin, finalY + 20, {
+      align: "right"
+    });
+
+    // Add separator line
     doc.setLineWidth(0.5);
-    doc.line(10, y, pageWidth - 10, y);
+    doc.line(margin, finalY + 30, pageWidth - margin, finalY + 30);
 
-    y += 10;
+    // Add final total
     doc.setFontSize(14);
-    doc.text("TOTAL PROFIT", 10, y);
-    doc.text(`PHP ${totalProfit}`, pageWidth - 10, y, { align: "right" });
+    doc.text(
+      totalProfit < 0 ? "TOTAL LOSS:" : "TOTAL PROFIT:",
+      margin,
+      finalY + 50
+    );
+    doc.text(
+      formatCurrency(Math.abs(totalProfit)),
+      pageWidth - margin,
+      finalY + 50,
+      {
+        align: "right"
+      }
+    );
 
-    const formattedDate = format(currentDate, "MMMM_dd_yyyy");
-    const filename = `Beautox_MonthlySalesReport_${formattedDate}.pdf`;
-
-    doc.save(filename);
+    // Save the PDF
+    doc.save(`Beautox_MonthlySalesReport_${formattedDateForFilename}.pdf`);
   };
 
   // Category management functions

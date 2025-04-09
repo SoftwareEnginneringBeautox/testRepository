@@ -51,7 +51,7 @@ const Table = React.forwardRef(
         <div className="w-full overflow-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-transparent">
           <table
             ref={ref}
-            className="w-full border-collapse text-sm text-[var(--table-text)]"
+            className="w-full border-collapse text-sm"
             {...props}
           >
             {children}
@@ -79,7 +79,7 @@ const TableHeader = React.forwardRef(({ className, ...props }, ref) => (
   <thead
     ref={ref}
     className={cn(
-      "border-b bg-lavender-400 dark:border-customNeutral-300",
+      "border-b bg-lavender-400 dark:bg-customNeutral-500",
       className
     )}
     {...props}

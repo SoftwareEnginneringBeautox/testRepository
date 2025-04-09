@@ -135,6 +135,7 @@ function PatientRecordsDatabase() {
       }
     });
 
+    console.log("Applying column filters:", updatedColumns); // Add this for debugging
     setSelectedColumns(updatedColumns);
   };
 
@@ -514,76 +515,116 @@ function PatientRecordsDatabase() {
       return;
     }
 
-    const doc = new jsPDF({
+    // First create a temporary jsPDF instance to measure the table
+    const tempDoc = new jsPDF({
       orientation: "landscape",
       unit: "pt",
       format: "a4"
     });
 
-    doc.setFont("helvetica");
+    const pageWidth = tempDoc.internal.pageSize.width;
+    const pageHeight = tempDoc.internal.pageSize.height;
+    const margin = 40;
+    const availableWidth = pageWidth - margin * 2;
+    const availableHeight = pageHeight - margin * 2;
 
-    const margin = 36;
-    const pageWidth = doc.internal.pageSize.width;
-    const startY = margin + 10;
-
-    const currentDate = new Date();
-    const formattedCurrentDate = format(
-      currentDate,
-      "MMMM dd, yyyy"
-    ).toUpperCase();
-    const formattedDateForFilename = format(currentDate, "MMMM dd, yyyy");
-
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(16);
-    doc.text(
-      `BEAUTOX PATIENT RECORDS REPORT AS OF ${formattedCurrentDate}`,
-      pageWidth / 2,
-      margin,
-      { align: "center" }
-    );
-
-    const headers = [
-      "CLIENT",
-      "DATE OF SESSION",
-      "TIME OF SESSION",
-      "CONTACT NUMBER",
-      "AGE",
-      "EMAIL",
-      "PERSON IN CHARGE",
-      "PACKAGE",
-      "TREATMENT",
-      "CONSENT STATUS",
-      "PAYMENT METHOD",
-      "TOTAL AMOUNT",
-      "AMOUNT PAID",
-      "REMAINING BALANCE",
-      "REFERENCE NO.",
-      "PAID"
+    // Define base column configuration
+    const baseColumns = [
+      { header: "CLIENT", width: 100 },
+      { header: "DATE", width: 70 },
+      { header: "TIME", width: 60 },
+      { header: "CONTACT", width: 80 },
+      { header: "AGE", width: 35 },
+      { header: "EMAIL", width: 120 },
+      { header: "PIC", width: 70 },
+      { header: "PACKAGE", width: 100 },
+      { header: "TREATMENT", width: 120 },
+      { header: "CS", width: 30 }, // Changed from CONSENT to CS
+      { header: "MODE", width: 50 },
+      { header: "TOTAL", width: 70 },
+      { header: "PAID", width: 70 },
+      { header: "BALANCE", width: 70 },
+      { header: "REF#", width: 70 }
     ];
 
+    // Calculate total natural width
+    const naturalWidth = baseColumns.reduce((sum, col) => sum + col.width, 0);
+
+    // Calculate scaling factor to fit available width
+    const scaleFactor = availableWidth / naturalWidth;
+
+    // Scale column widths
+    const headers = baseColumns.map((col) => ({
+      header: col.header,
+      width: col.width * scaleFactor
+    }));
+
+    // Helper functions
     const formatDate = (date) =>
-      date ? format(new Date(date), "MMMM dd, yyyy").toUpperCase() : "N/A";
+      date ? format(new Date(date), "MM/dd/yy").toUpperCase() : "N/A";
+
     const formatTime = (time) => {
       if (!time) return "N/A";
       const dateObj = new Date(`1970-01-01T${time}`);
       return format(dateObj, "hh:mm a").toUpperCase();
     };
 
+    // Manual currency formatting function
+    const formatCurrency = (amount) => {
+      // Handle zero, null, undefined, or NaN explicitly
+      if (!amount || isNaN(amount) || parseFloat(amount) === 0) return "P0";
+
+      // Convert to absolute number and round to remove decimals
+      const num = Math.abs(Math.round(parseFloat(amount)));
+
+      // Convert to string and add thousand separators
+      const formatted = num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+      return `P${formatted}`;
+    };
+
+    const formatPaymentMethod = (method) => {
+      if (!method) return "N/A";
+      return method.toLowerCase().includes("full") ? "FULL" : "INSTALL";
+    };
+
+    // Create the actual document
+    const doc = new jsPDF({
+      orientation: "landscape",
+      unit: "pt",
+      format: "a4"
+    });
+
+    // Format current date
+    const currentDate = new Date();
+    const formattedCurrentDate = format(
+      currentDate,
+      "MMMM dd, yyyy"
+    ).toUpperCase();
+    const formattedDateForFilename = format(currentDate, "MMMM_dd_yyyy");
+
+    // Add title
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(16);
+    doc.text(
+      `BEAUTOX PATIENT RECORDS REPORT AS OF ${formattedCurrentDate}`,
+      pageWidth / 2,
+      margin + 10,
+      { align: "center" }
+    );
+
+    // Prepare table data
     const tableData = patientRecords.map((record) => {
       const total = parseFloat(record.total_amount ?? "0");
-      const paid = parseFloat(record.amount_paid || 0);
+      const paid = parseFloat(record.amount_paid || "0");
       const remaining = total - paid;
-      const isPaidDisplay =
-        record.isPaid === null || record.isPaid === undefined
-          ? "-"
-          : record.isPaid.toUpperCase();
 
       return [
         record.client || record.patient_name?.toUpperCase() || "N/A",
         formatDate(record.dateTransacted || record.date_of_session),
         formatTime(record.nextSessionTime || record.time_of_session),
         record.contact_number || "N/A",
-        record.age || "N/A",
+        record.age?.toString() || "N/A", // Age as is, no truncation needed
         record.email || "N/A",
         (record.personInCharge || record.person_in_charge)?.toUpperCase() ||
           "N/A",
@@ -591,54 +632,93 @@ function PatientRecordsDatabase() {
         Array.isArray(record.treatments)
           ? getTreatmentNames(record.treatments).join(", ").toUpperCase()
           : record.treatment?.toUpperCase() || "N/A",
-        typeof record.consent_form_signed === "boolean"
-          ? record.consent_form_signed
-            ? "SIGNED"
-            : "NOT SIGNED"
-          : record.consentStatus || "N/A",
-        (record.paymentMethod || record.payment_method)?.toUpperCase() || "N/A",
-        `PHP ${total.toFixed(2)}`,
-        `PHP ${paid.toFixed(2)}`,
-        `PHP ${remaining.toFixed(2)}`,
-        record.reference_number || "N/A",
-        isPaidDisplay
+        record.consent_form_signed ? "Y" : "N",
+        formatPaymentMethod(record.paymentMethod || record.payment_method),
+        formatCurrency(total),
+        formatCurrency(paid),
+        formatCurrency(remaining),
+        record.reference_number || "N/A"
       ];
     });
 
+    // Configure and draw the table
     autoTable(doc, {
-      head: [headers],
+      head: [headers.map((h) => h.header)],
       body: tableData,
-      startY: startY + 20,
-      margin: { top: margin, left: margin, right: margin, bottom: margin },
-      theme: "grid",
+      startY: margin + 30,
+      margin: { top: margin, right: margin, bottom: margin, left: margin },
+      columnStyles: {
+        ...headers.reduce((acc, col, index) => {
+          acc[index] = {
+            cellWidth: col.width,
+            fontSize: 8,
+            cellPadding: 3,
+            overflow: "linebreak"
+          };
+          return acc;
+        }, {}),
+        // Special handling for specific columns
+        4: { halign: "center" }, // Age column centered
+        9: { halign: "center" }, // CS (Consent) column centered
+        11: { halign: "right", cellPadding: { right: 5 } }, // Total
+        12: { halign: "right", cellPadding: { right: 5 } }, // Paid
+        13: { halign: "right", cellPadding: { right: 5 } } // Balance
+      },
       styles: {
         font: "helvetica",
-        fontSize: 10,
-        valign: "middle",
-        cellPadding: { top: 5, right: 5, bottom: 5, left: 5 }
+        fontSize: 8,
+        cellPadding: 3,
+        overflow: "linebreak",
+        cellWidth: "wrap",
+        minCellHeight: 14,
+        valign: "middle"
       },
       headStyles: {
         fillColor: "#381B4C",
         textColor: "#FFFFFF",
-        fontSize: 12,
-        halign: "center",
-        valign: "middle",
+        fontSize: 8,
         fontStyle: "bold",
-        lineWidth: 0.5,
-        lineColor: "#000000"
+        halign: "center",
+        valign: "middle"
       },
-      bodyStyles: {
-        valign: "middle",
-        lineWidth: 0.2,
-        lineColor: "#000000"
+      alternateRowStyles: {
+        fillColor: "#F8F8F8"
+      },
+      didDrawPage: function (data) {
+        doc.setFontSize(8);
+        doc.text(
+          `Page ${data.pageNumber} of ${doc.internal.getNumberOfPages()}`,
+          pageWidth - margin,
+          pageHeight - 10,
+          { align: "right" }
+        );
+      },
+      willDrawCell: function (data) {
+        // Handle text overflow except for age and currency columns
+        if (
+          data.cell.text &&
+          typeof data.cell.text === "string" &&
+          ![4, 9, 11, 12, 13].includes(data.column.index)
+        ) {
+          // Skip age, consent, and currency columns
+          const maxWidth =
+            data.cell.styles.cellWidth - data.cell.styles.cellPadding * 2;
+          const textWidth =
+            doc.getStringUnitWidth(data.cell.text) * data.cell.styles.fontSize;
+
+          if (textWidth > maxWidth) {
+            const charactersPerLine = Math.floor(
+              (maxWidth / textWidth) * data.cell.text.length
+            );
+            data.cell.text =
+              data.cell.text.substring(0, charactersPerLine - 3) + "...";
+          }
+        }
       }
     });
 
-    doc.save(
-      `Beautox_PatientRecordsReport_${formattedDateForFilename
-        .replace(/,\s/g, "_")
-        .replace(/\s/g, "_")}.pdf`
-    );
+    // Save the PDF
+    doc.save(`Beautox_PatientRecords_${formattedDateForFilename}.pdf`);
   };
 
   // Column mapping to determine visibility
@@ -702,8 +782,8 @@ function PatientRecordsDatabase() {
 
           <MultiSelectFilter
             options={columns}
-            selectedValues={selectedColumns}
-            setSelectedValues={setSelectedColumns}
+            selectedValues={tempSelectedColumns}
+            setSelectedValues={setTempSelectedColumns}
             placeholder="FILTER COLUMNS"
             mandatoryValues={["client", "dateofsession"]}
             showApplyButton={true}
