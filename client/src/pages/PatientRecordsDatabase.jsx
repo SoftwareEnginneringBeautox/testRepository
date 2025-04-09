@@ -5,6 +5,7 @@ import { useModal } from "@/hooks/useModal";
 import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/Button";
+import { Badge } from "@/components/ui/Badge";
 import ChevronLeftIcon from "@/assets/icons/ChevronLeftIcon";
 import PlusIcon from "@/assets/icons/PlusIcon";
 import SortIcon from "@/assets/icons/SortIcon";
@@ -803,86 +804,82 @@ function PatientRecordsDatabase() {
           <TableHeader>
             <TableRow>
               {/* Always show CLIENT column */}
-              <TableHead className="py-4 whitespace-nowrap">CLIENT</TableHead>
+              <TableHead className=" whitespace-nowrap">CLIENT</TableHead>
 
               {/* Always show DATE OF SESSION column */}
-              <TableHead className="py-4 text-center whitespace-nowrap">
+              <TableHead className=" text-center whitespace-nowrap">
                 DATE OF SESSION
               </TableHead>
 
               {/* Conditionally show other columns based on selectedColumns */}
               {isColumnVisible.timeofsession && (
-                <TableHead className="py-4 text-center whitespace-nowrap">
+                <TableHead className=" text-center whitespace-nowrap">
                   TIME OF SESSION
                 </TableHead>
               )}
 
               {isColumnVisible.contactnumber && (
-                <TableHead className="py-4 text-center whitespace-nowrap">
+                <TableHead className=" text-center whitespace-nowrap">
                   CONTACT NUMBER
                 </TableHead>
               )}
               {isColumnVisible.age && (
-                <TableHead className="py-4 text-center whitespace-nowrap">
+                <TableHead className=" text-center whitespace-nowrap">
                   AGE
                 </TableHead>
               )}
               {isColumnVisible.email && (
-                <TableHead className="py-4 text-center whitespace-nowrap">
+                <TableHead className=" text-center whitespace-nowrap">
                   EMAIL
                 </TableHead>
               )}
 
               {isColumnVisible.personincharge && (
-                <TableHead className="py-4 text-center whitespace-nowrap">
+                <TableHead className=" text-center whitespace-nowrap">
                   PERSON IN CHARGE
                 </TableHead>
               )}
 
               {isColumnVisible.package && (
-                <TableHead className="py-4 whitespace-nowrap">
-                  PACKAGE
-                </TableHead>
+                <TableHead className=" whitespace-nowrap">PACKAGE</TableHead>
               )}
 
               {isColumnVisible.treatment && (
-                <TableHead className="py-4 whitespace-nowrap">
-                  TREATMENT
-                </TableHead>
+                <TableHead className=" whitespace-nowrap">TREATMENT</TableHead>
               )}
 
               {isColumnVisible.consentformsigned && (
-                <TableHead className="py-4 text-center whitespace-nowrap">
+                <TableHead className=" text-center whitespace-nowrap">
                   CONSENT FORM SIGNED
                 </TableHead>
               )}
 
               {isColumnVisible.paymentmethod && (
-                <TableHead className="py-4 text-center whitespace-nowrap">
+                <TableHead className=" text-center whitespace-nowrap">
                   PAYMENT METHOD
                 </TableHead>
               )}
 
               {isColumnVisible.totalamount && (
-                <TableHead className="py-4 text-center whitespace-nowrap">
+                <TableHead className=" text-center whitespace-nowrap">
                   TOTAL AMOUNT
                 </TableHead>
               )}
 
               {isColumnVisible.amountpaid && (
-                <TableHead className="py-4 text-center whitespace-nowrap">
+                <TableHead className=" text-center whitespace-nowrap">
                   AMOUNT PAID
                 </TableHead>
               )}
 
               {isColumnVisible.remainingbalance && (
-                <TableHead className="py-4 text-center whitespace-nowrap">
+                <TableHead className=" text-center whitespace-nowrap">
                   REMAINING BALANCE
                 </TableHead>
               )}
 
               {isColumnVisible.referenceno && (
-                <TableHead className="py-4 text-center whitespace-nowrap">
+                <TableHead className=" text-center whitespace-nowrap">
                   REFERENCE NO.
                 </TableHead>
               )}
@@ -992,11 +989,29 @@ function PatientRecordsDatabase() {
                       className="text-left whitespace-nowrap"
                       data-cy={`record-treatment-${index}`}
                     >
-                      {Array.isArray(record.treatment_ids)
-                        ? getTreatmentNames(record.treatment_ids)
-                            .join(", ")
-                            .toUpperCase()
-                        : "N/A"}
+                      {Array.isArray(record.treatment_ids) &&
+                      record.treatment_ids.length > 0 ? (
+                        <div className="flex flex-col gap-1">
+                          {record.treatment_ids.map((id) => {
+                            const treatment = treatmentsList.find(
+                              (t) => t.id === id
+                            );
+                            return treatment ? (
+                              <Badge
+                                key={treatment.id}
+                                variant="outline"
+                                data-cy={`record-treatment-badge-${record.id}-${treatment.id}`}
+                              >
+                                + {treatment.treatment_name.toUpperCase()}
+                              </Badge>
+                            ) : null;
+                          })}
+                        </div>
+                      ) : (
+                        <span className="text-muted-foreground italic">
+                          N/A
+                        </span>
+                      )}
                     </TableCell>
                   )}
 
