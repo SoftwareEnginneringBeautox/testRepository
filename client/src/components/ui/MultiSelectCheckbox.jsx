@@ -89,7 +89,7 @@ const MultiSelectCheckbox = React.forwardRef(
         </div>
 
         {isOpen && (
-          <div className="absolute z-50 mt-1 w-full bg-customNeutral-100 dark:bg-customNeutral-400 dark:text-customNeutral-100 rounded-md border shadow-md">
+          <div className="absolute z-50 mt-1 w-full bg-customNeutral-100 dark:bg-customNeutral-400 dark:text-customNeutral-100 rounded-md shadow-md min-w-[var(--radix-select-trigger-width)]">
             <div className="p-2 max-h-60 overflow-y-auto">
               {Array.isArray(options) && options.length > 0 ? (
                 options.map((option) =>

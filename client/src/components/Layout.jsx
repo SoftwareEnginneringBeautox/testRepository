@@ -73,7 +73,7 @@ export default function Layout() {
           className={cn(
             "flex flex-col flex-1 items-center",
             !sidebarlessRoutes.includes(location.pathname.toLowerCase()) &&
-              "my-12 lg:my-16"
+              "my-16 lg:my-20"
           )}
         >
           <div className="flex flex-col flex-1 w-full gap-4">

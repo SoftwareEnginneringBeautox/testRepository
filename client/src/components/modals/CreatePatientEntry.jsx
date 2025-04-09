@@ -383,13 +383,13 @@ function CreatePatientEntry({ isOpen, onClose }) {
                   onChange={(e) => setContactNumber(e.target.value)}
                   className={` ${
                     formSubmitAttempted && formErrors.contactNumber
-                      ? "border-error-400"
+                      ? "border-red-500"
                       : ""
                   }`}
                 />
               </InputTextField>
               {formSubmitAttempted && formErrors.contactNumber && (
-                <p className="text-error-400 text-sm mt-1">
+                <p className="text-red-500 text-sm mt-1">
                   {formErrors.contactNumber}
                 </p>
               )}
@@ -408,13 +408,13 @@ function CreatePatientEntry({ isOpen, onClose }) {
                   onChange={(e) => setAge(e.target.value)}
                   className={` ${
                     formSubmitAttempted && formErrors.age
-                      ? "border-error-400"
+                      ? "border-red-500"
                       : ""
                   }`}
                 />
               </InputTextField>
               {formSubmitAttempted && formErrors.age && (
-                <p className="text-error-400 text-sm mt-1">{formErrors.age}</p>
+                <p className="text-red-500 text-sm mt-1">{formErrors.age}</p>
               )}
             </InputContainer>
 
@@ -428,17 +428,15 @@ function CreatePatientEntry({ isOpen, onClose }) {
                   placeholder="example@email.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className={`${
+                  className={` ${
                     formSubmitAttempted && formErrors.email
-                      ? "border-error-400"
+                      ? "border-red-500"
                       : ""
                   }`}
                 />
               </InputTextField>
               {formSubmitAttempted && formErrors.email && (
-                <p className="text-error-400 text-sm mt-1">
-                  {formErrors.email}
-                </p>
+                <p className="text-red-500 text-sm mt-1">{formErrors.email}</p>
               )}
             </InputContainer>
 
@@ -454,13 +452,11 @@ function CreatePatientEntry({ isOpen, onClose }) {
               >
                 <ModalSelectTrigger
                   data-cy="person-in-charge-select"
-                  icon={
-                    <UserIDIcon className="w-4 h-4 dark:text-customNeutral-100" />
-                  }
+                  icon={<UserIDIcon className="w-4 h-4" />}
                   placeholder="Select person in charge"
                   className={
                     formSubmitAttempted && formErrors.personInCharge
-                      ? "border-error-400"
+                      ? "border-red-500"
                       : ""
                   }
                 />
@@ -477,7 +473,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
                 </ModalSelectContent>
               </Select>
               {formSubmitAttempted && formErrors.personInCharge && (
-                <p className="text-error-400 text-sm mt-1">
+                <p className="text-red-500 text-sm mt-1">
                   {formErrors.personInCharge}
                 </p>
               )}
@@ -505,7 +501,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
                   placeholder="Select package"
                   className={
                     formSubmitAttempted && formErrors.packageOrTreatment
-                      ? "border-error-400"
+                      ? "border-red-500"
                       : ""
                   }
                 />
@@ -525,7 +521,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
                 </ModalSelectContent>
               </Select>
               {formSubmitAttempted && formErrors.packageOrTreatment && (
-                <p className="text-error-400 text-sm mt-1">
+                <p className="text-red-500 text-sm mt-1">
                   {formErrors.packageOrTreatment}
                 </p>
               )}
@@ -555,13 +551,13 @@ function CreatePatientEntry({ isOpen, onClose }) {
                 placeholder="Select treatments"
                 className={
                   formSubmitAttempted && formErrors.packageOrTreatment
-                    ? "border-error-400"
+                    ? "border-red-500"
                     : ""
                 }
               />
 
               {formSubmitAttempted && formErrors.packageOrTreatment && (
-                <p className="text-error-400 text-sm mt-1">
+                <p className="text-red-500 text-sm mt-1">
                   {formErrors.packageOrTreatment}
                 </p>
               )}
@@ -576,7 +572,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
                 </InputIcon>
                 <CurrencyInput
                   data-cy="amount-input"
-                  className="outline-none flex-1 bg-[#F5F3F0]"
+                  className="outline-none flex-1 "
                   prefix="₱"
                   placeholder="₱0.00"
                   decimalsLimit={2}
@@ -596,7 +592,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
                 </InputIcon>
                 <CurrencyInput
                   data-cy="package-discount-input"
-                  className="outline-none flex-1 bg-[#F5F3F0]"
+                  className="outline-none flex-1 "
                   suffix="%"
                   placeholder="0%"
                   decimalsLimit={2}
@@ -616,7 +612,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
                 </InputIcon>
                 <CurrencyInput
                   data-cy="total-amount-input"
-                  className="outline-none flex-1 bg-[#F5F3F0]"
+                  className="outline-none flex-1 "
                   prefix="₱"
                   placeholder="₱0.00"
                   decimalsLimit={2}
@@ -635,7 +631,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
                 </InputIcon>
                 <CurrencyInput
                   data-cy="amount-paid-input"
-                  className="outline-none flex-1 bg-[#F5F3F0]"
+                  className="outline-none flex-1 "
                   prefix="₱"
                   placeholder="₱0.00"
                   decimalsLimit={2}
@@ -655,7 +651,6 @@ function CreatePatientEntry({ isOpen, onClose }) {
                 </InputIcon>
                 <Input
                   readOnly
-                  className="bg-[#F5F3F0] text-gray-500"
                   value={
                     isNaN(remainingBalance)
                       ? ""
@@ -713,7 +708,6 @@ function CreatePatientEntry({ isOpen, onClose }) {
                 <Input
                   data-cy="date-of-session-input"
                   type="date"
-                  className="text-input bg-[#F5F3F0]"
                   placeholder="Date of Session"
                   value={dateOfSession}
                   onChange={(e) => setDateOfSession(e.target.value)}
@@ -721,7 +715,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
                 />
               </InputTextField>
               {formSubmitAttempted && formErrors.dateOfSession && (
-                <p className="text-error-400 text-sm mt-1">
+                <p className="text-red-500 text-sm mt-1">
                   {formErrors.dateOfSession}
                 </p>
               )}
@@ -736,7 +730,6 @@ function CreatePatientEntry({ isOpen, onClose }) {
                 <Input
                   data-cy="time-of-session-input"
                   type="time"
-                  className="text-input bg-[#F5F3F0]"
                   placeholder="Time of Session"
                   value={timeOfSession}
                   onChange={(e) => setTimeOfSession(e.target.value)}

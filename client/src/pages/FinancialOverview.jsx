@@ -695,13 +695,13 @@ function FinancialOverview() {
       </div>
 
       {/* Sales Tracker Section */}
-      <h2
-        className="font-bold text-xl md:text-[2rem] dark:text-customNeutral-100"
-        data-cy="sales-tracker-title"
-      >
-        SALES TRACKER
-      </h2>
-      <div data-cy="sales-chart-container">
+      <div data-cy="sales-chart-container" className="flex flex-col gap-4">
+        <h2
+          className="font-bold text-xl md:text-[2rem] dark:text-customNeutral-100"
+          data-cy="sales-tracker-title"
+        >
+          SALES TRACKER
+        </h2>
         <SalesChart
           chartData={chartData}
           chartConfig={chartConfig}

@@ -100,7 +100,7 @@ function CreateMonthlySales({ isOpen, onClose, onCreateSuccess, categories }) {
     <ModalContainer data-cy="create-monthly-expense-modal">
       <ModalHeader>
         <ModalIcon>
-          <PesoIcon />
+          <PesoIcon size={28} />
         </ModalIcon>
         <ModalTitle>CREATE MONTHLY EXPENSE ENTRY</ModalTitle>
       </ModalHeader>

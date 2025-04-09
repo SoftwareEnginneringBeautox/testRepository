@@ -323,7 +323,7 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
             </InputContainer>
 
             {/* PACKAGE */}
-            {/* <InputContainer>
+            <InputContainer>
               <InputLabel>PACKAGE</InputLabel>
               <Select
                 value={originalData.package_name}
@@ -403,7 +403,6 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
                 <Input
                   data-cy="total-amount-input"
                   readOnly
-                  className="bg-[#F5F3F0] text-gray-500"
                   value={
                     isNaN(formData.total_amount)
                       ? ""
@@ -444,7 +443,6 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
                 </InputIcon>
                 <Input
                   readOnly
-                  className="bg-[#F5F3F0] text-gray-500"
                   value={
                     isNaN(remainingBalance)
                       ? ""
@@ -480,7 +478,7 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
                   </label>
                 </div>
               </RadioGroup>
-            </InputContainer> */}
+            </InputContainer>
           </div>
 
           <div className="flex flex-row w-full gap-4">

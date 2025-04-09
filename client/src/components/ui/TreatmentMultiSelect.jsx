@@ -50,12 +50,12 @@ export function TreatmentMultiSelect({
         </div>
       </PopoverTrigger>
 
-      <PopoverContent className="min-w-[320px] bg-customNeutral-100 dark:bg-customNeutral-400 dark:text-customNeutral-100 shadow-md rounded-md p-2 max-h-60 overflow-y-auto">
+      <PopoverContent className=" bg-customNeutral-100 dark:bg-customNeutral-400 dark:text-customNeutral-100 shadow-md rounded-md p-2 max-h-60 overflow-y-auto min-w-[var(--radix-select-trigger-width)]">
         {Array.isArray(options) && options.length > 0 ? (
           options.map((option) => (
             <div
               key={option.value}
-              className="flex items-center gap-2 px-2 py-1.5 hover:bg-lavender-100 dark:hover:text-lavender-400 rounded-sm cursor-pointer"
+              className="flex items-center gap-2 px-2 py-1.5 hover:bg-lavender-100 dark:hover:text-lavender-400 rounded-sm cursor-pointer min-w-[var(--radix-select-trigger-width)]"
               onClick={(e) => {
                 e.stopPropagation();
                 handleChange(option.value);
