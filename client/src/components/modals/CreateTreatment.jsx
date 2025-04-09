@@ -133,7 +133,7 @@ function CreateTreatment({ isOpen, onClose }) {
                 </InputIcon>
                 <CurrencyInput
                   data-cy="treatment-price"
-                  className="outline-none flex-1 "
+                  className="outline-none flex-1 bg-transparent dark:text-customNeutral-100 dark:placeholder-customNeutral-300"
                   prefix="₱"
                   placeholder="₱0.00"
                   decimalsLimit={2}

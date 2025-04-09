@@ -78,9 +78,10 @@ const Input = React.forwardRef(
         type={type}
         className={cn(
           "flex-1 outline-none bg-transparent file:text-customNeutral-100 file:text-sm file:font-medium placeholder:text-customNeutral-300 disabled:cursor-not-allowed disabled:opacity-50 dark:file:text-customNeutral-100 dark:caret-lavender-100 dark:text-customNeutral-100 md:text-sm",
-          // Filter styles for date inputs
           type === "date" &&
-            "dark:[&::-webkit-calendar-picker-indicator]:invert dark:[&::-webkit-calendar-picker-indicator]:opacity-70",
+            "dark:[&::-webkit-calendar-picker-indicator]:invert dark:[&::-webkit-calendar-picker-indicator]:opacity-70 [&::-webkit-calendar-picker-indicator]:cursor-pointer ",
+          type === "time" &&
+            "dark:[&::-webkit-time-picker-indicator]:invert dark:[&::-webkit-time-picker-indicator]:opacity-70 [&::-webkit-time-picker-indicator]:cursor-pointer ",
           fullWidth && "w-full",
           className
         )}

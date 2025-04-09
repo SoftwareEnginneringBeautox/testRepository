@@ -160,7 +160,6 @@ function CreatePackage({ isOpen, onClose }) {
                   value={packageName}
                   onChange={(e) => setPackageName(e.target.value)}
                   required
-                  className="bg-[#F5F3F0]"
                 />
               </InputTextField>
             </InputContainer>
@@ -191,7 +190,6 @@ function CreatePackage({ isOpen, onClose }) {
                   value={numberOfTreatments}
                   onChange={(e) => setNumberOfTreatments(e.target.value)}
                   required
-                  className="bg-[#F5F3F0]"
                 />
               </InputTextField>
             </InputContainer>
@@ -204,7 +202,7 @@ function CreatePackage({ isOpen, onClose }) {
                 </InputIcon>
                 <CurrencyInput
                   data-cy="package-price"
-                  className="outline-none flex-1 bg-[#F5F3F0]"
+                  className="outline-none flex-1 bg-transparent dark:text-customNeutral-100 dark:placeholder-customNeutral-300"
                   prefix="₱"
                   placeholder="₱0.00"
                   decimalsLimit={2}

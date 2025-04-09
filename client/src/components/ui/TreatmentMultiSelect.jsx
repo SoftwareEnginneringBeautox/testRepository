@@ -5,7 +5,7 @@ import {
 } from "@/components/ui/Popover";
 import { Checkbox } from "@/components/ui/checkbox";
 import ChevronDownIcon from "@/assets/icons/ChevronDownIcon";
-import { Button } from "@/components/ui/button";
+import TreatmentIcon from "@/assets/icons/TreatmentIcon";
 import { cn } from "@/lib/utils";
 
 export function TreatmentMultiSelect({
@@ -37,12 +37,20 @@ export function TreatmentMultiSelect({
       <PopoverTrigger asChild>
         <div
           className={cn(
-            "flex items-center justify-between gap-2 w-full px-3 h-12 bg-customNeutral-100 rounded-lg border-2 border-customNeutral-200 focus-within:border-lavender-400 dark:border-customNeutral-300 dark:bg-customNeutral-600 dark:text-customNeutral-100 cursor-pointer",
+            "flex items-center justify-between w-full px-3 h-12 bg-customNeutral-100 rounded-lg border-2 border-customNeutral-200 dark:border-customNeutral-300 dark:bg-customNeutral-600 focus-within:border-lavender-400 dark:focus-within:border-lavender-100 cursor-pointer",
             className
           )}
         >
-          <div className="flex-1 truncate text-sm data-[placeholder=true]:text-customNeutral-300">
-            {displayText}
+          <div className="flex items-center gap-2 flex-1">
+            <div className="[&_svg]:size-6 [&_svg]:shrink-0 text-customNeutral-700 dark:text-customNeutral-100">
+              <TreatmentIcon />
+            </div>
+            <div
+              className="flex-1 truncate text-sm data-[placeholder=true]:text-customNeutral-300 dark:data-[placeholder=true]:text-customNeutral-300 dark:text-customNeutral-100"
+              data-placeholder={value.length === 0}
+            >
+              {displayText}
+            </div>
           </div>
           <div className="[&_svg]:size-6 [&_svg]:shrink-0 text-customNeutral-700 dark:text-customNeutral-100 transition-transform">
             <ChevronDownIcon />
@@ -50,12 +58,12 @@ export function TreatmentMultiSelect({
         </div>
       </PopoverTrigger>
 
-      <PopoverContent className=" bg-customNeutral-100 dark:bg-customNeutral-400 dark:text-customNeutral-100 shadow-md rounded-md p-2 max-h-60 overflow-y-auto min-w-[var(--radix-select-trigger-width)]">
+      <PopoverContent className="relative z-50 bg-customNeutral-100 dark:bg-customNeutral-400 dark:text-customNeutral-100 shadow-md rounded-md p-1 max-h-60 overflow-y-auto min-w-[var(--radix-popover-trigger-width)] ">
         {Array.isArray(options) && options.length > 0 ? (
           options.map((option) => (
             <div
               key={option.value}
-              className="flex items-center gap-2 px-2 py-1.5 hover:bg-lavender-100 dark:hover:text-lavender-400 rounded-sm cursor-pointer min-w-[var(--radix-select-trigger-width)]"
+              className="flex items-center gap-2 px-2 py-1.5 hover:bg-lavender-100 dark:hover:text-lavender-400 rounded-sm cursor-pointer w-full"
               onClick={(e) => {
                 e.stopPropagation();
                 handleChange(option.value);
