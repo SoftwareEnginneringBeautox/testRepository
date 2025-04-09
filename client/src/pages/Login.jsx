@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useModal } from "@/hooks/useModal";
 import { useNavigate } from "react-router-dom";
+import { useTheme } from "@/components/ThemeProvider";
 import { Button } from "@/components/ui/Button";
 import UserIcon from "../assets/icons/UserIcon";
 import PasswordIcon from "../assets/icons/PasswordIcon";
@@ -30,9 +31,13 @@ function Login() {
   const [successMessage, setSuccessMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [recaptchaError, setRecaptchaError] = useState("");
-
+  const { setTheme } = useTheme();
   const { currentModal, openModal, closeModal } = useModal();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    setTheme("light");
+  }, [setTheme]);
 
   // Get executeRecaptcha function from the v3 hook
   const { executeRecaptcha } = useGoogleReCaptcha();
@@ -58,7 +63,9 @@ function Login() {
 
     if (!executeRecaptcha) {
       console.error("reCAPTCHA not yet available");
-      setRecaptchaError("reCAPTCHA is not yet available. Please try again in a moment.");
+      setRecaptchaError(
+        "reCAPTCHA is not yet available. Please try again in a moment."
+      );
       return;
     }
 
@@ -69,7 +76,7 @@ function Login() {
 
       if (!token) {
         setRecaptchaError("reCAPTCHA verification failed. Please try again.");
-        setIsLoading(false);
+        setIsLoading(false); // ✅ Stop loading on reCAPTCHA failure
         return;
       }
 
@@ -79,10 +86,10 @@ function Login() {
       console.log("Attempting login for:", trimmedUsername);
       const response = await axios.post(
         `${API_BASE_URL}/login`,
-        { 
-          username: trimmedUsername, 
+        {
+          username: trimmedUsername,
           password,
-          recaptchaToken: token // Send the v3 token to your backend for verification
+          recaptchaToken: token
         },
         { withCredentials: true }
       );
@@ -92,7 +99,6 @@ function Login() {
         setSuccessMessage("Login successful! Redirecting...");
         console.log("Login successful for:", trimmedUsername);
 
-        // Save authentication details in localStorage.
         localStorage.setItem("token", response.data.token);
         localStorage.setItem("role", response.data.role);
         localStorage.setItem("username", response.data.username);
@@ -100,70 +106,36 @@ function Login() {
         localStorage.setItem("login", Date.now());
         window.dispatchEvent(new Event("userProfileUpdated"));
 
-        // Redirect based on role.
+        // Redirect based on role
         if (response.data.role === "admin") {
           navigate("/AdminDashboard");
-        } else if (response.data.role === "receptionist" || response.data.role === "aesthetician") {
+        } else if (
+          response.data.role === "receptionist" ||
+          response.data.role === "aesthetician"
+        ) {
           navigate("/StaffDashboard");
         } else {
           navigate("/dashboard");
         }
       } else {
-        console.log(`Login failed for "${trimmedUsername}":`, response.data.message);
-        setErrorMessage(response.data.message || "Invalid username or password");
+        console.log(
+          `Login failed for "${trimmedUsername}":`,
+          response.data.message
+        );
+        setErrorMessage(
+          response.data.message || "Invalid username or password"
+        );
+        setIsLoading(false); // ✅ Stop loading on login failure
       }
     } catch (error) {
       const trimmedUsername = username.trim();
-      console.error(`Error during login attempt for "${trimmedUsername}":`, error);
-      setErrorMessage("An error occurred. Please try again later.");
-    }
-    /*
-        console.log("Attempting login for:", trimmedUsername);
-      const response = await axios.post(
-        `${API_BASE_URL}/login`,
-        { username: trimmedUsername, password },
-        { withCredentials: true }
+      console.error(
+        `Error during login attempt for "${trimmedUsername}":`,
+        error
       );
-
-      // If the response is HTML, log the text to help debug.
-      if (typeof response.data === "string" && response.data.startsWith("<!doctype html>")) {
-        console.error("Received unexpected HTML response:", response.data);
-        setErrorMessage("Login failed due to server misconfiguration.");
-        return;
-      }
-
-      const data = response.data;
-      console.log("Received login response:", data);
-     
-      if (data.success) {
-        setSuccessMessage("Login successful! Redirecting...");
-        console.log("Login successful for:", trimmedUsername);
-
-        // Save authentication details in localStorage.
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("role", data.role);
-        localStorage.setItem("username", data.username);
-        localStorage.setItem("loginTime", Date.now());
-        localStorage.setItem("login", Date.now());
-        window.dispatchEvent(new Event("userProfileUpdated"));
-
-        // Redirect based on role.
-        if (data.role === "admin") {
-          navigate("/AdminDashboard");
-        } else if (data.role === "receptionist" || data.role === "aesthetician") {
-          navigate("/StaffDashboard");
-        } else {
-          navigate("/dashboard");
-        }
-      } else {
-        console.log(`Login failed for "${trimmedUsername}":`, data.message);
-        setErrorMessage(data.message || "Invalid username or password");
-      }
-    } catch (error) {
-      const trimmedUsername = username.trim();
-      console.error(`Error during login attempt for "${trimmedUsername}":`, error);
       setErrorMessage("An error occurred. Please try again later.");
-    }*/
+      setIsLoading(false); // ✅ Stop loading on error
+    }
   };
 
   return (
@@ -203,7 +175,8 @@ function Login() {
                 Welcome to PRISM,
               </h2>
               <p className="text-[10px] text-center mb-3 max-w-[260px] tracking-wide uppercase">
-                BEAUTOX&apos;S PATIENT RECORDS, INTEGRATION, SCHEDULING, AND MANAGEMENT
+                BEAUTOX&apos;S PATIENT RECORDS, INTEGRATION, SCHEDULING, AND
+                MANAGEMENT
               </p>
             </div>
 
@@ -320,7 +293,8 @@ function Login() {
                 Welcome to PRISM,
               </h2>
               <p className="text-xs sm:text-sm md:text-base text-center mb-6 max-w-sm px-2">
-                BEAUTOX&apos;S PATIENT RECORDS, INTEGRATION, SCHEDULING, AND MANAGEMENT
+                BEAUTOX&apos;S PATIENT RECORDS, INTEGRATION, SCHEDULING, AND
+                MANAGEMENT
               </p>
             </div>
 

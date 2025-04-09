@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/Table";
 
 import { Badge } from "@/components/ui/Badge";
-
 import ChevronLeftIcon from "../assets/icons/ChevronLeftIcon";
 import PlusIcon from "../assets/icons/PlusIcon";
 import PackageIcon from "../assets/icons/PackageIcon";
@@ -20,9 +19,39 @@ import axios from "axios";
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 function StaffServices() {
-  // State for treatments and packages loaded from the database
   const [treatmentsData, setTreatmentsData] = useState([]);
   const [packagesData, setPackagesData] = useState([]);
+
+  // Add pagination state
+  const [treatmentsPage, setTreatmentsPage] = useState(1);
+  const [packagesPage, setPackagesPage] = useState(1);
+  const itemsPerPage = 10;
+
+  // Add pagination calculations
+  const paginatedTreatments = treatmentsData.slice(
+    (treatmentsPage - 1) * itemsPerPage,
+    treatmentsPage * itemsPerPage
+  );
+  const totalTreatmentPages = Math.ceil(treatmentsData.length / itemsPerPage);
+
+  const paginatedPackages = packagesData.slice(
+    (packagesPage - 1) * itemsPerPage,
+    packagesPage * itemsPerPage
+  );
+  const totalPackagePages = Math.ceil(packagesData.length / itemsPerPage);
+
+  // Add pagination handler functions
+  const paginateTreatments = (pageNumber) => {
+    if (pageNumber > 0 && pageNumber <= totalTreatmentPages) {
+      setTreatmentsPage(pageNumber);
+    }
+  };
+
+  const paginatePackages = (pageNumber) => {
+    if (pageNumber > 0 && pageNumber <= totalPackagePages) {
+      setPackagesPage(pageNumber);
+    }
+  };
 
   // Fetch Treatments from /api/treatments
   const fetchTreatments = async () => {
@@ -67,7 +96,13 @@ function StaffServices() {
       </h4>
 
       {/* Treatments Table */}
-      <Table data-cy="treatments-table">
+      <Table
+        data-cy="treatments-table"
+        showPagination={true}
+        currentPage={treatmentsPage}
+        totalPages={totalTreatmentPages}
+        onPageChange={paginateTreatments}
+      >
         <TableHeader data-cy="treatments-table-header">
           <TableRow>
             <TableHead
@@ -97,8 +132,8 @@ function StaffServices() {
           </TableRow>
         </TableHeader>
         <TableBody data-cy="treatments-table-body">
-          {treatmentsData.length > 0 ? (
-            treatmentsData.map((treatment) => (
+          {paginatedTreatments.length > 0 ? (
+            paginatedTreatments.map((treatment) => (
               <TableRow
                 key={treatment.id}
                 data-cy={`treatment-row-${treatment.id}`}
@@ -148,7 +183,13 @@ function StaffServices() {
       </Table>
 
       {/* Packages Table */}
-      <Table data-cy="packages-table">
+      <Table
+        data-cy="packages-table"
+        showPagination={true}
+        currentPage={packagesPage}
+        totalPages={totalPackagePages}
+        onPageChange={paginatePackages}
+      >
         <TableHeader data-cy="packages-table-header">
           <TableRow>
             <TableHead className="py-4 text-center" data-cy="package-id-header">
@@ -187,8 +228,8 @@ function StaffServices() {
           </TableRow>
         </TableHeader>
         <TableBody data-cy="packages-table-body">
-          {packagesData.length > 0 ? (
-            packagesData.map((pkg) => (
+          {paginatedPackages.length > 0 ? (
+            paginatedPackages.map((pkg) => (
               <TableRow key={pkg.id} data-cy={`package-row-${pkg.id}`}>
                 <TableCell
                   className="py-4 text-center"
