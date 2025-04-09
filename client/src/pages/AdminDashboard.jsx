@@ -503,7 +503,10 @@ function AdministratorDashboard() {
             WELCOME BACK, ADMINISTRATOR {userName.toUpperCase()}
           </h2>
         </div>
-        <div className="overflow-x-auto" data-cy="reminders-table-container">
+        <div
+          className="overflow-x-auto overflow-y-hidden"
+          data-cy="reminders-table-container"
+        >
           <Table className="min-w-full" data-cy="reminders-table">
             <TableHeader data-cy="reminders-header">
               <TableRow>

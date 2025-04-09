@@ -227,7 +227,7 @@ function StaffDashboard() {
         </div>
 
         {/* Treatments Table */}
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto overflow-y-hidden">
           <Table className="min-w-full">
             <TableHeader>
               <TableRow>
@@ -279,7 +279,7 @@ function StaffDashboard() {
         </div>
 
         {/* Packages Table */}
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto overflow-y-hidden">
           <Table className="min-w-full">
             <TableHeader>
               <TableRow>

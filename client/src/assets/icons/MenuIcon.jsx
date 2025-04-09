@@ -1,4 +1,4 @@
-const MenuIcon = ({ size = 24, fill = "white" }) => (
+const MenuIcon = ({ size = 24, fill = "#381B4C" }) => (
   <svg
     width={size}
     height={size}

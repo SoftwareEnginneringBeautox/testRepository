@@ -47,7 +47,6 @@ const Table = React.forwardRef(
 
     return (
       <div className="w-full overflow-hidden rounded-lg flex flex-col">
-        {/* Table wrapper with improved scrollbar positioning */}
         <div className="w-full overflow-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-transparent">
           <table
             ref={ref}

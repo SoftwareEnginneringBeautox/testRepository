@@ -4,7 +4,7 @@ import { ModalContainer, ModalTitle } from "@/components/ui/Modal";
 
 import { Button } from "../ui/Button";
 
-import DeleteIcon from "@/assets/icons/DeleteIcon";
+import ArchiveIcon from "@/assets/icons/ArchiveIcon";
 import WarningIcon from "@/assets/icons/WarningIcon";
 import ChevronLeftIcon from "@/assets/icons/ChevronLeftIcon";
 
@@ -49,8 +49,8 @@ function ArchiveMonthlySales({ isOpen, onClose, onArchive }) {
           className="md:w-1/2"
           onClick={onArchive}
         >
-          <DeleteIcon />
-          DELETE EXPENSE
+          <ArchiveIcon />
+          ARCHIVE EXPENSE
         </Button>
       </div>
     </ModalContainer>

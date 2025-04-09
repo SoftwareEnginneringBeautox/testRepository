@@ -66,6 +66,39 @@ export default function Layout() {
     };
   }, [location.pathname, isErrorPage]);
 
+  // useEffect(() => {
+  //   // Apply scrollbar styling to html element using inline styles
+  //   const html = document.documentElement;
+
+  //   // Save original styles to restore later
+  //   const originalStyles = {
+  //     scrollbarWidth: html.style.scrollbarWidth
+  //   };
+
+  //   // Apply scrollbar styles
+  //   html.style.scrollbarWidth = "thin"; // For Firefox
+
+  //   // For webkit browsers (Chrome, Safari, Edge)
+  //   const webkit = document.createElement("style");
+  //   webkit.innerHTML = `
+  //     ::-webkit-scrollbar { width: 0.625rem; }
+  //     ::-webkit-scrollbar-thumb {
+  //       background-color: #9ca3af;
+  //       border-radius: 9999px;
+  //     }
+  //     ::-webkit-scrollbar-thumb:hover { background-color: #8b5cf6; }
+  //     ::-webkit-scrollbar-track { background-color: transparent !important; }
+  //   `;
+  //   document.head.appendChild(webkit);
+
+  //   // Clean up function
+  //   return () => {
+  //     // Restore original styles
+  //     html.style.scrollbarWidth = originalStyles.scrollbarWidth;
+  //     document.head.removeChild(webkit);
+  //   };
+  // }, []);
+
   // Only show the sidebar and user profile if the current route is allowed and it's not the error page
   const shouldShowSidebar =
     !sidebarlessRoutes.includes(location.pathname.toLowerCase()) &&
@@ -82,7 +115,7 @@ export default function Layout() {
 
       <main
         className={cn(
-          "w-dvw h-screen flex flex-col overflow-y-auto  dark:bg-customNeutral-700 dark:text:customNeutral-100",
+          "w-dvw min-h-screen flex flex-col overflow-y-auto  dark:bg-customNeutral-700 dark:text:customNeutral-100",
           "[&::-webkit-scrollbar]:w-2.5",
           "[&::-webkit-scrollbar-thumb]:bg-gray-400",
           "[&::-webkit-scrollbar-thumb]:rounded-full",
@@ -107,6 +140,7 @@ export default function Layout() {
           className={cn(
             "flex flex-col flex-1 items-center",
             !sidebarlessRoutes.includes(location.pathname.toLowerCase()) &&
+              !isErrorPage &&
               "my-16 lg:my-20"
           )}
         >

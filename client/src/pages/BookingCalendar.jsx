@@ -478,7 +478,7 @@ function BookingCalendar() {
           ) : view === "monthly" ? (
             <div
               data-cy="monthly-calendar-view"
-              className="w-full overflow-x-auto "
+              className="w-full  overflow-x-auto overflow-y-hidden"
             >
               <MonthlyBookingPanel
                 calendarDays={calendar}
@@ -490,7 +490,7 @@ function BookingCalendar() {
           ) : (
             <div
               data-cy="weekly-calendar-view"
-              className="w-full flex justify-center overflow-x-auto"
+              className="w-full flex justify-center overflow-x-auto overflow-y-hidden"
             >
               <div className="w-full">
                 <WeeklyBookingPanel

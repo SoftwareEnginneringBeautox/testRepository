@@ -883,7 +883,10 @@ function FinancialOverview() {
         />
       </div>
 
-      <div className="w-full overflow-x-auto" data-cy="sales-table-container">
+      <div
+        className="w-full overflow-x-auto overflow-y-hidden"
+        data-cy="sales-table-container"
+      >
         <Table
           data-cy="sales-table"
           showPagination={true}
@@ -1077,7 +1080,7 @@ function FinancialOverview() {
         </div>
 
         <div
-          className="w-full overflow-x-auto"
+          className="w-full overflow-x-auto overflow-y-hidden"
           data-cy="expenses-table-container"
         >
           <Table
@@ -1301,7 +1304,7 @@ function FinancialOverview() {
         </div>
 
         <div
-          className="w-full flex flex-col md:flex-row justify-end gap-4 mb-[10%]"
+          className="w-full flex flex-col md:flex-row justify-end gap-4 pb-10"
           data-cy="bottom-actions"
         >
           <Button

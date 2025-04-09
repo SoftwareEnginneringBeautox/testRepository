@@ -136,8 +136,15 @@ function PatientRecordsDatabase() {
       }
     });
 
-    console.log("Applying column filters:", updatedColumns); // Add this for debugging
+    console.log("Before update:", selectedColumns);
+    console.log("Applying column filters:", updatedColumns);
     setSelectedColumns(updatedColumns);
+    console.log("After setSelectedColumns call");
+
+    // Add this setTimeout to check if state updates asynchronously
+    setTimeout(() => {
+      console.log("State after timeout:", selectedColumns);
+    }, 100);
   };
 
   // Pagination states
@@ -738,8 +745,8 @@ function PatientRecordsDatabase() {
     totalamount: selectedColumns.includes("totalamount"),
     amountpaid: selectedColumns.includes("amountpaid"),
     remainingbalance: selectedColumns.includes("remainingbalance"),
-    referenceno: selectedColumns.includes("referenceno"),
-    paid: true // Always show paid status
+    referenceno: selectedColumns.includes("referenceno")
+    // paid: true // Always show paid status
   };
 
   return (

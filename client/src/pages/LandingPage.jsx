@@ -90,7 +90,7 @@ function LandingPage() {
         },
         {
           name: "Intimate Secret",
-          note: "*20% OFF on Diode Packages", 
+          note: "*20% OFF on Diode Packages",
           subcategories: [
             {
               name: "Brazilian, Bikini, or Butt",
@@ -107,7 +107,6 @@ function LandingPage() {
       ]
     },
 
-  
     {
       category: "FACIAL",
       items: [
@@ -233,13 +232,17 @@ function LandingPage() {
           <nav className="hidden md:block bg-white/30 backdrop-blur-2xl rounded-full px-3 py-2 shadow-sm">
             <div className="flex items-center gap-5">
               {/* Logo */}
-              <img src={BeautoxLogo} alt="Beautox Logo" className="h-6 w-auto" />
+              <img
+                src={BeautoxLogo}
+                alt="Beautox Logo"
+                className="h-6 w-auto"
+              />
               <ul className="flex items-center gap-4">
                 {[
                   { label: "About Us", href: "hero" },
                   { label: "Services", href: "services" },
                   { label: "Find Us", href: "about-clinic" },
-                  { label: "Testimonials", href: "testimonials" },
+                  { label: "Testimonials", href: "testimonials" }
                 ].map(({ label, href }) => (
                   <li key={href} className="relative group">
                     <a
@@ -257,7 +260,6 @@ function LandingPage() {
                     onClick={() => navigate("/login")}
                     className="text-purple-900 text-base font-semibold flex items-center gap-2 px-3 py-1.5 rounded-full hover:bg-purple-950 hover:text-white transition-all duration-300"
                   >
-                    <LoginIcon className="h-3 w-3" />
                     Login
                   </button>
                 </li>
@@ -269,7 +271,7 @@ function LandingPage() {
           <div className="md:hidden ml-auto">
             <DropdownMenu>
               <DropdownMenuTrigger className="focus:outline-none">
-                <MenuIcon className="text-white" size={24} />
+                <MenuIcon />
               </DropdownMenuTrigger>
               <DropdownMenuContent className="bg-white/80 backdrop-blur-md rounded-lg shadow-lg p-2 mt-2 w-48">
                 <DropdownMenuGroup>
@@ -299,9 +301,9 @@ function LandingPage() {
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     className="px-4 py-2 mt-2 bg-purple-950 text-white hover:bg-purple-900 rounded-md cursor-pointer flex items-center gap-2 text-sm"
-          onClick={() => navigate("/login")}
+                    onClick={() => navigate("/login")}
                   >
-                    <LoginIcon className="text-white" /> Login
+                    Login
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
               </DropdownMenuContent>
@@ -328,28 +330,29 @@ function LandingPage() {
               />
 
               <div className="text-center space-y-2">
-                <h3 
+                <h3
                   className="text-lg sm:text-xl leading-tight text-[#4A3B89] font-bold whitespace-nowrap"
                   data-cy="hero-title"
                 >
                   Welcome to Beautox
                 </h3>
 
-                <p 
+                <p
                   className="font-semibold text-base sm:text-lg bg-gradient-to-r from-reflexBlue-300 to-lavender-300 text-transparent bg-clip-text whitespace-nowrap"
                   data-cy="hero-subtitle"
                 >
                   Where Beauty meets Innovation
                 </p>
 
-                <p 
+                <p
                   className="text-xs sm:text-sm text-gray-800 leading-relaxed px-1 max-w-[280px] mx-auto"
                   data-cy="hero-description"
                 >
-                  Experience the pinnacle of skincare luxury with our personalized
-                  treatments. Whether you're seeking a rejuvenating facial, targeted
-                  acne treatment, or a relaxing massage, our expert team is here to
-                  pamper you and address your unique skincare needs.
+                  Experience the pinnacle of skincare luxury with our
+                  personalized treatments. Whether you're seeking a rejuvenating
+                  facial, targeted acne treatment, or a relaxing massage, our
+                  expert team is here to pamper you and address your unique
+                  skincare needs.
                 </p>
 
                 <button
@@ -373,7 +376,7 @@ function LandingPage() {
               data-cy="hero-logo"
             />
 
-            <h3 
+            <h3
               className="text-xl sm:text-2xl md:text-3xl lg:text-4xl leading-none text-[#4A3B89] font-bold w-fit whitespace-nowrap"
               data-cy="hero-title"
             >
@@ -381,18 +384,21 @@ function LandingPage() {
             </h3>
 
             <div className="flex flex-col gap-3">
-              <p 
+              <p
                 className="font-semibold text-base sm:text-lg md:text-xl lg:text-2xl bg-gradient-to-r from-reflexBlue-300 to-lavender-300 text-transparent bg-clip-text whitespace-nowrap w-fit"
                 data-cy="hero-subtitle"
               >
                 Where Beauty meets Innovation
               </p>
 
-              <p 
+              <p
                 className="text-sm sm:text-base md:text-lg text-gray-800 leading-relaxed max-w-[28ch] mb-3"
                 data-cy="hero-description"
               >
-                Experience the pinnacle of skincare luxury with our personalized treatments. Whether you're seeking a rejuvenating facial, targeted acne treatment, or a relaxing massage, our expert team is here to pamper you and address your unique skincare needs.
+                Experience the pinnacle of skincare luxury with our personalized
+                treatments. Whether you're seeking a rejuvenating facial,
+                targeted acne treatment, or a relaxing massage, our expert team
+                is here to pamper you and address your unique skincare needs.
               </p>
 
               <button
@@ -412,12 +418,12 @@ function LandingPage() {
         </div>
 
         {/* Featured services section */}
-        <section 
+        <section
           className="w-[85%] sm:w-[80%] mx-auto py-8 sm:py-16"
           data-cy="featured-services-section"
         >
           <div className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
-            <h2 
+            <h2
               className="text-2xl sm:text-3xl font-semibold bg-gradient-to-r from-reflexBlue-300 to-lavender-300 text-transparent bg-clip-text text-center sm:text-left"
               data-cy="featured-services-title"
             >
@@ -432,12 +438,12 @@ function LandingPage() {
             </Button>
           </div>
 
-          <div 
+          <div
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8"
             data-cy="featured-services-grid"
           >
-             {/* 40 Sessions Package Card */}
-             <div className="bg-white rounded-2xl overflow-hidden shadow-[0_4px_12px_rgba(0,0,0,0.15)] hover:shadow-[0_8px_20px_rgba(0,0,0,0.25)] transition-shadow duration-300 relative">
+            {/* 40 Sessions Package Card */}
+            <div className="bg-white rounded-2xl overflow-hidden shadow-[0_4px_12px_rgba(0,0,0,0.15)] hover:shadow-[0_8px_20px_rgba(0,0,0,0.25)] transition-shadow duration-300 relative">
               <div className="h-[400px] relative">
                 <img
                   src="/images/BeautoxModel1.png"
@@ -457,7 +463,7 @@ function LandingPage() {
                   </div>
                 </div>
               </div>
-                  </div>
+            </div>
 
             {/* Diode Laser Card */}
             <div className="bg-white rounded-2xl overflow-hidden shadow-[0_4px_12px_rgba(0,0,0,0.15)] hover:shadow-[0_8px_20px_rgba(0,0,0,0.25)] transition-shadow duration-300 relative">
@@ -480,7 +486,7 @@ function LandingPage() {
                   </div>
                 </div>
               </div>
-                  </div>
+            </div>
 
             {/* Intimate Secret Card */}
             <div className="bg-white rounded-2xl overflow-hidden shadow-[0_4px_12px_rgba(0,0,0,0.15)] hover:shadow-[0_8px_20px_rgba(0,0,0,0.25)] transition-shadow duration-300 relative">
@@ -502,8 +508,8 @@ function LandingPage() {
                     </p>
                   </div>
                 </div>
-                </div>
               </div>
+            </div>
           </div>
         </section>
 
@@ -518,13 +524,13 @@ function LandingPage() {
           data-cy="service-selection-section"
         >
           <div className="text-center mb-8">
-            <h2 
+            <h2
               className="text-2xl sm:text-3xl font-semibold bg-gradient-to-r from-reflexBlue-300 to-lavender-300 text-transparent bg-clip-text mb-4"
               data-cy="services-title"
             >
               HERE'S WHAT WE HAVE IN STORE FOR YOU
             </h2>
-            <p 
+            <p
               className="text-sm sm:text-base text-gray-600 max-w-2xl mx-auto px-4"
               data-cy="services-subtitle"
             >
@@ -532,47 +538,53 @@ function LandingPage() {
               your natural glow and give you the ultimate self-care experience.
             </p>
           </div>
-          <Tabs 
-            defaultValue={services[0].category} 
+          <Tabs
+            defaultValue={services[0].category}
             className="w-full"
             data-cy="services-tabs"
           >
             <TabsList className="flex flex-row overflow-x-auto rounded-md shadow-md bg-white/5 backdrop-blur-[3.5px] p-1 no-scrollbar">
-                {services.map((service) => (
-                  <TabsTrigger
-                    key={service.category}
-                    value={service.category}
-                  className="px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-md font-semibold whitespace-nowrap transition-all rounded-md data-[state=active]:bg-[#4A3B89] data-[state=active]:text-white hover:bg-purple-100"
-                  data-cy={`service-tab-${service.category.toLowerCase().replace(' ', '-')}`}
-                  >
-                    {service.category}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-
               {services.map((service) => (
-                <TabsContent
+                <TabsTrigger
                   key={service.category}
                   value={service.category}
-                  className="mt-4"
-                data-cy={`service-tab-content-${service.category.toLowerCase().replace(' ', '-')}`}
-              >
-                <div 
-                  className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6"
-                  data-cy={`service-grid-${service.category.toLowerCase().replace(' ', '-')}`}
+                  className="px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-md font-semibold whitespace-nowrap transition-all rounded-md data-[state=active]:bg-[#4A3B89] data-[state=active]:text-white hover:bg-purple-100"
+                  data-cy={`service-tab-${service.category
+                    .toLowerCase()
+                    .replace(" ", "-")}`}
                 >
-                    {service.items.map((item, idx) => (
-                      <ProductCard
-                        key={idx}
-                        product={item}
-                        category={service.category}
-                      data-cy={`service-card-${idx}`}
-                      />
-                    ))}
-                  </div>
-                </TabsContent>
+                  {service.category}
+                </TabsTrigger>
               ))}
-            </Tabs>
+            </TabsList>
+
+            {services.map((service) => (
+              <TabsContent
+                key={service.category}
+                value={service.category}
+                className="mt-4"
+                data-cy={`service-tab-content-${service.category
+                  .toLowerCase()
+                  .replace(" ", "-")}`}
+              >
+                <div
+                  className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6"
+                  data-cy={`service-grid-${service.category
+                    .toLowerCase()
+                    .replace(" ", "-")}`}
+                >
+                  {service.items.map((item, idx) => (
+                    <ProductCard
+                      key={idx}
+                      product={item}
+                      category={service.category}
+                      data-cy={`service-card-${idx}`}
+                    />
+                  ))}
+                </div>
+              </TabsContent>
+            ))}
+          </Tabs>
         </section>
 
         <div className="w-[85%] sm:w-[80%] mx-auto">
@@ -585,7 +597,7 @@ function LandingPage() {
           className="w-[85%] sm:w-[80%] flex flex-col items-center justify-center gap-4 mx-auto"
           data-cy="about-clinic"
         >
-          <h2 
+          <h2
             className="text-2xl sm:text-3xl font-semibold bg-gradient-to-r from-reflexBlue-300 to-lavender-300 text-transparent bg-clip-text mb-8 text-center"
             data-cy="about-clinic-title"
           >
@@ -594,10 +606,7 @@ function LandingPage() {
 
           <div className="w-full flex flex-col lg:flex-row gap-8">
             {/* Main Image and Details */}
-            <div 
-              className="w-full lg:w-1/2"
-              data-cy="clinic-images"
-            >
+            <div className="w-full lg:w-1/2" data-cy="clinic-images">
               <img
                 src="/images/ClinicImage1.jpg"
                 alt="Beautox Clinic Main"
@@ -621,60 +630,64 @@ function LandingPage() {
             </div>
 
             {/* Clinic Information */}
-            <div 
+            <div
               className="w-full lg:w-1/2 flex flex-col gap-6 bg-gray-100/90 backdrop-blur-sm p-6 sm:p-8 rounded-2xl shadow-md"
               data-cy="clinic-info"
             >
               <div>
-                <h3 
+                <h3
                   className="text-xl sm:text-2xl font-semibold text-[#4A3B89] mb-2"
                   data-cy="clinic-name"
                 >
                   Beautox Aesthetic Clinic
                 </h3>
-                <p 
+                <p
                   className="text-gray-600 text-base sm:text-lg"
                   data-cy="clinic-address"
                 >
-                  42 Sonema Square, N. Domingo Street, Unit 5 Brgy. Valencia, Quezon City, 1112 Metro Manila <br />
+                  42 Sonema Square, N. Domingo Street, Unit 5 Brgy. Valencia,
+                  Quezon City, 1112 Metro Manila <br />
                   Near Robinson's Magnolia
                 </p>
               </div>
 
               <div>
-                <h4 
+                <h4
                   className="text-lg sm:text-xl font-semibold text-[#4A3B89] mb-2"
                   data-cy="clinic-hours-title"
                 >
                   Operations Days
                 </h4>
-                <p 
-                  className="text-gray-600"
-                  data-cy="clinic-hours"
-                >
+                <p className="text-gray-600" data-cy="clinic-hours">
                   Mon - Sun:{" "}
-                  <span className="font-semibold text-gray-700">12pm - 9pm</span>{" "}
+                  <span className="font-semibold text-gray-700">
+                    12pm - 9pm
+                  </span>{" "}
                 </p>
               </div>
 
               <div>
-                <h4 
+                <h4
                   className="text-lg sm:text-xl font-semibold text-[#4A3B89] mb-2"
                   data-cy="clinic-contact-title"
                 >
                   Contact Number
                 </h4>
-                <div 
+                <div
                   className="flex flex-col gap-1 text-gray-600"
                   data-cy="clinic-contact-info"
                 >
                   <p>
                     Landline:{" "}
-                    <span className="text-gray-700" data-cy="clinic-phone">0917-895-8825</span>
+                    <span className="text-gray-700" data-cy="clinic-phone">
+                      0917-895-8825
+                    </span>
                   </p>
                   <p>
                     Mobile:{" "}
-                    <span className="text-gray-700" data-cy="clinic-email">beautoxph@gmail.com</span>
+                    <span className="text-gray-700" data-cy="clinic-email">
+                      beautoxph@gmail.com
+                    </span>
                   </p>
                 </div>
               </div>
@@ -691,11 +704,7 @@ function LandingPage() {
           </div>
 
           {/* Google Map */}
-          <div 
-            id="location" 
-            className="w-full mt-8"
-            data-cy="location"
-          >
+          <div id="location" className="w-full mt-8" data-cy="location">
             <iframe
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1043.644141889592!2d121.03651836623278!3d14.614630075990188!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397b7656817cb95%3A0xc3a3721da76b89!2sSonema%20Square!5e0!3m2!1sen!2sph!4v1741322385811!5m2!1sen!2sph"
               loading="lazy"
@@ -712,14 +721,14 @@ function LandingPage() {
         </div>
 
         {/* Testimonials Section */}
-        <section 
-          id="testimonials" 
+        <section
+          id="testimonials"
           className="w-[92%] sm:w-[85%] md:w-[80%] mx-auto mb-8 bg-white py-12 sm:py-16"
           data-cy="testimonials"
         >
           <div className="text-center mb-16">
             <p className="text-purple-600 font-medium mb-2">Testimonials</p>
-            <h2 
+            <h2
               className="text-3xl sm:text-4xl font-semibold bg-gradient-to-r from-reflexBlue-300 to-lavender-300 text-transparent bg-clip-text"
               data-cy="testimonials-title"
             >
@@ -727,35 +736,61 @@ function LandingPage() {
             </h2>
           </div>
 
-          <div 
+          <div
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 sm:gap-8 mb-16 px-4 sm:px-0"
             data-cy="testimonials-grid"
           >
             {/* Testimonial 1 */}
-            <div className="bg-purple-100/70 rounded-2xl p-4 sm:p-8 relative mt-8" data-cy="testimonial-1">
+            <div
+              className="bg-purple-100/70 rounded-2xl p-4 sm:p-8 relative mt-8"
+              data-cy="testimonial-1"
+            >
               <div className="absolute top-0 left-4 sm:left-8 transform -translate-y-1/2">
                 <div className="w-14 sm:w-16 h-14 sm:h-16 rounded-full overflow-hidden ring-4 ring-white bg-purple-100 flex items-center justify-center">
-                  <svg className="w-7 sm:w-8 h-7 sm:h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  <svg
+                    className="w-7 sm:w-8 h-7 sm:h-8 text-purple-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                    />
                   </svg>
                 </div>
               </div>
               <div className="text-center pt-8 sm:pt-10">
-                <h4 className="text-lg sm:text-xl font-semibold text-gray-800 mb-1">Maria Angeles</h4>
-                <p className="text-purple-600 text-xs sm:text-sm mb-4 sm:mb-6">Regular Client</p>
+                <h4 className="text-lg sm:text-xl font-semibold text-gray-800 mb-1">
+                  Maria Angeles
+                </h4>
+                <p className="text-purple-600 text-xs sm:text-sm mb-4 sm:mb-6">
+                  Regular Client
+                </p>
                 <p className="text-gray-600 text-xs sm:text-sm leading-relaxed mb-4 sm:mb-6">
                   "Highly recommended! Staffs are very nice, they're also very
-                  accommodating! Ain't gonna lie… mano-notice agad ang improvement
-                  sa body. I also wanna mention that the clinic is always clean
-                  and very pretty."
+                  accommodating! Ain't gonna lie… mano-notice agad ang
+                  improvement sa body. I also wanna mention that the clinic is
+                  always clean and very pretty."
                 </p>
                 <div className="flex items-center justify-center gap-1">
                   {[1, 2, 3, 4].map((star) => (
-                    <svg key={star} className="w-4 sm:w-5 h-4 sm:h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                    <svg
+                      key={star}
+                      className="w-4 sm:w-5 h-4 sm:h-5 text-yellow-400"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
                       <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                     </svg>
                   ))}
-                  <svg className="w-4 sm:w-5 h-4 sm:h-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+                  <svg
+                    className="w-4 sm:w-5 h-4 sm:h-5 text-gray-300"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                   </svg>
                 </div>
@@ -763,17 +798,34 @@ function LandingPage() {
             </div>
 
             {/* Testimonial 2 */}
-            <div className="bg-purple-100/70 rounded-2xl p-4 sm:p-8 relative mt-8" data-cy="testimonial-2">
+            <div
+              className="bg-purple-100/70 rounded-2xl p-4 sm:p-8 relative mt-8"
+              data-cy="testimonial-2"
+            >
               <div className="absolute top-0 left-4 sm:left-8 transform -translate-y-1/2">
                 <div className="w-14 sm:w-16 h-14 sm:h-16 rounded-full overflow-hidden ring-4 ring-white bg-purple-100 flex items-center justify-center">
-                  <svg className="w-7 sm:w-8 h-7 sm:h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  <svg
+                    className="w-7 sm:w-8 h-7 sm:h-8 text-purple-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                    />
                   </svg>
                 </div>
               </div>
               <div className="text-center pt-8 sm:pt-10">
-                <h4 className="text-lg sm:text-xl font-semibold text-gray-800 mb-1">Sarah Rodriguez</h4>
-                <p className="text-purple-600 text-xs sm:text-sm mb-4 sm:mb-6">Me-So Sexy Package Client</p>
+                <h4 className="text-lg sm:text-xl font-semibold text-gray-800 mb-1">
+                  Sarah Rodriguez
+                </h4>
+                <p className="text-purple-600 text-xs sm:text-sm mb-4 sm:mb-6">
+                  Me-So Sexy Package Client
+                </p>
                 <p className="text-gray-600 text-xs sm:text-sm leading-relaxed mb-4 sm:mb-6">
                   "Highly recommended! I love the service here. The mesolipo is
                   really effective. My arms have gotten noticeably thinner even
@@ -781,41 +833,76 @@ function LandingPage() {
                 </p>
                 <div className="flex items-center justify-center gap-1">
                   {[1, 2, 3, 4].map((star) => (
-                    <svg key={star} className="w-4 sm:w-5 h-4 sm:h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                    <svg
+                      key={star}
+                      className="w-4 sm:w-5 h-4 sm:h-5 text-yellow-400"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
                       <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                     </svg>
                   ))}
-                  <svg className="w-4 sm:w-5 h-4 sm:h-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+                  <svg
+                    className="w-4 sm:w-5 h-4 sm:h-5 text-gray-300"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                   </svg>
                 </div>
               </div>
-              </div>
+            </div>
 
             {/* Testimonial 3 */}
-            <div className="bg-purple-100/70 rounded-2xl p-4 sm:p-8 relative mt-8" data-cy="testimonial-3">
+            <div
+              className="bg-purple-100/70 rounded-2xl p-4 sm:p-8 relative mt-8"
+              data-cy="testimonial-3"
+            >
               <div className="absolute top-0 left-4 sm:left-8 transform -translate-y-1/2">
                 <div className="w-14 sm:w-16 h-14 sm:h-16 rounded-full overflow-hidden ring-4 ring-white bg-purple-100 flex items-center justify-center">
-                  <svg className="w-7 sm:w-8 h-7 sm:h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  <svg
+                    className="w-7 sm:w-8 h-7 sm:h-8 text-purple-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                    />
                   </svg>
                 </div>
               </div>
               <div className="text-center pt-8 sm:pt-10">
-                <h4 className="text-lg sm:text-xl font-semibold text-gray-800 mb-1">Jane Dela Cruz</h4>
-                <p className="text-purple-600 text-xs sm:text-sm mb-4 sm:mb-6">Gluta Drips Package Client</p>
+                <h4 className="text-lg sm:text-xl font-semibold text-gray-800 mb-1">
+                  Jane Dela Cruz
+                </h4>
+                <p className="text-purple-600 text-xs sm:text-sm mb-4 sm:mb-6">
+                  Gluta Drips Package Client
+                </p>
                 <p className="text-gray-600 text-xs sm:text-sm leading-relaxed mb-4 sm:mb-6">
-                  "Third Empress Gluta Drip ko na dito, and super happy ako! After a few
-                  sessions, pumantay na skin tone ko at nag-lighten dark spots ko.
-                  Super worth it! Babalik ako for more!"
+                  "Third Empress Gluta Drip ko na dito, and super happy ako!
+                  After a few sessions, pumantay na skin tone ko at nag-lighten
+                  dark spots ko. Super worth it! Babalik ako for more!"
                 </p>
                 <div className="flex items-center justify-center gap-1">
                   {[1, 2, 3, 4].map((star) => (
-                    <svg key={star} className="w-4 sm:w-5 h-4 sm:h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                    <svg
+                      key={star}
+                      className="w-4 sm:w-5 h-4 sm:h-5 text-yellow-400"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
                       <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                     </svg>
                   ))}
-                  <svg className="w-4 sm:w-5 h-4 sm:h-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+                  <svg
+                    className="w-4 sm:w-5 h-4 sm:h-5 text-gray-300"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                   </svg>
                 </div>
@@ -835,17 +922,14 @@ function LandingPage() {
           data-cy="contact"
         >
           <div className="w-[85%] sm:w-[80%] mx-auto flex flex-col-reverse lg:flex-row gap-8 justify-center">
-            <ul 
+            <ul
               className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-base sm:text-lg w-full lg:w-1/2"
               data-cy="contact-links"
             >
-              <li 
-                className="flex gap-2 justify-center"
-                data-cy="facebook-link"
-              >
-                <svg 
-                  className="w-6 h-6 text-white" 
-                  fill="currentColor" 
+              <li className="flex gap-2 justify-center" data-cy="facebook-link">
+                <svg
+                  className="w-6 h-6 text-white"
+                  fill="currentColor"
                   viewBox="0 0 24 24"
                   aria-hidden="true"
                 >
@@ -855,62 +939,62 @@ function LandingPage() {
                     clipRule="evenodd"
                   />
                 </svg>
-              <a
-                href="https://www.facebook.com/BeautoxAestheticClinicNewManila"
-                target="_blank"
-                rel="noreferrer"
+                <a
+                  href="https://www.facebook.com/BeautoxAestheticClinicNewManila"
+                  target="_blank"
+                  rel="noreferrer"
                   className="text-white hover:text-white/80 transition-colors"
-              >
-                FACEBOOK
-              </a>
-            </li>
+                >
+                  FACEBOOK
+                </a>
+              </li>
 
-              <li 
+              <li
                 className="flex gap-2 justify-center text-white"
                 data-cy="phone-contact"
               >
                 <PhoneIcon className="text-white" />
-              0917-895-8825
-            </li>
-              
-              <li 
+                0917-895-8825
+              </li>
+
+              <li
                 className="flex gap-2 justify-center"
                 data-cy="instagram-link"
               >
                 <InstagramIcon fill="#FFFFFF" />
-              <a
-                href="https://www.instagram.com/beautoxnewmanila/"
-                target="_blank"
-                rel="noreferrer"
+                <a
+                  href="https://www.instagram.com/beautoxnewmanila/"
+                  target="_blank"
+                  rel="noreferrer"
                   className="text-white hover:text-white/80 transition-colors"
-              >
-                INSTAGRAM
-              </a>
-            </li>
-              
-              <li 
+                >
+                  INSTAGRAM
+                </a>
+              </li>
+
+              <li
                 className="flex gap-2 justify-center text-white"
                 data-cy="email-contact"
               >
                 <EmailIcon className="text-white" />
-              beautoxph@gmail.com
-            </li>
-          </ul>
-            <h3 
+                beautoxph@gmail.com
+              </li>
+            </ul>
+            <h3
               className="w-full lg:w-1/2 text-2xl sm:text-3xl text-center lg:text-end font-bold text-white"
               data-cy="find-us-title"
             >
-            WANT TO LEARN MORE ABOUT US? CONTACT US HERE
-          </h3>
+              WANT TO LEARN MORE ABOUT US? CONTACT US HERE
+            </h3>
           </div>
         </section>
 
-      {/* Schedule Appointment Modal */}
-      <ScheduleAppointmentModal
-        isOpen={isScheduleModalOpen}
-        onClose={() => setIsScheduleModalOpen(false)}
+        {/* Schedule Appointment Modal */}
+        <ScheduleAppointmentModal
+          isOpen={isScheduleModalOpen}
+          onClose={() => setIsScheduleModalOpen(false)}
           data-cy="schedule-appointment-modal"
-      />
+        />
       </div>
     </div>
   );
