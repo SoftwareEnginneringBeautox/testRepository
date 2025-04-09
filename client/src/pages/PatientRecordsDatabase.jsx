@@ -702,12 +702,12 @@ function PatientRecordsDatabase() {
 
           <MultiSelectFilter
             options={columns}
-            selectedValues={tempSelectedColumns}
-            setSelectedValues={setTempSelectedColumns}
+            selectedValues={selectedColumns}
+            setSelectedValues={setSelectedColumns}
             placeholder="FILTER COLUMNS"
             mandatoryValues={["client", "dateofsession"]}
-            onApply={applyColumnFilters}
             showApplyButton={true}
+            onApply={applyColumnFilters}
             data-cy="column-filter"
           />
         </div>

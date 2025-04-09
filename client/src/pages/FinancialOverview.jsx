@@ -753,6 +753,11 @@ function FinancialOverview() {
           selectedValues={selectedColumns}
           setSelectedValues={setSelectedColumns}
           placeholder="FILTER COLUMNS"
+          mandatoryValues={columns
+            .filter((col) => col.mandatory)
+            .map((col) => col.value)}
+          showApplyButton={true}
+          data-cy="column-filter"
         />
       </div>
 

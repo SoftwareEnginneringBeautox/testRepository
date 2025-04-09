@@ -470,11 +470,11 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
             <InputContainer>
               <InputLabel>PAYMENT METHOD</InputLabel>
               <RadioGroup
-                value={originalData.payment_method}
+                value={formData.payment_method ?? originalData.payment_method}
                 onValueChange={(value) =>
                   setFormData({ ...formData, payment_method: value })
                 }
-                className="flex flex-col gap-2 "
+                className="flex flex-col gap-2"
               >
                 <div className="flex items-center gap-2">
                   <RadioGroupItem value="full-payment" id="full-payment" />
@@ -582,7 +582,10 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
             <div className="flex flex-row gap-3 items-center justify-start">
               <Checkbox
                 id="consent"
-                checked={originalData.consent_form_signed}
+                checked={
+                  formData.consent_form_signed ??
+                  originalData.consent_form_signed
+                }
                 onCheckedChange={(checked) =>
                   setFormData({ ...formData, consent_form_signed: checked })
                 }

@@ -14,7 +14,10 @@ const MultiSelectFilter = ({
   options,
   selectedValues,
   setSelectedValues,
-  placeholder = "Select options"
+  placeholder = "Select options",
+  mandatoryValues = [], // Add support for mandatory values
+  showApplyButton = true,
+  onApply // Optional callback for when changes are applied
 }) => {
   const [tempSelectedValues, setTempSelectedValues] = useState([
     ...selectedValues
@@ -27,12 +30,18 @@ const MultiSelectFilter = ({
   };
 
   const handleChange = (optionValue) => {
-    if (optionValue === "client") return; // Prevent unchecking "client"
+    // Check if the value is mandatory
+    if (mandatoryValues.includes(optionValue)) {
+      return; // Don't allow unchecking mandatory values
+    }
+
     const newSelected = tempSelectedValues.includes(optionValue)
       ? tempSelectedValues.filter((v) => v !== optionValue)
       : [...tempSelectedValues, optionValue];
 
-    setTempSelectedValues(newSelected);
+    // Ensure mandatory values are always included
+    const finalSelected = [...new Set([...mandatoryValues, ...newSelected])];
+    setTempSelectedValues(finalSelected);
   };
 
   const handleSelectAll = (isChecked) => {
@@ -40,12 +49,20 @@ const MultiSelectFilter = ({
       const allValues = options.map((opt) => opt.value);
       setTempSelectedValues(allValues);
     } else {
-      setTempSelectedValues(["client"]); // Ensure "client" is always selected
+      // When deselecting all, keep only mandatory values
+      setTempSelectedValues([...mandatoryValues]);
     }
   };
 
   const handleApply = () => {
-    setSelectedValues(tempSelectedValues);
+    // Ensure mandatory values are included
+    const finalValues = [
+      ...new Set([...mandatoryValues, ...tempSelectedValues])
+    ];
+    setSelectedValues(finalValues);
+    if (onApply) {
+      onApply(finalValues);
+    }
   };
 
   const allSelected = tempSelectedValues.length === options.length;
@@ -94,29 +111,31 @@ const MultiSelectFilter = ({
                   onCheckedChange={() => handleChange(option.value)}
                   id={`checkbox-${option.value}`}
                   data-cy={`checkbox-${option.value}`}
-                  disabled={option.value === "client"} // Disable unchecking "client"
+                  disabled={mandatoryValues.includes(option.value)}
                 />
                 <label
                   htmlFor={`checkbox-${option.value}`}
                   className="flex-1 cursor-pointer text-sm"
                 >
                   {option.label}
-                  {option.value === "client" && " (required)"}
+                  {mandatoryValues.includes(option.value) && " (required)"}
                 </label>
               </div>
             ))}
           </div>
-          <div className="mt-2 pt-2 px-2 pb-2">
-            <Button
-              variant="callToAction"
-              fullWidth={true}
-              size="sm"
-              onClick={handleApply}
-              data-cy="apply-filter-button"
-            >
-              APPLY
-            </Button>
-          </div>
+          {showApplyButton && (
+            <div className="mt-2 pt-2 px-2 pb-2">
+              <Button
+                variant="callToAction"
+                fullWidth={true}
+                size="sm"
+                onClick={handleApply}
+                data-cy="apply-filter-button"
+              >
+                APPLY
+              </Button>
+            </div>
+          )}
         </div>
       </SelectContent>
     </Select>
