@@ -12,7 +12,6 @@ import CreateCategory from "@/components/modals/CreateCategory";
 import EditCategory from "@/components/modals/EditCategory";
 import ArchiveCategory from "@/components/modals/ArchiveCategory";
 import { Button } from "@/components/ui/Button";
-import ChevronLeftIcon from "../assets/icons/ChevronLeftIcon";
 import DownloadIcon from "../assets/icons/DownloadIcon";
 import PlusIcon from "../assets/icons/PlusIcon";
 import EditIcon from "@/assets/icons/EditIcon";
@@ -248,7 +247,7 @@ function FinancialOverview() {
     }
 
     const doc = new jsPDF({
-      orientation: "portrait", // Changed from landscape to portrait
+      orientation: "portrait",
       unit: "pt",
       format: "a4"
     });
@@ -271,13 +270,14 @@ function FinancialOverview() {
     ).toUpperCase();
     const formattedDateForFilename = format(currentDate, "MMMM_dd_yyyy");
 
-    // Add title (adjusted for portrait layout)
+    // Add title (combined into one line)
     doc.setFont("helvetica", "bold");
-    doc.text(`BEAUTOX WEEKLY`, pageWidth / 2, margin + 10, { align: "center" });
-    doc.text(`SALES REPORT`, pageWidth / 2, margin + 30, { align: "center" });
-    doc.text(`AS OF ${formattedCurrentDate}`, pageWidth / 2, margin + 50, {
-      align: "center"
-    });
+    doc.text(
+      `BEAUTOX WEEKLY SALES REPORT AS OF ${formattedCurrentDate}`,
+      pageWidth / 2,
+      margin + 30,
+      { align: "center" }
+    );
 
     // Define base column configuration (adjusted for portrait layout)
     const baseColumns = [
@@ -401,21 +401,11 @@ function FinancialOverview() {
       }
     });
 
-    // Calculate and add total
+    // Calculate total amount (keeping this part but removing the duplicate title)
     const totalAmount = salesData.reduce((sum, sale) => {
       const amount = parseFloat(sale.payment) || 0;
       return sum + amount;
     }, 0);
-
-    // Add total at the bottom
-    const finalY = doc.lastAutoTable.finalY + 20;
-    doc.setFont("helvetica", "bold");
-    doc.text(
-      `BEAUTOX WEEKLY SALES REPORT AS OF ${formattedCurrentDate}`,
-      pageWidth / 2,
-      margin + 30,
-      { align: "center" }
-    );
 
     // Save the PDF
     doc.save(`Beautox_WeeklySalesReport_${formattedDateForFilename}.pdf`);

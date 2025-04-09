@@ -67,7 +67,7 @@ export default function Layout() {
   }, [location.pathname, isErrorPage]);
 
   // useEffect(() => {
-  //   // Apply scrollbar styling to html element using inline styles
+  //   // Apply scrollbar styling to html element
   //   const html = document.documentElement;
 
   //   // Save original styles to restore later
@@ -75,25 +75,48 @@ export default function Layout() {
   //     scrollbarWidth: html.style.scrollbarWidth
   //   };
 
-  //   // Apply scrollbar styles
-  //   html.style.scrollbarWidth = "thin"; // For Firefox
+  //   // Apply scrollbar styles (thin for Firefox)
+  //   html.style.scrollbarWidth = "thin";
 
   //   // For webkit browsers (Chrome, Safari, Edge)
   //   const webkit = document.createElement("style");
   //   webkit.innerHTML = `
-  //     ::-webkit-scrollbar { width: 0.625rem; }
+  //     /* Base scrollbar styles */
+  //     ::-webkit-scrollbar {
+  //       width: 0.4rem; /* Thinner vertical scrollbar */
+  //       height: 0.625rem; /* Keep horizontal scrollbar size */
+  //     }
+
+  //     /* Thumb styles (the draggable part) */
   //     ::-webkit-scrollbar-thumb {
-  //       background-color: #9ca3af;
+  //       background-color: rgba(156, 163, 175, 0.7); /* Semi-transparent gray */
   //       border-radius: 9999px;
   //     }
-  //     ::-webkit-scrollbar-thumb:hover { background-color: #8b5cf6; }
-  //     ::-webkit-scrollbar-track { background-color: transparent !important; }
+
+  //     ::-webkit-scrollbar-thumb:hover {
+  //       background-color: rgba(139, 92, 246, 0.7); /* Semi-transparent purple/lavender */
+  //     }
+
+  //     /* Track styles (the background) - making it transparent */
+  //     ::-webkit-scrollbar-track {
+  //       background-color: transparent !important;
+  //     }
+
+  //     /* Hide the arrow buttons on scrollbars */
+  //     ::-webkit-scrollbar-button {
+  //       display: none;
+  //     }
+
+  //     /* For Firefox - hide arrows and make track transparent */
+  //     * {
+  //       scrollbar-width: thin;
+  //       scrollbar-color: rgba(156, 163, 175, 0.7) transparent;
+  //     }
   //   `;
   //   document.head.appendChild(webkit);
 
   //   // Clean up function
   //   return () => {
-  //     // Restore original styles
   //     html.style.scrollbarWidth = originalStyles.scrollbarWidth;
   //     document.head.removeChild(webkit);
   //   };
@@ -116,11 +139,22 @@ export default function Layout() {
       <main
         className={cn(
           "w-dvw min-h-screen flex flex-col overflow-y-auto  dark:bg-customNeutral-700 dark:text:customNeutral-100",
-          "[&::-webkit-scrollbar]:w-2.5",
+          "[&::-webkit-scrollbar]:w-[0.4rem]",
+
+          "scrollbar-thin scrollbar-thumb-gray-400/70 scrollbar-track-transparent",
+
+          /* Webkit-specific styles */
+          "[&::-webkit-scrollbar:horizontal]:h-[0.4rem]",
           "[&::-webkit-scrollbar-thumb]:bg-gray-400",
           "[&::-webkit-scrollbar-thumb]:rounded-full",
           "[&::-webkit-scrollbar-track]:!bg-transparent",
-          "[&::-webkit-scrollbar-thumb:hover]:bg-lavender-200"
+          "[&::-webkit-scrollbar-thumb:hover]:bg-lavender-200",
+
+          /* Hide scrollbar buttons/arrows */
+          "[&::-webkit-scrollbar-button]:hidden",
+          "[&::-webkit-scrollbar-button]:opacity-0",
+          "[&::-webkit-scrollbar-button]:h-0",
+          "[&::-webkit-scrollbar-button]:w-0"
         )}
       >
         {/* Fixed header with proper positioning */}
