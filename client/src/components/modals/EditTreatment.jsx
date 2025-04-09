@@ -65,7 +65,7 @@ function EditTreatment({ isOpen, onClose, entryData, onSubmit }) {
     <ModalContainer data-cy="edit-treatment-modal">
       <ModalHeader>
         <ModalIcon>
-          <EditIcon />
+          <TreatmentIcon />
         </ModalIcon>
         <ModalTitle>EDIT TREATMENT</ModalTitle>
       </ModalHeader>

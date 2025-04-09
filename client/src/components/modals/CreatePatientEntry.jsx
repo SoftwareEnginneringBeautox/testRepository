@@ -41,6 +41,9 @@ import UserIDIcon from "@/assets/icons/UserIDIcon";
 import PackageIcon from "@/assets/icons/PackageIcon";
 import PercentageIcon from "@/assets/icons/PercentageIcon";
 import TreatmentIcon from "@/assets/icons/TreatmentIcon";
+import EmailIcon from "@/assets/icons/EmailIcon";
+import PhoneIcon from "@/assets/icons/PhoneIcon";
+import AgeIcon from "@/assets/icons/AgeIcon";
 
 import axios from "axios";
 
@@ -376,6 +379,9 @@ function CreatePatientEntry({ isOpen, onClose }) {
             <InputContainer>
               <InputLabel>CONTACT NUMBER</InputLabel>
               <InputTextField>
+                <InputIcon>
+                  <PhoneIcon />
+                </InputIcon>
                 <Input
                   data-cy="contact-number-input"
                   placeholder="e.g. 09XXXXXXXXX"
@@ -399,6 +405,9 @@ function CreatePatientEntry({ isOpen, onClose }) {
             <InputContainer>
               <InputLabel>AGE</InputLabel>
               <InputTextField>
+                <InputIcon>
+                  <AgeIcon />
+                </InputIcon>
                 <Input
                   data-cy="age-input"
                   type="number"
@@ -422,6 +431,9 @@ function CreatePatientEntry({ isOpen, onClose }) {
             <InputContainer>
               <InputLabel>EMAIL</InputLabel>
               <InputTextField>
+                <InputIcon>
+                  <EmailIcon />
+                </InputIcon>
                 <Input
                   data-cy="email-input"
                   type="email"

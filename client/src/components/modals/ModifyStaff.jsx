@@ -124,6 +124,7 @@ const ModifyStaff = ({ isOpen, onClose, entryData, onSubmit }) => {
               >
                 <ModalSelectTrigger
                   data-cy="edit-staff-role"
+                  icon={<UserIDIcon className="w-4 h-4" />}
                   className="w-full"
                 >
                   <UserIDIcon className="w-4 h-4 mr-2" />
@@ -150,6 +151,7 @@ const ModifyStaff = ({ isOpen, onClose, entryData, onSubmit }) => {
               >
                 <ModalSelectTrigger
                   data-cy="edit-staff-dayoff"
+                  icon={<CalendarIcon className="w-4 h-4" />}
                   className="w-full"
                 >
                   <CalendarIcon className="w-4 h-4 mr-2" />

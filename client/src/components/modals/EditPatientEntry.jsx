@@ -42,7 +42,10 @@ import UserIDIcon from "@/assets/icons/UserIDIcon";
 import CircleUserIcon from "@/assets/icons/CircleUserIcon";
 import PackageIcon from "@/assets/icons/PackageIcon";
 import TreatmentIcon from "@/assets/icons/TreatmentIcon";
+import EmailIcon from "@/assets/icons/EmailIcon";
 import EditIcon from "@/assets/icons/EditIcon";
+import AgeIcon from "@/assets/icons/AgeIcon";
+import PhoneIcon from "@/assets/icons/PhoneIcon";
 
 function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
   const API_BASE_URL = import.meta.env.VITE_API_URL;
@@ -243,6 +246,9 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
             <InputContainer>
               <InputLabel>CONTACT NUMBER</InputLabel>
               <InputTextField>
+                <InputIcon>
+                  <PhoneIcon />
+                </InputIcon>
                 <Input
                   data-cy="contact-number-input"
                   placeholder="e.g. 09XXXXXXXXX"
@@ -258,6 +264,9 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
             <InputContainer>
               <InputLabel>AGE</InputLabel>
               <InputTextField>
+                <InputIcon>
+                  <AgeIcon />
+                </InputIcon>
                 <Input
                   data-cy="age-input"
                   type="number"
@@ -275,6 +284,9 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
             <InputContainer>
               <InputLabel>EMAIL</InputLabel>
               <InputTextField>
+                <InputIcon>
+                  <EmailIcon />
+                </InputIcon>
                 <Input
                   data-cy="email-input"
                   type="email"
