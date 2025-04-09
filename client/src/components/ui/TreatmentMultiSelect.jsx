@@ -2,7 +2,7 @@ import {
   Popover,
   PopoverTrigger,
   PopoverContent
-} from "@/components/ui/popover";
+} from "@/components/ui/Popover";
 import { Checkbox } from "@/components/ui/checkbox";
 import ChevronDownIcon from "@/assets/icons/ChevronDownIcon";
 import { Button } from "@/components/ui/button";

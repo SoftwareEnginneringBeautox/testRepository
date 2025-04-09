@@ -572,7 +572,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
                 </InputIcon>
                 <CurrencyInput
                   data-cy="amount-input"
-                  className="outline-none flex-1 "
+                  className="outline-none flex-1 bg-transparent dark:text-customNeutral-100 dark:placeholder-customNeutral-300"
                   prefix="₱"
                   placeholder="₱0.00"
                   decimalsLimit={2}
@@ -592,7 +592,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
                 </InputIcon>
                 <CurrencyInput
                   data-cy="package-discount-input"
-                  className="outline-none flex-1 "
+                  className="outline-none flex-1 bg-transparent dark:text-customNeutral-100 dark:placeholder-customNeutral-300"
                   suffix="%"
                   placeholder="0%"
                   decimalsLimit={2}
@@ -612,7 +612,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
                 </InputIcon>
                 <CurrencyInput
                   data-cy="total-amount-input"
-                  className="outline-none flex-1 "
+                  className="outline-none flex-1 bg-transparent dark:text-customNeutral-100 dark:placeholder-customNeutral-300"
                   prefix="₱"
                   placeholder="₱0.00"
                   decimalsLimit={2}
@@ -631,7 +631,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
                 </InputIcon>
                 <CurrencyInput
                   data-cy="amount-paid-input"
-                  className="outline-none flex-1 "
+                  className="outline-none flex-1 bg-transparent dark:text-customNeutral-100 dark:placeholder-customNeutral-300"
                   prefix="₱"
                   placeholder="₱0.00"
                   decimalsLimit={2}
