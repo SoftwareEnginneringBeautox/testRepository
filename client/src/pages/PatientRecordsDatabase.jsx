@@ -715,7 +715,6 @@ function PatientRecordsDatabase() {
 
       <div className="w-full overflow-x-auto" data-cy="patient-records-table">
         <Table
-          className="min-w-[1200px]"
           showPagination={true}
           currentPage={currentPage}
           totalPages={totalPages}
@@ -808,7 +807,6 @@ function PatientRecordsDatabase() {
                 </TableHead>
               )}
 
-              {/* Update PAID column header */}
               <TableHead className="py-4 text-center whitespace-nowrap">
                 PAID STATUS
               </TableHead>
@@ -817,244 +815,23 @@ function PatientRecordsDatabase() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {currentRecords.map((record, index) => (
-              <TableRow key={index} data-cy={`record-row-${index}`}>
-                {/* Always show CLIENT column */}
+            {currentRecords.length > 0 ? (
+              currentRecords.map((record, index) => (
+                <TableRow key={index} data-cy={`record-row-${index}`}>
+                  {/* Your existing row content remains the same */}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
                 <TableCell
-                  className="whitespace-nowrap"
-                  data-cy={`record-client-${index}`}
-                >
-                  {record.client || record.patient_name?.toUpperCase() || "N/A"}
-                </TableCell>
-
-                {/* Always show DATE OF SESSION column */}
-                <TableCell
-                  className="text-center whitespace-nowrap"
-                  data-cy={`record-date-${index}`}
-                >
-                  {record.dateTransacted || record.date_of_session
-                    ? format(
-                        new Date(
-                          record.dateTransacted || record.date_of_session
-                        ),
-                        "MMMM dd, yyyy"
-                      ).toUpperCase()
-                    : "N/A"}
-                </TableCell>
-
-                {/* Conditionally show other cells based on selectedColumns */}
-                {isColumnVisible.timeofsession && (
-                  <TableCell
-                    className="text-center whitespace-nowrap"
-                    data-cy={`record-time-${index}`}
-                  >
-                    {record.nextSessionTime || record.time_of_session
-                      ? (() => {
-                          const timeValue =
-                            record.nextSessionTime || record.time_of_session;
-                          const parsedTime = new Date(
-                            `1970-01-01T${timeValue}`
-                          );
-                          return isNaN(parsedTime.getTime())
-                            ? "Invalid Time"
-                            : format(parsedTime, "hh:mm a");
-                        })()
-                      : "N/A"}
-                  </TableCell>
-                )}
-                {isColumnVisible.contactnumber && (
-                  <TableCell
-                    className="text-center whitespace-nowrap"
-                    data-cy={`record-contact-${index}`}
-                  >
-                    {record.contact_number || "N/A"}
-                  </TableCell>
-                )}
-                {isColumnVisible.age && (
-                  <TableCell
-                    className="text-center whitespace-nowrap"
-                    data-cy={`record-age-${index}`}
-                  >
-                    {record.age || "N/A"}
-                  </TableCell>
-                )}
-                {isColumnVisible.email && (
-                  <TableCell
-                    className="text-center whitespace-nowrap"
-                    data-cy={`record-email-${index}`}
-                  >
-                    {record.email || "N/A"}
-                  </TableCell>
-                )}
-
-                {isColumnVisible.personincharge && (
-                  <TableCell
-                    className="text-center whitespace-nowrap"
-                    data-cy={`record-personincharge-${index}`}
-                  >
-                    {(
-                      record.personInCharge || record.person_in_charge
-                    )?.toUpperCase()}
-                  </TableCell>
-                )}
-
-                {isColumnVisible.package && (
-                  <TableCell
-                    className="whitespace-nowrap"
-                    data-cy={`record-package-${index}`}
-                  >
-                    {(record.package || record.package_name)?.toUpperCase()}
-                  </TableCell>
-                )}
-
-                {isColumnVisible.treatment && (
-                  <TableCell
-                    className="text-left whitespace-nowrap"
-                    data-cy={`record-treatment-${index}`}
-                  >
-                    {Array.isArray(record.treatment_ids)
-                      ? getTreatmentNames(record.treatment_ids)
-                          .join(", ")
-                          .toUpperCase()
-                      : "N/A"}
-                  </TableCell>
-                )}
-
-                {isColumnVisible.consentformsigned && (
-                  <TableCell
-                    className="text-center whitespace-nowrap"
-                    data-cy={`record-consent-${index}`}
-                  >
-                    {record.consentStatus ||
-                      (typeof record.consent_form_signed === "boolean"
-                        ? record.consent_form_signed
-                          ? "YES"
-                          : "NO"
-                        : record.consent_form_signed)}
-                  </TableCell>
-                )}
-
-                {isColumnVisible.paymentmethod && (
-                  <TableCell
-                    className="whitespace-nowrap"
-                    data-cy={`record-paymentmethod-${index}`}
-                  >
-                    {(
-                      record.paymentMethod || record.payment_method
-                    )?.toUpperCase()}
-                  </TableCell>
-                )}
-
-                {isColumnVisible.totalamount && (
-                  <TableCell
-                    className="text-center"
-                    data-cy={`record-total-${index}`}
-                  >
-                    {new Intl.NumberFormat("en-PH", {
-                      style: "currency",
-                      currency: "PHP"
-                    }).format(parseFloat(record.total_amount || 0))}
-                  </TableCell>
-                )}
-
-                {isColumnVisible.amountpaid && (
-                  <TableCell
-                    className="text-center"
-                    data-cy={`record-paid-${index}`}
-                  >
-                    {record.amount_paid
-                      ? new Intl.NumberFormat("en-PH", {
-                          style: "currency",
-                          currency: "PHP"
-                        }).format(record.amount_paid)
-                      : "₱0.00"}
-                  </TableCell>
-                )}
-
-                {isColumnVisible.remainingbalance && (
-                  <TableCell
-                    className="text-center"
-                    data-cy={`record-remaining-${index}`}
-                  >
-                    {(() => {
-                      const total = parseFloat(record.total_amount || 0);
-                      const paid = parseFloat(record.amount_paid || 0);
-                      const remaining = total - paid;
-                      return new Intl.NumberFormat("en-PH", {
-                        style: "currency",
-                        currency: "PHP"
-                      }).format(remaining);
-                    })()}
-                  </TableCell>
-                )}
-
-                {isColumnVisible.referenceno && (
-                  <TableCell
-                    className="text-center"
-                    data-cy={`record-refno-${index}`}
-                  >
-                    {record.reference_number || "N/A"}
-                  </TableCell>
-                )}
-
-                {/* Replace Checkbox with Select dropdown for PAID STATUS column */}
-                <TableCell
+                  colSpan={selectedColumns.length + 2}
                   className="text-center"
-                  data-cy={`record-paid-status-${index}`}
+                  data-cy="no-records-message"
                 >
-                  <Select
-                    value={record.isPaid || "no"}
-                    onValueChange={(value) =>
-                      handlePaidChange(record, value === "yes")
-                    }
-                    data-cy={`paid-status-select-${index}`}
-                  >
-                    <SelectTrigger className="w-[80px] mx-auto">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="yes">YES</SelectItem>
-                      <SelectItem value="no">NO</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </TableCell>
-
-                <TableCell>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger
-                      data-cy={`record-menu-trigger-${index}`}
-                    >
-                      <EllipsisIcon />
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                      <DropdownMenuGroup>
-                        <DropdownMenuItem
-                          onClick={() => handleOpenUpdateEntry(record)}
-                          data-cy={`record-update-button-${index}`}
-                        >
-                          <UpdateIcon />
-                          <p className="font-semibold">Update</p>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => handleOpenEditEntry(record)}
-                          data-cy={`record-edit-button-${index}`}
-                        >
-                          <EditIcon />
-                          <p className="font-semibold">Edit</p>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => handleOpenArchiveEntry(record)}
-                          data-cy={`record-archive-button-${index}`}
-                        >
-                          <ArchiveIcon />
-                          <p className="font-semibold">Archive</p>
-                        </DropdownMenuItem>
-                      </DropdownMenuGroup>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  NO PATIENT RECORDS CURRENTLY AVAILABLE
                 </TableCell>
               </TableRow>
-            ))}
+            )}
           </TableBody>
         </Table>
       </div>

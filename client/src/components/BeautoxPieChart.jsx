@@ -5,6 +5,7 @@ import {
   CardContent,
   CardDescription,
   CardHeader,
+  CardFooter,
   CardTitle
 } from "@/components/ui/card";
 
@@ -151,18 +152,18 @@ const BeautoxPieChart = () => {
   };
 
   return (
-    <Card className="w-full h-full shadow-md bg-white">
+    <Card className="w-full h-full shadow-md bg-white flex flex-col items-center justify-evenly">
       <CardHeader className="items-center pb-2">
         <CardTitle>MONTHLY EXPENSES</CardTitle>
         <CardDescription>April 2025</CardDescription>
       </CardHeader>
-      <CardContent className="pb-0">
+      <CardContent className="pb-0 w-full flex-1 flex flex-col items-center justify-center">
         {loading ? (
           <div className="flex justify-center items-center h-64">
             <Loader />
           </div>
         ) : error ? (
-          <div className="px-3 py-2 bg-red-50 border border-red-200 rounded text-red-700 text-xs mb-4">
+          <div className="px-3 py-2 bg-red-50 border border-error-200 rounded text-error-400 text-xs mb-4">
             Error loading data: {error}
           </div>
         ) : chartData.length === 0 ? (
@@ -205,16 +206,17 @@ const BeautoxPieChart = () => {
                 <Legend />
               </PieChart>
             </ResponsiveContainer>
-
-            <div className="text-center mt-4">
-              <div className="text-2xl font-bold">
-                {formatCurrency(totalExpenses)}
-              </div>
-              <div className="text-sm text-gray-500">TOTAL EXPENSES</div>
-            </div>
           </>
         )}
       </CardContent>
+      <CardFooter>
+        <div className="text-center mt-4">
+          <div className="text-2xl font-bold">
+            {formatCurrency(totalExpenses)}
+          </div>
+          <div className="text-sm text-gray-500">TOTAL EXPENSES</div>
+        </div>
+      </CardFooter>
     </Card>
   );
 };

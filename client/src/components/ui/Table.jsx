@@ -60,7 +60,7 @@ const Table = React.forwardRef(
 
         {/* Pagination component - separated from scroll container */}
         {showPagination && totalPages > 1 && (
-          <div className={cn("w-full mt-2", scrollbarBgClass)}>
+          <div className={cn("w-full ", scrollbarBgClass)}>
             <PaginationWithPageCount
               currentPage={currentPage}
               totalPages={totalPages}

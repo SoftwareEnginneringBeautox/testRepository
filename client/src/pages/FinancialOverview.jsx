@@ -48,17 +48,6 @@ import {
   SelectValue,
   SelectTrigger
 } from "@/components/ui/Select";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious
-} from "@/components/ui/Pagination";
-
-import { Checkbox } from "@/components/ui/Checkbox";
 
 // Define the base API URL from environment variable
 const API_BASE_URL = import.meta.env.VITE_API_URL;
@@ -502,6 +491,26 @@ function FinancialOverview() {
     }
   };
 
+  // FOR HANDLING OF THE LAST PAGE OF THE CATEGORIES TABLE
+  const [categoriesPage, setCategoriesPage] = useState(1);
+  const categoriesPerPage = 7;
+
+  // Calculate paginated categories
+  const indexOfLastCategory = categoriesPage * categoriesPerPage;
+  const indexOfFirstCategory = indexOfLastCategory - categoriesPerPage;
+  const paginatedCategories = categories.slice(
+    indexOfFirstCategory,
+    indexOfLastCategory
+  );
+  const totalCategoryPages = Math.ceil(categories.length / categoriesPerPage);
+
+  // Paginate function for categories
+  const paginateCategories = (pageNumber) => {
+    if (pageNumber > 0 && pageNumber <= totalCategoryPages) {
+      setCategoriesPage(pageNumber);
+    }
+  };
+
   const handleEditCategory = async (categoryData) => {
     try {
       console.log("Edit category callback called with:", categoryData);
@@ -852,7 +861,14 @@ function FinancialOverview() {
             className="flex flex-col w-full md:w-1/2 gap-2"
             data-cy="categories-section"
           >
-            <Table className="overflow-x-hidden" data-cy="categories-table">
+            <Table
+              className="overflow-x-hidden"
+              data-cy="categories-table"
+              showPagination={true}
+              currentPage={categoriesPage}
+              totalPages={totalCategoryPages}
+              onPageChange={paginateCategories}
+            >
               <TableHeader>
                 <TableRow>
                   <TableHead
@@ -864,8 +880,8 @@ function FinancialOverview() {
                 </TableRow>
               </TableHeader>
               <TableBody data-cy="categories-table-body">
-                {categories.length > 0 ? (
-                  categories.map((category) => (
+                {paginatedCategories.length > 0 ? (
+                  paginatedCategories.map((category) => (
                     <TableRow
                       key={category.id}
                       data-cy={`category-row-${category.id}`}
@@ -921,6 +937,7 @@ function FinancialOverview() {
                 )}
               </TableBody>
             </Table>
+
             <Button
               fullWidth={true}
               onClick={() => openModal("createCategory")}
