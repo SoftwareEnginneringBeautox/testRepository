@@ -367,31 +367,31 @@ function StaffDashboard() {
 
       {/* Right Section - Staff List */}
       <div className="w-full lg:w-1/4 flex flex-col gap-4">
-        <div className="shadow-custom p-4 sm:p-6 md:p-8 lg:p-10 bg-ash-100 rounded-lg flex flex-col items-center gap-3 sm:gap-4 mt-4 lg:mt-0">
-          <h3 className="flex items-center gap-2 text-lg sm:text-xl md:text-2xl lg:text-[2rem] leading-tight sm:leading-[2.8rem] font-semibold">
+        <div className="shadow-custom p-4 sm:p-6 md:p-8 lg:p-10 bg-ash-100 dark:bg-customNeutral-500 rounded-lg flex flex-col items-center gap-3 sm:gap-4 mt-4 lg:mt-0">
+          <h3 className="flex items-center gap-2 text-lg sm:text-xl md:text-2xl lg:text-[2rem] leading-tight sm:leading-[2.8rem] font-semibold dark:text-customNeutral-100">
             <UserIcon size={24} className="sm:w-8 sm:h-8" />
             STAFF LIST
           </h3>
           {loadingStaff ? (
-            <p className="text-sm sm:text-base">Loading staff...</p>
+            <p className="text-sm sm:text-base dark:text-customNeutral-100">Loading staff...</p>
           ) : errorStaff ? (
-            <p className="text-red-500 text-sm sm:text-base">{errorStaff}</p>
+            <p className="text-error-400 text-sm sm:text-base">{errorStaff}</p>
           ) : staffList.length === 0 ? (
-            <p className="text-sm sm:text-base">No staff found.</p>
+            <p className="text-sm sm:text-base dark:text-customNeutral-100">No staff found.</p>
           ) : (
             <div className="w-full max-h-[300px] sm:max-h-[400px] overflow-y-auto">
               {staffList.map((staff, index) => (
                 <div
                   key={index}
-                  className="w-full flex justify-between border-2 border-reflexBlue-400 px-3 sm:px-4 py-2 sm:py-3 rounded-md mb-2"
+                  className="w-full flex justify-between border-2 border-reflexBlue-400 dark:border-lavender-300 px-3 sm:px-4 py-2 sm:py-3 rounded-md mb-2"
                 >
                   <div className="flex flex-col">
-                    <span className="font-semibold text-sm sm:text-base">
+                    <span className="font-semibold text-sm sm:text-base dark:text-customNeutral-100">
                       {staff.username}
                     </span>
                     {(staff.role === "receptionist" ||
                       staff.role === "aesthetician") && (
-                      <span className="text-xs sm:text-sm text-gray-500 capitalize">
+                      <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 capitalize">
                         ({staff.role})
                       </span>
                     )}
@@ -403,19 +403,19 @@ function StaffDashboard() {
         </div>
 
         {/* Reminders Card */}
-        <div className="shadow-custom p-4 sm:p-6 md:p-8 lg:p-10 bg-ash-100 rounded-lg flex flex-col items-center gap-3 sm:gap-4">
-          <h3 className="flex items-center gap-2 text-lg sm:text-xl md:text-2xl lg:text-[2rem] leading-tight sm:leading-[2.8rem] font-semibold">
+        <div className="shadow-custom p-4 sm:p-6 md:p-8 lg:p-10 bg-ash-100 dark:bg-customNeutral-500 rounded-lg flex flex-col items-center gap-3 sm:gap-4">
+          <h3 className="flex items-center gap-2 text-lg sm:text-xl md:text-2xl lg:text-[2rem] leading-tight sm:leading-[2.8rem] font-semibold dark:text-customNeutral-100">
             <CalendarIcon className="w-6 h-6 sm:w-8 sm:h-8" />
             REMINDERS
           </h3>
           <div className="w-full">
-            <h4 className="text-base sm:text-lg font-semibold mb-2">
+            <h4 className="text-base sm:text-lg font-semibold mb-2 dark:text-customNeutral-100">
               UPCOMING APPOINTMENTS
             </h4>
             <div className="flex flex-col gap-2">
               {reminders.length > 0 ? (
                 reminders.map((item, index) => (
-                  <div key={index} className="flex items-start text-xs sm:text-sm bg-white/50 p-4 rounded-lg relative min-h-[80px]">
+                  <div key={index} className="flex items-start text-xs sm:text-sm bg-white/50 dark:bg-customNeutral-400 p-4 rounded-lg relative min-h-[80px]">
                     {getReminderLabel(item.date_of_session) && (
                       <div className="absolute top-3 right-3">
                         <span className="px-3 py-1 text-[10px] rounded-full bg-lavender-300 text-white font-semibold whitespace-nowrap">
@@ -424,7 +424,7 @@ function StaffDashboard() {
                       </div>
                     )}
                     <div className="w-[calc(100%-100px)]">
-                      <span>
+                      <span className="dark:text-customNeutral-100">
                         {item.full_name} has an appointment on{" "}
                         <strong>{format(new Date(item.date_of_session), "MMMM dd, yyyy")}</strong>{" "}
                         at{" "}
@@ -436,8 +436,8 @@ function StaffDashboard() {
                   </div>
                 ))
               ) : (
-                <div className="flex items-center gap-2 text-xs sm:text-sm bg-white/50 p-4 rounded-lg">
-                  <span>No upcoming appointments in the next 3 days.</span>
+                <div className="flex items-center gap-2 text-xs sm:text-sm bg-white/50 dark:bg-customNeutral-400 p-4 rounded-lg">
+                  <span className="dark:text-customNeutral-100">No upcoming appointments in the next 3 days.</span>
                 </div>
               )}
             </div>
