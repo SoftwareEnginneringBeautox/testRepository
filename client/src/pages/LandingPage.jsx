@@ -374,33 +374,33 @@ function LandingPage() {
             />
 
             <h3 
-              className="text-2xl sm:text-3xl md:text-5xl lg:text-4xl leading-none text-[#4A3B89] font-bold w-fit whitespace-nowrap"
+              className="text-xl sm:text-2xl md:text-3xl lg:text-4xl leading-none text-[#4A3B89] font-bold w-fit whitespace-nowrap"
               data-cy="hero-title"
             >
-                Welcome to Beautox
-              </h3>
+              Welcome to Beautox
+            </h3>
 
             <div className="flex flex-col gap-3">
               <p 
-                className="font-semibold text-lg sm:text-xl md:text-2xl bg-gradient-to-r from-reflexBlue-300 to-lavender-300 text-transparent bg-clip-text whitespace-nowrap w-fit"
+                className="font-semibold text-base sm:text-lg md:text-xl lg:text-2xl bg-gradient-to-r from-reflexBlue-300 to-lavender-300 text-transparent bg-clip-text whitespace-nowrap w-fit"
                 data-cy="hero-subtitle"
               >
                 Where Beauty meets Innovation
               </p>
 
               <p 
-                className="text-base sm:text-lg text-gray-800 leading-relaxed max-w-[28ch] mb-3"
+                className="text-sm sm:text-base md:text-lg text-gray-800 leading-relaxed max-w-[28ch] mb-3"
                 data-cy="hero-description"
               >
                 Experience the pinnacle of skincare luxury with our personalized treatments. Whether you're seeking a rejuvenating facial, targeted acne treatment, or a relaxing massage, our expert team is here to pamper you and address your unique skincare needs.
               </p>
 
               <button
-                className="flex items-center justify-center gap-2 px-6 sm:px-8 py-3 bg-purple-950 text-white rounded-full text-base sm:text-lg font-semibold hover:bg-purple-900 transition shadow-md w-fit"
+                className="flex items-center justify-center gap-2 px-4 sm:px-6 md:px-8 py-2 sm:py-3 bg-purple-950 text-white rounded-full text-sm sm:text-base md:text-lg font-semibold hover:bg-purple-900 transition shadow-md w-fit"
                 onClick={() => setIsScheduleModalOpen(true)}
                 data-cy="appointment-btn"
               >
-                <CalendarIcon className="h-3 w-3" />
+                <CalendarIcon className="h-3 w-3 sm:h-4 sm:w-4" />
                 Set an Appointment
               </button>
             </div>
@@ -589,7 +589,7 @@ function LandingPage() {
             className="text-2xl sm:text-3xl font-semibold bg-gradient-to-r from-reflexBlue-300 to-lavender-300 text-transparent bg-clip-text mb-8 text-center"
             data-cy="about-clinic-title"
           >
-            ABOUT OUR CLINIC
+            FIND OUR CLINIC
           </h2>
 
           <div className="w-full flex flex-col lg:flex-row gap-8">
