@@ -421,7 +421,7 @@ function StaffDashboard() {
                 reminders.map((item, index) => (
                   <div
                     key={index}
-                    className="flex items-start text-xs sm:text-sm bg-white/50 dark:bg-customNeutral-400 p-4 rounded-lg relative min-h-[80px]"
+                    className="flex items-start text-xs sm:text-sm bg-white/50 dark:bg-customNeutral-400 pt-8 pb-4 px-4 rounded-lg relative min-h-[80px]"
                   >
                     {getReminderLabel(item.date_of_session) && (
                       <div className="absolute top-3 right-3">
@@ -431,7 +431,7 @@ function StaffDashboard() {
                       </div>
                     )}
                     <div className="w-[calc(100%-100px)]">
-                      <span className="dark:text-customNeutral-100">
+                      <span className="dark:text-customNeutral-100 ">
                         {item.full_name} has an appointment on{" "}
                         <strong>
                           {format(
@@ -451,7 +451,7 @@ function StaffDashboard() {
                   </div>
                 ))
               ) : (
-                <div className="flex items-center gap-2 text-xs sm:text-sm bg-white/50 dark:bg-customNeutral-400 p-4 rounded-lg">
+                <div className="flex items-center gap-2 text-xs sm:text-sm bg-white/50 dark:bg-customNeutral-400   rounded-lg">
                   <span className="dark:text-customNeutral-100">
                     No upcoming appointments in the next 3 days.
                   </span>

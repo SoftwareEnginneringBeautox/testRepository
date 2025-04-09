@@ -192,7 +192,7 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
             </InputContainer>
           </div>
 
-          <div className="flex flex-row w-full gap-4">
+          <div className="flex flex-row w-full gap-4 mt-4">
             <InputContainer className="flex-1">
               <InputLabel>DATE OF SESSION</InputLabel>
               <p data-cy="date-of-session-display">
@@ -208,7 +208,7 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
             </InputContainer>
           </div>
 
-          <div className="flex flex-row w-full gap-4">
+          <div className="flex flex-row w-full gap-4 mt-4">
             <InputContainer className="flex-1">
               <InputLabel>DATE OF NEXT SESSION</InputLabel>
               <InputTextField>

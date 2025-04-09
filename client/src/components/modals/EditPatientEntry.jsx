@@ -474,7 +474,7 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
                 onValueChange={(value) =>
                   setFormData({ ...formData, payment_method: value })
                 }
-                className="flex flex-col gap-2 mt-2"
+                className="flex flex-col gap-2 "
               >
                 <div className="flex items-center gap-2">
                   <RadioGroupItem value="full-payment" id="full-payment" />
@@ -493,7 +493,7 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
             </InputContainer>
           </div>
 
-          <div className="flex flex-row w-full gap-4">
+          <div className="flex flex-row w-full gap-4 mt-4">
             <InputContainer className="flex-1">
               <InputLabel>DATE OF SESSION</InputLabel>
               <InputTextField>
@@ -520,7 +520,7 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
                 />
               </InputTextField>
               {formSubmitAttempted && formErrors.date_of_session && (
-                <p className="text-red-500 text-sm mt-1">
+                <p className="text-error-400 text-sm mt-1">
                   {formErrors.date_of_session}
                 </p>
               )}

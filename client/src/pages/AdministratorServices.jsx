@@ -178,6 +178,35 @@ function AdministratorServices() {
     fetchPackages();
   }, []);
 
+  const [treatmentsPage, setTreatmentsPage] = useState(1);
+  const [packagesPage, setPackagesPage] = useState(1);
+  const itemsPerPage = 10;
+
+  // Add pagination calculations
+  const paginatedTreatments = treatmentsData.slice(
+    (treatmentsPage - 1) * itemsPerPage,
+    treatmentsPage * itemsPerPage
+  );
+  const totalTreatmentPages = Math.ceil(treatmentsData.length / itemsPerPage);
+
+  const paginatedPackages = packagesData.slice(
+    (packagesPage - 1) * itemsPerPage,
+    packagesPage * itemsPerPage
+  );
+  const totalPackagePages = Math.ceil(packagesData.length / itemsPerPage);
+
+  const paginateTreatments = (pageNumber) => {
+    if (pageNumber > 0 && pageNumber <= totalTreatmentPages) {
+      setTreatmentsPage(pageNumber);
+    }
+  };
+
+  const paginatePackages = (pageNumber) => {
+    if (pageNumber > 0 && pageNumber <= totalPackagePages) {
+      setPackagesPage(pageNumber);
+    }
+  };
+
   return (
     <div
       className="flex flex-col gap-4 text-left w-[90%] mx-auto overflow-hidden"
@@ -191,7 +220,13 @@ function AdministratorServices() {
       </h4>
 
       {/* Treatments Table */}
-      <Table data-cy="treatments-table">
+      <Table
+        data-cy="treatments-table"
+        showPagination={true}
+        currentPage={treatmentsPage}
+        totalPages={totalTreatmentPages}
+        onPageChange={paginateTreatments}
+      >
         <TableHeader data-cy="treatments-table-header">
           <TableRow>
             <TableHead
@@ -218,7 +253,6 @@ function AdministratorServices() {
             >
               EXPIRATION
             </TableHead>
-
             <TableHead
               className="py-4 text-center"
               data-cy="treatment-actions-header"
@@ -226,8 +260,8 @@ function AdministratorServices() {
           </TableRow>
         </TableHeader>
         <TableBody data-cy="treatments-table-body">
-          {treatmentsData.length > 0 ? (
-            treatmentsData.map((treatment) => (
+          {paginatedTreatments.length > 0 ? (
+            paginatedTreatments.map((treatment) => (
               <TableRow
                 key={treatment.id}
                 data-cy={`treatment-row-${treatment.id}`}
@@ -260,7 +294,6 @@ function AdministratorServices() {
                       }`
                     : "-"}
                 </TableCell>
-
                 <TableCell
                   className="py-4 text-center"
                   data-cy={`treatment-actions-${treatment.id}`}
@@ -326,7 +359,13 @@ function AdministratorServices() {
       </div>
 
       {/* Packages Table */}
-      <Table data-cy="packages-table">
+      <Table
+        data-cy="packages-table"
+        showPagination={true}
+        currentPage={packagesPage}
+        totalPages={totalPackagePages}
+        onPageChange={paginatePackages}
+      >
         <TableHeader data-cy="packages-table-header">
           <TableRow>
             <TableHead className="py-4 text-center" data-cy="package-id-header">
@@ -362,7 +401,6 @@ function AdministratorServices() {
             >
               EXPIRATION
             </TableHead>
-
             <TableHead
               className="py-4 text-center"
               data-cy="package-actions-header"
@@ -370,8 +408,8 @@ function AdministratorServices() {
           </TableRow>
         </TableHeader>
         <TableBody data-cy="packages-table-body">
-          {packagesData.length > 0 ? (
-            packagesData.map((pkg) => (
+          {paginatedPackages.length > 0 ? (
+            paginatedPackages.map((pkg) => (
               <TableRow key={pkg.id} data-cy={`package-row-${pkg.id}`}>
                 <TableCell
                   className="py-4 text-center"
@@ -448,7 +486,6 @@ function AdministratorServices() {
                     ? `${pkg.expiration} week${pkg.expiration > 1 ? "s" : ""}`
                     : "-"}
                 </TableCell>
-
                 <TableCell
                   className="py-4 text-center"
                   data-cy={`package-actions-${pkg.id}`}

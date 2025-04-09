@@ -677,7 +677,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
           </div>
 
           {/* PAYMENT METHOD RADIO */}
-          <div className="flex flex-col gap-2 mt-2">
+          <div className="flex flex-col gap-2 mt-4">
             <InputContainer>
               <InputLabel>PAYMENT METHOD</InputLabel>
 
@@ -710,7 +710,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
           </div>
 
           {/* DATE AND TIME OF SESSION */}
-          <div className="flex flex-row w-full gap-4">
+          <div className="flex flex-row w-full gap-4 mt-4">
             <InputContainer className="flex-1">
               <InputLabel>DATE OF SESSION</InputLabel>
               <InputTextField>

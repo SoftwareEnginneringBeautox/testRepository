@@ -1,4 +1,5 @@
 import React from "react";
+import { useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/Sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
@@ -12,12 +13,20 @@ export default function Layout() {
   // Define routes that should not show the sidebar or user profile
   const sidebarlessRoutes = ["/", "/login", "/scheduleappointment"];
 
+  const lightThemeRoutes = [
+    "/",
+    "/login",
+    "/scheduleappointment",
+    "/landingpage"
+  ];
+
   // List all valid routes from your App.jsx
   const validRoutes = [
     "/admindashboard",
     "/staffdashboard",
     "/patientrecordsdatabase",
     "/administratorservices",
+    "/staffservices",
     "/scheduleappointment",
     "/bookingcalendar",
     "/financialoverview"
@@ -31,6 +40,31 @@ export default function Layout() {
         location.pathname.toLowerCase() === route.toLowerCase() ||
         location.pathname.toLowerCase().startsWith(route.toLowerCase() + "/")
     ) && !sidebarlessRoutes.includes(location.pathname.toLowerCase());
+
+  useEffect(() => {
+    const root = window.document.documentElement;
+
+    // Check if current route should have light theme
+    const shouldBeLightTheme =
+      lightThemeRoutes.some(
+        (route) => location.pathname.toLowerCase() === route.toLowerCase()
+      ) || isErrorPage;
+
+    if (shouldBeLightTheme) {
+      root.classList.remove("dark");
+      root.classList.add("light");
+    } else {
+      // For all other routes, set to dark theme
+      root.classList.remove("light");
+      root.classList.add("dark");
+    }
+
+    // Cleanup function
+    return () => {
+      // Optional: Reset to default theme when component unmounts
+      // root.classList.remove('light', 'dark');
+    };
+  }, [location.pathname, isErrorPage]);
 
   // Only show the sidebar and user profile if the current route is allowed and it's not the error page
   const shouldShowSidebar =
