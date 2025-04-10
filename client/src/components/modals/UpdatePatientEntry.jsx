@@ -86,10 +86,10 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
         additional_payment: "0", // Initialize additional payment as 0
         sessions_left: Math.max(0, (initialData.sessions_left || 0) - 1) // Decrement sessions by 1 for this visit
       });
-      
+
       setSessionsLeft(Math.max(0, (initialData.sessions_left || 0) - 1));
     }
-    
+
     const fetchAestheticians = async () => {
       try {
         const response = await fetch(
@@ -157,10 +157,10 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
     if (entryData && !formData.date_of_session) {
       const currentDate = new Date(entryData.date_of_session);
       currentDate.setDate(currentDate.getDate() + 7); // Add 7 days
-      
+
       const nextSessionDate = currentDate.toISOString().slice(0, 10);
-      
-      setFormData(prev => ({
+
+      setFormData((prev) => ({
         ...prev,
         date_of_session: nextSessionDate
       }));
@@ -171,9 +171,9 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
   useEffect(() => {
     let calculatedAmount = 0;
     let calculatedSessions = 0;
-    
+
     if (selectedPackage) {
-      const pkg = packagesList.find(p => p.package_name === selectedPackage);
+      const pkg = packagesList.find((p) => p.package_name === selectedPackage);
       if (pkg) {
         calculatedAmount = parseFloat(pkg.price) || 0;
         calculatedSessions = parseInt(pkg.sessions) || 0;
@@ -183,31 +183,38 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
     } else if (selectedTreatments.length > 0) {
       // Calculate total from selected treatments
       calculatedAmount = selectedTreatments.reduce((sum, treatmentId) => {
-        const treatment = treatmentsList.find(t => t.id === treatmentId);
+        const treatment = treatmentsList.find((t) => t.id === treatmentId);
         return sum + (parseFloat(treatment?.price) || 0);
       }, 0);
-      
+
       // One session per treatment
       calculatedSessions = selectedTreatments.length;
     }
-    
+
     // Apply discount if any
     const discount = parseFloat(packageDiscount) || 0;
     if (discount > 0) {
-      calculatedAmount = calculatedAmount - (calculatedAmount * discount / 100);
+      calculatedAmount = calculatedAmount - (calculatedAmount * discount) / 100;
     }
-    
+
     setNewAmount(calculatedAmount.toFixed(2));
     setSessionsLeft(calculatedSessions);
-    
+
     // When payment method changes, update amount paid
     if (newPaymentMethod === "full-payment") {
       setNewAmountPaid(calculatedAmount.toFixed(2));
     }
-  }, [selectedPackage, selectedTreatments, packagesList, treatmentsList, packageDiscount, newPaymentMethod]);
+  }, [
+    selectedPackage,
+    selectedTreatments,
+    packagesList,
+    treatmentsList,
+    packageDiscount,
+    newPaymentMethod
+  ]);
 
   if (!isOpen) return null;
-  
+
   // Calculate original total and remaining balance
   const total = parseFloat(originalData.total_amount || "0");
   const initialPaid = parseFloat(originalData.amount_paid || "0");
@@ -225,9 +232,11 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
   const isNewPaid = newBalance <= 0;
 
   // Check if current package/treatments are completed
-  const hasCompletedCurrentTreatments = 
-    (!originalData.package_name || originalData.package_name === "") && 
-    (!originalData.treatment_ids || originalData.treatment_ids.length === 0 || sessionsLeft <= 0);
+  const hasCompletedCurrentTreatments =
+    (!originalData.package_name || originalData.package_name === "") &&
+    (!originalData.treatment_ids ||
+      originalData.treatment_ids.length === 0 ||
+      sessionsLeft <= 0);
 
   const handleSubmit = async () => {
     setFormSubmitAttempted(true);
@@ -237,29 +246,40 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
     const selectedDate = new Date(formData.date_of_session);
     const today = new Date();
     today.setHours(0, 0, 0, 0); // Reset time portion for comparison
-    
+
     if (selectedDate < today) {
       errors.date_of_session = "Next session date cannot be in the past";
     }
 
     // If additional payment is entered, update remaining balance
-    if (formData.additional_payment && parseFloat(formData.additional_payment) > 0) {
+    if (
+      formData.additional_payment &&
+      parseFloat(formData.additional_payment) > 0
+    ) {
       // Validate payment amount doesn't exceed remaining balance
-      if (parseFloat(formData.additional_payment) > (total - initialPaid)) {
+      if (parseFloat(formData.additional_payment) > total - initialPaid) {
         errors.additional_payment = "Payment exceeds remaining balance";
       }
     }
 
     // If adding new package/treatments, validate selection
-    if (hasCompletedCurrentTreatments && !selectedPackage && selectedTreatments.length === 0) {
+    if (
+      hasCompletedCurrentTreatments &&
+      !selectedPackage &&
+      selectedTreatments.length === 0
+    ) {
       errors.newTreatment = "Please select a new package or treatment";
     }
-    
+
     // If adding new package/treatments and using installment, validate amount paid
-    if ((selectedPackage || selectedTreatments.length > 0) && 
-        newPaymentMethod === "installment" && 
-        (parseFloat(newAmountPaid) <= 0 || parseFloat(newAmountPaid) > parseFloat(newAmount))) {
-      errors.newAmountPaid = "Please enter a valid amount paid (greater than 0 and not exceeding the total)";
+    if (
+      (selectedPackage || selectedTreatments.length > 0) &&
+      newPaymentMethod === "installment" &&
+      (parseFloat(newAmountPaid) <= 0 ||
+        parseFloat(newAmountPaid) > parseFloat(newAmount))
+    ) {
+      errors.newAmountPaid =
+        "Please enter a valid amount paid (greater than 0 and not exceeding the total)";
     }
 
     setFormErrors(errors);
@@ -272,8 +292,8 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
       time_of_session: formData.time_of_session,
       consent_form_signed: formData.consent_form_signed,
       amount_paid: totalPaid.toString(), // Update total amount paid
-      sessions_left: sessionsLeft,
-  // Update paid status based on remaining balance
+      sessions_left: sessionsLeft
+      // Update paid status based on remaining balance
     };
 
     // If adding new package/treatments, include them
@@ -286,7 +306,6 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
         updatedData.payment_method = newPaymentMethod;
         updatedData.package_discount = parseFloat(packageDiscount);
         updatedData.remaining_balance = newBalance;
-
       } else if (selectedTreatments.length > 0) {
         updatedData.package_name = "";
         updatedData.treatment_ids = selectedTreatments;
@@ -295,7 +314,6 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
         updatedData.payment_method = newPaymentMethod;
         updatedData.package_discount = parseFloat(packageDiscount);
         updatedData.remaining_balance = newBalance;
-
       }
     }
 
@@ -308,14 +326,15 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
         const salesPayload = {
           client: entryData.patient_name,
           person_in_charge: entryData.person_in_charge,
-          date_transacted: new Date().toISOString().split('T')[0],
+          date_transacted: new Date().toISOString().split("T")[0],
           payment_method: entryData.payment_method || "Installment",
           packages: entryData.package_name || "",
-          treatment: Array.isArray(entryData.treatment_ids) ? 
-            treatmentsList.filter(t => entryData.treatment_ids.includes(t.id))
-                         .map(t => t.treatment_name)
-                         .join(", ") : 
-            "",
+          treatment: Array.isArray(entryData.treatment_ids)
+            ? treatmentsList
+                .filter((t) => entryData.treatment_ids.includes(t.id))
+                .map((t) => t.treatment_name)
+                .join(", ")
+            : "",
           payment: additionalPayment,
           reference_no: entryData.reference_number || `REF${Date.now()}`
         };
@@ -332,19 +351,24 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
     }
 
     // If a new package or treatment is selected, create a new sales record
-    if (hasCompletedCurrentTreatments && (selectedPackage || selectedTreatments.length > 0)) {
+    if (
+      hasCompletedCurrentTreatments &&
+      (selectedPackage || selectedTreatments.length > 0)
+    ) {
       try {
         const newSalesPayload = {
           client: entryData.patient_name,
           person_in_charge: entryData.person_in_charge,
-          date_transacted: new Date().toISOString().split('T')[0],
+          date_transacted: new Date().toISOString().split("T")[0],
           payment_method: newPaymentMethod,
           packages: selectedPackage || "",
-          treatment: selectedTreatments.length > 0 ? 
-            treatmentsList.filter(t => selectedTreatments.includes(t.id))
-                         .map(t => t.treatment_name)
-                         .join(", ") : 
-            "",
+          treatment:
+            selectedTreatments.length > 0
+              ? treatmentsList
+                  .filter((t) => selectedTreatments.includes(t.id))
+                  .map((t) => t.treatment_name)
+                  .join(", ")
+              : "",
           payment: parseFloat(newAmountPaid),
           reference_no: `NEWSRV${Date.now()}`
         };
@@ -417,18 +441,22 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
             {/* Current PACKAGE */}
             <InputContainer>
               <InputLabel>CURRENT PACKAGE</InputLabel>
-              <p data-cy="package-display">{originalData.package_name || "None"}</p>
+              <p data-cy="package-display">
+                {originalData.package_name || "None"}
+              </p>
             </InputContainer>
 
             {/* Current TREATMENT */}
             <InputContainer>
               <InputLabel>CURRENT TREATMENT</InputLabel>
               <p data-cy="treatment-display">
-                {Array.isArray(originalData.treatment_ids) && originalData.treatment_ids.length > 0 ? 
-                  treatmentsList.filter(t => originalData.treatment_ids.includes(t.id))
-                               .map(t => t.treatment_name)
-                               .join(", ") : 
-                  "None"}
+                {Array.isArray(originalData.treatment_ids) &&
+                originalData.treatment_ids.length > 0
+                  ? treatmentsList
+                      .filter((t) => originalData.treatment_ids.includes(t.id))
+                      .map((t) => t.treatment_name)
+                      .join(", ")
+                  : "None"}
               </p>
             </InputContainer>
 
@@ -448,17 +476,19 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
                 />
               </InputTextField>
               <p className="text-sm text-gray-500 mt-1">
-                {sessionsLeft > 0 ? 
-                  `${sessionsLeft} sessions left after this visit` : 
-                  "No sessions left. Consider adding a new package or treatment."}
+                {sessionsLeft > 0
+                  ? `${sessionsLeft} sessions left after this visit`
+                  : "No sessions left. Consider adding a new package or treatment."}
               </p>
             </InputContainer>
 
             {/* Current financial status section */}
             {(!hasCompletedCurrentTreatments || total > 0) && (
-              <div className="border-t border-b border-gray-200 dark:border-gray-700 py-4 my-2">
-                <h5 className="text-lg font-semibold mb-3">Current Account Status</h5>
-                
+              <div className="border-t border-b gap-4 border-gray-200 dark:border-gray-700 py-4 my-2">
+                <h5 className="text-lg font-semibold mb-3">
+                  Current Account Status
+                </h5>
+
                 <InputContainer>
                   <InputLabel>TOTAL AMOUNT</InputLabel>
                   <p data-cy="total-amount-display">
@@ -494,7 +524,7 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
                         decimalsLimit={2}
                         allowNegativeValue={false}
                         value={formData.additional_payment || ""}
-                        onValueChange={(value) => 
+                        onValueChange={(value) =>
                           setFormData({
                             ...formData,
                             additional_payment: value || "0"
@@ -503,14 +533,21 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
                       />
                     </InputTextField>
                     {formSubmitAttempted && formErrors.additional_payment && (
-                      <p className="text-red-500 text-sm mt-1">{formErrors.additional_payment}</p>
+                      <p className="text-red-500 text-sm mt-1">
+                        {formErrors.additional_payment}
+                      </p>
                     )}
                   </InputContainer>
                 )}
 
                 <InputContainer>
                   <InputLabel>REMAINING BALANCE</InputLabel>
-                  <p data-cy="remaining-balance-display" className={remainingBalance <= 0 ? "text-green-500 font-bold" : ""}>
+                  <p
+                    data-cy="remaining-balance-display"
+                    className={
+                      remainingBalance <= 0 ? "text-green-500 font-bold" : ""
+                    }
+                  >
                     {new Intl.NumberFormat("en-PH", {
                       style: "currency",
                       currency: "PHP"
@@ -531,8 +568,10 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
             {/* NEW PACKAGE OR TREATMENT SECTION */}
             {hasCompletedCurrentTreatments && (
               <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-md mt-2">
-                <h5 className="text-lg font-semibold mb-4">Add New Package or Treatment</h5>
-                
+                <h5 className="text-lg font-semibold mb-4">
+                  Add New Package or Treatment
+                </h5>
+
                 {/* NEW PACKAGE */}
                 <InputContainer>
                   <InputLabel>SELECT NEW PACKAGE</InputLabel>
@@ -559,11 +598,9 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
                     <ModalSelectContent>
                       <SelectItem value="CLEAR">Clear Selection</SelectItem>
                       {packagesList.map((pkg) => (
-                        <SelectItem
-                          key={pkg.id}
-                          value={pkg.package_name}
-                        >
-                          {pkg.package_name} - ₱{pkg.price} - {pkg.sessions} sessions
+                        <SelectItem key={pkg.id} value={pkg.package_name}>
+                          {pkg.package_name} - ₱{pkg.price} - {pkg.sessions}{" "}
+                          sessions
                         </SelectItem>
                       ))}
                     </ModalSelectContent>
@@ -620,11 +657,13 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
                           decimalsLimit={2}
                           allowNegativeValue={false}
                           value={packageDiscount}
-                          onValueChange={(value) => setPackageDiscount(value || "0")}
+                          onValueChange={(value) =>
+                            setPackageDiscount(value || "0")
+                          }
                         />
                       </InputTextField>
                     </InputContainer>
-                    
+
                     {/* TOTAL AMOUNT */}
                     <InputContainer>
                       <InputLabel>NEW TOTAL AMOUNT</InputLabel>
@@ -644,7 +683,7 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
                         />
                       </InputTextField>
                     </InputContainer>
-                    
+
                     {/* PAYMENT METHOD */}
                     <InputContainer>
                       <InputLabel>PAYMENT METHOD</InputLabel>
@@ -661,21 +700,27 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
                         className="flex flex-col gap-2"
                       >
                         <div className="flex items-center gap-2">
-                          <RadioGroupItem value="full-payment" id="new-full-payment" />
+                          <RadioGroupItem
+                            value="full-payment"
+                            id="new-full-payment"
+                          />
                           <label htmlFor="new-full-payment" className="text-sm">
                             FULL PAYMENT
                           </label>
                         </div>
 
                         <div className="flex items-center gap-2">
-                          <RadioGroupItem value="installment" id="new-installment" />
+                          <RadioGroupItem
+                            value="installment"
+                            id="new-installment"
+                          />
                           <label htmlFor="new-installment" className="text-sm">
                             INSTALLMENT
                           </label>
                         </div>
                       </RadioGroup>
                     </InputContainer>
-                    
+
                     {/* AMOUNT PAID */}
                     <InputContainer>
                       <InputLabel>AMOUNT PAID</InputLabel>
@@ -691,19 +736,27 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
                           decimalsLimit={2}
                           allowNegativeValue={false}
                           value={newAmountPaid}
-                          onValueChange={(value) => setNewAmountPaid(value || "0")}
+                          onValueChange={(value) =>
+                            setNewAmountPaid(value || "0")
+                          }
                           readOnly={newPaymentMethod === "full-payment"}
                         />
                       </InputTextField>
                       {formSubmitAttempted && formErrors.newAmountPaid && (
-                        <p className="text-red-500 text-sm mt-1">{formErrors.newAmountPaid}</p>
+                        <p className="text-red-500 text-sm mt-1">
+                          {formErrors.newAmountPaid}
+                        </p>
                       )}
                     </InputContainer>
-                    
+
                     {/* REMAINING BALANCE */}
                     <InputContainer>
                       <InputLabel>NEW REMAINING BALANCE</InputLabel>
-                      <p className={newBalance <= 0 ? "text-green-500 font-bold" : ""}>
+                      <p
+                        className={
+                          newBalance <= 0 ? "text-green-500 font-bold" : ""
+                        }
+                      >
                         {new Intl.NumberFormat("en-PH", {
                           style: "currency",
                           currency: "PHP"
@@ -715,7 +768,9 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
                 )}
 
                 {formSubmitAttempted && formErrors.newTreatment && (
-                  <p className="text-red-500 text-sm mt-1">{formErrors.newTreatment}</p>
+                  <p className="text-red-500 text-sm mt-1">
+                    {formErrors.newTreatment}
+                  </p>
                 )}
               </div>
             )}
@@ -744,7 +799,9 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
                 />
               </InputTextField>
               {formSubmitAttempted && formErrors.date_of_session && (
-                <p className="text-red-500 text-sm mt-1">{formErrors.date_of_session}</p>
+                <p className="text-red-500 text-sm mt-1">
+                  {formErrors.date_of_session}
+                </p>
               )}
             </InputContainer>
 
@@ -791,31 +848,31 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
                 Accept terms and conditions
               </label>
             </div>
-            </div>
+          </div>
 
-<div className="flex sm:flex-row flex-col gap-4 mt-6 w-full">
-  <Button
-    data-cy="cancel-update-patient-btn"
-    variant="outline"
-    className="md:w-1/2"
-    onClick={onClose}
-  >
-    <ChevronLeftIcon />
-    CANCEL AND RETURN
-  </Button>
-  <Button
-    data-cy="submit-update-patient"
-    className="md:w-1/2"
-    onClick={handleSubmit}
-  >
-    <UpdateIcon />
-    UPDATE ENTRY
-  </Button>
-</div>
-</form>
-</ModalBody>
-</ModalContainer>
-);
+          <div className="flex sm:flex-row flex-col gap-4 mt-6 w-full">
+            <Button
+              data-cy="cancel-update-patient-btn"
+              variant="outline"
+              className="md:w-1/2"
+              onClick={onClose}
+            >
+              <ChevronLeftIcon />
+              CANCEL AND RETURN
+            </Button>
+            <Button
+              data-cy="submit-update-patient"
+              className="md:w-1/2"
+              onClick={handleSubmit}
+            >
+              <UpdateIcon />
+              UPDATE ENTRY
+            </Button>
+          </div>
+        </form>
+      </ModalBody>
+    </ModalContainer>
+  );
 }
 
 export default UpdatePatientEntry;

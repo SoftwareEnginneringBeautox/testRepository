@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { cn } from "@/lib/utils";
 import { Checkbox } from "@/components/ui/Checkbox";
 import {
   Select,
@@ -86,7 +87,17 @@ const MultiSelectFilter = ({
       </SelectTrigger>
       <SelectContent>
         <div className="flex flex-col">
-          <div className="flex-1 overflow-y-auto max-h-64">
+          <div
+            className={cn(
+              "flex-1 overflow-y-auto max-h-64",
+              // Scrollbar-specific styling
+              "[&::-webkit-scrollbar]:w-2",
+              "[&::-webkit-scrollbar-thumb]:bg-gray-400",
+              "[&::-webkit-scrollbar-thumb]:rounded-full",
+              "[&::-webkit-scrollbar-track]:bg-transparent",
+              "[&::-webkit-scrollbar-thumb:hover]:bg-lavender-400"
+            )}
+          >
             <div className="flex items-center gap-2 px-2 py-1.5">
               <Checkbox
                 checked={allSelected}

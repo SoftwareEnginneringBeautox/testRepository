@@ -146,20 +146,28 @@ function Login() {
           `Login failed for "${trimmedUsername}":`,
           response.data.message
         );
-        
+
         // Special handling for archived accounts
-        if (response.data.message?.toLowerCase().includes('archived')) {
-          setErrorMessage("Your account has been archived. Please contact your administrator.");
+        if (response.data.message?.toLowerCase().includes("archived")) {
+          setErrorMessage(
+            "Your account has been archived. Please contact your administrator."
+          );
         } else {
-          setErrorMessage(response.data.message || "Invalid username or password");
+          setErrorMessage(
+            response.data.message || "Invalid username or password"
+          );
         }
         setIsLoading(false); // ✅ Stop loading on login failure
       }
     } catch (error) {
       // Also handle the 403 status specifically for archived accounts
-      if (error.response?.status === 403 && 
-          error.response.data?.message?.toLowerCase().includes('archived')) {
-        setErrorMessage("Your account has been archived. Please contact your administrator.");
+      if (
+        error.response?.status === 403 &&
+        error.response.data?.message?.toLowerCase().includes("archived")
+      ) {
+        setErrorMessage(
+          "Your account has been archived. Please contact your administrator."
+        );
       } else {
         setErrorMessage("An error occurred. Please try again later.");
       }
@@ -290,7 +298,7 @@ function Login() {
                   fullWidth="true"
                 >
                   <ChevronLeftIcon />
-                  RETURN
+                  VISIT BEAUTOX
                 </Button>
               </div>
             </form>

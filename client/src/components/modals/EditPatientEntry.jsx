@@ -54,7 +54,7 @@ function EditPatientContactInfo({ isOpen, onClose, entryData, onSubmit }) {
         <ModalIcon>
           <CircleUserIcon />
         </ModalIcon>
-        <ModalTitle>EDIT PATIENT CONTACT INFORMATION</ModalTitle>
+        <ModalTitle>EDIT PATIENT RECORD</ModalTitle>
       </ModalHeader>
       <ModalBody>
         <form onSubmit={(e) => e.preventDefault()}>
@@ -159,10 +159,14 @@ function EditPatientContactInfo({ isOpen, onClose, entryData, onSubmit }) {
                 if (formData.email && !/\S+@\S+\.\S+/.test(formData.email)) {
                   errors.email = "Please enter a valid email address";
                 }
-                
+
                 // Validate phone number format if needed
-                if (formData.contact_number && !/^09\d{9}$/.test(formData.contact_number)) {
-                  errors.contact_number = "Please enter a valid phone number (format: 09XXXXXXXXX)";
+                if (
+                  formData.contact_number &&
+                  !/^09\d{9}$/.test(formData.contact_number)
+                ) {
+                  errors.contact_number =
+                    "Please enter a valid phone number (format: 09XXXXXXXXX)";
                 }
 
                 setFormErrors(errors);
