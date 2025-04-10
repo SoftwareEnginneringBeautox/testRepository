@@ -30,26 +30,14 @@ export function NavUser({ user }) {
   const effectiveTheme = theme === "system" ? currentDocumentTheme : theme;
 
   const toggleTheme = () => {
-    const currentDocTheme = document.documentElement.classList.contains("dark")
-      ? "dark"
-      : "light";
     const newTheme = theme === "light" ? "dark" : "light";
-
-    console.log("🔄 Theme Toggle:");
-    console.log("- Current theme state:", theme);
-    console.log("- Current document class:", currentDocTheme);
-    console.log("- Setting new theme to:", newTheme);
-
+    console.log("NavUser - Before toggle - Current theme:", theme);
+    console.log("NavUser - Before toggle - localStorage:", localStorage.getItem("vite-ui-theme"));
+    console.log("NavUser - Before toggle - DOM class:", document.documentElement.classList.contains("dark") ? "dark" : "light");
+    
+    // Set the new theme using the ThemeProvider's setTheme
     setTheme(newTheme);
-
-    // Force immediate update
-    document.documentElement.classList.remove("light", "dark");
-    document.documentElement.classList.add(newTheme);
-
-    console.log(
-      "- Document class after toggle:",
-      document.documentElement.classList.contains("dark") ? "dark" : "light"
-    );
+    
   };
 
   const handleLogout = async () => {
@@ -113,16 +101,6 @@ export function NavUser({ user }) {
       if (now - parseInt(loginTime, 10) > twentyFourHours) {
         handleLogout();
       }
-    }
-  }, []);
-
-  // Update theme state to match what's actually on the document
-  useEffect(() => {
-    const currentDocTheme = document.documentElement.classList.contains("dark")
-      ? "dark"
-      : "light";
-    if (theme !== currentDocTheme) {
-      setTheme(currentDocTheme);
     }
   }, []);
 
