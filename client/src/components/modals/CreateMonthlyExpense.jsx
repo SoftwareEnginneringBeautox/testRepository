@@ -23,6 +23,14 @@ import {
   SelectItem
 } from "@/components/ui/Select";
 
+import {
+  AlertContainer,
+  AlertText,
+  AlertTitle,
+  AlertDescription,
+  CloseAlert
+} from "@/components/ui/Alert";
+
 import { Button } from "../ui/Button";
 
 import PesoIcon from "@/assets/icons/PesoIcon";
@@ -32,7 +40,12 @@ import PlusIcon from "@/assets/icons/PlusIcon";
 import ExpenseTypeIcon from "@/assets/icons/ExpenseTypeIcon";
 import CalendarIcon from "@/assets/icons/CalendarIcon";
 
-function CreateMonthlySales({ isOpen, onClose, onCreateSuccess, categories }) {
+function CreateMonthlyExpense({
+  isOpen,
+  onClose,
+  onCreateSuccess,
+  categories
+}) {
   // Ensure categories is always an array
   const safeCategories = Array.isArray(categories) ? categories : [];
 
@@ -42,8 +55,15 @@ function CreateMonthlySales({ isOpen, onClose, onCreateSuccess, categories }) {
     date: new Date().toISOString().split("T")[0]
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertTitle, setAlertTitle] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
 
   if (!isOpen) return null;
+
+  const handleAlertClose = () => {
+    setShowAlert(false);
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -65,7 +85,9 @@ function CreateMonthlySales({ isOpen, onClose, onCreateSuccess, categories }) {
 
     // Validate form data
     if (!formData.expenseType || !formData.amount || !formData.date) {
-      alert("Please fill in all required fields");
+      setAlertTitle("Error");
+      setAlertMessage("Please fill in all required fields");
+      setShowAlert(true);
       return;
     }
 
@@ -90,7 +112,11 @@ function CreateMonthlySales({ isOpen, onClose, onCreateSuccess, categories }) {
       onClose();
     } catch (error) {
       console.error("Error creating expense:", error);
-      alert("An error occurred while creating the expense. Please try again.");
+      setAlertTitle("Error");
+      setAlertMessage(
+        "An error occurred while creating the expense. Please try again."
+      );
+      setShowAlert(true);
     } finally {
       setIsSubmitting(false);
     }
@@ -98,6 +124,15 @@ function CreateMonthlySales({ isOpen, onClose, onCreateSuccess, categories }) {
 
   return (
     <ModalContainer data-cy="create-monthly-expense-modal">
+      {showAlert && (
+        <AlertContainer>
+          <AlertText>
+            <AlertTitle>{alertTitle}</AlertTitle>
+            <AlertDescription>{alertMessage}</AlertDescription>
+          </AlertText>
+          <CloseAlert onClick={handleAlertClose} />
+        </AlertContainer>
+      )}
       <ModalHeader>
         <ModalIcon>
           <PesoIcon size={28} />
@@ -212,4 +247,4 @@ function CreateMonthlySales({ isOpen, onClose, onCreateSuccess, categories }) {
   );
 }
 
-export default CreateMonthlySales;
+export default CreateMonthlyExpense;

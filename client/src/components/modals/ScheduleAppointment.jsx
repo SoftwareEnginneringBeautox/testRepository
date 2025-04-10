@@ -6,6 +6,13 @@ import {
   ModalBody
 } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
+import {
+  AlertContainer,
+  AlertText,
+  AlertTitle,
+  AlertDescription,
+  CloseAlert
+} from "@/components/ui/Alert";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -34,13 +41,39 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
   const [email, setEmail] = useState("");
   const [dateOfSession, setDateOfSession] = useState("");
   const [timeOfSession, setTimeOfSession] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertTitle, setAlertTitle] = useState("");
+  const [showAlert, setShowAlert] = useState(false);
 
   if (!isOpen) return null;
+
+  // Function to check if time is within business hours (12pm - 9pm)
+  const isWithinBusinessHours = (time) => {
+    if (!time) return false;
+
+    const [hours, minutes] = time.split(":").map(Number);
+
+    // Convert to 24-hour format for comparison
+    // Business hours: 12:00 (12pm) to 21:00 (9pm)
+    return (hours >= 12 && hours < 21) || (hours === 21 && minutes === 0);
+  };
 
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
+    // Reset alert
+    setAlertTitle("");
+    setAlertMessage("");
+
+    // Check if time is within business hours
+    if (!isWithinBusinessHours(timeOfSession)) {
+      setAlertTitle("Error");
+      setAlertMessage("Selected time is outside business hours (12pm - 9pm)");
+      setShowAlert(true);
+      return;
+    }
+
     try {
       const response = await fetch(`${API_BASE_URL}/api/staged-appointments`, {
         method: "POST",
@@ -54,26 +87,56 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
           email: email,
           date_of_session: dateOfSession,
           time_of_session: timeOfSession
-        }),
+        })
       });
-  
+
       const data = await response.json();
       if (response.ok) {
-        // On success, you can show a message, reset the form, or close the modal
-        alert("Appointment scheduled successfully! Awaiting confirmation.");
-        onClose();
+        // On success, show alert instead of using native alert
+        setAlertTitle("Success");
+        setAlertMessage(
+          "Appointment scheduled successfully! Awaiting confirmation."
+        );
+        setShowAlert(true);
+
+        // We'll close the modal when the user dismisses the alert
       } else {
         // Handle a failed response
-        alert(`Error scheduling appointment: ${data.error || data.message}`);
+        setAlertTitle("Error");
+        setAlertMessage(
+          `Error scheduling appointment: ${data.error || data.message}`
+        );
+        setShowAlert(true);
       }
     } catch (error) {
       console.error("Error scheduling appointment:", error);
-      alert("An error occurred while scheduling the appointment.");
+      setAlertTitle("Error");
+      setAlertMessage("An error occurred while scheduling the appointment.");
+      setShowAlert(true);
+    }
+  };
+
+  // Handle alert dismissal
+  const handleAlertClose = () => {
+    setShowAlert(false);
+
+    // If it was a success alert, also close the modal
+    if (alertTitle === "Success") {
+      onClose();
     }
   };
 
   return (
     <ModalContainer data-cy="schedule-appointment-modal">
+      {showAlert && (
+        <AlertContainer>
+          <AlertText>
+            <AlertTitle>{alertTitle}</AlertTitle>
+            <AlertDescription>{alertMessage}</AlertDescription>
+          </AlertText>
+          <CloseAlert onClick={handleAlertClose} />
+        </AlertContainer>
+      )}
       <ModalHeader>
         <ModalTitle data-cy="schedule-appointment-title">
           SCHEDULE APPOINTMENT
@@ -187,10 +250,19 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
                   type="time"
                   placeholder="Time of Session"
                   value={timeOfSession}
-                  onChange={(e) => setTimeOfSession(e.target.value)}
+                  onChange={(e) => {
+                    setTimeOfSession(e.target.value);
+                    // Clear alert if user changes the time
+                    if (showAlert) setShowAlert(false);
+                  }}
                   required
                 />
               </InputTextField>
+              {!isWithinBusinessHours(timeOfSession) && timeOfSession && (
+                <p className="text-red-500 text-xs mt-1">
+                  Please select a time between 12:00 PM and 9:00 PM
+                </p>
+              )}
             </InputContainer>
           </div>
 
@@ -217,7 +289,7 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
               className="md:w-1/2"
             >
               <ArrowNorthEastIcon />
-              SUBMIT SCHEDULE APPOINTMENT
+              SUBMIT APPOINTMENT
             </Button>
           </div>
         </form>

@@ -1,6 +1,13 @@
 import React, { useState } from "react";
 
 import { ModalContainer, ModalTitle } from "@/components/ui/Modal";
+import {
+  AlertContainer,
+  AlertText,
+  AlertTitle,
+  AlertDescription,
+  CloseAlert
+} from "@/components/ui/Alert";
 
 import { Button } from "../ui/Button";
 
@@ -11,6 +18,13 @@ import ArchiveIcon from "@/assets/icons/ArchiveIcon";
 function ArchiveCategory({ isOpen, onClose, category, onArchiveSuccess }) {
   // Add state for tracking archive operation
   const [isArchiving, setIsArchiving] = useState(false);
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertTitle, setAlertTitle] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
+
+  const handleAlertClose = () => {
+    setShowAlert(false);
+  };
 
   const handleArchive = async () => {
     if (!category) return;
@@ -37,11 +51,15 @@ function ArchiveCategory({ isOpen, onClose, category, onArchiveSuccess }) {
         // Close the modal
         onClose();
       } else {
-        alert(result.message || "Error archiving category");
+        setAlertTitle("Error");
+        setAlertMessage(result.message || "Error archiving category");
+        setShowAlert(true);
       }
     } catch (error) {
       console.error("Error archiving category:", error);
-      alert("An error occurred. Please try again.");
+      setAlertTitle("Error");
+      setAlertMessage("An error occurred. Please try again.");
+      setShowAlert(true);
     } finally {
       setIsArchiving(false);
     }
@@ -51,6 +69,15 @@ function ArchiveCategory({ isOpen, onClose, category, onArchiveSuccess }) {
 
   return (
     <ModalContainer className="flex flex-col gap-4">
+      {showAlert && (
+        <AlertContainer>
+          <AlertText>
+            <AlertTitle>{alertTitle}</AlertTitle>
+            <AlertDescription>{alertMessage}</AlertDescription>
+          </AlertText>
+          <CloseAlert onClick={handleAlertClose} />
+        </AlertContainer>
+      )}
       <div className="flex w-full flex-1 items-center justify-center text-warning-300">
         <WarningIcon size={48} />
       </div>

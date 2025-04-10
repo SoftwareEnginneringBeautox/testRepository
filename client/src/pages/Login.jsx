@@ -180,7 +180,6 @@ function Login() {
               </p>
             </div>
 
-            {/* Alert Messages */}
             {errorMessage && (
               <div className="bg-red-50 border border-red-200 text-red-600 px-2.5 py-1.5 rounded-md text-[11px] text-center mb-3">
                 {errorMessage}

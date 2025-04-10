@@ -553,28 +553,6 @@ function EditPatientEntry({ isOpen, onClose, entryData, onSubmit }) {
             </InputContainer>
           </div>
 
-          {/* 
-          <div className="flex flex-col gap-4 mt-4">
-            <InputContainer>
-              <InputLabel>TREATMENTS</InputLabel>
-              <Select
-                value={formData.next_treatment ?? originalData.next_treatment}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, next_treatment: value })
-                }
-              >
-                <ModalSelectTrigger
-                  icon={<TreatmentIcon className="w-4 h-4" />}
-                  placeholder="Next treatment chosen"
-                />
-                <ModalSelectContent>
-                  <SelectItem value="AESTHETICIAN">AESTHETICIAN</SelectItem>
-                  <SelectItem value="RECEPTIONIST">RECEPTIONIST</SelectItem>
-                </ModalSelectContent>
-              </Select>
-            </InputContainer>
-          </div> */}
-
           <div className="flex flex-col gap-4 my-4">
             <h5 className="text-xl leading-8 font-semibold">
               PATIENT CONSENT FORM

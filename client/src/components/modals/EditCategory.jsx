@@ -16,6 +16,14 @@ import {
   Input
 } from "@/components/ui/Input";
 
+import {
+  AlertContainer,
+  AlertText,
+  AlertTitle,
+  AlertDescription,
+  CloseAlert
+} from "@/components/ui/Alert";
+
 import { Button } from "../ui/Button";
 
 import ChevronLeftIcon from "@/assets/icons/ChevronLeftIcon";
@@ -23,10 +31,11 @@ import EditIcon from "@/assets/icons/EditIcon";
 import ExpenseTypeIcon from "@/assets/icons/ExpenseTypeIcon";
 
 function EditCategory({ isOpen, onClose, category, onEditSuccess }) {
-  // Add state for the category name
   const [categoryName, setCategoryName] = useState("");
-  // Add state for tracking form submission
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertTitle, setAlertTitle] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
 
   // Set the initial category name when the category prop changes
   useEffect(() => {
@@ -35,11 +44,17 @@ function EditCategory({ isOpen, onClose, category, onEditSuccess }) {
     }
   }, [category]);
 
+  const handleAlertClose = () => {
+    setShowAlert(false);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!categoryName || !categoryName.trim()) {
-      alert("Please enter a category name");
+      setAlertTitle("Error");
+      setAlertMessage("Please enter a category name");
+      setShowAlert(true);
       return;
     }
 
@@ -69,11 +84,15 @@ function EditCategory({ isOpen, onClose, category, onEditSuccess }) {
         // Close the modal
         onClose();
       } else {
-        alert(result.message || "Error updating category");
+        setAlertTitle("Error");
+        setAlertMessage(result.message || "Error updating category");
+        setShowAlert(true);
       }
     } catch (error) {
       console.error("Error updating category:", error);
-      alert("An error occurred. Please try again.");
+      setAlertTitle("Error");
+      setAlertMessage("An error occurred. Please try again.");
+      setShowAlert(true);
     } finally {
       setIsSubmitting(false);
     }
@@ -83,6 +102,15 @@ function EditCategory({ isOpen, onClose, category, onEditSuccess }) {
 
   return (
     <ModalContainer data-cy="edit-category-modal">
+      {showAlert && (
+        <AlertContainer>
+          <AlertText>
+            <AlertTitle>{alertTitle}</AlertTitle>
+            <AlertDescription>{alertMessage}</AlertDescription>
+          </AlertText>
+          <CloseAlert onClick={handleAlertClose} />
+        </AlertContainer>
+      )}
       <ModalHeader>
         <ModalIcon>
           <ExpenseTypeIcon />
