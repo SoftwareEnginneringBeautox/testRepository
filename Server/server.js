@@ -314,6 +314,41 @@ app.post('/logout', (req, res) => {
 --------------------------------------------- */
 
 // Create a new patient record
+app.post('/api/update-sessions', async (req, res) => {
+  try {
+    const { patient_id, sessions_used = 1 } = req.body;
+    
+    // First get the current sessions left
+    const getQuery = 'SELECT sessions_left FROM patient_records WHERE id = $1';
+    const currentSession = await pool.query(getQuery, [patient_id]);
+    
+    if (currentSession.rows.length === 0) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Patient record not found' 
+      });
+    }
+    
+    const currentSessionsLeft = currentSession.rows[0].sessions_left || 0;
+    const newSessionsLeft = Math.max(0, currentSessionsLeft - sessions_used);
+    
+    // Update the sessions left
+    const updateQuery = 'UPDATE patient_records SET sessions_left = $1 WHERE id = $2';
+    await pool.query(updateQuery, [newSessionsLeft, patient_id]);
+    
+    res.json({
+      success: true,
+      message: 'Sessions updated successfully',
+      sessionsLeft: newSessionsLeft
+    });
+  } catch (error) {
+    console.error('Error updating sessions:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Error updating sessions' 
+    });
+  }
+});
 app.post('/api/patients', async (req, res) => {
   try {
     const {
@@ -334,7 +369,8 @@ app.post('/api/patients', async (req, res) => {
       amount_paid,
       remaining_balance,
       reference_number,
-      isPaid
+      isPaid,
+      sessions_left  // Add this new field
     } = req.body;
 
     const insertQuery = `
@@ -356,9 +392,10 @@ app.post('/api/patients', async (req, res) => {
         amount_paid,
         remaining_balance,
         reference_number,
-       "isPaid"
+        "isPaid",
+        sessions_left
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)
       RETURNING id;
     `;
 
@@ -380,7 +417,8 @@ app.post('/api/patients', async (req, res) => {
       amount_paid,
       remaining_balance,
       reference_number,
-      isPaid
+      isPaid,
+      sessions_left  // Include this in the values array
     ];
 
     const result = await pool.query(insertQuery, values);
@@ -395,6 +433,16 @@ app.post('/api/patients', async (req, res) => {
     res.status(500).json({ success: false, error: 'Error creating patient record' });
   }
 });
+
+// You'll also need to modify the database table to include the sessions_left column
+// Run this SQL query on your database:
+/*
+ALTER TABLE patient_records 
+ADD COLUMN IF NOT EXISTS sessions_left INTEGER DEFAULT 0;
+*/
+
+// Update the sales endpoint to include the sales data
+
 
 // Retrieve all patient records
 app.get('/api/patients', async (req, res) => {
@@ -1237,7 +1285,7 @@ app.post("/sales", async (req, res) => {
       reference_no
     } = req.body;
 
-    // (Optional) Basic validation
+    // Basic validation
     if (!client || !date_transacted || payment == null) {
       return res.status(400).json({
         success: false,
@@ -1257,11 +1305,11 @@ app.post("/sales", async (req, res) => {
     const values = [
       client,
       person_in_charge,
-      date_transacted,   // Make sure this is in a valid Date or string format for your DB
+      date_transacted,
       payment_method,
       packages,
       treatment,
-      payment,           // e.g. numeric or decimal
+      payment,
       reference_no
     ];
 
@@ -1281,7 +1329,6 @@ app.post("/sales", async (req, res) => {
     });
   }
 });
-
 // Create a new expense
 app.post("/api/expenses", async (req, res) => {
   try {

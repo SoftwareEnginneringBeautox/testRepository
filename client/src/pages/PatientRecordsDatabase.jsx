@@ -85,14 +85,15 @@ function PatientRecordsDatabase() {
     "personincharge",
     "package",
     "treatment",
+    "sessionsleft", // New column for sessions left
     "consentformsigned",
     "paymentmethod",
     "totalamount",
     "amountpaid",
     "remainingbalance",
     "referenceno",
-    "contactnumber", // ✅ NEW
-    "age", // ✅ NEW
+    "contactnumber", 
+    "age", 
     "email"
   ]);
 
@@ -103,7 +104,6 @@ function PatientRecordsDatabase() {
 
   const columns = [
     { label: "CLIENT", value: "client", mandatory: true },
-
     { label: "DATE OF SESSION", value: "dateofsession", mandatory: true },
     { label: "TIME OF SESSION", value: "timeofsession" },
     { label: "CONTACT NUMBER", value: "contactnumber" },
@@ -112,6 +112,7 @@ function PatientRecordsDatabase() {
     { label: "PERSON IN CHARGE", value: "personincharge" },
     { label: "PACKAGE", value: "package" },
     { label: "TREATMENT", value: "treatment" },
+    { label: "SESSIONS LEFT", value: "sessionsleft" }, // New column
     { label: "CONSENT FORM SIGNED", value: "consentformsigned" },
     { label: "PAYMENT METHOD", value: "paymentmethod" },
     { label: "TOTAL AMOUNT", value: "totalamount" },
@@ -136,15 +137,7 @@ function PatientRecordsDatabase() {
       }
     });
 
-    console.log("Before update:", selectedColumns);
-    console.log("Applying column filters:", updatedColumns);
     setSelectedColumns(updatedColumns);
-    console.log("After setSelectedColumns call");
-
-    // Add this setTimeout to check if state updates asynchronously
-    setTimeout(() => {
-      console.log("State after timeout:", selectedColumns);
-    }, 100);
   };
 
   // Pagination states
@@ -179,6 +172,7 @@ function PatientRecordsDatabase() {
   useEffect(() => {
     fetchRecords();
   }, []);
+  
   const [treatmentsList, setTreatmentsList] = useState([]);
   useEffect(() => {
     const fetchTreatments = async () => {
@@ -313,20 +307,23 @@ function PatientRecordsDatabase() {
         credentials: "include",
         body: JSON.stringify({
           table: "patient_records",
-          id: updatedData.id,
-          action: "edit", // or "update" if your backend expects a different action
+          id: selectedEntry.id,
+          action: "edit", 
           data: safeData
         })
       });
+      
+      // If this is updating a session, update sessions left count
+      if (safeData.sessions_left !== undefined) {
+        // Implementation would go here if needed
+      }
+      
       closeModal();
       fetchRecords();
     } catch (error) {
       console.error("❌ Failed to update patient entry:", error);
     }
   };
-
-  // Replace the existing handlePaidChange function
- 
 
   const filteredRecords = [...records]
     .filter((record) => {
@@ -474,8 +471,9 @@ function PatientRecordsDatabase() {
       { header: "EMAIL", width: 120 },
       { header: "PIC", width: 70 },
       { header: "PACKAGE", width: 100 },
-      { header: "TREATMENT", width: 120 },
-      { header: "CS", width: 30 }, // Changed from CONSENT to CS
+      { header: "TREATMENT", width: 100 },
+      { header: "SESS LEFT", width: 40 }, // Added this column
+      { header: "CS", width: 30 }, 
       { header: "MODE", width: 50 },
       { header: "TOTAL", width: 70 },
       { header: "PAID", width: 70 },
@@ -560,14 +558,15 @@ function PatientRecordsDatabase() {
         formatDate(record.dateTransacted || record.date_of_session),
         formatTime(record.nextSessionTime || record.time_of_session),
         record.contact_number || "N/A",
-        record.age?.toString() || "N/A", // Age as is, no truncation needed
+        record.age?.toString() || "N/A", 
         record.email || "N/A",
         (record.personInCharge || record.person_in_charge)?.toUpperCase() ||
           "N/A",
         (record.package || record.package_name)?.toUpperCase() || "N/A",
-        Array.isArray(record.treatments)
-          ? getTreatmentNames(record.treatments).join(", ").toUpperCase()
+        Array.isArray(record.treatment_ids)
+          ? getTreatmentNames(record.treatment_ids).join(", ").toUpperCase()
           : record.treatment?.toUpperCase() || "N/A",
+        record.sessions_left || "N/A", // Display sessions left
         record.consent_form_signed ? "Y" : "N",
         formatPaymentMethod(record.paymentMethod || record.payment_method),
         formatCurrency(total),
@@ -595,10 +594,11 @@ function PatientRecordsDatabase() {
         }, {}),
         // Special handling for specific columns
         4: { halign: "center" }, // Age column centered
-        9: { halign: "center" }, // CS (Consent) column centered
-        11: { halign: "right", cellPadding: { right: 5 } }, // Total
-        12: { halign: "right", cellPadding: { right: 5 } }, // Paid
-        13: { halign: "right", cellPadding: { right: 5 } } // Balance
+        9: { halign: "center" }, // Sessions left centered
+        10: { halign: "center" }, // CS (Consent) column centered
+        12: { halign: "right", cellPadding: { right: 5 } }, // Total
+        13: { halign: "right", cellPadding: { right: 5 } }, // Paid
+        14: { halign: "right", cellPadding: { right: 5 } } // Balance
       },
       styles: {
         font: "helvetica",
@@ -634,9 +634,8 @@ function PatientRecordsDatabase() {
         if (
           data.cell.text &&
           typeof data.cell.text === "string" &&
-          ![4, 9, 11, 12, 13].includes(data.column.index)
+          ![4, 9, 10, 12, 13, 14].includes(data.column.index)
         ) {
-          // Skip age, consent, and currency columns
           const maxWidth =
             data.cell.styles.cellWidth - data.cell.styles.cellPadding * 2;
           const textWidth =
@@ -668,13 +667,13 @@ function PatientRecordsDatabase() {
     personincharge: selectedColumns.includes("personincharge"),
     package: selectedColumns.includes("package"),
     treatment: selectedColumns.includes("treatment"),
+    sessionsleft: selectedColumns.includes("sessionsleft"), // New column
     consentformsigned: selectedColumns.includes("consentformsigned"),
     paymentmethod: selectedColumns.includes("paymentmethod"),
     totalamount: selectedColumns.includes("totalamount"),
     amountpaid: selectedColumns.includes("amountpaid"),
     remainingbalance: selectedColumns.includes("remainingbalance"),
     referenceno: selectedColumns.includes("referenceno")
-    // paid: true // Always show paid status
   };
 
   return (
@@ -782,6 +781,12 @@ function PatientRecordsDatabase() {
               {isColumnVisible.treatment && (
                 <TableHead className=" whitespace-nowrap">TREATMENT</TableHead>
               )}
+              
+              {isColumnVisible.sessionsleft && (
+                <TableHead className=" text-center whitespace-nowrap">
+                  SESSIONS LEFT
+                </TableHead>
+              )}
 
               {isColumnVisible.consentformsigned && (
                 <TableHead className=" text-center whitespace-nowrap">
@@ -818,9 +823,6 @@ function PatientRecordsDatabase() {
                   REFERENCE NO.
                 </TableHead>
               )}
-
-              {/* Update PAID column header */}
-            
 
               <TableHead></TableHead>
             </TableRow>
@@ -871,276 +873,286 @@ function PatientRecordsDatabase() {
                               ? "Invalid Time"
                               : format(parsedTime, "hh:mm a");
                           })()
-                        : "N/A"}
-                    </TableCell>
-                  )}
+                  
+                       : "N/A"}
+                   </TableCell>
+                 )}
 
-                  {isColumnVisible.contactnumber && (
-                    <TableCell
-                      className="text-center whitespace-nowrap"
-                      data-cy={`record-contact-${index}`}
-                    >
-                      {record.contact_number || "N/A"}
-                    </TableCell>
-                  )}
+                 {isColumnVisible.contactnumber && (
+                   <TableCell
+                     className="text-center whitespace-nowrap"
+                     data-cy={`record-contact-${index}`}
+                   >
+                     {record.contact_number || "N/A"}
+                   </TableCell>
+                 )}
 
-                  {isColumnVisible.age && (
-                    <TableCell
-                      className="text-center whitespace-nowrap"
-                      data-cy={`record-age-${index}`}
-                    >
-                      {record.age || "N/A"}
-                    </TableCell>
-                  )}
+                 {isColumnVisible.age && (
+                   <TableCell
+                     className="text-center whitespace-nowrap"
+                     data-cy={`record-age-${index}`}
+                   >
+                     {record.age || "N/A"}
+                   </TableCell>
+                 )}
 
-                  {isColumnVisible.email && (
-                    <TableCell
-                      className="text-center whitespace-nowrap"
-                      data-cy={`record-email-${index}`}
-                    >
-                      {record.email || "N/A"}
-                    </TableCell>
-                  )}
+                 {isColumnVisible.email && (
+                   <TableCell
+                     className="text-center whitespace-nowrap"
+                     data-cy={`record-email-${index}`}
+                   >
+                     {record.email || "N/A"}
+                   </TableCell>
+                 )}
 
-                  {isColumnVisible.personincharge && (
-                    <TableCell
-                      className="text-center whitespace-nowrap"
-                      data-cy={`record-personincharge-${index}`}
-                    >
-                      {(
-                        record.personInCharge || record.person_in_charge
-                      )?.toUpperCase()}
-                    </TableCell>
-                  )}
+                 {isColumnVisible.personincharge && (
+                   <TableCell
+                     className="text-center whitespace-nowrap"
+                     data-cy={`record-personincharge-${index}`}
+                   >
+                     {(
+                       record.personInCharge || record.person_in_charge
+                     )?.toUpperCase()}
+                   </TableCell>
+                 )}
 
-                  {isColumnVisible.package && (
-                    <TableCell
-                      className="whitespace-nowrap"
-                      data-cy={`record-package-${index}`}
-                    >
-                      {(record.package || record.package_name)?.toUpperCase()}
-                    </TableCell>
-                  )}
+                 {isColumnVisible.package && (
+                   <TableCell
+                     className="whitespace-nowrap"
+                     data-cy={`record-package-${index}`}
+                   >
+                     {(record.package || record.package_name)?.toUpperCase()}
+                   </TableCell>
+                 )}
 
-                  {isColumnVisible.treatment && (
-                    <TableCell
-                      className="text-left whitespace-nowrap"
-                      data-cy={`record-treatment-${index}`}
-                    >
-                      {Array.isArray(record.treatment_ids) &&
-                      record.treatment_ids.length > 0 ? (
-                        <div className="flex flex-col gap-1">
-                          {record.treatment_ids.map((id) => {
-                            const treatment = treatmentsList.find(
-                              (t) => t.id === id
-                            );
-                            return treatment ? (
-                              <Badge
-                                key={treatment.id}
-                                variant="outline"
-                                data-cy={`record-treatment-badge-${record.id}-${treatment.id}`}
-                              >
-                                + {treatment.treatment_name.toUpperCase()}
-                              </Badge>
-                            ) : null;
-                          })}
-                        </div>
-                      ) : (
-                        <span className="text-muted-foreground italic">
-                          N/A
-                        </span>
-                      )}
-                    </TableCell>
-                  )}
+                 {isColumnVisible.treatment && (
+                   <TableCell
+                     className="text-left whitespace-nowrap"
+                     data-cy={`record-treatment-${index}`}
+                   >
+                     {Array.isArray(record.treatment_ids) &&
+                     record.treatment_ids.length > 0 ? (
+                       <div className="flex flex-col gap-1">
+                         {record.treatment_ids.map((id) => {
+                           const treatment = treatmentsList.find(
+                             (t) => t.id === id
+                           );
+                           return treatment ? (
+                             <Badge
+                               key={treatment.id}
+                               variant="outline"
+                               data-cy={`record-treatment-badge-${record.id}-${treatment.id}`}
+                             >
+                               + {treatment.treatment_name.toUpperCase()}
+                             </Badge>
+                           ) : null;
+                         })}
+                       </div>
+                     ) : (
+                       <span className="text-muted-foreground italic">
+                         N/A
+                       </span>
+                     )}
+                   </TableCell>
+                 )}
+                 
+                 {isColumnVisible.sessionsleft && (
+                   <TableCell
+                     className="text-center whitespace-nowrap"
+                     data-cy={`record-sessionsleft-${index}`}
+                   >
+                     {record.sessions_left || 0}
+                   </TableCell>
+                 )}
 
-                  {isColumnVisible.consentformsigned && (
-                    <TableCell
-                      className="text-center whitespace-nowrap"
-                      data-cy={`record-consent-${index}`}
-                    >
-                      {record.consentStatus ||
-                        (typeof record.consent_form_signed === "boolean"
-                          ? record.consent_form_signed
-                            ? "YES"
-                            : "NO"
-                          : record.consent_form_signed)}
-                    </TableCell>
-                  )}
+                 {isColumnVisible.consentformsigned && (
+                   <TableCell
+                     className="text-center whitespace-nowrap"
+                     data-cy={`record-consent-${index}`}
+                   >
+                     {record.consentStatus ||
+                       (typeof record.consent_form_signed === "boolean"
+                         ? record.consent_form_signed
+                           ? "YES"
+                           : "NO"
+                         : record.consent_form_signed)}
+                   </TableCell>
+                 )}
 
-                  {isColumnVisible.paymentmethod && (
-                    <TableCell
-                      className="whitespace-nowrap"
-                      data-cy={`record-paymentmethod-${index}`}
-                    >
-                      {(
-                        record.paymentMethod || record.payment_method
-                      )?.toUpperCase()}
-                    </TableCell>
-                  )}
+                 {isColumnVisible.paymentmethod && (
+                   <TableCell
+                     className="whitespace-nowrap"
+                     data-cy={`record-paymentmethod-${index}`}
+                   >
+                     {(
+                       record.paymentMethod || record.payment_method
+                     )?.toUpperCase()}
+                   </TableCell>
+                 )}
 
-                  {isColumnVisible.totalamount && (
-                    <TableCell
-                      className="text-center"
-                      data-cy={`record-total-${index}`}
-                    >
-                      {new Intl.NumberFormat("en-PH", {
-                        style: "currency",
-                        currency: "PHP"
-                      }).format(parseFloat(record.total_amount || 0))}
-                    </TableCell>
-                  )}
+                 {isColumnVisible.totalamount && (
+                   <TableCell
+                     className="text-center"
+                     data-cy={`record-total-${index}`}
+                   >
+                     {new Intl.NumberFormat("en-PH", {
+                       style: "currency",
+                       currency: "PHP"
+                     }).format(parseFloat(record.total_amount || 0))}
+                   </TableCell>
+                 )}
 
-                  {isColumnVisible.amountpaid && (
-                    <TableCell
-                      className="text-center"
-                      data-cy={`record-paid-${index}`}
-                    >
-                      {record.amount_paid
-                        ? new Intl.NumberFormat("en-PH", {
-                            style: "currency",
-                            currency: "PHP"
-                          }).format(record.amount_paid)
-                        : "₱0.00"}
-                    </TableCell>
-                  )}
+                 {isColumnVisible.amountpaid && (
+                   <TableCell
+                     className="text-center"
+                     data-cy={`record-paid-${index}`}
+                   >
+                     {record.amount_paid
+                       ? new Intl.NumberFormat("en-PH", {
+                           style: "currency",
+                           currency: "PHP"
+                         }).format(record.amount_paid)
+                       : "₱0.00"}
+                   </TableCell>
+                 )}
 
-                  {isColumnVisible.remainingbalance && (
-                    <TableCell
-                      className="text-center"
-                      data-cy={`record-remaining-${index}`}
-                    >
-                      {(() => {
-                        const total = parseFloat(record.total_amount || 0);
-                        const paid = parseFloat(record.amount_paid || 0);
-                        const remaining = total - paid;
-                        return new Intl.NumberFormat("en-PH", {
-                          style: "currency",
-                          currency: "PHP"
-                        }).format(remaining);
-                      })()}
-                    </TableCell>
-                  )}
+                 {isColumnVisible.remainingbalance && (
+                   <TableCell
+                     className="text-center"
+                     data-cy={`record-remaining-${index}`}
+                   >
+                     {(() => {
+                       const total = parseFloat(record.total_amount || 0);
+                       const paid = parseFloat(record.amount_paid || 0);
+                       const remaining = total - paid;
+                       return new Intl.NumberFormat("en-PH", {
+                         style: "currency",
+                         currency: "PHP"
+                       }).format(remaining);
+                     })()}
+                   </TableCell>
+                 )}
 
-                  {isColumnVisible.referenceno && (
-                    <TableCell
-                      className="text-center"
-                      data-cy={`record-refno-${index}`}
-                    >
-                      {record.reference_number || "N/A"}
-                    </TableCell>
-                  )}
+                 {isColumnVisible.referenceno && (
+                   <TableCell
+                     className="text-center"
+                     data-cy={`record-refno-${index}`}
+                   >
+                     {record.reference_number || "N/A"}
+                   </TableCell>
+                 )}
 
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger
-                        data-cy={`record-menu-trigger-${index}`}
-                      >
-                        <EllipsisIcon />
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent>
-                        <DropdownMenuGroup>
-                          <DropdownMenuItem
-                            onClick={() => handleOpenUpdateEntry(record)}
-                            data-cy={`record-update-button-${index}`}
-                          >
-                            <UpdateIcon />
-                            <p className="font-semibold">Update</p>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => handleOpenEditEntry(record)}
-                            data-cy={`record-edit-button-${index}`}
-                          >
-                            <EditIcon />
-                            <p className="font-semibold">Edit</p>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => handleOpenArchiveEntry(record)}
-                            data-cy={`record-archive-button-${index}`}
-                          >
-                            <ArchiveIcon />
-                            <p className="font-semibold">Archive</p>
-                          </DropdownMenuItem>
-                        </DropdownMenuGroup>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={selectedColumns.length + 2}
-                  className="text-center"
-                  data-cy="no-records-message"
-                >
-                  NO PATIENT RECORDS CURRENTLY AVAILABLE
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
+                 <TableCell>
+                   <DropdownMenu>
+                     <DropdownMenuTrigger
+                       data-cy={`record-menu-trigger-${index}`}
+                     >
+                       <EllipsisIcon />
+                     </DropdownMenuTrigger>
+                     <DropdownMenuContent>
+                       <DropdownMenuGroup>
+                         <DropdownMenuItem
+                           onClick={() => handleOpenUpdateEntry(record)}
+                           data-cy={`record-update-button-${index}`}
+                         >
+                           <UpdateIcon />
+                           <p className="font-semibold">Update</p>
+                         </DropdownMenuItem>
+                         <DropdownMenuItem
+                           onClick={() => handleOpenEditEntry(record)}
+                           data-cy={`record-edit-button-${index}`}
+                         >
+                           <EditIcon />
+                           <p className="font-semibold">Edit</p>
+                         </DropdownMenuItem>
+                         <DropdownMenuItem
+                           onClick={() => handleOpenArchiveEntry(record)}
+                           data-cy={`record-archive-button-${index}`}
+                         >
+                           <ArchiveIcon />
+                           <p className="font-semibold">Archive</p>
+                         </DropdownMenuItem>
+                       </DropdownMenuGroup>
+                     </DropdownMenuContent>
+                   </DropdownMenu>
+                 </TableCell>
+               </TableRow>
+             ))
+           ) : (
+             <TableRow>
+               <TableCell
+                 colSpan={selectedColumns.length + 2}
+                 className="text-center"
+                 data-cy="no-records-message"
+               >
+                 NO PATIENT RECORDS CURRENTLY AVAILABLE
+               </TableCell>
+             </TableRow>
+           )}
+         </TableBody>
+       </Table>
+     </div>
 
-      <div
-        className="flex flex-col md:flex-row gap-4 justify-end"
-        data-cy="patient-records-actions"
-      >
-        <Button
-          onClick={() => openModal("createEntry")}
-          className="w-full md:w-auto"
-          data-cy="add-entry-button"
-        >
-          <PlusIcon />
-          ADD NEW ENTRY
-        </Button>
-        <Button
-          variant="callToAction"
-          onClick={() => generatePRDReport(records)}
-          className="w-full md:w-auto"
-          data-cy="download-records-button"
-        >
-          <DownloadIcon />
-          <span className="hidden md:inline">DOWNLOAD PATIENT RECORDS</span>
-          <span className="md:hidden">DOWNLOAD RECORDS</span>
-        </Button>
-      </div>
+     <div
+       className="flex flex-col md:flex-row gap-4 justify-end"
+       data-cy="patient-records-actions"
+     >
+       <Button
+         onClick={() => openModal("createEntry")}
+         className="w-full md:w-auto"
+         data-cy="add-entry-button"
+       >
+         <PlusIcon />
+         ADD NEW ENTRY
+       </Button>
+       <Button
+         variant="callToAction"
+         onClick={() => generatePRDReport(records)}
+         className="w-full md:w-auto"
+         data-cy="download-records-button"
+       >
+         <DownloadIcon />
+         <span className="hidden md:inline">DOWNLOAD PATIENT RECORDS</span>
+         <span className="md:hidden">DOWNLOAD RECORDS</span>
+       </Button>
+     </div>
 
-      {currentModal === "createEntry" && (
-        <CreatePatientEntry
-          isOpen={true}
-          onClose={handleModalClose}
-          data-cy="create-patient-entry-modal"
-        />
-      )}
-      {currentModal === "editEntry" && selectedEntry && (
-        <EditPatientEntry
-          isOpen={true}
-          onClose={handleModalClose}
-          entryData={selectedEntry}
-          onSubmit={handleEditPatientEntry}
-          data-cy="edit-patient-entry-modal"
-        />
-      )}
-      {currentModal === "updateEntry" && selectedEntry && (
-        <UpdatePatientEntry
-          isOpen={true}
-          onClose={handleModalClose}
-          entryData={selectedEntry}
-          onSubmit={handleUpdatePatientEntry}
-          data-cy="update-patient-entry-modal"
-        />
-      )}
-      {currentModal === "archiveEntry" && selectedEntry && (
-        <ArchivePatientEntry
-          isOpen={true}
-          onClose={handleModalClose}
-          entryData={selectedEntry}
-          onArchive={handleArchive}
-          data-cy="archive-patient-entry-modal"
-        />
-      )}
-    </div>
-  );
+     {currentModal === "createEntry" && (
+       <CreatePatientEntry
+         isOpen={true}
+         onClose={handleModalClose}
+         data-cy="create-patient-entry-modal"
+       />
+     )}
+     {currentModal === "editEntry" && selectedEntry && (
+       <EditPatientEntry
+         isOpen={true}
+         onClose={handleModalClose}
+         entryData={selectedEntry}
+         onSubmit={handleEditPatientEntry}
+         data-cy="edit-patient-entry-modal"
+       />
+     )}
+     {currentModal === "updateEntry" && selectedEntry && (
+       <UpdatePatientEntry
+         isOpen={true}
+         onClose={handleModalClose}
+         entryData={selectedEntry}
+         onSubmit={handleUpdatePatientEntry}
+         data-cy="update-patient-entry-modal"
+       />
+     )}
+     {currentModal === "archiveEntry" && selectedEntry && (
+       <ArchivePatientEntry
+         isOpen={true}
+         onClose={handleModalClose}
+         entryData={selectedEntry}
+         onArchive={handleArchive}
+         data-cy="archive-patient-entry-modal"
+       />
+     )}
+   </div>
+ );
 }
 
 export default PatientRecordsDatabase;

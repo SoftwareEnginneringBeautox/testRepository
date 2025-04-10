@@ -52,6 +52,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
   const [personInCharge, setPersonInCharge] = useState("");
   const [packageName, setPackageName] = useState("");
   const [treatment, setTreatment] = useState("");
+  const [sessionsLeft, setSessionsLeft] = useState(0);
 
   const [amount, setAmount] = useState(""); // Original amount input by the user
   const [packageDiscount, setPackageDiscount] = useState("");
@@ -83,13 +84,17 @@ function CreatePatientEntry({ isOpen, onClose }) {
   const [age, setAge] = useState("");
   const [email, setEmail] = useState("");
 
+  // Effect for setting amount based on package or treatments
   useEffect(() => {
     if (packageName) {
       const pkg = packagesList.find((p) => p.package_name === packageName);
       if (pkg && !isNaN(parseFloat(pkg.price))) {
         setAmount(parseFloat(pkg.price).toFixed(2));
+        // Set sessions left based on package
+        setSessionsLeft(pkg.sessions || 0);
       } else {
         setAmount(""); // fallback if price is not a number
+        setSessionsLeft(0);
       }
     } else if (Array.isArray(treatment) && treatment.length > 0) {
       const selected = treatmentsList.filter((t) => treatment.includes(t.id));
@@ -98,10 +103,20 @@ function CreatePatientEntry({ isOpen, onClose }) {
         return sum + (isNaN(price) ? 0 : price);
       }, 0);
       setAmount(total.toFixed(2));
+      // For treatments, default to 1 session left for each treatment
+      setSessionsLeft(treatment.length);
     } else {
       setAmount("");
+      setSessionsLeft(0);
     }
   }, [packageName, treatment, treatmentsList, packagesList]);
+
+  // Effect for full payment
+  useEffect(() => {
+    if (paymentMethod === "full-payment" && totalAmount) {
+      setAmountPaid(totalAmount);
+    }
+  }, [paymentMethod, totalAmount]);
 
   // Compute total amount automatically whenever amount or discount changes
   useEffect(() => {
@@ -262,6 +277,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
     const numericDiscount = parseFloat(packageDiscount) || 0;
     const numericAmount = parseFloat(amount) || 0;
     const numericAmountPaid = parseFloat(amountPaid) || 0;
+    const remainingBalance = numericTotal - numericAmountPaid;
 
     const selectedTreatmentIds = Array.isArray(treatment)
       ? treatment.map(Number)
@@ -271,7 +287,10 @@ function CreatePatientEntry({ isOpen, onClose }) {
       .filter((t) => selectedTreatmentIds.includes(t.id))
       .map((t) => t.treatment_name);
 
-    const payload = {
+    const isPaid = remainingBalance <= 0;
+
+    // Patient Records Payload
+    const patientPayload = {
       patient_name: patientName,
       contact_number: contactNumber,
       age: age ? parseInt(age) : null,
@@ -288,20 +307,26 @@ function CreatePatientEntry({ isOpen, onClose }) {
       date_of_session: dateOfSession,
       time_of_session: timeOfSession,
       consent_form_signed: consentFormSigned,
-      reference_number: referenceNumber
+      reference_number: referenceNumber,
+      remaining_balance: remainingBalance,
+      sessions_left: sessionsLeft,
+      isPaid: isPaid
     };
 
     try {
+      // Submit to patient records
       const response = await fetch(`${API_BASE_URL}/api/patients`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
+        credentials: "include",
+        body: JSON.stringify(patientPayload)
       });
 
       if (response.ok) {
-        // Also insert into appointments table
         const patientData = await response.json();
-        const patientId = patientData.patientId; // Assuming the response contains the new patient's ID
+        const patientId = patientData.patientId;
+
+        // Submit to appointments
         try {
           const appointmentPayload = {
             patient_record_id: patientId,
@@ -319,6 +344,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
             {
               method: "POST",
               headers: { "Content-Type": "application/json" },
+              credentials: "include",
               body: JSON.stringify(appointmentPayload)
             }
           );
@@ -331,6 +357,38 @@ function CreatePatientEntry({ isOpen, onClose }) {
           }
         } catch (err) {
           console.error("❌ Error inserting into appointments:", err);
+        }
+
+        // Submit to sales if payment was made
+        if (numericAmountPaid > 0) {
+          try {
+            const salesPayload = {
+              client: patientName,
+              person_in_charge: personInCharge,
+              date_transacted: new Date().toISOString().split('T')[0],
+              payment_method: paymentMethod === "full-payment" ? "Full Payment" : "Installment",
+              packages: packageName,
+              treatment: selectedTreatmentNames.join(", "),
+              payment: numericAmountPaid,
+              reference_no: referenceNumber
+            };
+
+            const salesRes = await fetch(`${API_BASE_URL}/sales`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              credentials: "include",
+              body: JSON.stringify(salesPayload)
+            });
+
+            if (!salesRes.ok) {
+              const errText = await salesRes.text();
+              console.error("❌ Failed to insert sales record:", errText);
+            } else {
+              console.log("✅ Sales record successfully inserted");
+            }
+          } catch (err) {
+            console.error("❌ Error inserting into sales:", err);
+          }
         }
 
         onClose();
@@ -527,7 +585,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
                       key={pkg.id}
                       value={pkg.package_name}
                     >
-                      {pkg.package_name} - ₱{pkg.price}
+                      {pkg.package_name} - ₱{pkg.price} - {pkg.sessions} sessions
                     </SelectItem>
                   ))}
                 </ModalSelectContent>
@@ -573,6 +631,24 @@ function CreatePatientEntry({ isOpen, onClose }) {
                   {formErrors.packageOrTreatment}
                 </p>
               )}
+            </InputContainer>
+
+            {/* SESSIONS LEFT */}
+            <InputContainer>
+              <InputLabel>SESSIONS LEFT</InputLabel>
+              <InputTextField>
+                <InputIcon>
+                  <PackageIcon />
+                </InputIcon>
+                <Input
+                  data-cy="sessions-left-input"
+                  type="number"
+                  min="0"
+                  value={sessionsLeft}
+                  onChange={(e) => setSessionsLeft(parseInt(e.target.value) || 0)}
+                  readOnly
+                />
+              </InputTextField>
             </InputContainer>
 
             {/* AMOUNT (CURRENCY) */}
@@ -650,6 +726,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
                   allowNegativeValue={false}
                   value={amountPaid}
                   onValueChange={(value) => setAmountPaid(value || "")}
+                  readOnly={paymentMethod === "full-payment"}
                 />
               </InputTextField>
             </InputContainer>
@@ -683,7 +760,14 @@ function CreatePatientEntry({ isOpen, onClose }) {
 
               <RadioGroup
                 value={paymentMethod}
-                onValueChange={(val) => setPaymentMethod(val)}
+                onValueChange={(val) => {
+                  setPaymentMethod(val);
+                  if (val === "full-payment") {
+                    setAmountPaid(totalAmount);
+                  } else {
+                    setAmountPaid(""); // reset if switching to installment
+                  }
+                }}
               >
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem
