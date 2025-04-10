@@ -161,10 +161,10 @@ function CreateMonthlyExpense({
                     safeCategories.map((category) => (
                       <SelectItem
                         key={category.id}
-                        value={category.name}
+                        value={category.name || `category-${category.id}`}
                         data-cy={`expense-type-option-${category.id}`}
                       >
-                        {category.name.toUpperCase()}
+                        {category.name.toUpperCase() || `Category ${category.id}`}
                       </SelectItem>
                     ))
                   ) : (

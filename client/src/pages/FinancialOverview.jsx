@@ -640,6 +640,7 @@ function FinancialOverview() {
         ...prevCategories,
         { id: categoryData.id, name: categoryData.name }
       ]);
+      await refreshCategories();
       closeModal();
     } catch (error) {
       console.error("Create category error:", error);
