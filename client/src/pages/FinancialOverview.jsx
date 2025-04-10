@@ -13,7 +13,7 @@ import EditCategory from "@/components/modals/EditCategory";
 import ArchiveCategory from "@/components/modals/ArchiveCategory";
 import { Button } from "@/components/ui/Button";
 import DownloadIcon from "../assets/icons/DownloadIcon";
-import PlusIcon from "../assets/icons/PlusIcon";
+import PlusIcon from "@/assets/icons/PlusIcon";
 import EditIcon from "@/assets/icons/EditIcon";
 import EllipsisIcon from "@/assets/icons/EllipsisIcon";
 import ArchiveIcon from "@/assets/icons/ArchiveIcon";
@@ -48,6 +48,14 @@ import {
   SelectTrigger
 } from "@/components/ui/Select";
 
+import {
+  AlertContainer,
+  AlertText,
+  AlertTitle,
+  AlertDescription,
+  CloseAlert
+} from "@/components/ui/Alert";
+
 // Define the base API URL from environment variable
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -80,6 +88,22 @@ function FinancialOverview() {
     { value: "payment", label: "PAYMENT", mandatory: true },
     { value: "reference_no", label: "REFERENCE NO.", mandatory: false }
   ]);
+
+  // Alert state
+  const [alert, setAlert] = useState({
+    visible: false,
+    message: "",
+    variant: "default"
+  });
+
+  // Function to show alert
+  const showAlert = (message, variant = "default") => {
+    setAlert({ visible: true, message, variant });
+    setTimeout(
+      () => setAlert({ visible: false, message: "", variant: "default" }),
+      3000
+    );
+  };
 
   // Static chart data and config
   const chartData = [
@@ -159,21 +183,28 @@ function FinancialOverview() {
     fetch(`${API_BASE_URL}/financial-overview`)
       .then((response) => response.json())
       .then((data) => setFinancialData(data))
-      .catch((error) =>
-        console.error("Error fetching financial overview:", error)
-      );
+      .catch((error) => {
+        console.error("Error fetching financial overview:", error);
+        showAlert("Error fetching financial overview", "destructive");
+      });
 
     // 2. Sales data for table
     fetch(`${API_BASE_URL}/sales`)
       .then((response) => response.json())
       .then((data) => setSalesData(data))
-      .catch((error) => console.error("Error fetching sales data:", error));
+      .catch((error) => {
+        console.error("Error fetching sales data:", error);
+        showAlert("Error fetching sales data", "destructive");
+      });
 
     // 3. Expenses data
     fetch(`${API_BASE_URL}/expenses`)
       .then((response) => response.json())
       .then((data) => setExpensesData(data))
-      .catch((error) => console.error("Error fetching expenses data:", error));
+      .catch((error) => {
+        console.error("Error fetching expenses data:", error);
+        showAlert("Error fetching expenses data", "destructive");
+      });
 
     // 4. Categories
     fetch(`${API_BASE_URL}/api/categories`)
@@ -185,6 +216,7 @@ function FinancialOverview() {
       .catch((error) => {
         console.error("Error fetching categories:", error);
         setCategories([]); // Set to empty array on error
+        showAlert("Error fetching categories", "destructive");
       });
   }, []);
 
@@ -203,6 +235,7 @@ function FinancialOverview() {
       setExpensesData(data);
     } catch (error) {
       console.error("Error refreshing expenses data:", error);
+      showAlert("Error refreshing expenses data", "destructive");
     }
   };
 
@@ -243,6 +276,7 @@ function FinancialOverview() {
   const generateWeeklySalesReport = (salesData) => {
     if (!salesData || salesData.length === 0) {
       console.error("No sales data available to generate PDF.");
+      showAlert("No sales data available to generate PDF.", "destructive");
       return;
     }
 
@@ -414,10 +448,18 @@ function FinancialOverview() {
   const generateMonthlySalesReport = (salesData, expensesData) => {
     if (!salesData || salesData.length === 0) {
       console.error("No sales data available to generate Monthly Report.");
+      showAlert(
+        "No sales data available to generate Monthly Report.",
+        "destructive"
+      );
       return;
     }
     if (!expensesData || expensesData.length === 0) {
       console.warn("No expense data available. Proceeding with zero expenses.");
+      showAlert(
+        "No expense data available. Proceeding with zero expenses.",
+        "destructive"
+      );
     }
 
     const doc = new jsPDF({
@@ -588,6 +630,7 @@ function FinancialOverview() {
       setCategories(data);
     } catch (error) {
       console.error("Error refreshing categories data:", error);
+      showAlert("Error refreshing categories data", "destructive");
     }
   };
 
@@ -600,6 +643,7 @@ function FinancialOverview() {
       closeModal();
     } catch (error) {
       console.error("Create category error:", error);
+      showAlert("Create category error", "destructive");
     }
   };
 
@@ -632,7 +676,7 @@ function FinancialOverview() {
           category.name.toLowerCase() === categoryData.name.trim().toLowerCase()
       );
       if (isDuplicate) {
-        alert("A category with this name already exists");
+        showAlert("A category with this name already exists", "destructive");
         return;
       }
       const response = await fetch(
@@ -657,7 +701,10 @@ function FinancialOverview() {
       closeModal();
     } catch (error) {
       console.error("Edit category error:", error);
-      alert(error.message || "An error occurred while updating the category");
+      showAlert(
+        error.message || "An error occurred while updating the category",
+        "destructive"
+      );
     }
   };
 
@@ -675,11 +722,14 @@ function FinancialOverview() {
         closeModal();
       } else {
         const errorData = await response.json();
-        alert(errorData.message || "Error archiving category");
+        showAlert(
+          errorData.message || "Error archiving category",
+          "destructive"
+        );
       }
     } catch (error) {
       console.error("Archive category error:", error);
-      alert("An error occurred. Please try again.");
+      showAlert("An error occurred. Please try again.", "destructive");
     }
   };
 
@@ -708,16 +758,19 @@ function FinancialOverview() {
           setExpensesData((prevExpenses) => [newExpense, ...prevExpenses]);
           closeModal();
         } else {
-          alert(result.message || "Error creating expense");
+          showAlert(result.message || "Error creating expense", "destructive");
         }
       } else {
         const errorData = await response.json();
         console.error("Create error response:", errorData);
-        alert(errorData.message || "Error creating expense. Please try again.");
+        showAlert(
+          errorData.message || "Error creating expense. Please try again.",
+          "destructive"
+        );
       }
     } catch (error) {
       console.error("Create expense error:", error);
-      alert("An error occurred. Please try again.");
+      showAlert("An error occurred. Please try again.", "destructive");
     }
   };
 
@@ -761,9 +814,11 @@ function FinancialOverview() {
       } else {
         const errorData = await response.json();
         console.error("Edit error response:", errorData);
+        showAlert(errorData.message || "Error editing expense", "destructive");
       }
     } catch (error) {
       console.error("Edit expense error:", error);
+      showAlert("An error occurred while editing the expense", "destructive");
     }
   };
 
@@ -788,9 +843,14 @@ function FinancialOverview() {
       } else {
         const errorData = await response.json();
         console.error("Archive error response:", errorData);
+        showAlert(
+          errorData.message || "Error archiving expense",
+          "destructive"
+        );
       }
     } catch (error) {
       console.error("Archive expense error:", error);
+      showAlert("An error occurred. Please try again.", "destructive");
     }
   };
 
@@ -1196,56 +1256,6 @@ function FinancialOverview() {
           </Table>
         </div>
 
-        {/* <div
-          className="w-full rounded-lg p-4 border-2 border-lavender-400 dark:border-lavender-100 text-center"
-          data-cy="total-profit-container"
-        >
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4 dark:text-customNeutral-100">
-            <div className="text-lg md:text-xl leading-normal">
-              TOTAL SALES:{" "}
-              <span
-                className="font-bold text-success-400"
-                data-cy="total-sales-amount"
-              >
-                {new Intl.NumberFormat("en-PH", {
-                  style: "currency",
-                  currency: "PHP"
-                }).format(financialData.totalSales)}
-              </span>
-            </div>
-            <div className="text-lg md:text-xl leading-normal">
-              TOTAL EXPENSES:{" "}
-              <span
-                className="font-bold text-error-400"
-                data-cy="total-expenses-amount"
-              >
-                {new Intl.NumberFormat("en-PH", {
-                  style: "currency",
-                  currency: "PHP"
-                }).format(financialData.totalExpenses)}
-              </span>
-            </div>
-            <div className="text-lg md:text-xl leading-normal">
-              <div className="flex items-center justify-center gap-2">
-                <div>=</div>
-              </div>
-            </div>
-          </div>
-          <div className="text-xl md:text-3xl leading-normal md:leading-[67.2px] FONT-SEMIBOLD">
-            {financialData.netIncome < 0 ? "TOTAL LOSS: " : "TOTAL PROFIT: "}
-            <span
-              className={`font-bold dark:text-customNeutral-100 ${
-                financialData.netIncome < 0 ? "text-error-400" : ""
-              }`}
-              data-cy="total-profit-amount"
-            >
-              {new Intl.NumberFormat("en-PH", {
-                style: "currency",
-                currency: "PHP"
-              }).format(Math.abs(financialData.netIncome))}
-            </span>
-          </div>
-        </div> */}
         <div
           className="w-full rounded-lg p-4 border-2 border-lavender-400 dark:border-lavender-100 text-center flex flex-col items-center gap-4 md:gap-8 dark:text-customNeutral-100"
           data-cy="total-profit-container"
@@ -1381,6 +1391,22 @@ function FinancialOverview() {
           category={selectedCategory}
           data-cy="archive-category-modal"
         />
+      )}
+
+      {alert.visible && (
+        <AlertContainer variant={alert.variant}>
+          <AlertText>
+            <AlertTitle>
+              {alert.variant === "destructive" ? "Error" : "Notice"}
+            </AlertTitle>
+            <AlertDescription>{alert.message}</AlertDescription>
+          </AlertText>
+          <CloseAlert
+            onClick={() =>
+              setAlert({ visible: false, message: "", variant: "default" })
+            }
+          />
+        </AlertContainer>
       )}
     </div>
   );

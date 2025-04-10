@@ -68,6 +68,27 @@ function AdministratorDashboard() {
 
   const [selectedStaff, setSelectedStaff] = useState(null);
 
+  // Alert state
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertTitle, setAlertTitle] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
+
+  const handleCloseAlert = () => {
+    setShowAlert(false);
+  };
+
+  const displayAlert = (title, message, duration = 3000) => {
+    setAlertTitle(title);
+    setAlertMessage(message);
+    setShowAlert(true);
+
+    if (duration > 0) {
+      setTimeout(() => {
+        setShowAlert(false);
+      }, duration);
+    }
+  };
+
   const handleEditStaff = async (updatedData) => {
     console.log("Sending to backend:", updatedData);
     try {
@@ -88,6 +109,7 @@ function AdministratorDashboard() {
       fetchStaff();
     } catch (error) {
       console.error("Error editing staff:", error);
+      displayAlert("Error", "Failed to edit staff member");
     }
   };
 
@@ -111,6 +133,7 @@ function AdministratorDashboard() {
       fetchStaff();
     } catch (error) {
       console.error("Error archiving staff:", error);
+      displayAlert("Error", "Failed to archive staff member");
     }
   };
 
@@ -194,13 +217,13 @@ function AdministratorDashboard() {
         }
       );
 
-      alert("Appointment confirmed successfully!");
+      displayAlert("Success", "Appointment confirmed successfully!");
       setShowAppointmentModal(false);
       fetchStagedAppointments(); // Refresh the list
       fetchReminders(); // Refresh regular appointments
     } catch (error) {
       console.error("Error confirming appointment:", error);
-      alert("Failed to confirm appointment");
+      displayAlert("Error", "Failed to confirm appointment");
     }
   };
 
@@ -214,12 +237,12 @@ function AdministratorDashboard() {
         }
       );
 
-      alert("Appointment rejected");
+      displayAlert("Success", "Appointment rejected");
       setShowAppointmentModal(false);
       fetchStagedAppointments(); // Refresh the list
     } catch (error) {
       console.error("Error rejecting appointment:", error);
-      alert("Failed to reject appointment");
+      displayAlert("Error", "Failed to reject appointment");
     }
   };
 
@@ -296,13 +319,12 @@ function AdministratorDashboard() {
     fetchStagedAppointments(); // Fetch staged appointments
   }, []);
 
-  const [showAlert, setShowAlert] = useState(false);
-
-  const throwAlert = () => {
-    setShowAlert(true);
-    setTimeout(() => {
-      setShowAlert(false);
-    }, 15000);
+  const throwExampleAlert = () => {
+    displayAlert(
+      "Heads up!",
+      "You can add components to your app using the CLI.",
+      15000
+    );
   };
 
   const handlePrevious = () => {
@@ -465,14 +487,13 @@ function AdministratorDashboard() {
     >
       {showAlert && (
         <AlertContainer className="w-full" data-cy="alert-container">
-          <InformationIcon />
-          <AlertText data-cy="alert-text">
-            <AlertTitle data-cy="alert-title">Heads up!</AlertTitle>
+          <AlertText>
+            <AlertTitle data-cy="alert-title">{alertTitle}</AlertTitle>
             <AlertDescription data-cy="alert-description">
-              You can add components to your app using the CLI.
+              {alertMessage}
             </AlertDescription>
           </AlertText>
-          <CloseAlert onClick={() => setShowAlert(false)} data-cy="close-alert">
+          <CloseAlert onClick={handleCloseAlert} data-cy="close-alert">
             &times;
           </CloseAlert>
         </AlertContainer>
