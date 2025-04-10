@@ -498,6 +498,7 @@ app.get('/api/staged-appointments/unconfirmed', async (req, res) => {
 });
 
 // Confirm a staged appointment
+// Confirm a staged appointment
 app.post('/api/staged-appointments/:id/confirm', async (req, res) => {
   try {
     const { id } = req.params;
@@ -548,10 +549,92 @@ app.post('/api/staged-appointments/:id/confirm', async (req, res) => {
       false
     ]);
     
+    // Create a limited patient record with the info we have
+    const patientRecordInsert = `
+      INSERT INTO patient_records (
+        patient_name,
+        contact_number,
+        age,
+        email,
+        date_of_session,
+        time_of_session,
+        archived
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      RETURNING id;
+    `;
+    
+    const patientResult = await pool.query(patientRecordInsert, [
+      appointment.full_name,
+      appointment.contact_number,
+      appointment.age,
+      appointment.email,
+      appointment.date_of_session,
+      appointment.time_of_session,
+      false
+    ]);
+    
+    // Send confirmation email
+    if (appointment.email) {
+      try {
+        // Format date for email
+        const dateObj = new Date(appointment.date_of_session);
+        const formattedDate = dateObj.toLocaleDateString('en-US', {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        });
+        
+        // Format time for email
+        const timeString = appointment.time_of_session;
+        let formattedTime = timeString;
+        
+        if (timeString && timeString.includes(':')) {
+          const [hours, minutes] = timeString.split(':');
+          const timeObj = new Date();
+          timeObj.setHours(parseInt(hours, 10));
+          timeObj.setMinutes(parseInt(minutes, 10));
+          
+          formattedTime = timeObj.toLocaleTimeString('en-US', {
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true
+          });
+        }
+        
+        await transporter.sendMail({
+          from: `"No Reply" <${process.env.EMAIL_USER}>`,
+          to: appointment.email,
+          subject: "Your Appointment Has Been Confirmed",
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 5px;">
+              <h2 style="color: #333; text-align: center;">Appointment Confirmation</h2>
+              <p>Hello ${appointment.full_name},</p>
+              <p>Your appointment has been confirmed for:</p>
+              <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 15px 0;">
+                <p><strong>Date:</strong> ${formattedDate}</p>
+                <p><strong>Time:</strong> ${formattedTime}</p>
+              </div>
+              <p>We look forward to seeing you!</p>
+              <p>If you need to reschedule or have any questions, please contact us.</p>
+              <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+              <p style="font-size: 12px; color: #777; text-align: center;">This is an automated email. Please do not reply.</p>
+            </div>
+          `
+        });
+        console.log(`Confirmation email sent to ${appointment.email}`);
+      } catch (emailError) {
+        console.error('Error sending confirmation email:', emailError);
+        // We don't want to fail the whole appointment if just the email fails
+      }
+    }
+    
     res.json({
       success: true,
       message: 'Appointment confirmed',
-      appointmentId: result.rows[0].id
+      appointmentId: result.rows[0].id,
+      patientId: patientResult.rows[0].id
     });
   } catch (error) {
     console.error('Error confirming appointment:', error);
@@ -563,31 +646,245 @@ app.post('/api/staged-appointments/:id/confirm', async (req, res) => {
 });
 
 // Reject a staged appointment
-app.post('/api/staged-appointments/:id/reject', async (req, res) => {
+// Update these endpoints in your server.js file
+
+// Confirm a staged appointment
+app.post('/api/staged-appointments/:id/confirm', async (req, res) => {
   try {
     const { id } = req.params;
     
-    // Update the patient_confirmed status to rejected
-    const result = await pool.query(
-      'UPDATE staged_appointments SET patient_confirmed = $1 WHERE id = $2 RETURNING *',
-      ['rejected', id]
+    // Get the staged appointment
+    const stagedResult = await pool.query(
+      'SELECT * FROM staged_appointments WHERE id = $1',
+      [id]
     );
     
-    if (result.rows.length === 0) {
+    if (stagedResult.rows.length === 0) {
       return res.status(404).json({ 
         success: false, 
         message: 'Staged appointment not found' 
       });
     }
     
+    const appointment = stagedResult.rows[0];
+    
+    // Update the patient_confirmed status
+    await pool.query(
+      'UPDATE staged_appointments SET patient_confirmed = $1 WHERE id = $2',
+      ['yes', id]
+    );
+    
+    // Insert into the appointments table
+    const insertQuery = `
+      INSERT INTO appointments (
+        full_name,
+        contact_number,
+        age,
+        email,
+        date_of_session,
+        time_of_session,
+        archived
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      RETURNING id;
+    `;
+    
+    const result = await pool.query(insertQuery, [
+      appointment.full_name,
+      appointment.contact_number,
+      appointment.age,
+      appointment.email,
+      appointment.date_of_session,
+      appointment.time_of_session,
+      false
+    ]);
+    
+    // Create a limited patient record with the info we have
+    const patientRecordInsert = `
+      INSERT INTO patient_records (
+        patient_name,
+        contact_number,
+        age,
+        email,
+        date_of_session,
+        time_of_session,
+        archived
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      RETURNING id;
+    `;
+    
+    const patientResult = await pool.query(patientRecordInsert, [
+      appointment.full_name,
+      appointment.contact_number,
+      appointment.age,
+      appointment.email,
+      appointment.date_of_session,
+      appointment.time_of_session,
+      false
+    ]);
+    
+    // Send confirmation email
+    if (appointment.email) {
+      try {
+        // Format date for email
+        const dateObj = new Date(appointment.date_of_session);
+        const formattedDate = dateObj.toLocaleDateString('en-US', {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        });
+        
+        // Format time for email
+        const timeString = appointment.time_of_session;
+        let formattedTime = timeString;
+        
+        if (timeString && timeString.includes(':')) {
+          const [hours, minutes] = timeString.split(':');
+          const timeObj = new Date();
+          timeObj.setHours(parseInt(hours, 10));
+          timeObj.setMinutes(parseInt(minutes, 10));
+          
+          formattedTime = timeObj.toLocaleTimeString('en-US', {
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true
+          });
+        }
+        
+        await transporter.sendMail({
+          from: `"No Reply" <${process.env.EMAIL_USER}>`,
+          to: appointment.email,
+          subject: "Your Appointment Has Been Confirmed",
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 5px;">
+              <h2 style="color: #333; text-align: center;">Appointment Confirmation</h2>
+              <p>Hello ${appointment.full_name},</p>
+              <p>Your appointment has been confirmed for:</p>
+              <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 15px 0;">
+                <p><strong>Date:</strong> ${formattedDate}</p>
+                <p><strong>Time:</strong> ${formattedTime}</p>
+              </div>
+              <p>We look forward to seeing you!</p>
+              <p>If you need to reschedule or have any questions, please contact us.</p>
+              <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+              <p style="font-size: 12px; color: #777; text-align: center;">This is an automated email. Please do not reply.</p>
+            </div>
+          `
+        });
+        console.log(`Confirmation email sent to ${appointment.email}`);
+      } catch (emailError) {
+        console.error('Error sending confirmation email:', emailError);
+        // We don't want to fail the whole appointment if just the email fails
+      }
+    }
+    
     res.json({
+      success: true,
+      message: 'Appointment confirmed',
+      appointmentId: result.rows[0].id,
+      patientId: patientResult.rows[0].id
+    });
+  } catch (error) {
+    console.error('Error confirming appointment:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Error confirming appointment' 
+    });
+  }
+});
+
+
+// Fixed reject endpoint
+app.post('/api/staged-appointments/:id/reject', async (req, res) => {
+  try {
+    const { id } = req.params;
+    console.log(`Reject request for appointment ID: ${id}`);
+    
+    // Get the staged appointment first to access email
+    const stagedResult = await pool.query(
+      'SELECT * FROM staged_appointments WHERE id = $1',
+      [id]
+    );
+    
+    if (stagedResult.rows.length === 0) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Staged appointment not found' 
+      });
+    }
+    
+    const appointment = stagedResult.rows[0];
+    
+    // Update the patient_confirmed status to 'no'
+    const result = await pool.query(
+      'UPDATE staged_appointments SET patient_confirmed = $1 WHERE id = $2 RETURNING *',
+      ['yes', id]
+    );
+    
+    // Send rejection email
+    if (appointment.email) {
+      try {
+        // Format date for email
+        const dateObj = new Date(appointment.date_of_session);
+        const formattedDate = dateObj.toLocaleDateString('en-US', {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        });
+        
+        // Format time for email
+        const timeString = appointment.time_of_session;
+        let formattedTime = timeString;
+        
+        if (timeString && timeString.includes(':')) {
+          const [hours, minutes] = timeString.split(':');
+          const timeObj = new Date();
+          timeObj.setHours(parseInt(hours, 10));
+          timeObj.setMinutes(parseInt(minutes, 10));
+          
+          formattedTime = timeObj.toLocaleTimeString('en-US', {
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true
+          });
+        }
+        
+        await transporter.sendMail({
+          from: `"No Reply" <${process.env.EMAIL_USER}>`,
+          to: appointment.email,
+          subject: "Regarding Your Appointment Request",
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 5px;">
+              <h2 style="color: #333; text-align: center;">Appointment Update</h2>
+              <p>Hello ${appointment.full_name},</p>
+              <p>We regret to inform you that your appointment request for <strong>${formattedDate}</strong> at <strong>${formattedTime}</strong> cannot be accommodated at this time.</p>
+              <p>This may be due to scheduling conflicts or availability issues.</p>
+              <p>We invite you to reschedule your appointment at a different time or date that may better fit our schedule.</p>
+              <p>Thank you for your understanding.</p>
+              <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+              <p style="font-size: 12px; color: #777; text-align: center;">This is an automated email. Please do not reply.</p>
+            </div>
+          `
+        });
+        console.log(`Rejection email sent to ${appointment.email}`);
+      } catch (emailError) {
+        console.error('Error sending rejection email:', emailError);
+        // We don't want to fail the whole rejection if just the email fails
+      }
+    }
+    
+    // Send only ONE response at the end of the function
+    return res.json({
       success: true,
       message: 'Appointment rejected',
       appointment: result.rows[0]
     });
   } catch (error) {
     console.error('Error rejecting appointment:', error);
-    res.status(500).json({ 
+    return res.status(500).json({ 
       success: false, 
       error: 'Error rejecting appointment' 
     });

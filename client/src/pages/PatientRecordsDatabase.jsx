@@ -326,79 +326,8 @@ function PatientRecordsDatabase() {
   };
 
   // Replace the existing handlePaidChange function
-  const handlePaidChange = async (record, checked) => {
-    try {
-      console.log("Updating paid status:", {
-        id: record.id,
-        newStatus: checked ? "yes" : "no"
       });
-
-      // Store local copy of updated record for optimistic updates
-      const updatedRecord = {
-        ...record,
-        isPaid: checked ? "yes" : "no"
-      };
-
-      // Update UI immediately (optimistic update)
-      setRecords(records.map((r) => (r.id === record.id ? updatedRecord : r)));
-
-      // 1. Update patient record's paid status
-      const updateResponse = await fetch(`${API_BASE_URL}/api/manage-record`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({
-          table: "patient_records",
-          id: record.id,
-          action: "edit",
-          data: { isPaid: checked ? "yes" : "no" }
-        })
-      });
-
-      if (!updateResponse.ok) {
-        throw new Error(`Error updating paid status: ${updateResponse.status}`);
-      }
-
-      // 2. If marking as paid, add to sales tracker
-      if (checked) {
-        // Sales tracker code remains unchanged
-        const salesData = {
-          client: record.client || record.patient_name,
-          date_transacted: record.date_of_session,
-          payment: record.amount_paid || record.total_amount,
-          reference_no: record.reference_number,
-          person_in_charge: record.person_in_charge,
-          payment_method: record.payment_method,
-          packages: record.package_name,
-          treatment: record.treatment_ids
-            ? getTreatmentNames(record.treatment_ids).join(", ")
-            : ""
-        };
-
-        const salesResponse = await fetch(`${API_BASE_URL}/api/sales`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify(salesData)
-        });
-
-        if (!salesResponse.ok) {
-          throw new Error(
-            `Error adding to sales tracker: ${salesResponse.status}`
-          );
-        }
-      }
-
-      // Always fetch records to ensure UI is updated with server data
-      await fetchRecords();
-      console.log("Paid status updated successfully");
-    } catch (error) {
-      console.error("Error updating paid status:", error);
-      // Revert the optimistic update by fetching fresh data
-      fetchRecords();
-      // You could add a toast notification here
-    }
-  };
+ 
 
   const filteredRecords = [...records]
     .filter((record) => {
@@ -890,6 +819,9 @@ function PatientRecordsDatabase() {
                   REFERENCE NO.
                 </TableHead>
               )}
+
+              {/* Update PAID column header */}
+            
 
               <TableHead></TableHead>
             </TableRow>
