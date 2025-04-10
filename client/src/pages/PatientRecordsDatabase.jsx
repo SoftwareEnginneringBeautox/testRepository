@@ -326,7 +326,6 @@ function PatientRecordsDatabase() {
   };
 
   // Replace the existing handlePaidChange function
-      });
  
 
   const filteredRecords = [...records]
