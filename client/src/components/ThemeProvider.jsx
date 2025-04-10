@@ -11,17 +11,19 @@ export function ThemeProvider({
   storageKey = "vite-ui-theme",
   ...props
 }) {
-  // Get the stored theme, or default to "light"
+  // Initialize theme from localStorage
   const [theme, setThemeState] = useState(() => {
     return localStorage.getItem(storageKey) || defaultTheme;
   });
 
-  // Function to apply theme on the document element
+  // This is the core function to apply a theme
   const applyTheme = (themeValue) => {
     const root = window.document.documentElement;
+    
+    // Remove existing theme classes
     root.classList.remove("light", "dark");
 
-    // If theme is "system", use the system setting
+    // Apply the appropriate theme
     if (themeValue === "system") {
       const systemPrefersDark = window.matchMedia(
         "(prefers-color-scheme: dark)"
@@ -33,23 +35,33 @@ export function ThemeProvider({
     }
   };
 
-  // Set the theme and store in localStorage
+  // Public method to set theme
   const setTheme = (newTheme) => {
+    // Update localStorage
     localStorage.setItem(storageKey, newTheme);
+    
+    // Update state
     setThemeState(newTheme);
+    
+    // Apply immediately
     applyTheme(newTheme);
+    
+    console.log("ThemeProvider: Theme set to", newTheme);
+    console.log("ThemeProvider: localStorage updated to", localStorage.getItem(storageKey));
   };
 
-  // On mount and whenever theme changes, apply the correct theme
+  // Apply theme when component mounts and whenever theme changes
   useEffect(() => {
     applyTheme(theme);
+  }, [theme]);
 
-    // Handle system preference changes
+  // Handle system theme changes
+  useEffect(() => {
+    if (theme !== "system") return;
+    
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
     const handleChange = () => {
-      if (theme === "system") {
-        applyTheme("system");
-      }
+      applyTheme("system");
     };
 
     mediaQuery.addEventListener("change", handleChange);
@@ -57,7 +69,7 @@ export function ThemeProvider({
   }, [theme]);
 
   return (
-    <ThemeProviderContext.Provider {...props} value={{ theme, setTheme }}>
+    <ThemeProviderContext.Provider value={{ theme, setTheme }} {...props}>
       {children}
     </ThemeProviderContext.Provider>
   );
@@ -65,6 +77,8 @@ export function ThemeProvider({
 
 export const useTheme = () => {
   const context = useContext(ThemeProviderContext);
-  if (!context) throw new Error("useTheme must be used within a ThemeProvider");
+  if (!context) {
+    throw new Error("useTheme must be used within a ThemeProvider");
+  }
   return context;
 };

@@ -51,6 +51,7 @@ function AdministratorDashboard() {
   const { currentModal, openModal, closeModal } = useModal();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [view, setView] = useState("monthly");
+  const [remindersExpanded, setRemindersExpanded] = useState(false);
 
   const month = currentDate.getMonth();
   const year = currentDate.getFullYear();
@@ -76,6 +77,10 @@ function AdministratorDashboard() {
 
   const handleCloseAlert = () => {
     setShowAlert(false);
+  };
+
+  const toggleReminders = () => {
+    setRemindersExpanded(!remindersExpanded);
   };
 
   const displayAlert = (title, message, duration = 3000) => {
@@ -533,99 +538,161 @@ function AdministratorDashboard() {
             <TableHeader data-cy="reminders-header">
               <TableRow>
                 <TableHead
-                  className="text-base sm:text-lg md:text-xl text-left font-semibold py-2 sm:py-4"
+                  className="text-base sm:text-lg md:text-xl text-left font-semibold py-2 sm:py-4 flex items-center justify-between"
                   data-cy="reminders-title"
                 >
-                  REMINDERS
+                  <div className="flex items-center gap-2">
+                    REMINDERS
+                    {(stagedAppointments.length > 0 || reminders.length > 0) && (
+                      <span className="text-xs bg-lavender-300 text-white rounded-full px-2 py-0.5">
+                        {stagedAppointments.length + reminders.length}
+                      </span>
+                    )}
+                  </div>
+                  <button 
+                    onClick={toggleReminders} 
+                    className="focus:outline-none transition-transform duration-200"
+                    aria-label={remindersExpanded ? "Collapse reminders" : "Expand reminders"}
+                    data-cy="toggle-reminders"
+                  >
+                    <svg 
+                      xmlns="http://www.w3.org/2000/svg" 
+                      width="24" 
+                      height="24" 
+                      viewBox="0 0 24 24" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      strokeWidth="2" 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round"
+                      className={`transform ${remindersExpanded ? "rotate-180" : "rotate-0"}`}
+                    >
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                  </button>
                 </TableHead>
               </TableRow>
             </TableHeader>
-            <TableBody data-cy="reminders-body">
-              {loadingAppointments ? (
+            
+            {remindersExpanded ? (
+              <TableBody data-cy="reminders-body">
+                {loadingAppointments ? (
+                  <TableRow>
+                    <TableCell>Loading appointments...</TableCell>
+                  </TableRow>
+                ) : appointmentError ? (
+                  <TableRow>
+                    <TableCell className="text-error-400">
+                      {appointmentError}
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  <>
+                    {/* Display any pending appointment confirmations */}
+                    {stagedAppointments.length > 0
+                      ? stagedAppointments.map((item, index) => (
+                          <TableRow key={`staged-${index}`}>
+                            <TableCell className="flex items-center gap-2 sm:gap-4 text-sm sm:text-base">
+                              <CalendarIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                              <span>
+                                <strong>{item.full_name}</strong> has scheduled an
+                                appointment on{" "}
+                                <strong>
+                                  {formatSafeDate(
+                                    item.date_of_session,
+                                    "MMMM dd, yyyy"
+                                  )}
+                                </strong>{" "}
+                                at{" "}
+                                <strong>
+                                  {formatSafeTime(item.time_of_session)}
+                                </strong>
+                              </span>
+                              <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-lavender-300 text-white font-semibold">
+                                Needs Confirmation
+                              </span>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="ml-auto"
+                                onClick={() => viewAppointmentDetails(item)}
+                              >
+                                View
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      : null}
+
+                    {/* Display existing reminders for confirmed appointments */}
+                    {reminders.length > 0
+                      ? reminders.map((item, index) => (
+                          <TableRow key={`reminder-${index}`}>
+                            <TableCell className="flex items-center gap-2 sm:gap-4 text-sm sm:text-base">
+                              <CalendarIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                              <span>
+                                {item.full_name} has an appointment on{" "}
+                                <strong>
+                                  {formatSafeDate(
+                                    item.date_of_session,
+                                    "MMMM dd, yyyy"
+                                  )}
+                                </strong>{" "}
+                                at{" "}
+                                <strong>
+                                  {formatSafeTime(item.time_of_session)}
+                                </strong>
+                              </span>
+                              {getReminderLabel(item.date_of_session) && (
+                                <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-lavender-300 text-white font-semibold">
+                                  {getReminderLabel(item.date_of_session)}
+                                </span>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      : !stagedAppointments.length && (
+                          <TableRow>
+                            <TableCell className="text-sm sm:text-base">
+                              No recent appointments needing reminders.
+                            </TableCell>
+                          </TableRow>
+                        )}
+                  </>
+                )}
+              </TableBody>
+            ) : (
+              <TableBody data-cy="reminders-summary">
                 <TableRow>
-                  <TableCell>Loading appointments...</TableCell>
-                </TableRow>
-              ) : appointmentError ? (
-                <TableRow>
-                  <TableCell className="text-error-400">
-                    {appointmentError}
+                  <TableCell className="text-sm sm:text-base py-2">
+                    {loadingAppointments ? (
+                      "Loading appointments..."
+                    ) : appointmentError ? (
+                      <span className="text-error-400">{appointmentError}</span>
+                    ) : stagedAppointments.length > 0 || reminders.length > 0 ? (
+                      <div className="flex items-center justify-between">
+                        <span>
+                          {stagedAppointments.length > 0 ? (
+                            <span className="font-medium">
+                              {stagedAppointments.length} pending {stagedAppointments.length === 1 ? "confirmation" : "confirmations"}
+                            </span>
+                          ) : null}
+                          {stagedAppointments.length > 0 && reminders.length > 0 ? " • " : ""}
+                          {reminders.length > 0 ? (
+                            <span>
+                              {reminders.length} upcoming {reminders.length === 1 ? "appointment" : "appointments"}
+                            </span>
+                          ) : null}
+                        </span>
+                        <span className="text-xs text-gray-500">Click arrow to view details</span>
+                      </div>
+                    ) : (
+                      "No upcoming appointments"
+                    )}
                   </TableCell>
                 </TableRow>
-              ) : (
-                <>
-                  {/* Display any pending appointment confirmations */}
-                  {stagedAppointments.length > 0
-                    ? stagedAppointments.map((item, index) => (
-                        <TableRow key={`staged-${index}`}>
-                          <TableCell className="flex items-center gap-2 sm:gap-4 text-sm sm:text-base">
-                            <CalendarIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-                            <span>
-                              <strong>{item.full_name}</strong> has scheduled an
-                              appointment on{" "}
-                              <strong>
-                                {formatSafeDate(
-                                  item.date_of_session,
-                                  "MMMM dd, yyyy"
-                                )}
-                              </strong>{" "}
-                              at{" "}
-                              <strong>
-                                {formatSafeTime(item.time_of_session)}
-                              </strong>
-                            </span>
-                            <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-lavender-300 text-white font-semibold">
-                              Needs Confirmation
-                            </span>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="ml-auto"
-                              onClick={() => viewAppointmentDetails(item)}
-                            >
-                              View
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    : null}
-
-                  {/* Display existing reminders for confirmed appointments */}
-                  {reminders.length > 0
-                    ? reminders.map((item, index) => (
-                        <TableRow key={`reminder-${index}`}>
-                          <TableCell className="flex items-center gap-2 sm:gap-4 text-sm sm:text-base">
-                            <CalendarIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-                            <span>
-                              {item.full_name} has an appointment on{" "}
-                              <strong>
-                                {formatSafeDate(
-                                  item.date_of_session,
-                                  "MMMM dd, yyyy"
-                                )}
-                              </strong>{" "}
-                              at{" "}
-                              <strong>
-                                {formatSafeTime(item.time_of_session)}
-                              </strong>
-                            </span>
-                            {getReminderLabel(item.date_of_session) && (
-                              <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-lavender-300 text-white font-semibold">
-                                {getReminderLabel(item.date_of_session)}
-                              </span>
-                            )}
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    : !stagedAppointments.length && (
-                        <TableRow>
-                          <TableCell className="text-sm sm:text-base">
-                            No recent appointments needing reminders.
-                          </TableCell>
-                        </TableRow>
-                      )}
-                </>
-              )}
-            </TableBody>
+              </TableBody>
+            )}
           </Table>
         </div>
         <div data-cy="sales-chart-container">
