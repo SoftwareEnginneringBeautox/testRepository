@@ -27,6 +27,7 @@ function LandingPage() {
   const navigate = useNavigate();
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [activeTab, setActiveTab] = useState("BEST-SELLER");
 
   useEffect(() => {
     const handleScroll = () => {
@@ -539,7 +540,8 @@ function LandingPage() {
             </p>
           </div>
           <Tabs
-            defaultValue={services[0].category}
+            value={activeTab}
+            onValueChange={setActiveTab}
             className="w-full"
             data-cy="services-tabs"
           >
@@ -585,6 +587,96 @@ function LandingPage() {
               </TabsContent>
             ))}
           </Tabs>
+        </section>
+
+        <div className="w-[85%] sm:w-[80%] mx-auto">
+          <div className="h-0.5 bg-purple-900 my-8 sm:my-16"></div>
+        </div>
+
+        {/* Promos Section */}
+        <section className="w-[85%] sm:w-[80%] mx-auto py-8 sm:py-16">
+          <div className="text-center mb-12">
+            <h2 className="text-2xl sm:text-3xl font-semibold bg-gradient-to-r from-reflexBlue-300 to-lavender-300 text-transparent bg-clip-text mb-4">
+            WE'VE GOT PROMOS FOR YOU!
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 mb-8">
+            {/* Promo Card 1 */}
+            <div className="bg-white rounded-2xl overflow-hidden shadow-[0_4px_12px_rgba(0,0,0,0.15)] hover:shadow-[0_8px_20px_rgba(0,0,0,0.25)] transition-all duration-300 relative group">
+              <div className="h-[400px] relative">
+                <div className="absolute inset-0 bg-purple-100/10 group-hover:bg-purple-100/5 transition-colors duration-300 z-10"></div>
+                <div className="absolute top-0 left-0 right-0 h-2/5 bg-gradient-to-b from-purple-300/40 via-purple-200/30 to-transparent z-20"></div>
+                <img
+                  src="/images/Promo1.png"
+                  alt="Monthly Promo 1"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+                <span className="absolute top-6 left-6 z-30 px-4 py-1.5 bg-purple-950 text-white text-xs font-semibold rounded-full">
+                  Limited Time Offer
+                </span>
+              </div>
+            </div>
+
+            {/* Promo Card 2 */}
+            <div className="bg-white rounded-2xl overflow-hidden shadow-[0_4px_12px_rgba(0,0,0,0.15)] hover:shadow-[0_8px_20px_rgba(0,0,0,0.25)] transition-all duration-300 relative group">
+              <div className="h-[400px] relative">
+                <div className="absolute inset-0 bg-purple-100/10 group-hover:bg-purple-100/5 transition-colors duration-300 z-10"></div>
+                <div className="absolute top-0 left-0 right-0 h-2/5 bg-gradient-to-b from-purple-300/40 via-purple-200/30 to-transparent z-20"></div>
+                <img
+                  src="/images/Promo2.png"
+                  alt="Monthly Promo 2"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+                <span className="absolute top-6 left-6 z-30 px-4 py-1.5 bg-purple-950 text-white text-xs font-semibold rounded-full">
+                  Bundle Deal
+                </span>
+              </div>
+            </div>
+
+            {/* Promo Card 3 */}
+            <div className="bg-white rounded-2xl overflow-hidden shadow-[0_4px_12px_rgba(0,0,0,0.15)] hover:shadow-[0_8px_20px_rgba(0,0,0,0.25)] transition-all duration-300 relative group">
+              <div className="h-[400px] relative">
+                <div className="absolute inset-0 bg-purple-100/10 group-hover:bg-purple-100/5 transition-colors duration-300 z-10"></div>
+                <div className="absolute top-0 left-0 right-0 h-2/5 bg-gradient-to-b from-purple-300/40 via-purple-200/30 to-transparent z-20"></div>
+                <img
+                  src="/images/Promo3.png"
+                  alt="Monthly Promo 3"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+                <span className="absolute top-6 left-6 z-30 px-4 py-1.5 bg-purple-950 text-white text-xs font-semibold rounded-full">
+                  Limited Offer
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="text-center space-y-6">
+            <p className="text-purple-900 font-semibold text-lg">Limited slots available—lock in your glow-up today!</p>
+            <div className="flex flex-col items-center gap-4">
+              <p className="text-gray-600 text-base">Stay tuned! Our promos vary monthly. Kindly follow us for the latest updates and deals.</p>
+              <div className="flex items-center gap-4">
+                <a
+                  href="https://www.facebook.com/BeautoxAestheticClinicNewManila"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-100 hover:bg-purple-200 text-purple-900 rounded-full transition-all duration-300 font-medium"
+                >
+                  <FacebookIcon className="w-4 h-4" />
+                  <span>Facebook</span>
+                </a>
+                <a
+                  href="https://www.instagram.com/beautoxnewmanila/"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-100 hover:bg-purple-200 text-purple-900 rounded-full transition-all duration-300 font-medium"
+                >
+                  <InstagramIcon className="w-4 h-4" />
+                  <span>Instagram</span>
+                </a>
+              </div>
+            </div>
+          </div>
         </section>
 
         <div className="w-[85%] sm:w-[80%] mx-auto">
@@ -764,7 +856,7 @@ function LandingPage() {
               </div>
               <div className="text-center pt-8 sm:pt-10">
                 <h4 className="text-lg sm:text-xl font-semibold text-gray-800 mb-1">
-                  Maria Angeles
+                  Maria Angeles(Alias)
                 </h4>
                 <p className="text-purple-600 text-xs sm:text-sm mb-4 sm:mb-6">
                   Regular Client
@@ -821,7 +913,7 @@ function LandingPage() {
               </div>
               <div className="text-center pt-8 sm:pt-10">
                 <h4 className="text-lg sm:text-xl font-semibold text-gray-800 mb-1">
-                  Sarah Rodriguez
+                  Sarah Rodriguez(Alias)
                 </h4>
                 <p className="text-purple-600 text-xs sm:text-sm mb-4 sm:mb-6">
                   Me-So Sexy Package Client
@@ -877,7 +969,7 @@ function LandingPage() {
               </div>
               <div className="text-center pt-8 sm:pt-10">
                 <h4 className="text-lg sm:text-xl font-semibold text-gray-800 mb-1">
-                  Jane Dela Cruz
+                  Jane Dela Cruz(Alias)
                 </h4>
                 <p className="text-purple-600 text-xs sm:text-sm mb-4 sm:mb-6">
                   Gluta Drips Package Client
@@ -911,81 +1003,121 @@ function LandingPage() {
           </div>
         </section>
 
-        <div className="w-[85%] sm:w-[80%] mx-auto">
-          <div className="h-0.5 bg-purple-900 my-8 sm:my-16"></div>
-        </div>
-
         {/* Contact Section */}
-        <section
-          id="contact"
-          className="w-full bg-purple-950 py-16 mt-8"
-          data-cy="contact"
-        >
-          <div className="w-[85%] sm:w-[80%] mx-auto flex flex-col-reverse lg:flex-row gap-8 justify-center">
-            <h3
-              className="w-full lg:w-1/2 text-xl sm:text-3xl text-center lg:text-end font-bold text-white"
-              data-cy="find-us-title"
-            >
-              WANT TO LEARN MORE ABOUT US? CONTACT US HERE
-            </h3>
-            <ul
-              className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-base sm:text-lg w-full lg:w-1/2"
-              data-cy="contact-links"
-            >
-              <li className="flex gap-2 justify-center" data-cy="facebook-link">
-                <svg
-                  className="w-6 h-6 text-white"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                  aria-hidden="true"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                <a
-                  href="https://www.facebook.com/BeautoxAestheticClinicNewManila"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-white hover:text-white/80 transition-colors"
-                >
-                  FACEBOOK
-                </a>
-              </li>
+        <section id="contact" className="w-full bg-purple-950 py-16" data-cy="contact">
+          <div className="w-[85%] sm:w-[80%] mx-auto grid grid-cols-1 md:grid-cols-4 gap-12">
+            {/* Company */}
+            <div className="space-y-4">
+              <h3 className="text-white font-semibold text-2xl">Company</h3>
+              <ul className="space-y-3">
+                {[
+                 { label: "About Us", href: "hero" },
+                 { label: "Find us", href: "about-clinic" }, 
+                  { label: "Testimonials", href: "testimonials" }
+                ].map(({ label, href }) => (
+                  <li key={href}>
+                    <a
+                      href={`#${href}`}
+                      onClick={(e) => handleScroll(e, href)}
+                      className="text-white hover:text-gray-200 transition-all duration-200 text-base hover:underline"
+                    >
+                      {label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
 
-              <li
-                className="flex gap-2 justify-center text-white"
-                data-cy="phone-contact"
-              >
-                <PhoneIcon className="text-white" />
-                [BEAUTOX NUMBER]
-              </li>
+            {/* Services */}
+            <div className="space-y-4">
+              <h3 className="text-white font-semibold text-2xl">Services</h3>
+              <ul className="space-y-3">
+                {[
+                  { name: "Best-Seller", value: "BEST-SELLER" },
+                  { name: "Facial", value: "FACIAL" },
+                  { name: "Doctor's Procedure", value: "DOCTOR'S PROCEDURE" },
+                  { name: "Gluta Drips", value: "GLUTA DRIPS" },
+                  { name: "Slimming Treatments", value: "SLIMMING TREATMENTS" }
+                ].map((service) => (
+                  <li key={service.name}>
+                    <button
+                      onClick={() => {
+                        setActiveTab(service.value);
+                        const servicesSection = document.getElementById("services");
+                        if (servicesSection) {
+                          servicesSection.scrollIntoView({ behavior: "smooth" });
+                        }
+                      }}
+                      className="text-white hover:text-gray-200 transition-all duration-200 text-base hover:underline"
+                    >
+                      {service.name}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
 
-              <li
-                className="flex gap-2 justify-center"
-                data-cy="instagram-link"
-              >
-                <InstagramIcon fill="#FFFFFF" />
-                <a
-                  href="https://www.instagram.com/beautoxnewmanila/"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-white hover:text-white/80 transition-colors"
-                >
-                  INSTAGRAM
-                </a>
-              </li>
+            {/* Social Media */}
+            <div className="space-y-4">
+              <h3 className="text-white font-semibold text-2xl">Social Media</h3>
+              <ul className="space-y-4">
+                <li>
+                  <a
+                    href="https://www.facebook.com/BeautoxAestheticClinicNewManila"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-white hover:text-gray-200 transition-all duration-200 text-base flex items-center gap-4 group"
+                  >
+                    <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-md">
+                      <FacebookIcon className="w-4 h-4 text-purple-950" />
+                    </div>
+                    <span className="hover:underline">Facebook</span>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="https://www.instagram.com/beautoxnewmanila/"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-white hover:text-gray-200 transition-all duration-200 text-base flex items-center gap-4 group"
+                  >
+                    <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-md">
+                      <InstagramIcon className="w-4 h-4 text-purple-950" />
+                    </div>
+                    <span className="hover:underline">Instagram</span>
+                  </a>
+                </li>
+              </ul>
+            </div>
 
-              <li
-                className="flex gap-2 justify-center text-white"
-                data-cy="email-contact"
-              >
-                <EmailIcon className="text-white" />
-                beautoxph@gmail.com
-              </li>
-            </ul>
+            {/* Contact Us */}
+            <div className="space-y-4">
+              <h3 className="text-white font-semibold text-2xl">Contact Us</h3>
+              <ul className="space-y-4">
+                <li className="flex items-center gap-4 text-white text-base">
+                  <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-md">
+                    <PhoneIcon className="w-4 h-4 text-purple-950" />
+                  </div>
+                  0917-895-8825
+                </li>
+                <li className="flex items-center gap-4 text-white text-base">
+                  <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-md">
+                    <EmailIcon className="w-4 h-4 text-purple-950" />
+                  </div>
+                  beautoxph@gmail.com
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Copyright */}
+          <div className="w-[85%] sm:w-[80%] mx-auto mt-16 pt-8 border-t border-white/20">
+            <div className="flex items-center justify-between">
+              <img src="/images/FooterBeautoxLogo.png" alt="Beautox Logo" className="h-12 w-auto" />
+              <p className="text-white/80 text-sm">
+                © {new Date().getFullYear()} BeautoxPH. All rights reserved.
+              </p>
+            </div>
           </div>
         </section>
 
