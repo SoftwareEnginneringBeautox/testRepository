@@ -1064,33 +1064,58 @@ app.get('/test-email', async (req, res) => {
 // POST /api/forgot-password
 app.post("/forgot-password", async (req, res) => {
   const { email } = req.body;
-  const otp = generateOTP();
-  const otpExpiry = new Date(Date.now() + 5 * 60 * 1000);
-  console.log("Generated OTP:", otp);
-
+  
   try {
-    const result = await pool.query(
-      "UPDATE accounts SET otp = $1, otp_expiry = $2 WHERE email = $3 RETURNING *",
-      [otp, otpExpiry, email]
+    // First check if user exists and is not archived
+    const userCheck = await pool.query(
+      "SELECT * FROM accounts WHERE email = $1",
+      [email]
     );
 
-    if (result.rowCount === 0) {
-      console.log("❌ User not found in DB");
-      return res.status(404).json({ message: "User not found" });
+    if (userCheck.rowCount === 0) {
+      return res.status(404).json({ 
+        success: false, 
+        message: "User not found" 
+      });
     }
-
-    console.log("✅ User found, sending email...");
+    
+    // Check if user is archived
+    if (userCheck.rows[0].archived === true) {
+      return res.status(403).json({ 
+        success: false, 
+        archived: true,
+        message: "Account has been archived. Please contact your administrator." 
+      });
+    }
+    
+    // Continue with normal OTP generation and sending
+    const otp = generateOTP();
+    const otpExpiry = new Date(Date.now() + 5 * 60 * 1000);
+    
+    // Update user with OTP
+    await pool.query(
+      "UPDATE accounts SET otp = $1, otp_expiry = $2 WHERE email = $3",
+      [otp, otpExpiry, email]
+    );
+    
+    // Send OTP email
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
       to: email,
       subject: "Your OTP Code",
       text: `Your OTP is ${otp}`,
     });
-
-    res.json({ message: "OTP sent to email" });
+    
+    res.json({ 
+      success: true, 
+      message: "OTP sent to email" 
+    });
   } catch (err) {
     console.error("❌ Forgot password error:", err);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ 
+      success: false, 
+      message: "Server error" 
+    });
   }
 });
 
