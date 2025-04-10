@@ -605,7 +605,7 @@ function LandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 mb-8">
             {/* Promo Card 1 */}
             <div className="bg-white rounded-2xl overflow-hidden shadow-[0_4px_12px_rgba(0,0,0,0.15)] hover:shadow-[0_8px_20px_rgba(0,0,0,0.25)] transition-all duration-300 relative group">
-              <div className="h-[400px] relative">
+              <div className="aspect-[4/5] relative">
                 <div className="absolute inset-0 bg-purple-100/10 group-hover:bg-purple-100/5 transition-colors duration-300 z-10"></div>
                 <div className="absolute top-0 left-0 right-0 h-2/5 bg-gradient-to-b from-purple-300/40 via-purple-200/30 to-transparent z-20"></div>
                 <img
@@ -621,7 +621,7 @@ function LandingPage() {
 
             {/* Promo Card 2 */}
             <div className="bg-white rounded-2xl overflow-hidden shadow-[0_4px_12px_rgba(0,0,0,0.15)] hover:shadow-[0_8px_20px_rgba(0,0,0,0.25)] transition-all duration-300 relative group">
-              <div className="h-[400px] relative">
+              <div className="aspect-[4/5] relative">
                 <div className="absolute inset-0 bg-purple-100/10 group-hover:bg-purple-100/5 transition-colors duration-300 z-10"></div>
                 <div className="absolute top-0 left-0 right-0 h-2/5 bg-gradient-to-b from-purple-300/40 via-purple-200/30 to-transparent z-20"></div>
                 <img
@@ -637,7 +637,7 @@ function LandingPage() {
 
             {/* Promo Card 3 */}
             <div className="bg-white rounded-2xl overflow-hidden shadow-[0_4px_12px_rgba(0,0,0,0.15)] hover:shadow-[0_8px_20px_rgba(0,0,0,0.25)] transition-all duration-300 relative group">
-              <div className="h-[400px] relative">
+              <div className="aspect-[4/5] relative">
                 <div className="absolute inset-0 bg-purple-100/10 group-hover:bg-purple-100/5 transition-colors duration-300 z-10"></div>
                 <div className="absolute top-0 left-0 right-0 h-2/5 bg-gradient-to-b from-purple-300/40 via-purple-200/30 to-transparent z-20"></div>
                 <img

@@ -1061,19 +1061,19 @@ app.get('/test-email', async (req, res) => {
 
 // POST /api/forgot-password
 app.post("/forgot-password", async (req, res) => {
-  const { email } = req.body;
+  const { email, username } = req.body;
   
   try {
-    // First check if user exists and is not archived
+    // Check if user exists with BOTH email AND username
     const userCheck = await pool.query(
-      "SELECT * FROM accounts WHERE email = $1",
-      [email]
+      "SELECT * FROM accounts WHERE email = $1 AND username = $2",
+      [email, username]
     );
 
     if (userCheck.rowCount === 0) {
       return res.status(404).json({ 
         success: false, 
-        message: "User not found" 
+        message: "No account found with this email and username combination" 
       });
     }
     
@@ -1092,16 +1092,29 @@ app.post("/forgot-password", async (req, res) => {
     
     // Update user with OTP
     await pool.query(
-      "UPDATE accounts SET otp = $1, otp_expiry = $2 WHERE email = $3",
-      [otp, otpExpiry, email]
+      "UPDATE accounts SET otp = $1, otp_expiry = $2 WHERE email = $3 AND username = $4",
+      [otp, otpExpiry, email, username]
     );
     
-    // Send OTP email
+    // Send OTP email (HTML email code remains unchanged)
     await transporter.sendMail({
-      from: process.env.EMAIL_USER,
+      from: `"No Reply" <${process.env.EMAIL_USER}>`,
       to: email,
-      subject: "Your OTP Code",
-      text: `Your OTP is ${otp}`,
+      subject: "Password Reset OTP Code",
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 5px;">
+          <h2 style="color: #333; text-align: center;">Password Reset Request</h2>
+          <p>Hello ${username},</p>
+          <p>We received a request to reset your password. Please use the following One-Time Password (OTP) to continue with your password reset:</p>
+          <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 15px 0; text-align: center;">
+            <p style="font-size: 24px; font-weight: bold; letter-spacing: 5px; color: #333;">${otp}</p>
+          </div>
+          <p>This code will expire in 5 minutes for security purposes.</p>
+          <p>If you did not request this password reset, please ignore this email or contact our support team immediately.</p>
+          <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+          <p style="font-size: 12px; color: #777; text-align: center;">This is an automated email from Beautox PRISM. Please do not reply.</p>
+        </div>
+      `
     });
     
     res.json({ 
@@ -1117,40 +1130,99 @@ app.post("/forgot-password", async (req, res) => {
   }
 });
 
-// POST /api/verify-otp
+// POST /verify-otp
 app.post("/verify-otp", async (req, res) => {
-  const { email, otp } = req.body;
-  const result = await pool.query("SELECT otp, otp_expiry FROM accounts WHERE email = $1", [email]);
-  const user = result.rows[0];
+  const { email, otp, username } = req.body;
+  
+  try {
+    // Log debugging information
+    console.log("Verifying OTP:", { email, otp: otp?.substring(0, 2) + "****" });
+    
+    // Include both email and username in query if username is provided
+    let query = "SELECT otp, otp_expiry FROM accounts WHERE email = $1";
+    const params = [email];
+    
+    if (username) {
+      query = "SELECT otp, otp_expiry FROM accounts WHERE email = $1 AND username = $2";
+      params.push(username);
+    }
+    
+    const result = await pool.query(query, params);
+    const user = result.rows[0];
 
-  if (!user || user.otp !== otp)
-    return res.status(400).json({ message: "Invalid OTP" });
+    if (!user) {
+      console.log("No user found with this email");
+      return res.status(400).json({ message: "Invalid OTP" });
+    }
+    
+    // Fix: Properly normalize both values before comparison
+    // PostgreSQL might return the OTP as a different type
+    const storedOtp = String(user.otp || '').trim();
+    const submittedOtp = String(otp || '').trim();
+    
+    console.log("Stored OTP:", storedOtp);
+    console.log("Submitted OTP:", submittedOtp);
+    console.log("OTP match check:", storedOtp === submittedOtp);
+    
+    // Compare the normalized values
+    if (storedOtp !== submittedOtp) {
+      console.log("OTP mismatch");
+      return res.status(400).json({ message: "Invalid OTP" });
+    }
 
-  if (new Date(user.otp_expiry) < new Date())
-    return res.status(400).json({ message: "OTP expired" });
+    if (new Date(user.otp_expiry) < new Date()) {
+      console.log("OTP expired");
+      return res.status(400).json({ message: "OTP expired" });
+    }
 
-  res.json({ success: true, message: "OTP verified" });
+    res.json({ success: true, message: "OTP verified" });
+  } catch (err) {
+    console.error("Error in verify-otp:", err);
+    res.status(500).json({ message: "Server error" });
+  }
 });
 
-// POST /api/reset-password
+// POST /reset-password
 app.post("/reset-password", async (req, res) => {
-  const { email, otp, newPassword } = req.body;
-  const result = await pool.query("SELECT otp, otp_expiry FROM accounts WHERE email = $1", [email]);
-  const user = result.rows[0];
+  const { email, otp, newPassword, username } = req.body;
+  
+  try {
+    // Include username in query if provided
+    let query = "SELECT otp, otp_expiry FROM accounts WHERE email = $1";
+    const params = [email];
+    
+    if (username) {
+      query = "SELECT otp, otp_expiry FROM accounts WHERE email = $1 AND username = $2";
+      params.push(username);
+    }
+    
+    const result = await pool.query(query, params);
+    const user = result.rows[0];
 
-  if (!user || user.otp !== otp)
-    return res.status(400).json({ message: "Invalid OTP" });
+    if (!user || String(user.otp) !== String(otp))
+      return res.status(400).json({ message: "Invalid OTP" });
 
-  if (new Date(user.otp_expiry) < new Date())
-    return res.status(400).json({ message: "OTP expired" });
+    if (new Date(user.otp_expiry) < new Date())
+      return res.status(400).json({ message: "OTP expired" });
 
-  const hashed = await bcrypt.hash(newPassword, 10);
-  await pool.query(
-    "UPDATE accounts SET password = $1, otp = NULL, otp_expiry = NULL WHERE email = $2",
-    [hashed, email]
-  );
+    const hashed = await bcrypt.hash(newPassword, 10);
+    
+    // Update using both email and username if username is provided
+    let updateQuery = "UPDATE accounts SET password = $1, otp = NULL, otp_expiry = NULL WHERE email = $2";
+    const updateParams = [hashed, email];
+    
+    if (username) {
+      updateQuery = "UPDATE accounts SET password = $1, otp = NULL, otp_expiry = NULL WHERE email = $2 AND username = $3";
+      updateParams.push(username);
+    }
+    
+    await pool.query(updateQuery, updateParams);
 
-  res.json({ message: "Password reset successful" });
+    res.json({ success: true, message: "Password reset successful" });
+  } catch (err) {
+    console.error("Error in reset-password:", err);
+    res.status(500).json({ message: "Server error" });
+  }
 });
 
 

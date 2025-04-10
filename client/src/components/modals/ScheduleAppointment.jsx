@@ -166,14 +166,26 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
 
       const data = await response.json();
       if (response.ok) {
-        // On success, show alert instead of using native alert
+        // Reset all form fields
+        setFullName("");
+        setContactNumber("");
+        setAge("");
+        setEmail("");
+        setDateOfSession("");
+        setTimeOfSession("");
+        
+        // Reset validation errors
+        setAgeError(false);
+        setPhoneError(false);
+        setDateError(false);
+        setEmailError(false);
+        
+        // Show success message
         setAlertTitle("Success");
         setAlertMessage(
           "Appointment scheduled successfully! Awaiting confirmation."
         );
         setShowAlert(true);
-
-        // We'll close the modal when the user dismisses the alert
       } else {
         // Handle a failed response
         setAlertTitle("Error");

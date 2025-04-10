@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/InputOTP";
 
 import { Button } from "@/components/ui/Button";
-
+import UserIcon from "@/assets/icons/UserIcon";
 import ChevronLeftIcon from "@/assets/icons/ChevronLeftIcon";
 import ChevronRightIcon from "@/assets/icons/ChevronRightIcon";
 import EmailIcon from "@/assets/icons/EmailIcon";
@@ -34,22 +34,54 @@ import PasswordIcon from "@/assets/icons/PasswordIcon";
 import ConfirmIcon from "@/assets/icons/ConfirmIcon";
 
 function ForgotPassword({ isOpen, onClose }) {
-  // 1 = email, 2 = otp, 3 = reset password
+  // Add username state
   const [step, setStep] = useState(1);
   const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [otp, setOtp] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Add email validation error state
+  const [emailError, setEmailError] = useState(false);
+  
+  // Email validation function
+  const isValidEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+  
+  // Validate email
+  const validateEmail = (value) => {
+    if (value && !isValidEmail(value)) {
+      setEmailError(true);
+      return false;
+    } else {
+      setEmailError(false);
+      return true;
+    }
+  };
 
   const sendOTP = async (e) => {
     e.preventDefault();
+    
+    // Validate email before submitting
+    if (!validateEmail(email)) {
+      setMessage("Please enter a valid email address");
+      return;
+    }
+    
     setIsLoading(true);
     setMessage(""); // Clear any previous messages
 
     try {
-      const response = await axios.post("http://localhost:4000/forgot-password", { email });
+      // Send both email and username to the server
+      const response = await axios.post("http://localhost:4000/forgot-password", { 
+        email,
+        username 
+      });
       
       if (response.data.success) {
         setStep(2);
@@ -59,7 +91,7 @@ function ForgotPassword({ isOpen, onClose }) {
         if (response.data.archived) {
           setMessage("This account has been archived. Please contact your administrator.");
         } else {
-          setMessage(response.data.message || "Failed to send OTP. Please check your email.");
+          setMessage(response.data.message || "Failed to send OTP. Please check your email and username.");
         }
       }
     } catch (err) {
@@ -68,8 +100,10 @@ function ForgotPassword({ isOpen, onClose }) {
       // Handle archived account error response
       if (err.response?.data?.archived) {
         setMessage("This account has been archived. Please contact your administrator.");
+      } else if (err.response?.status === 404) {
+        setMessage("No account found with this email and username combination.");
       } else {
-        setMessage("Failed to send OTP. Make sure the email is correct.");
+        setMessage("Failed to send OTP. Please check your information.");
       }
     } finally {
       setIsLoading(false);
@@ -78,30 +112,35 @@ function ForgotPassword({ isOpen, onClose }) {
 
   const verifyOTP = async (e) => {
     e.preventDefault();
-    setIsLoading(true); // Set loading to true when verifying OTP
-    setMessage(""); // Clear any previous messages
+    setIsLoading(true);
+    setMessage("");
 
     try {
-      console.log("Verifying OTP:", otp);
+      // Ensure OTP is clean and properly formatted before sending
+      const cleanOtp = String(otp).trim();
+      console.log("Sending OTP verification:", cleanOtp);
+      
       const response = await axios.post("http://localhost:4000/verify-otp", {
         email,
-        otp
+        username, // Include username for more secure verification
+        otp: cleanOtp // Send the cleaned OTP
       });
 
       console.log("Server Response:", response.data);
 
       if (response.data.success) {
         setStep(3);
-        console.log("Step set to 3");
         setMessage("OTP verified. Enter your new password.");
       } else {
         setMessage("Invalid OTP. Please try again.");
       }
     } catch (err) {
       console.error("Error verifying OTP:", err);
-      setMessage("Failed to verify OTP. Please try again.");
+      // Extract error message from response if available
+      const errorMessage = err.response?.data?.message || "Failed to verify OTP. Please try again.";
+      setMessage(errorMessage);
     } finally {
-      setIsLoading(false); // Ensure loading is set to false regardless of outcome
+      setIsLoading(false);
     }
   };
 
@@ -116,9 +155,10 @@ function ForgotPassword({ isOpen, onClose }) {
     setMessage(""); // Clear previous messages
 
     try {
-      // Add actual reset password implementation here
+      // Include username in the request
       await axios.post("http://localhost:4000/reset-password", {
         email,
+        username, // Add username to the request
         otp,
         newPassword
       });
@@ -129,9 +169,11 @@ function ForgotPassword({ isOpen, onClose }) {
       }, 2000);
     } catch (err) {
       console.error("Error resetting password:", err);
-      setMessage("Failed to reset password. Please try again.");
+      // Show specific error message from server if available
+      const errorMessage = err.response?.data?.message || "Failed to reset password. Please try again.";
+      setMessage(errorMessage);
     } finally {
-      setIsLoading(false); // Ensure loading is set to false regardless of outcome
+      setIsLoading(false);
     }
   };
 
@@ -165,7 +207,28 @@ function ForgotPassword({ isOpen, onClose }) {
         {step === 1 ? (
           <form onSubmit={sendOTP} className="flex flex-col gap-4 items-center">
             <div className="flex gap-4 flex-col w-full">
-              <p>Kindly input the email of your account.</p>
+              <p>Enter your username and email to retrieve your account.</p>
+              
+              {/* Username input field */}
+              <InputContainer data-cy="forgot-username-container">
+                <InputLabel>Username</InputLabel>
+                <InputTextField>
+                  <InputIcon>
+                    <UserIcon />
+                  </InputIcon>
+                  <Input
+                    type="text"
+                    id="username"
+                    placeholder="Enter your username"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    required
+                    data-cy="forgot-username"
+                  />
+                </InputTextField>
+              </InputContainer>
+              
+              {/* Email input field */}
               <InputContainer data-cy="forgot-email-container">
                 <InputLabel>Email</InputLabel>
                 <InputTextField>
@@ -177,11 +240,20 @@ function ForgotPassword({ isOpen, onClose }) {
                     id="email"
                     placeholder="Enter your email"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      validateEmail(e.target.value);
+                    }}
+                    onBlur={(e) => validateEmail(e.target.value)}
                     required
                     data-cy="forgot-email"
                   />
                 </InputTextField>
+                {emailError && (
+                  <p className="text-red-500 text-xs mt-1">
+                    Please enter a valid email address
+                  </p>
+                )}
               </InputContainer>
             </div>
             <div className="flex gap-4 w-full">
