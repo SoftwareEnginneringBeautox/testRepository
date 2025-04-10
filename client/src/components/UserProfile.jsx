@@ -11,12 +11,34 @@ const UserProfile = () => {
   );
   const [userRole, setUserRole] = useState(localStorage.getItem("role") || "");
   const location = useLocation();
+  const [currentTheme, setCurrentTheme] = useState(
+    document.documentElement.classList.contains("dark") ? "dark" : "light"
+  );
 
   // Define routes that should hide the user icon (still needed for the icon visibility)
   const hideIconRoutes = ["/login"];
   const isIconVisible = !hideIconRoutes.includes(
     location.pathname.toLowerCase()
   );
+
+  useEffect(() => {
+    // Update the current theme based on document class
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === "class") {
+          setCurrentTheme(
+            document.documentElement.classList.contains("dark")
+              ? "dark"
+              : "light"
+          );
+        }
+      });
+    });
+
+    observer.observe(document.documentElement, { attributes: true });
+
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     const updateUserData = () => {
@@ -41,6 +63,11 @@ const UserProfile = () => {
     };
   }, []);
 
+  // Update currentTheme when theme context changes
+  useEffect(() => {
+    setCurrentTheme(theme);
+  }, [theme]);
+
   return (
     <div className="flex items-center justify-end gap-2 p-3 bg-transparent">
       <div className="text-right">
@@ -53,7 +80,7 @@ const UserProfile = () => {
         <UserIcon
           size={36}
           className={`h-full ${
-            theme === "dark" ? "text-customNeutral-100" : ""
+            currentTheme === "dark" ? "text-customNeutral-100" : ""
           }`}
         />
       )}

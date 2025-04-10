@@ -21,7 +21,6 @@ import {
 
 import {
   Select,
-  SelectValue,
   ModalSelectTrigger,
   ModalSelectContent,
   SelectItem
@@ -35,9 +34,11 @@ import ChevronLeftIcon from "@/assets/icons/ChevronLeftIcon";
 import PlusIcon from "@/assets/icons/PlusIcon";
 import CalendarIcon from "@/assets/icons/CalendarIcon";
 import PasswordIcon from "@/assets/icons/PasswordIcon";
+import EmailIcon from "@/assets/icons/EmailIcon";
 
 function CreateStaff({ isOpen, onClose }) {
   const [staffName, setStaffName] = useState("");
+  const [staffEmail, setStaffEmail] = useState("");
   const [staffRole, setStaffRole] = useState("");
   const [staffPassword, setStaffPassword] = useState("");
   const [dayOff, setDayOff] = useState("");
@@ -54,6 +55,7 @@ function CreateStaff({ isOpen, onClose }) {
 
     console.log("Submitting staff:", {
       staffName,
+      staffEmail,
       staffRole,
       staffPassword,
       dayOff
@@ -65,6 +67,7 @@ function CreateStaff({ isOpen, onClose }) {
         {
           username: staffName,
           password: staffPassword,
+          email: staffEmail,
           role: staffRole,
           dayoff: dayOff
         },
@@ -107,6 +110,22 @@ function CreateStaff({ isOpen, onClose }) {
                   placeholder="Name of the Staff"
                   value={staffName}
                   onChange={(e) => setStaffName(e.target.value)}
+                />
+              </InputTextField>
+            </InputContainer>
+
+            <InputContainer>
+              <InputLabel>STAFF EMAIL</InputLabel>
+              <InputTextField>
+                <InputIcon>
+                  <EmailIcon />
+                </InputIcon>
+                <Input
+                  data-cy="create-staff-email"
+                  placeholder="Email of the Staff"
+                  type="email"
+                  value={staffEmail}
+                  onChange={(e) => setStaffEmail(e.target.value)}
                 />
               </InputTextField>
             </InputContainer>
