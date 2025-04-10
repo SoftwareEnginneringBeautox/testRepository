@@ -1102,18 +1102,32 @@ app.post("/forgot-password", async (req, res) => {
       to: email,
       subject: "Password Reset OTP Code",
       html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 5px;">
-          <h2 style="color: #333; text-align: center;">Password Reset Request</h2>
-          <p>Hello ${username},</p>
-          <p>We received a request to reset your password. Please use the following One-Time Password (OTP) to continue with your password reset:</p>
-          <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 15px 0; text-align: center;">
-            <p style="font-size: 24px; font-weight: bold; letter-spacing: 5px; color: #333;">${otp}</p>
-          </div>
-          <p>This code will expire in 5 minutes for security purposes.</p>
-          <p>If you did not request this password reset, please ignore this email or contact our support team immediately.</p>
-          <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
-          <p style="font-size: 12px; color: #777; text-align: center;">This is an automated email from Beautox PRISM. Please do not reply.</p>
-        </div>
+        <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; padding: 30px; border: 1px solid #e0e0e0; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+  <div style="text-align: center; margin-bottom: 25px;">
+    <h2 style="color: #3a3a3a; font-weight: 600; margin-bottom: 5px;">Password Reset</h2>
+    <p style="color: #666; font-size: 16px; margin-top: 0;">Beautox PRISM</p>
+  </div>
+  
+  <p style="color: #444; font-size: 15px; line-height: 1.6;">Hello <strong>${username}</strong>,</p>
+  
+  <p style="color: #444; font-size: 15px; line-height: 1.6;">We received a request to reset your password. Please use the following One-Time Password (OTP) to complete your password reset:</p>
+  
+  <div style="background-color: #f7f9fc; padding: 20px; border-radius: 6px; margin: 25px 0; text-align: center; border-left: 4px solid #4a6cf7;">
+    <p style="font-size: 28px; font-weight: bold; letter-spacing: 8px; color: #3a3a3a; margin: 0;">${otp}</p>
+    <p style="font-size: 13px; color: #666; margin-top: 10px; margin-bottom: 0;">This code will expire in 5 minutes</p>
+  </div>
+  
+  <p style="color: #444; font-size: 15px; line-height: 1.6;">If you didn't request this password reset, please ignore this email or contact our support team immediately.</p>
+  
+  <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eaeaea; text-align: center;">
+    <p style="font-size: 14px; color: #666; margin-bottom: 5px;">Need help? <a href="#" style="color: #4a6cf7; text-decoration: none;">Contact Support</a></p>
+    <p style="font-size: 13px; color: #999; margin-top: 15px;">This is an automated message from Beautox PRISM. Please do not reply.</p>
+  </div>
+  
+  <div style="margin-top: 25px; text-align: center;">
+    <p style="font-size: 12px; color: #999;">© 2025 Beautox PRISM. All rights reserved.</p>
+  </div>
+</div>
       `
     });
     

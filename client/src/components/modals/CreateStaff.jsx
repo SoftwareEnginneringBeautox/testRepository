@@ -146,6 +146,9 @@ function CreateStaff({ isOpen, onClose }) {
                   placeholder="Select staff role"
                 />
                 <ModalSelectContent>
+                  <SelectItem data-cy="role-admin" value="admin">
+                    Admin
+                  </SelectItem>
                   <SelectItem data-cy="role-aesthetician" value="aesthetician">
                     Aesthetician
                   </SelectItem>
