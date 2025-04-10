@@ -76,6 +76,7 @@ function PatientRecordsDatabase() {
   const [records, setRecords] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortOption, setSortOption] = useState("");
+  const [loading, setLoading] = useState(true); // Add loading state
 
   // State for managing column visibility
   const [selectedColumns, setSelectedColumns] = useState([
@@ -154,6 +155,7 @@ function PatientRecordsDatabase() {
   // Fetch patient records from the API
   const fetchRecords = async () => {
     try {
+      setLoading(true); // Set loading to true before fetching
       const response = await fetch(`${API_BASE_URL}/api/patients`, {
         method: "GET",
         credentials: "include"
@@ -165,6 +167,8 @@ function PatientRecordsDatabase() {
       setCurrentPage(1);
     } catch (error) {
       console.error("Error fetching records:", error);
+    } finally {
+      setLoading(false); // Set loading to false when done
     }
   };
 
@@ -728,431 +732,438 @@ function PatientRecordsDatabase() {
         </div>
       </div>
 
-      <div className="w-full overflow-x-auto" data-cy="patient-records-table">
-        <Table
-          showPagination={true}
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={paginate}
-        >
-          <TableHeader>
-            <TableRow>
-              {/* Always show CLIENT column */}
-              <TableHead className=" whitespace-nowrap">CLIENT</TableHead>
+      {loading ? (
+        <div className="w-full flex flex-col items-center justify-center p-12 space-y-4" data-cy="loading-spinner">
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent"></div>
+          <p className="text-center text-primary font-medium">Loading patient records...</p>
+        </div>
+      ) : (
+        <div className="w-full overflow-x-auto" data-cy="patient-records-table">
+          <Table
+            showPagination={true}
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={paginate}
+          >
+            <TableHeader>
+              <TableRow>
+                {/* Always show CLIENT column */}
+                <TableHead className=" whitespace-nowrap">CLIENT</TableHead>
 
-              {/* Always show DATE OF SESSION column */}
-              <TableHead className=" text-center whitespace-nowrap">
-                DATE OF SESSION
-              </TableHead>
-
-              {/* Conditionally show other columns based on selectedColumns */}
-              {isColumnVisible.timeofsession && (
+                {/* Always show DATE OF SESSION column */}
                 <TableHead className=" text-center whitespace-nowrap">
-                  TIME OF SESSION
+                  DATE OF SESSION
                 </TableHead>
-              )}
 
-              {isColumnVisible.contactnumber && (
-                <TableHead className=" text-center whitespace-nowrap">
-                  CONTACT NUMBER
-                </TableHead>
-              )}
-              {isColumnVisible.age && (
-                <TableHead className=" text-center whitespace-nowrap">
-                  AGE
-                </TableHead>
-              )}
-              {isColumnVisible.email && (
-                <TableHead className=" text-center whitespace-nowrap">
-                  EMAIL
-                </TableHead>
-              )}
+                {/* Conditionally show other columns based on selectedColumns */}
+                {isColumnVisible.timeofsession && (
+                  <TableHead className=" text-center whitespace-nowrap">
+                    TIME OF SESSION
+                  </TableHead>
+                )}
 
-              {isColumnVisible.personincharge && (
-                <TableHead className=" text-center whitespace-nowrap">
-                  PERSON IN CHARGE
-                </TableHead>
-              )}
+                {isColumnVisible.contactnumber && (
+                  <TableHead className=" text-center whitespace-nowrap">
+                    CONTACT NUMBER
+                  </TableHead>
+                )}
+                {isColumnVisible.age && (
+                  <TableHead className=" text-center whitespace-nowrap">
+                    AGE
+                  </TableHead>
+                )}
+                {isColumnVisible.email && (
+                  <TableHead className=" text-center whitespace-nowrap">
+                    EMAIL
+                  </TableHead>
+                )}
 
-              {isColumnVisible.package && (
-                <TableHead className=" whitespace-nowrap">PACKAGE</TableHead>
-              )}
+                {isColumnVisible.personincharge && (
+                  <TableHead className=" text-center whitespace-nowrap">
+                    PERSON IN CHARGE
+                  </TableHead>
+                )}
 
-              {isColumnVisible.treatment && (
-                <TableHead className=" whitespace-nowrap">TREATMENT</TableHead>
-              )}
-              
-              {isColumnVisible.sessionsleft && (
-                <TableHead className=" text-center whitespace-nowrap">
-                  SESSIONS LEFT
-                </TableHead>
-              )}
+                {isColumnVisible.package && (
+                  <TableHead className=" whitespace-nowrap">PACKAGE</TableHead>
+                )}
 
-              {isColumnVisible.consentformsigned && (
-                <TableHead className=" text-center whitespace-nowrap">
-                  CONSENT FORM SIGNED
-                </TableHead>
-              )}
+                {isColumnVisible.treatment && (
+                  <TableHead className=" whitespace-nowrap">TREATMENT</TableHead>
+                )}
+                
+                {isColumnVisible.sessionsleft && (
+                  <TableHead className=" text-center whitespace-nowrap">
+                    SESSIONS LEFT
+                  </TableHead>
+                )}
 
-              {isColumnVisible.paymentmethod && (
-                <TableHead className=" text-center whitespace-nowrap">
-                  PAYMENT METHOD
-                </TableHead>
-              )}
+                {isColumnVisible.consentformsigned && (
+                  <TableHead className=" text-center whitespace-nowrap">
+                    CONSENT FORM SIGNED
+                  </TableHead>
+                )}
 
-              {isColumnVisible.totalamount && (
-                <TableHead className=" text-center whitespace-nowrap">
-                  TOTAL AMOUNT
-                </TableHead>
-              )}
+                {isColumnVisible.paymentmethod && (
+                  <TableHead className=" text-center whitespace-nowrap">
+                    PAYMENT METHOD
+                  </TableHead>
+                )}
 
-              {isColumnVisible.amountpaid && (
-                <TableHead className=" text-center whitespace-nowrap">
-                  AMOUNT PAID
-                </TableHead>
-              )}
+                {isColumnVisible.totalamount && (
+                  <TableHead className=" text-center whitespace-nowrap">
+                    TOTAL AMOUNT
+                  </TableHead>
+                )}
 
-              {isColumnVisible.remainingbalance && (
-                <TableHead className=" text-center whitespace-nowrap">
-                  REMAINING BALANCE
-                </TableHead>
-              )}
+                {isColumnVisible.amountpaid && (
+                  <TableHead className=" text-center whitespace-nowrap">
+                    AMOUNT PAID
+                  </TableHead>
+                )}
 
-              {isColumnVisible.referenceno && (
-                <TableHead className=" text-center whitespace-nowrap">
-                  REFERENCE NO.
-                </TableHead>
-              )}
+                {isColumnVisible.remainingbalance && (
+                  <TableHead className=" text-center whitespace-nowrap">
+                    REMAINING BALANCE
+                  </TableHead>
+                )}
 
-              <TableHead></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {currentRecords.length > 0 ? (
-              currentRecords.map((record, index) => (
-                <TableRow key={index} data-cy={`record-row-${index}`}>
-                  {/* Always show CLIENT column */}
-                  <TableCell
-                    className="whitespace-nowrap"
-                    data-cy={`record-client-${index}`}
-                  >
-                    {record.client ||
-                      record.patient_name?.toUpperCase() ||
-                      "N/A"}
-                  </TableCell>
+                {isColumnVisible.referenceno && (
+                  <TableHead className=" text-center whitespace-nowrap">
+                    REFERENCE NO.
+                  </TableHead>
+                )}
 
-                  {/* Always show DATE OF SESSION column */}
-                  <TableCell
-                    className="text-center whitespace-nowrap"
-                    data-cy={`record-date-${index}`}
-                  >
-                    {record.dateTransacted || record.date_of_session
-                      ? format(
-                          new Date(
-                            record.dateTransacted || record.date_of_session
-                          ),
-                          "MMMM dd, yyyy"
-                        ).toUpperCase()
-                      : "N/A"}
-                  </TableCell>
+                <TableHead></TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {currentRecords.length > 0 ? (
+                currentRecords.map((record, index) => (
+                  <TableRow key={index} data-cy={`record-row-${index}`}>
+                    {/* Always show CLIENT column */}
+                    <TableCell
+                      className="whitespace-nowrap"
+                      data-cy={`record-client-${index}`}
+                    >
+                      {record.client ||
+                        record.patient_name?.toUpperCase() ||
+                        "N/A"}
+                    </TableCell>
 
-                  {/* Conditionally show other cells based on selectedColumns */}
-                  {isColumnVisible.timeofsession && (
+                    {/* Always show DATE OF SESSION column */}
                     <TableCell
                       className="text-center whitespace-nowrap"
-                      data-cy={`record-time-${index}`}
+                      data-cy={`record-date-${index}`}
                     >
-                      {record.nextSessionTime || record.time_of_session
-                        ? (() => {
-                            const timeValue =
-                              record.nextSessionTime || record.time_of_session;
-                            const parsedTime = new Date(
-                              `1970-01-01T${timeValue}`
-                            );
-                            return isNaN(parsedTime.getTime())
-                              ? "Invalid Time"
-                              : format(parsedTime, "hh:mm a");
-                          })()
-                  
-                       : "N/A"}
-                   </TableCell>
-                 )}
+                      {record.dateTransacted || record.date_of_session
+                        ? format(
+                            new Date(
+                              record.dateTransacted || record.date_of_session
+                            ),
+                            "MMMM dd, yyyy"
+                          ).toUpperCase()
+                        : "N/A"}
+                    </TableCell>
 
-                 {isColumnVisible.contactnumber && (
-                   <TableCell
-                     className="text-center whitespace-nowrap"
-                     data-cy={`record-contact-${index}`}
-                   >
-                     {record.contact_number || "N/A"}
-                   </TableCell>
-                 )}
+                    {/* Conditionally show other cells based on selectedColumns */}
+                    {isColumnVisible.timeofsession && (
+                      <TableCell
+                        className="text-center whitespace-nowrap"
+                        data-cy={`record-time-${index}`}
+                      >
+                        {record.nextSessionTime || record.time_of_session
+                          ? (() => {
+                              const timeValue =
+                                record.nextSessionTime || record.time_of_session;
+                              const parsedTime = new Date(
+                                `1970-01-01T${timeValue}`
+                              );
+                              return isNaN(parsedTime.getTime())
+                                ? "Invalid Time"
+                                : format(parsedTime, "hh:mm a");
+                            })()
+                    
+                         : "N/A"}
+                     </TableCell>
+                   )}
 
-                 {isColumnVisible.age && (
-                   <TableCell
-                     className="text-center whitespace-nowrap"
-                     data-cy={`record-age-${index}`}
-                   >
-                     {record.age || "N/A"}
-                   </TableCell>
-                 )}
+                   {isColumnVisible.contactnumber && (
+                     <TableCell
+                       className="text-center whitespace-nowrap"
+                       data-cy={`record-contact-${index}`}
+                     >
+                       {record.contact_number || "N/A"}
+                     </TableCell>
+                   )}
 
-                 {isColumnVisible.email && (
-                   <TableCell
-                     className="text-center whitespace-nowrap"
-                     data-cy={`record-email-${index}`}
-                   >
-                     {record.email || "N/A"}
-                   </TableCell>
-                 )}
+                   {isColumnVisible.age && (
+                     <TableCell
+                       className="text-center whitespace-nowrap"
+                       data-cy={`record-age-${index}`}
+                     >
+                       {record.age || "N/A"}
+                     </TableCell>
+                   )}
 
-                 {isColumnVisible.personincharge && (
-                   <TableCell
-                     className="text-center whitespace-nowrap"
-                     data-cy={`record-personincharge-${index}`}
-                   >
-                     {(
-                       record.personInCharge || record.person_in_charge
-                     )?.toUpperCase()}
-                   </TableCell>
-                 )}
+                   {isColumnVisible.email && (
+                     <TableCell
+                       className="text-center whitespace-nowrap"
+                       data-cy={`record-email-${index}`}
+                     >
+                       {record.email || "N/A"}
+                     </TableCell>
+                   )}
 
-                 {isColumnVisible.package && (
-                   <TableCell
-                     className="whitespace-nowrap"
-                     data-cy={`record-package-${index}`}
-                   >
-                     {(record.package || record.package_name)?.toUpperCase()}
-                   </TableCell>
-                 )}
+                   {isColumnVisible.personincharge && (
+                     <TableCell
+                       className="text-center whitespace-nowrap"
+                       data-cy={`record-personincharge-${index}`}
+                     >
+                       {(
+                         record.personInCharge || record.person_in_charge
+                       )?.toUpperCase()}
+                     </TableCell>
+                   )}
 
-                 {isColumnVisible.treatment && (
-                   <TableCell
-                     className="text-left whitespace-nowrap"
-                     data-cy={`record-treatment-${index}`}
-                   >
-                     {Array.isArray(record.treatment_ids) &&
-                     record.treatment_ids.length > 0 ? (
-                       <div className="flex flex-col gap-1">
-                         {record.treatment_ids.map((id) => {
-                           const treatment = treatmentsList.find(
-                             (t) => t.id === id
-                           );
-                           return treatment ? (
-                             <Badge
-                               key={treatment.id}
-                               variant="outline"
-                               data-cy={`record-treatment-badge-${record.id}-${treatment.id}`}
-                             >
-                               + {treatment.treatment_name.toUpperCase()}
-                             </Badge>
-                           ) : null;
-                         })}
-                       </div>
-                     ) : (
-                       <span className="text-muted-foreground italic">
-                         N/A
-                       </span>
-                     )}
-                   </TableCell>
-                 )}
-                 
-                 {isColumnVisible.sessionsleft && (
-                   <TableCell
-                     className="text-center whitespace-nowrap"
-                     data-cy={`record-sessionsleft-${index}`}
-                   >
-                     {record.sessions_left || 0}
-                   </TableCell>
-                 )}
+                   {isColumnVisible.package && (
+                     <TableCell
+                       className="whitespace-nowrap"
+                       data-cy={`record-package-${index}`}
+                     >
+                       {(record.package || record.package_name)?.toUpperCase()}
+                     </TableCell>
+                   )}
 
-                 {isColumnVisible.consentformsigned && (
-                   <TableCell
-                     className="text-center whitespace-nowrap"
-                     data-cy={`record-consent-${index}`}
-                   >
-                     {record.consentStatus ||
-                       (typeof record.consent_form_signed === "boolean"
-                         ? record.consent_form_signed
-                           ? "YES"
-                           : "NO"
-                         : record.consent_form_signed)}
-                   </TableCell>
-                 )}
+                   {isColumnVisible.treatment && (
+                     <TableCell
+                       className="text-left whitespace-nowrap"
+                       data-cy={`record-treatment-${index}`}
+                     >
+                       {Array.isArray(record.treatment_ids) &&
+                       record.treatment_ids.length > 0 ? (
+                         <div className="flex flex-col gap-1">
+                           {record.treatment_ids.map((id) => {
+                             const treatment = treatmentsList.find(
+                               (t) => t.id === id
+                             );
+                             return treatment ? (
+                               <Badge
+                                 key={treatment.id}
+                                 variant="outline"
+                                 data-cy={`record-treatment-badge-${record.id}-${treatment.id}`}
+                               >
+                                 + {treatment.treatment_name.toUpperCase()}
+                               </Badge>
+                             ) : null;
+                           })}
+                         </div>
+                       ) : (
+                         <span className="text-muted-foreground italic">
+                           N/A
+                         </span>
+                       )}
+                     </TableCell>
+                   )}
+                   
+                   {isColumnVisible.sessionsleft && (
+                     <TableCell
+                       className="text-center whitespace-nowrap"
+                       data-cy={`record-sessionsleft-${index}`}
+                     >
+                       {record.sessions_left || 0}
+                     </TableCell>
+                   )}
 
-                 {isColumnVisible.paymentmethod && (
-                   <TableCell
-                     className="whitespace-nowrap"
-                     data-cy={`record-paymentmethod-${index}`}
-                   >
-                     {(
-                       record.paymentMethod || record.payment_method
-                     )?.toUpperCase()}
-                   </TableCell>
-                 )}
+                   {isColumnVisible.consentformsigned && (
+                     <TableCell
+                       className="text-center whitespace-nowrap"
+                       data-cy={`record-consent-${index}`}
+                     >
+                       {record.consentStatus ||
+                         (typeof record.consent_form_signed === "boolean"
+                           ? record.consent_form_signed
+                             ? "YES"
+                             : "NO"
+                           : record.consent_form_signed)}
+                     </TableCell>
+                   )}
 
-                 {isColumnVisible.totalamount && (
-                   <TableCell
-                     className="text-center"
-                     data-cy={`record-total-${index}`}
-                   >
-                     {new Intl.NumberFormat("en-PH", {
-                       style: "currency",
-                       currency: "PHP"
-                     }).format(parseFloat(record.total_amount || 0))}
-                   </TableCell>
-                 )}
+                   {isColumnVisible.paymentmethod && (
+                     <TableCell
+                       className="whitespace-nowrap"
+                       data-cy={`record-paymentmethod-${index}`}
+                     >
+                       {(
+                         record.paymentMethod || record.payment_method
+                       )?.toUpperCase()}
+                     </TableCell>
+                   )}
 
-                 {isColumnVisible.amountpaid && (
-                   <TableCell
-                     className="text-center"
-                     data-cy={`record-paid-${index}`}
-                   >
-                     {record.amount_paid
-                       ? new Intl.NumberFormat("en-PH", {
-                           style: "currency",
-                           currency: "PHP"
-                         }).format(record.amount_paid)
-                       : "₱0.00"}
-                   </TableCell>
-                 )}
-
-                 {isColumnVisible.remainingbalance && (
-                   <TableCell
-                     className="text-center"
-                     data-cy={`record-remaining-${index}`}
-                   >
-                     {(() => {
-                       const total = parseFloat(record.total_amount || 0);
-                       const paid = parseFloat(record.amount_paid || 0);
-                       const remaining = total - paid;
-                       return new Intl.NumberFormat("en-PH", {
+                   {isColumnVisible.totalamount && (
+                     <TableCell
+                       className="text-center"
+                       data-cy={`record-total-${index}`}
+                     >
+                       {new Intl.NumberFormat("en-PH", {
                          style: "currency",
                          currency: "PHP"
-                       }).format(remaining);
-                     })()}
-                   </TableCell>
-                 )}
+                       }).format(parseFloat(record.total_amount || 0))}
+                     </TableCell>
+                   )}
 
-                 {isColumnVisible.referenceno && (
-                   <TableCell
-                     className="text-center"
-                     data-cy={`record-refno-${index}`}
-                   >
-                     {record.reference_number || "N/A"}
-                   </TableCell>
-                 )}
-
-                 <TableCell>
-                   <DropdownMenu>
-                     <DropdownMenuTrigger
-                       data-cy={`record-menu-trigger-${index}`}
+                   {isColumnVisible.amountpaid && (
+                     <TableCell
+                       className="text-center"
+                       data-cy={`record-paid-${index}`}
                      >
-                       <EllipsisIcon />
-                     </DropdownMenuTrigger>
-                     <DropdownMenuContent>
-                       <DropdownMenuGroup>
-                         <DropdownMenuItem
-                           onClick={() => handleOpenUpdateEntry(record)}
-                           data-cy={`record-update-button-${index}`}
-                         >
-                           <UpdateIcon />
-                           <p className="font-semibold">Update</p>
-                         </DropdownMenuItem>
-                         <DropdownMenuItem
-                           onClick={() => handleOpenEditEntry(record)}
-                           data-cy={`record-edit-button-${index}`}
-                         >
-                           <EditIcon />
-                           <p className="font-semibold">Edit</p>
-                         </DropdownMenuItem>
-                         <DropdownMenuItem
-                           onClick={() => handleOpenArchiveEntry(record)}
-                           data-cy={`record-archive-button-${index}`}
-                         >
-                           <ArchiveIcon />
-                           <p className="font-semibold">Archive</p>
-                         </DropdownMenuItem>
-                       </DropdownMenuGroup>
-                     </DropdownMenuContent>
-                   </DropdownMenu>
+                       {record.amount_paid
+                         ? new Intl.NumberFormat("en-PH", {
+                             style: "currency",
+                             currency: "PHP"
+                           }).format(record.amount_paid)
+                         : "₱0.00"}
+                     </TableCell>
+                   )}
+
+                   {isColumnVisible.remainingbalance && (
+                     <TableCell
+                       className="text-center"
+                       data-cy={`record-remaining-${index}`}
+                     >
+                       {(() => {
+                         const total = parseFloat(record.total_amount || 0);
+                         const paid = parseFloat(record.amount_paid || 0);
+                         const remaining = total - paid;
+                         return new Intl.NumberFormat("en-PH", {
+                           style: "currency",
+                           currency: "PHP"
+                         }).format(remaining);
+                       })()}
+                     </TableCell>
+                   )}
+
+                   {isColumnVisible.referenceno && (
+                     <TableCell
+                       className="text-center"
+                       data-cy={`record-refno-${index}`}
+                     >
+                       {record.reference_number || "N/A"}
+                     </TableCell>
+                   )}
+
+                   <TableCell>
+                     <DropdownMenu>
+                       <DropdownMenuTrigger
+                         data-cy={`record-menu-trigger-${index}`}
+                       >
+                         <EllipsisIcon />
+                       </DropdownMenuTrigger>
+                       <DropdownMenuContent>
+                         <DropdownMenuGroup>
+                           <DropdownMenuItem
+                             onClick={() => handleOpenUpdateEntry(record)}
+                             data-cy={`record-update-button-${index}`}
+                           >
+                             <UpdateIcon />
+                             <p className="font-semibold">Update</p>
+                           </DropdownMenuItem>
+                           <DropdownMenuItem
+                             onClick={() => handleOpenEditEntry(record)}
+                             data-cy={`record-edit-button-${index}`}
+                           >
+                             <EditIcon />
+                             <p className="font-semibold">Edit</p>
+                           </DropdownMenuItem>
+                           <DropdownMenuItem
+                             onClick={() => handleOpenArchiveEntry(record)}
+                             data-cy={`record-archive-button-${index}`}
+                           >
+                             <ArchiveIcon />
+                             <p className="font-semibold">Archive</p>
+                           </DropdownMenuItem>
+                         </DropdownMenuGroup>
+                       </DropdownMenuContent>
+                     </DropdownMenu>
+                   </TableCell>
+                 </TableRow>
+               ))
+             ) : (
+               <TableRow>
+                 <TableCell
+                   colSpan={selectedColumns.length + 2}
+                   className="text-center"
+                   data-cy="no-records-message"
+                 >
+                   NO PATIENT RECORDS CURRENTLY AVAILABLE
                  </TableCell>
                </TableRow>
-             ))
-           ) : (
-             <TableRow>
-               <TableCell
-                 colSpan={selectedColumns.length + 2}
-                 className="text-center"
-                 data-cy="no-records-message"
-               >
-                 NO PATIENT RECORDS CURRENTLY AVAILABLE
-               </TableCell>
-             </TableRow>
-           )}
-         </TableBody>
-       </Table>
-     </div>
+             )}
+           </TableBody>
+         </Table>
+       </div>
+      )}
 
-     <div
-       className="flex flex-col md:flex-row gap-4 justify-end"
-       data-cy="patient-records-actions"
-     >
-       <Button
-         onClick={() => openModal("createEntry")}
-         className="w-full md:w-auto"
-         data-cy="add-entry-button"
-       >
-         <PlusIcon />
-         ADD NEW ENTRY
-       </Button>
-       <Button
-         variant="callToAction"
-         onClick={() => generatePRDReport(records)}
-         className="w-full md:w-auto"
-         data-cy="download-records-button"
-       >
-         <DownloadIcon />
-         <span className="hidden md:inline">DOWNLOAD PATIENT RECORDS</span>
-         <span className="md:hidden">DOWNLOAD RECORDS</span>
-       </Button>
-     </div>
+      <div
+        className="flex flex-col md:flex-row gap-4 justify-end"
+        data-cy="patient-records-actions"
+      >
+        <Button
+          onClick={() => openModal("createEntry")}
+          className="w-full md:w-auto"
+          data-cy="add-entry-button"
+        >
+          <PlusIcon />
+          ADD NEW ENTRY
+        </Button>
+        <Button
+          variant="callToAction"
+          onClick={() => generatePRDReport(records)}
+          className="w-full md:w-auto"
+          data-cy="download-records-button"
+        >
+          <DownloadIcon />
+          <span className="hidden md:inline">DOWNLOAD PATIENT RECORDS</span>
+          <span className="md:hidden">DOWNLOAD RECORDS</span>
+        </Button>
+      </div>
 
-     {currentModal === "createEntry" && (
-       <CreatePatientEntry
-         isOpen={true}
-         onClose={handleModalClose}
-         data-cy="create-patient-entry-modal"
-       />
-     )}
-     {currentModal === "editEntry" && selectedEntry && (
-       <EditPatientEntry
-         isOpen={true}
-         onClose={handleModalClose}
-         entryData={selectedEntry}
-         onSubmit={handleEditPatientEntry}
-         data-cy="edit-patient-entry-modal"
-       />
-     )}
-     {currentModal === "updateEntry" && selectedEntry && (
-       <UpdatePatientEntry
-         isOpen={true}
-         onClose={handleModalClose}
-         entryData={selectedEntry}
-         onSubmit={handleUpdatePatientEntry}
-         data-cy="update-patient-entry-modal"
-       />
-     )}
-     {currentModal === "archiveEntry" && selectedEntry && (
-       <ArchivePatientEntry
-         isOpen={true}
-         onClose={handleModalClose}
-         entryData={selectedEntry}
-         onArchive={handleArchive}
-         data-cy="archive-patient-entry-modal"
-       />
-     )}
-   </div>
- );
+      {currentModal === "createEntry" && (
+        <CreatePatientEntry
+          isOpen={true}
+          onClose={handleModalClose}
+          data-cy="create-patient-entry-modal"
+        />
+      )}
+      {currentModal === "editEntry" && selectedEntry && (
+        <EditPatientEntry
+          isOpen={true}
+          onClose={handleModalClose}
+          entryData={selectedEntry}
+          onSubmit={handleEditPatientEntry}
+          data-cy="edit-patient-entry-modal"
+        />
+      )}
+      {currentModal === "updateEntry" && selectedEntry && (
+        <UpdatePatientEntry
+          isOpen={true}
+          onClose={handleModalClose}
+          entryData={selectedEntry}
+          onSubmit={handleUpdatePatientEntry}
+          data-cy="update-patient-entry-modal"
+        />
+      )}
+      {currentModal === "archiveEntry" && selectedEntry && (
+        <ArchivePatientEntry
+          isOpen={true}
+          onClose={handleModalClose}
+          entryData={selectedEntry}
+          onArchive={handleArchive}
+          data-cy="archive-patient-entry-modal"
+        />
+      )}
+    </div>
+  );
 }
 
 export default PatientRecordsDatabase;

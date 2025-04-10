@@ -44,6 +44,12 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
   const [alertMessage, setAlertMessage] = useState("");
   const [alertTitle, setAlertTitle] = useState("");
   const [showAlert, setShowAlert] = useState(false);
+  
+  // Add validation error states
+  const [ageError, setAgeError] = useState(false);
+  const [phoneError, setPhoneError] = useState(false);
+  const [dateError, setDateError] = useState(false);
+  const [emailError, setEmailError] = useState(false);
 
   if (!isOpen) return null;
 
@@ -58,6 +64,70 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
     return (hours >= 12 && hours < 21) || (hours === 21 && minutes === 0);
   };
 
+  // Function to validate phone number (Philippine format)
+  const isValidPhoneNumber = (number) => {
+    // Philippine format: 09XXXXXXXXX (11 digits starting with 09)
+    const phoneRegex = /^09\d{9}$/;
+    return phoneRegex.test(number);
+  };
+
+  // Function to validate if date is not in the past
+  const isValidDate = (date) => {
+    const selectedDate = new Date(date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Reset time portion for date comparison only
+    return selectedDate >= today;
+  };
+
+  // Function to validate email
+  const isValidEmail = (email) => {
+    // Regular expression for basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  // Add validation handlers for each field
+  const validateAge = (value) => {
+    const ageValue = parseInt(value, 10);
+    if (value && (isNaN(ageValue) || ageValue < 18)) {
+      setAgeError(true);
+      return false;
+    } else {
+      setAgeError(false);
+      return true;
+    }
+  };
+  
+  const validatePhone = (value) => {
+    if (value && !isValidPhoneNumber(value)) {
+      setPhoneError(true);
+      return false;
+    } else {
+      setPhoneError(false);
+      return true;
+    }
+  };
+  
+  const validateDate = (value) => {
+    if (value && !isValidDate(value)) {
+      setDateError(true);
+      return false;
+    } else {
+      setDateError(false);
+      return true;
+    }
+  };
+
+  const validateEmail = (value) => {
+    if (value && !isValidEmail(value)) {
+      setEmailError(true);
+      return false;
+    } else {
+      setEmailError(false);
+      return true;
+    }
+  };
+
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -65,12 +135,16 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
     // Reset alert
     setAlertTitle("");
     setAlertMessage("");
-
-    // Check if time is within business hours
-    if (!isWithinBusinessHours(timeOfSession)) {
-      setAlertTitle("Error");
-      setAlertMessage("Selected time is outside business hours (12pm - 9pm)");
-      setShowAlert(true);
+    
+    // Run all validations
+    const isAgeValid = validateAge(age);
+    const isPhoneValid = validatePhone(contactNumber);
+    const isDateValid = validateDate(dateOfSession);
+    const isTimeValid = isWithinBusinessHours(timeOfSession);
+    const isEmailValid = validateEmail(email);
+    
+    // If any validation fails, prevent form submission
+    if (!isAgeValid || !isPhoneValid || !isDateValid || !isTimeValid || !isEmailValid) {
       return;
     }
 
@@ -92,14 +166,26 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
 
       const data = await response.json();
       if (response.ok) {
-        // On success, show alert instead of using native alert
+        // Reset all form fields
+        setFullName("");
+        setContactNumber("");
+        setAge("");
+        setEmail("");
+        setDateOfSession("");
+        setTimeOfSession("");
+        
+        // Reset validation errors
+        setAgeError(false);
+        setPhoneError(false);
+        setDateError(false);
+        setEmailError(false);
+        
+        // Show success message
         setAlertTitle("Success");
         setAlertMessage(
           "Appointment scheduled successfully! Awaiting confirmation."
         );
         setShowAlert(true);
-
-        // We'll close the modal when the user dismisses the alert
       } else {
         // Handle a failed response
         setAlertTitle("Error");
@@ -178,10 +264,19 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
                 type="tel"
                 placeholder="Contact Number"
                 value={contactNumber}
-                onChange={(e) => setContactNumber(e.target.value)}
+                onChange={(e) => {
+                  setContactNumber(e.target.value);
+                  validatePhone(e.target.value);
+                }}
+                onBlur={(e) => validatePhone(e.target.value)}
                 required
               />
             </InputTextField>
+            {phoneError && (
+              <p className="text-red-500 text-xs mt-1">
+                Please enter a valid Philippine mobile number (format: 09XXXXXXXXX)
+              </p>
+            )}
           </InputContainer>
 
           {/* AGE */}
@@ -196,10 +291,19 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
                 type="number"
                 placeholder="Age"
                 value={age}
-                onChange={(e) => setAge(e.target.value)}
+                onChange={(e) => {
+                  setAge(e.target.value);
+                  validateAge(e.target.value);
+                }}
+                onBlur={(e) => validateAge(e.target.value)}
                 required
               />
             </InputTextField>
+            {ageError && (
+              <p className="text-red-500 text-xs mt-1">
+                You must be at least 18 years old to schedule an appointment
+              </p>
+            )}
           </InputContainer>
 
           {/* EMAIL */}
@@ -214,10 +318,19 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
                 type="email"
                 placeholder="Email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  validateEmail(e.target.value);
+                }}
+                onBlur={(e) => validateEmail(e.target.value)}
                 required
               />
             </InputTextField>
+            {emailError && (
+              <p className="text-red-500 text-xs mt-1">
+                Please enter a valid email address
+              </p>
+            )}
           </InputContainer>
 
           {/* DATE & TIME OF SESSION */}
@@ -233,10 +346,19 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
                   type="date"
                   placeholder="Date of Session"
                   value={dateOfSession}
-                  onChange={(e) => setDateOfSession(e.target.value)}
+                  onChange={(e) => {
+                    setDateOfSession(e.target.value);
+                    validateDate(e.target.value);
+                  }}
+                  onBlur={(e) => validateDate(e.target.value)}
                   required
                 />
               </InputTextField>
+              {dateError && (
+                <p className="text-red-500 text-xs mt-1">
+                  Please select a date that is not in the past
+                </p>
+              )}
             </InputContainer>
 
             <InputContainer className="flex-1">

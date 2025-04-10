@@ -381,7 +381,6 @@ app.post('/api/patients', async (req, res) => {
       amount_paid,
       remaining_balance,
       reference_number,
-      isPaid,
       sessions_left  // Add this new field
     } = req.body;
 
@@ -404,10 +403,9 @@ app.post('/api/patients', async (req, res) => {
         amount_paid,
         remaining_balance,
         reference_number,
-        "isPaid",
         sessions_left
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
       RETURNING id;
     `;
 
@@ -429,7 +427,7 @@ app.post('/api/patients', async (req, res) => {
       amount_paid,
       remaining_balance,
       reference_number,
-      isPaid,
+
       sessions_left  // Include this in the values array
     ];
 
@@ -1063,71 +1061,168 @@ app.get('/test-email', async (req, res) => {
 
 // POST /api/forgot-password
 app.post("/forgot-password", async (req, res) => {
-  const { email } = req.body;
-  const otp = generateOTP();
-  const otpExpiry = new Date(Date.now() + 5 * 60 * 1000);
-  console.log("Generated OTP:", otp);
-
+  const { email, username } = req.body;
+  
   try {
-    const result = await pool.query(
-      "UPDATE accounts SET otp = $1, otp_expiry = $2 WHERE email = $3 RETURNING *",
-      [otp, otpExpiry, email]
+    // Check if user exists with BOTH email AND username
+    const userCheck = await pool.query(
+      "SELECT * FROM accounts WHERE email = $1 AND username = $2",
+      [email, username]
     );
 
-    if (result.rowCount === 0) {
-      console.log("❌ User not found in DB");
-      return res.status(404).json({ message: "User not found" });
+    if (userCheck.rowCount === 0) {
+      return res.status(404).json({ 
+        success: false, 
+        message: "No account found with this email and username combination" 
+      });
     }
-
-    console.log("✅ User found, sending email...");
+    
+    // Check if user is archived
+    if (userCheck.rows[0].archived === true) {
+      return res.status(403).json({ 
+        success: false, 
+        archived: true,
+        message: "Account has been archived. Please contact your administrator." 
+      });
+    }
+    
+    // Continue with normal OTP generation and sending
+    const otp = generateOTP();
+    const otpExpiry = new Date(Date.now() + 5 * 60 * 1000);
+    
+    // Update user with OTP
+    await pool.query(
+      "UPDATE accounts SET otp = $1, otp_expiry = $2 WHERE email = $3 AND username = $4",
+      [otp, otpExpiry, email, username]
+    );
+    
+    // Send OTP email (HTML email code remains unchanged)
     await transporter.sendMail({
-      from: process.env.EMAIL_USER,
+      from: `"No Reply" <${process.env.EMAIL_USER}>`,
       to: email,
-      subject: "Your OTP Code",
-      text: `Your OTP is ${otp}`,
+      subject: "Password Reset OTP Code",
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 5px;">
+          <h2 style="color: #333; text-align: center;">Password Reset Request</h2>
+          <p>Hello ${username},</p>
+          <p>We received a request to reset your password. Please use the following One-Time Password (OTP) to continue with your password reset:</p>
+          <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 15px 0; text-align: center;">
+            <p style="font-size: 24px; font-weight: bold; letter-spacing: 5px; color: #333;">${otp}</p>
+          </div>
+          <p>This code will expire in 5 minutes for security purposes.</p>
+          <p>If you did not request this password reset, please ignore this email or contact our support team immediately.</p>
+          <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+          <p style="font-size: 12px; color: #777; text-align: center;">This is an automated email from Beautox PRISM. Please do not reply.</p>
+        </div>
+      `
     });
-
-    res.json({ message: "OTP sent to email" });
+    
+    res.json({ 
+      success: true, 
+      message: "OTP sent to email" 
+    });
   } catch (err) {
     console.error("❌ Forgot password error:", err);
+    res.status(500).json({ 
+      success: false, 
+      message: "Server error" 
+    });
+  }
+});
+
+// POST /verify-otp
+app.post("/verify-otp", async (req, res) => {
+  const { email, otp, username } = req.body;
+  
+  try {
+    // Log debugging information
+    console.log("Verifying OTP:", { email, otp: otp?.substring(0, 2) + "****" });
+    
+    // Include both email and username in query if username is provided
+    let query = "SELECT otp, otp_expiry FROM accounts WHERE email = $1";
+    const params = [email];
+    
+    if (username) {
+      query = "SELECT otp, otp_expiry FROM accounts WHERE email = $1 AND username = $2";
+      params.push(username);
+    }
+    
+    const result = await pool.query(query, params);
+    const user = result.rows[0];
+
+    if (!user) {
+      console.log("No user found with this email");
+      return res.status(400).json({ message: "Invalid OTP" });
+    }
+    
+    // Fix: Properly normalize both values before comparison
+    // PostgreSQL might return the OTP as a different type
+    const storedOtp = String(user.otp || '').trim();
+    const submittedOtp = String(otp || '').trim();
+    
+    console.log("Stored OTP:", storedOtp);
+    console.log("Submitted OTP:", submittedOtp);
+    console.log("OTP match check:", storedOtp === submittedOtp);
+    
+    // Compare the normalized values
+    if (storedOtp !== submittedOtp) {
+      console.log("OTP mismatch");
+      return res.status(400).json({ message: "Invalid OTP" });
+    }
+
+    if (new Date(user.otp_expiry) < new Date()) {
+      console.log("OTP expired");
+      return res.status(400).json({ message: "OTP expired" });
+    }
+
+    res.json({ success: true, message: "OTP verified" });
+  } catch (err) {
+    console.error("Error in verify-otp:", err);
     res.status(500).json({ message: "Server error" });
   }
 });
 
-// POST /api/verify-otp
-app.post("/verify-otp", async (req, res) => {
-  const { email, otp } = req.body;
-  const result = await pool.query("SELECT otp, otp_expiry FROM accounts WHERE email = $1", [email]);
-  const user = result.rows[0];
-
-  if (!user || user.otp !== otp)
-    return res.status(400).json({ message: "Invalid OTP" });
-
-  if (new Date(user.otp_expiry) < new Date())
-    return res.status(400).json({ message: "OTP expired" });
-
-  res.json({ success: true, message: "OTP verified" });
-});
-
-// POST /api/reset-password
+// POST /reset-password
 app.post("/reset-password", async (req, res) => {
-  const { email, otp, newPassword } = req.body;
-  const result = await pool.query("SELECT otp, otp_expiry FROM accounts WHERE email = $1", [email]);
-  const user = result.rows[0];
+  const { email, otp, newPassword, username } = req.body;
+  
+  try {
+    // Include username in query if provided
+    let query = "SELECT otp, otp_expiry FROM accounts WHERE email = $1";
+    const params = [email];
+    
+    if (username) {
+      query = "SELECT otp, otp_expiry FROM accounts WHERE email = $1 AND username = $2";
+      params.push(username);
+    }
+    
+    const result = await pool.query(query, params);
+    const user = result.rows[0];
 
-  if (!user || user.otp !== otp)
-    return res.status(400).json({ message: "Invalid OTP" });
+    if (!user || String(user.otp) !== String(otp))
+      return res.status(400).json({ message: "Invalid OTP" });
 
-  if (new Date(user.otp_expiry) < new Date())
-    return res.status(400).json({ message: "OTP expired" });
+    if (new Date(user.otp_expiry) < new Date())
+      return res.status(400).json({ message: "OTP expired" });
 
-  const hashed = await bcrypt.hash(newPassword, 10);
-  await pool.query(
-    "UPDATE accounts SET password = $1, otp = NULL, otp_expiry = NULL WHERE email = $2",
-    [hashed, email]
-  );
+    const hashed = await bcrypt.hash(newPassword, 10);
+    
+    // Update using both email and username if username is provided
+    let updateQuery = "UPDATE accounts SET password = $1, otp = NULL, otp_expiry = NULL WHERE email = $2";
+    const updateParams = [hashed, email];
+    
+    if (username) {
+      updateQuery = "UPDATE accounts SET password = $1, otp = NULL, otp_expiry = NULL WHERE email = $2 AND username = $3";
+      updateParams.push(username);
+    }
+    
+    await pool.query(updateQuery, updateParams);
 
-  res.json({ message: "Password reset successful" });
+    res.json({ success: true, message: "Password reset successful" });
+  } catch (err) {
+    console.error("Error in reset-password:", err);
+    res.status(500).json({ message: "Server error" });
+  }
 });
 
 
@@ -1736,7 +1831,57 @@ app.put('/api/categories/:id', async (req, res) => {
     });
   }
 });
+app.post('/api/manage-record', async (req, res) => {
+  const { table, id, action, data } = req.body; // action: 'edit' or 'archive'
 
+  const editableTables = [
+    'expenses_tracker',
+    'patient_records',
+    'accounts',
+    'packages',
+    'treatments',
+    'appointments'
+  ];
+
+  if (!editableTables.includes(table)) {
+    return res.status(400).json({ success: false, message: 'Invalid table name' });
+  }
+
+  if (!id) {
+    return res.status(400).json({ success: false, message: 'Missing record ID' });
+  }
+
+  try {
+    if (action === 'edit') {
+      if (!data || typeof data !== 'object' || Object.keys(data).length === 0) {
+        return res.status(400).json({ success: false, message: 'Missing or invalid data for edit' });
+      }
+
+      console.log("🔧 Incoming update request body:", req.body);
+
+      const fields = Object.keys(data);
+      const values = Object.values(data);
+      const setClause = fields.map((field, idx) => `"${field}" = $${idx + 1}`).join(', ');
+      const query = `UPDATE ${table} SET ${setClause} WHERE id = $${fields.length + 1}`;
+
+      await pool.query(query, [...values, id]);
+
+      return res.json({ success: true, message: `${table} record updated` });
+    }
+
+    if (action === 'archive') {
+      const query = `UPDATE ${table} SET archived = TRUE WHERE id = $1`;
+      await pool.query(query, [id]);
+
+      return res.json({ success: true, message: `${table} record archived` });
+    }
+
+    return res.status(400).json({ success: false, message: 'Invalid action' });
+  } catch (err) {
+    console.error(`❌ Error in manage-record (${action}):`, err.message);
+    return res.status(500).json({ success: false, message: `Server error: ${err.message}` });
+  }
+});
 // Archive a category
 app.patch('/api/categories/:id/archive', async (req, res) => {
   try {
