@@ -146,18 +146,23 @@ function Login() {
           `Login failed for "${trimmedUsername}":`,
           response.data.message
         );
-        setErrorMessage(
-          response.data.message || "Invalid username or password"
-        );
+        
+        // Special handling for archived accounts
+        if (response.data.message?.toLowerCase().includes('archived')) {
+          setErrorMessage("Your account has been archived. Please contact your administrator.");
+        } else {
+          setErrorMessage(response.data.message || "Invalid username or password");
+        }
         setIsLoading(false); // ✅ Stop loading on login failure
       }
     } catch (error) {
-      const trimmedUsername = username.trim();
-      console.error(
-        `Error during login attempt for "${trimmedUsername}":`,
-        error
-      );
-      setErrorMessage("An error occurred. Please try again later.");
+      // Also handle the 403 status specifically for archived accounts
+      if (error.response?.status === 403 && 
+          error.response.data?.message?.toLowerCase().includes('archived')) {
+        setErrorMessage("Your account has been archived. Please contact your administrator.");
+      } else {
+        setErrorMessage("An error occurred. Please try again later.");
+      }
       setIsLoading(false); // ✅ Stop loading on error
     }
   };

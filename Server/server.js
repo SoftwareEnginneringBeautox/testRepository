@@ -269,10 +269,22 @@ app.post('/login', async (req, res) => {
     const query = 'SELECT * FROM accounts WHERE username = $1';
     const result = await pool.query(query, [username]);
 
+    // In your /login endpoint, after retrieving the user but before password comparison:
+
     if (result.rows.length > 0) {
       const user = result.rows[0];
+      
+      // Check if user is archived
+      if (user.archived === true) {
+        return res.status(403).json({ 
+          success: false, 
+          message: "Account has been archived. Please contact your administrator." 
+        });
+      }
+      
       const passwordMatch = await bcrypt.compare(password, user.password);
-
+      // Continue with existing code...
+    
       if (passwordMatch) {
         // Generate a random token (256-bit token in hex format)
         const token = crypto.randomBytes(32).toString('hex');
