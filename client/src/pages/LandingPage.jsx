@@ -922,6 +922,12 @@ function LandingPage() {
           data-cy="contact"
         >
           <div className="w-[85%] sm:w-[80%] mx-auto flex flex-col-reverse lg:flex-row gap-8 justify-center">
+            <h3
+              className="w-full lg:w-1/2 text-xl sm:text-3xl text-center lg:text-end font-bold text-white"
+              data-cy="find-us-title"
+            >
+              WANT TO LEARN MORE ABOUT US? CONTACT US HERE
+            </h3>
             <ul
               className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-base sm:text-lg w-full lg:w-1/2"
               data-cy="contact-links"
@@ -954,7 +960,7 @@ function LandingPage() {
                 data-cy="phone-contact"
               >
                 <PhoneIcon className="text-white" />
-                0917-895-8825
+                [BEAUTOX NUMBER]
               </li>
 
               <li
@@ -980,12 +986,6 @@ function LandingPage() {
                 beautoxph@gmail.com
               </li>
             </ul>
-            <h3
-              className="w-full lg:w-1/2 text-2xl sm:text-3xl text-center lg:text-end font-bold text-white"
-              data-cy="find-us-title"
-            >
-              WANT TO LEARN MORE ABOUT US? CONTACT US HERE
-            </h3>
           </div>
         </section>
 

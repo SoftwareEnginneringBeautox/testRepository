@@ -605,7 +605,6 @@ function AdministratorServices() {
           data-cy="edit-treatment-modal"
         />
       )}
-      <Loader />
     </div>
   );
 }
