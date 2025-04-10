@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-
+import { useEffect } from "react";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 import Layout from "./components/Layout";
@@ -50,6 +50,60 @@ function AdminRoute({ children }) {
 }
 
 function App() {
+  useEffect(() => {
+    // First console log with your requested pattern
+    console.log(` Welcome to PRISM by Beautox!
+
+                ############                                
+               ###########                                      
+           ######                                                
+         ####                                                    
+       ####                                                      
+      ###        ################                                
+    ###            ###        #####                              
+   ###             ###          ####                             
+  ###              ###           ####                            
+ ###               ###           ####                            
+ ##                ###          ####                          ##  
+##                 #######     #######                      ### 
+##               ########   #################            #####  
+##             #######    #########       #################     
+##            ###  ###  ####    ######          #######         
+##           ##    #######        #####         ###              
+##          ##     #####            ###         ###              
+##          ##     ###              ####        ###              
+##          ##     ###               ###        ###              
+ ##         ##     ###               ###        ###              
+ ###        ##     ###              ####         #               
+  ###        ##    ###             ####         ###              
+   ###        ##  #####           ####          ####            
+    ###        ########         #####            ##              
+     ####       ######     ########          #                   
+       ####        #############           ###                   
+         ####                            ###                    
+           ######                    #####                       
+              ##########      #########                          
+                   ################                             
+    `);
+
+    var consoleSignatureStyle =
+      "font-size: 16px;" +
+      "background: linear-gradient(to right, #e66465, #9198e5);" + // Linear gradient applied
+      "color: transparent;" + // Make the text color transparent to show the gradient
+      "background-clip: text;" + // Clip the background to the text
+      "text-align: start;" +
+      "padding: 10px 15px;" +
+      "width: 100%;" +
+      "border-radius: 12px;" +
+      "white-space: pre-line;"; // Ensure line breaks are respected
+
+    // Create the console text, with default icon colors and gradient text applied
+    var consoleSignatureText =
+      "%cCreated by:\n🤝 Denzel To - Project Manager\n🔗 Aleksy Mendoza - Systems Analyst\n📉 Edrine Esguerra - Business Analyst\n📋 Jasmine De Guia - Quality Officer\n📋 Rayna Gulifardo - Quality Officer\n💻 Ivan Mendoza - Backend Developer\n🎨 Eli Dizon - Frontend Developer";
+
+    console.log(consoleSignatureText, consoleSignatureStyle);
+  }, []);
+
   return (
     <GoogleReCaptchaProvider
       reCaptchaKey="6LfTPA0rAAAAAJQuZjo32e1CDmvMgb4l-yt47U3h"
