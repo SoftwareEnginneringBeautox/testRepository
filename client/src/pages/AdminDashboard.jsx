@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "../App.css";
+import { cn } from "@/lib/utils";
 import { useModal } from "@/hooks/useModal";
 import { Button } from "@/components/ui/Button";
 import CreateStaff from "@/components/modals/CreateStaff";
@@ -638,7 +639,14 @@ function AdministratorDashboard() {
 
       {/* Right Section */}
       <div
-        className="w-full lg:w-1/4 shadow-custom p-4 sm:p-6 md:p-8 lg:p-10 bg-ash-100 dark:bg-customNeutral-500 rounded-lg flex flex-col items-center gap-3 sm:gap-4 mt-4 lg:mt-0"
+        className={cn(
+          "w-full lg:w-1/4 shadow-custom p-4 sm:p-6 md:p-8 lg:p-10 bg-ash-100 dark:bg-customNeutral-500 rounded-lg flex flex-col items-center gap-3 sm:gap-4 mt-4 lg:mt-0",
+          "[&::-webkit-scrollbar]:w-2",
+          "[&::-webkit-scrollbar-thumb]:bg-gray-400",
+          "[&::-webkit-scrollbar-thumb]:rounded-full",
+          "[&::-webkit-scrollbar-track]:bg-transparent",
+          "[&::-webkit-scrollbar-thumb:hover]:bg-lavender-400"
+        )}
         data-cy="staff-section"
       >
         <h3

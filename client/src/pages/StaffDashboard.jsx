@@ -8,6 +8,7 @@ const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 import { Loader } from "@/components/ui/Loader";
 import UserIcon from "../assets/icons/UserIcon";
+import { cn } from "@/lib/utils";
 
 import {
   Table,
@@ -367,7 +368,16 @@ function StaffDashboard() {
 
       {/* Right Section - Staff List */}
       <div className="w-full lg:w-1/4 flex flex-col gap-4">
-        <div className="shadow-custom p-4 sm:p-6 md:p-8 lg:p-10 bg-ash-100 dark:bg-customNeutral-500 rounded-lg flex flex-col items-center gap-3 sm:gap-4 mt-4 lg:mt-0">
+        <div
+          className={cn(
+            "shadow-custom p-4 sm:p-6 md:p-8 lg:p-10 bg-ash-100 dark:bg-customNeutral-500 rounded-lg flex flex-col items-center gap-3 sm:gap-4 mt-4 lg:mt-0 overflow-y-auto",
+            "[&::-webkit-scrollbar]:w-2",
+            "[&::-webkit-scrollbar-thumb]:bg-gray-400",
+            "[&::-webkit-scrollbar-thumb]:rounded-full",
+            "[&::-webkit-scrollbar-track]:bg-transparent",
+            "[&::-webkit-scrollbar-thumb:hover]:bg-lavender-400"
+          )}
+        >
           <h3 className="flex items-center gap-2 text-lg sm:text-xl md:text-2xl lg:text-[2rem] leading-tight sm:leading-[2.8rem] font-semibold dark:text-customNeutral-100">
             <UserIcon size={24} className="sm:w-8 sm:h-8" />
             STAFF LIST
@@ -407,7 +417,16 @@ function StaffDashboard() {
         </div>
 
         {/* Reminders Card */}
-        <div className="shadow-custom p-4 sm:p-6 md:p-8 lg:p-10 bg-ash-100 dark:bg-customNeutral-500 rounded-lg flex flex-col items-center gap-3 sm:gap-4">
+        <div
+          className={cn(
+            "shadow-custom p-4 sm:p-6 md:p-8 lg:p-10 bg-ash-100 dark:bg-customNeutral-500 rounded-lg flex flex-col items-center gap-3 sm:gap-4 overflow-y-auto",
+            "[&::-webkit-scrollbar]:w-2",
+            "[&::-webkit-scrollbar-thumb]:bg-gray-400",
+            "[&::-webkit-scrollbar-thumb]:rounded-full",
+            "[&::-webkit-scrollbar-track]:bg-transparent",
+            "[&::-webkit-scrollbar-thumb:hover]:bg-lavender-400"
+          )}
+        >
           <h3 className="flex items-center gap-2 text-lg sm:text-xl md:text-2xl lg:text-[2rem] leading-tight sm:leading-[2.8rem] font-semibold dark:text-customNeutral-100">
             <CalendarIcon className="w-6 h-6 sm:w-8 sm:h-8" />
             REMINDERS

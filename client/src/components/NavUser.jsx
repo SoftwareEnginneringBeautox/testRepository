@@ -22,9 +22,34 @@ export function NavUser({ user }) {
   const { currentModal, openModal, closeModal } = useSidebar();
   const { theme, setTheme } = useTheme();
 
+  const currentDocumentTheme = document.documentElement.classList.contains(
+    "dark"
+  )
+    ? "dark"
+    : "light";
+  const effectiveTheme = theme === "system" ? currentDocumentTheme : theme;
+
   const toggleTheme = () => {
-    setTheme(theme === "light" ? "dark" : "light");
-    console.log("theme set to " + theme);
+    const currentDocTheme = document.documentElement.classList.contains("dark")
+      ? "dark"
+      : "light";
+    const newTheme = theme === "light" ? "dark" : "light";
+
+    console.log("🔄 Theme Toggle:");
+    console.log("- Current theme state:", theme);
+    console.log("- Current document class:", currentDocTheme);
+    console.log("- Setting new theme to:", newTheme);
+
+    setTheme(newTheme);
+
+    // Force immediate update
+    document.documentElement.classList.remove("light", "dark");
+    document.documentElement.classList.add(newTheme);
+
+    console.log(
+      "- Document class after toggle:",
+      document.documentElement.classList.contains("dark") ? "dark" : "light"
+    );
   };
 
   const handleLogout = async () => {
@@ -91,13 +116,23 @@ export function NavUser({ user }) {
     }
   }, []);
 
+  // Update theme state to match what's actually on the document
+  useEffect(() => {
+    const currentDocTheme = document.documentElement.classList.contains("dark")
+      ? "dark"
+      : "light";
+    if (theme !== currentDocTheme) {
+      setTheme(currentDocTheme);
+    }
+  }, []);
+
   return (
     <SidebarMenu>
       <SidebarMenuItem>
         <SidebarMenuButton tooltip="TOGGLE THEME" onClick={toggleTheme}>
-          {theme === "light" ? <LightIcon /> : <DarkIcon />}
-          <span className="flex flex-row gap-2 justify-center items-center">
-            {theme === "light" ? "LIGHT" : "DARK"}
+          {effectiveTheme === "light" ? <LightIcon /> : <DarkIcon />}
+          <span className="flex gap-2 items-center">
+            {effectiveTheme.toUpperCase()}
           </span>
         </SidebarMenuButton>
       </SidebarMenuItem>

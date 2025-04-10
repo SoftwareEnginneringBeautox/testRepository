@@ -257,12 +257,13 @@ function LandingPage() {
                   </li>
                 ))}
                 <li className="relative group">
-                  <button
+                  <a
                     onClick={() => navigate("/login")}
-                    className="text-purple-900 text-base font-semibold flex items-center gap-2 px-3 py-1.5 rounded-full hover:bg-purple-950 hover:text-white transition-all duration-300"
+                    className="text-purple-900 text-base font-semibold cursor-pointer"
                   >
                     Login
-                  </button>
+                    <span className="absolute left-0 bottom-0 block h-0.5 bg-lavender-400 transition-all duration-300 w-0 group-hover:w-full" />
+                  </a>
                 </li>
               </ul>
             </div>
@@ -301,7 +302,7 @@ function LandingPage() {
                     Testimonials
                   </DropdownMenuItem>
                   <DropdownMenuItem
-                    className="px-4 py-2 mt-2 bg-purple-950 text-white hover:bg-purple-900 rounded-md cursor-pointer flex items-center gap-2 text-sm"
+                    className="px-4 py-2 text-gray-800 hover:bg-purple-50 rounded-md cursor-pointer text-sm"
                     onClick={() => navigate("/login")}
                   >
                     Login
@@ -597,7 +598,7 @@ function LandingPage() {
         <section className="w-[85%] sm:w-[80%] mx-auto py-8 sm:py-16">
           <div className="text-center mb-12">
             <h2 className="text-2xl sm:text-3xl font-semibold bg-gradient-to-r from-reflexBlue-300 to-lavender-300 text-transparent bg-clip-text mb-4">
-            WE'VE GOT PROMOS FOR YOU!
+              WE'VE GOT PROMOS FOR YOU!
             </h2>
           </div>
 
@@ -652,9 +653,14 @@ function LandingPage() {
           </div>
 
           <div className="text-center space-y-6">
-            <p className="text-purple-900 font-semibold text-lg">Limited slots available—lock in your glow-up today!</p>
+            <p className="text-purple-900 font-semibold text-lg">
+              Limited slots available—lock in your glow-up today!
+            </p>
             <div className="flex flex-col items-center gap-4">
-              <p className="text-gray-600 text-base">Stay tuned! Our promos vary monthly. Kindly follow us for the latest updates and deals.</p>
+              <p className="text-gray-600 text-base">
+                Stay tuned! Our promos vary monthly. Kindly follow us for the
+                latest updates and deals.
+              </p>
               <div className="flex items-center gap-4">
                 <a
                   href="https://www.facebook.com/BeautoxAestheticClinicNewManila"
@@ -1004,15 +1010,19 @@ function LandingPage() {
         </section>
 
         {/* Contact Section */}
-        <section id="contact" className="w-full bg-purple-950 py-16" data-cy="contact">
+        <section
+          id="contact"
+          className="w-full bg-purple-950 py-16"
+          data-cy="contact"
+        >
           <div className="w-[85%] sm:w-[80%] mx-auto grid grid-cols-1 md:grid-cols-4 gap-12">
             {/* Company */}
             <div className="space-y-4">
               <h3 className="text-white font-semibold text-2xl">Company</h3>
               <ul className="space-y-3">
                 {[
-                 { label: "About Us", href: "hero" },
-                 { label: "Find us", href: "about-clinic" }, 
+                  { label: "About Us", href: "hero" },
+                  { label: "Find us", href: "about-clinic" },
                   { label: "Testimonials", href: "testimonials" }
                 ].map(({ label, href }) => (
                   <li key={href}>
@@ -1043,9 +1053,12 @@ function LandingPage() {
                     <button
                       onClick={() => {
                         setActiveTab(service.value);
-                        const servicesSection = document.getElementById("services");
+                        const servicesSection =
+                          document.getElementById("services");
                         if (servicesSection) {
-                          servicesSection.scrollIntoView({ behavior: "smooth" });
+                          servicesSection.scrollIntoView({
+                            behavior: "smooth"
+                          });
                         }
                       }}
                       className="text-white hover:text-gray-200 transition-all duration-200 text-base hover:underline"
@@ -1059,7 +1072,9 @@ function LandingPage() {
 
             {/* Social Media */}
             <div className="space-y-4">
-              <h3 className="text-white font-semibold text-2xl">Social Media</h3>
+              <h3 className="text-white font-semibold text-2xl">
+                Social Media
+              </h3>
               <ul className="space-y-4">
                 <li>
                   <a
@@ -1113,7 +1128,11 @@ function LandingPage() {
           {/* Copyright */}
           <div className="w-[85%] sm:w-[80%] mx-auto mt-16 pt-8 border-t border-white/20">
             <div className="flex items-center justify-between">
-              <img src="/images/FooterBeautoxLogo.png" alt="Beautox Logo" className="h-12 w-auto" />
+              <img
+                src="/images/FooterBeautoxLogo.png"
+                alt="Beautox Logo"
+                className="h-12 w-auto"
+              />
               <p className="text-white/80 text-sm">
                 © {new Date().getFullYear()} BeautoxPH. All rights reserved.
               </p>

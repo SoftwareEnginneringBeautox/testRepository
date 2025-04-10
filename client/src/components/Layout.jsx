@@ -43,89 +43,55 @@ export default function Layout() {
 
   useEffect(() => {
     const root = window.document.documentElement;
+    const userTheme = localStorage.getItem("vite-ui-theme");
 
-    // Check if current route should have light theme
-    const shouldBeLightTheme =
-      lightThemeRoutes.some(
-        (route) => location.pathname.toLowerCase() === route.toLowerCase()
-      ) || isErrorPage;
+    // Define routes that should always use light theme regardless of preference
+    const forceableLightRoutes = ["/", "/login", "/scheduleappointment"];
 
-    if (shouldBeLightTheme) {
+    // Check if current route should force light theme
+    const shouldForceLightTheme = forceableLightRoutes.some(
+      (route) => location.pathname.toLowerCase() === route.toLowerCase()
+    );
+
+    // If on a route that must be light, force light theme temporarily
+    if (shouldForceLightTheme) {
       root.classList.remove("dark");
       root.classList.add("light");
-    } else {
-      // For all other routes, set to dark theme
-      root.classList.remove("light");
-      root.classList.add("dark");
+      return;
     }
 
-    // Cleanup function
-    return () => {
-      // Optional: Reset to default theme when component unmounts
-      // root.classList.remove('light', 'dark');
-    };
-  }, [location.pathname, isErrorPage]);
-
-  // useEffect(() => {
-  //   // Apply scrollbar styling to html element
-  //   const html = document.documentElement;
-
-  //   // Save original styles to restore later
-  //   const originalStyles = {
-  //     scrollbarWidth: html.style.scrollbarWidth
-  //   };
-
-  //   // Apply scrollbar styles (thin for Firefox)
-  //   html.style.scrollbarWidth = "thin";
-
-  //   // For webkit browsers (Chrome, Safari, Edge)
-  //   const webkit = document.createElement("style");
-  //   webkit.innerHTML = `
-  //     /* Base scrollbar styles */
-  //     ::-webkit-scrollbar {
-  //       width: 0.4rem; /* Thinner vertical scrollbar */
-  //       height: 0.625rem; /* Keep horizontal scrollbar size */
-  //     }
-
-  //     /* Thumb styles (the draggable part) */
-  //     ::-webkit-scrollbar-thumb {
-  //       background-color: rgba(156, 163, 175, 0.7); /* Semi-transparent gray */
-  //       border-radius: 9999px;
-  //     }
-
-  //     ::-webkit-scrollbar-thumb:hover {
-  //       background-color: rgba(139, 92, 246, 0.7); /* Semi-transparent purple/lavender */
-  //     }
-
-  //     /* Track styles (the background) - making it transparent */
-  //     ::-webkit-scrollbar-track {
-  //       background-color: transparent !important;
-  //     }
-
-  //     /* Hide the arrow buttons on scrollbars */
-  //     ::-webkit-scrollbar-button {
-  //       display: none;
-  //     }
-
-  //     /* For Firefox - hide arrows and make track transparent */
-  //     * {
-  //       scrollbar-width: thin;
-  //       scrollbar-color: rgba(156, 163, 175, 0.7) transparent;
-  //     }
-  //   `;
-  //   document.head.appendChild(webkit);
-
-  //   // Clean up function
-  //   return () => {
-  //     html.style.scrollbarWidth = originalStyles.scrollbarWidth;
-  //     document.head.removeChild(webkit);
-  //   };
-  // }, []);
+    // Otherwise respect the user's theme preference
+    // This will be handled by ThemeProvider, so we don't need to do anything else
+  }, [location.pathname]);
 
   // Only show the sidebar and user profile if the current route is allowed and it's not the error page
   const shouldShowSidebar =
     !sidebarlessRoutes.includes(location.pathname.toLowerCase()) &&
     !isErrorPage;
+
+  // for debugging toggle theme
+  useEffect(() => {
+    const root = window.document.documentElement;
+    const userTheme = localStorage.getItem("vite-ui-theme");
+    const currentDocTheme = root.classList.contains("dark") ? "dark" : "light";
+    const systemPrefersDark = window.matchMedia(
+      "(prefers-color-scheme: dark)"
+    ).matches;
+    const systemTheme = systemPrefersDark ? "dark" : "light";
+
+    const shouldForceLightTheme =
+      location.pathname.startsWith("/public") ||
+      location.pathname === "/login" ||
+      location.pathname === "/404" ||
+      isErrorPage;
+
+    console.log("📄 Layout Theme Check:");
+    console.log("- Current path:", location.pathname);
+    console.log("- System preference:", systemTheme);
+    console.log("- User theme from storage:", userTheme);
+    console.log("- Current document theme:", currentDocTheme);
+    console.log("- Should force light theme:", shouldForceLightTheme);
+  }, [location.pathname, isErrorPage]);
 
   return (
     <SidebarProvider
