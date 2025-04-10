@@ -381,7 +381,6 @@ app.post('/api/patients', async (req, res) => {
       amount_paid,
       remaining_balance,
       reference_number,
-      isPaid,
       sessions_left  // Add this new field
     } = req.body;
 
@@ -404,10 +403,9 @@ app.post('/api/patients', async (req, res) => {
         amount_paid,
         remaining_balance,
         reference_number,
-        "isPaid",
         sessions_left
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
       RETURNING id;
     `;
 
@@ -429,7 +427,7 @@ app.post('/api/patients', async (req, res) => {
       amount_paid,
       remaining_balance,
       reference_number,
-      isPaid,
+
       sessions_left  // Include this in the values array
     ];
 
@@ -1761,7 +1759,57 @@ app.put('/api/categories/:id', async (req, res) => {
     });
   }
 });
+app.post('/api/manage-record', async (req, res) => {
+  const { table, id, action, data } = req.body; // action: 'edit' or 'archive'
 
+  const editableTables = [
+    'expenses_tracker',
+    'patient_records',
+    'accounts',
+    'packages',
+    'treatments',
+    'appointments'
+  ];
+
+  if (!editableTables.includes(table)) {
+    return res.status(400).json({ success: false, message: 'Invalid table name' });
+  }
+
+  if (!id) {
+    return res.status(400).json({ success: false, message: 'Missing record ID' });
+  }
+
+  try {
+    if (action === 'edit') {
+      if (!data || typeof data !== 'object' || Object.keys(data).length === 0) {
+        return res.status(400).json({ success: false, message: 'Missing or invalid data for edit' });
+      }
+
+      console.log("🔧 Incoming update request body:", req.body);
+
+      const fields = Object.keys(data);
+      const values = Object.values(data);
+      const setClause = fields.map((field, idx) => `"${field}" = $${idx + 1}`).join(', ');
+      const query = `UPDATE ${table} SET ${setClause} WHERE id = $${fields.length + 1}`;
+
+      await pool.query(query, [...values, id]);
+
+      return res.json({ success: true, message: `${table} record updated` });
+    }
+
+    if (action === 'archive') {
+      const query = `UPDATE ${table} SET archived = TRUE WHERE id = $1`;
+      await pool.query(query, [id]);
+
+      return res.json({ success: true, message: `${table} record archived` });
+    }
+
+    return res.status(400).json({ success: false, message: 'Invalid action' });
+  } catch (err) {
+    console.error(`❌ Error in manage-record (${action}):`, err.message);
+    return res.status(500).json({ success: false, message: `Server error: ${err.message}` });
+  }
+});
 // Archive a category
 app.patch('/api/categories/:id/archive', async (req, res) => {
   try {
