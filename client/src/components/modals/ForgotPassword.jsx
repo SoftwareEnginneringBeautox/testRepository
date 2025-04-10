@@ -45,18 +45,34 @@ function ForgotPassword({ isOpen, onClose }) {
 
   const sendOTP = async (e) => {
     e.preventDefault();
-    setIsLoading(true); // Set loading to true when sending OTP
+    setIsLoading(true);
     setMessage(""); // Clear any previous messages
 
     try {
-      await axios.post("http://localhost:4000/forgot-password", { email });
-      setStep(2);
-      setMessage("OTP sent to your email.");
+      const response = await axios.post("http://localhost:4000/forgot-password", { email });
+      
+      if (response.data.success) {
+        setStep(2);
+        setMessage("OTP sent to your email.");
+      } else {
+        // Check for archived account specifically
+        if (response.data.archived) {
+          setMessage("This account has been archived. Please contact your administrator.");
+        } else {
+          setMessage(response.data.message || "Failed to send OTP. Please check your email.");
+        }
+      }
     } catch (err) {
       console.error("Failed to send OTP:", err);
-      setMessage("Failed to send OTP. Make sure the email is correct.");
+      
+      // Handle archived account error response
+      if (err.response?.data?.archived) {
+        setMessage("This account has been archived. Please contact your administrator.");
+      } else {
+        setMessage("Failed to send OTP. Make sure the email is correct.");
+      }
     } finally {
-      setIsLoading(false); // Ensure loading is set to false regardless of outcome
+      setIsLoading(false);
     }
   };
 

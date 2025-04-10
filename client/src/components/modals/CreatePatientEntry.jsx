@@ -287,7 +287,6 @@ function CreatePatientEntry({ isOpen, onClose }) {
       .filter((t) => selectedTreatmentIds.includes(t.id))
       .map((t) => t.treatment_name);
 
-    const isPaid = remainingBalance <= 0;
 
     // Patient Records Payload
     const patientPayload = {
@@ -310,7 +309,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
       reference_number: referenceNumber,
       remaining_balance: remainingBalance,
       sessions_left: sessionsLeft,
-      isPaid: isPaid
+
     };
 
     try {
