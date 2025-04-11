@@ -215,6 +215,28 @@ function CreatePatientEntry({ isOpen, onClose }) {
       errors.personInCharge = "Person in charge is required";
     }
 
+    // Validate date - ensure it's not in the past
+    if (dateOfSession) {
+      const selectedDate = new Date(dateOfSession);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // Reset time part for comparison
+      
+      if (selectedDate < today) {
+        errors.dateOfSession = "Session date cannot be in the past";
+      }
+    }
+
+    // Validate time - ensure it's within business hours (9am-6pm)
+    if (timeOfSession) {
+      const [hours, minutes] = timeOfSession.split(':').map(Number);
+      const startHour = 9; // 9am
+      const endHour = 18; // 6pm
+      
+      if (hours < startHour || hours > endHour || (hours === endHour && minutes > 0)) {
+        errors.timeOfSession = "Session time must be between 9:00 AM and 6:00 PM";
+      }
+    }
+
     if (!packageName && (!treatment || treatment.length === 0)) {
       errors.packageOrTreatment =
         "Select either a package or at least one treatment";
@@ -830,8 +852,18 @@ function CreatePatientEntry({ isOpen, onClose }) {
                   value={timeOfSession}
                   onChange={(e) => setTimeOfSession(e.target.value)}
                   required
+                  className={`${
+                    formSubmitAttempted && formErrors.timeOfSession
+                      ? "border-red-500"
+                      : ""
+                  }`}
                 />
               </InputTextField>
+              {formSubmitAttempted && formErrors.timeOfSession && (
+                <p className="text-red-500 text-sm mt-1">
+                  {formErrors.timeOfSession}
+                </p>
+              )}
             </InputContainer>
           </div>
 
