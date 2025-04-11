@@ -836,6 +836,7 @@ function FinancialOverview() {
         })
       });
       console.log("Archive response status:", response.status);
+     
       if (response.ok) {
         setExpensesData((prevExpenses) =>
           prevExpenses.filter((expense) => expense.id !== selectedExpense.id)
