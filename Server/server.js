@@ -1569,9 +1569,9 @@ app.get("/expenses", async (req, res) => {
     res.setHeader('Pragma', 'no-cache');
     res.setHeader('Expires', '0');
     
-    // Get the data from the database
-    const result = await pool.query("SELECT * FROM expenses_tracker ORDER BY date DESC");
-    console.log("API /expenses endpoint called, returning", result.rows.length, "records");
+    // Get the data from the database, excluding archived expenses
+    const result = await pool.query("SELECT * FROM expenses_tracker WHERE archived = FALSE ORDER BY date DESC");
+    console.log("API /expenses endpoint called, returning", result.rows.length, "non-archived records");
     
     // Count April 2025 records for debugging
     const april2025Count = result.rows.filter(row => {
@@ -1597,6 +1597,7 @@ app.get("/expenses", async (req, res) => {
     });
   }
 });
+
 app.get("/api/test-expenses", async (req, res) => {
   try {
     // Test the database connection first

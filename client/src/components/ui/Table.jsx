@@ -4,74 +4,17 @@ import { useState, useEffect } from "react";
 
 import { PaginationWithPageCount } from "@/components/ui/Pagination";
 
-const Table = React.forwardRef(
-  (
-    {
-      className,
-      children,
-      // Pagination props
-      currentPage = 1,
-      totalPages = 1,
-      onPageChange,
-      showPagination = false,
-      ...props
-    },
-    ref
-  ) => {
-    // Use this state to count rows if you still want the dynamic background feature
-    const [rowCount, setRowCount] = useState(0);
-
-    // Count logic for row background
-    useEffect(() => {
-      // Find TableBody in children and count its direct tr children
-      React.Children.forEach(children, (child) => {
-        if (child?.type?.displayName === "TableBody") {
-          let count = 0;
-          React.Children.forEach(child.props.children, (row) => {
-            if (
-              React.isValidElement(row) &&
-              row.type?.displayName === "TableRow"
-            ) {
-              count++;
-            }
-          });
-          setRowCount(count);
-        }
-      });
-    }, [children]);
-
-    const scrollbarBgClass =
-      rowCount % 2 === 0
-        ? "bg-faintingLight-100 dark:bg-customNeutral-500"
-        : "bg-reflexBlue-100 dark:bg-customNeutral-400";
-
-    return (
-      <div className="w-full overflow-hidden rounded-lg flex flex-col">
-        <div className="w-full overflow-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-transparent">
-          <table
-            ref={ref}
-            className="w-full border-collapse text-sm"
-            {...props}
-          >
-            {children}
-          </table>
-        </div>
-
-        {/* Pagination component - separated from scroll container */}
-        {showPagination && totalPages > 1 && (
-          <div className={cn("w-full ", scrollbarBgClass)}>
-            <PaginationWithPageCount
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={onPageChange}
-              siblingsCount={1}
-            />
-          </div>
-        )}
-      </div>
-    );
-  }
-);
+const Table = React.forwardRef(({ className, ...props }, ref) => (
+  <div className="w-full overflow-hidden rounded-lg">
+    <div className="w-full overflow-x-auto relative">
+      <table
+        ref={ref}
+        className={cn("w-full border-collapse text-sm relative", className)}
+        {...props}
+      />
+    </div>
+  </div>
+));
 Table.displayName = "Table";
 
 const TableHeader = React.forwardRef(({ className, ...props }, ref) => (
@@ -122,11 +65,13 @@ const TableRow = React.forwardRef(({ className, ...props }, ref) => (
 ));
 TableRow.displayName = "TableRow";
 
-const TableHead = React.forwardRef(({ className, ...props }, ref) => (
+const TableHead = React.forwardRef(({ className, isSticky, ...props }, ref) => (
   <th
     ref={ref}
     className={cn(
-      "h-12 px-4 py-4 align-middle font-semibold text-xl bg-lavender-400 text-customNeutral-100 dark:bg-customNeutral-600 dark:text-customNeutral-100 sticky top-0",
+      "h-12 px-4 py-4 align-middle font-semibold text-xl bg-lavender-400 text-customNeutral-100 dark:bg-customNeutral-600 dark:text-customNeutral-100",
+      isSticky &&
+        "sticky right-0 z-50 shadow-[-2px_0_5px_-2px_rgba(0,0,0,0.1)]",
       className
     )}
     {...props}
@@ -134,11 +79,15 @@ const TableHead = React.forwardRef(({ className, ...props }, ref) => (
 ));
 TableHead.displayName = "TableHead";
 
-const TableCell = React.forwardRef(({ className, ...props }, ref) => (
+const TableCell = React.forwardRef(({ className, isSticky, ...props }, ref) => (
   <td
     ref={ref}
     className={cn(
       "p-4 align-middle text-customNeutral-600 dark:text-customNeutral-100",
+      isSticky &&
+        "sticky right-0 z-40 shadow-[-2px_0_5px_-2px_rgba(0,0,0,0.1)]",
+      // Inherit background color from parent row instead of setting it directly
+      isSticky && "bg-inherit",
       className
     )}
     {...props}

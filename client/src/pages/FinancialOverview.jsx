@@ -118,11 +118,11 @@ function FinancialOverview() {
 
   const chartConfig = {
     currentWeek: {
-      label: "Current Week",
+      label: "Sales",
       color: "#381B4C" // Lavender-400
     },
     previousWeek: {
-      label: "Previous Week",
+      label: "Expenses",
       color: "#002B7F" // ReflexBlue-400
     }
   };
@@ -836,6 +836,7 @@ function FinancialOverview() {
         })
       });
       console.log("Archive response status:", response.status);
+     
       if (response.ok) {
         setExpensesData((prevExpenses) =>
           prevExpenses.filter((expense) => expense.id !== selectedExpense.id)
@@ -885,8 +886,8 @@ function FinancialOverview() {
           SALES TRACKER
         </h2>
         <SalesChart
-          chartData={chartData}
           chartConfig={chartConfig}
+          financialData={financialData} // Pass the financial data as a prop
           data-cy="sales-chart"
         />
       </div>

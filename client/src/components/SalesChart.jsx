@@ -60,7 +60,14 @@ const calculatePercentageChange = (salesData) => {
   return (((totalCurrent - totalPrevious) / totalPrevious) * 100).toFixed(2);
 };
 
-const SalesChart = ({ chartConfig }) => {
+const SalesChart = ({
+  chartConfig,
+  financialData = {
+    totalSales: 0,
+    totalExpenses: 0,
+    netIncome: 0
+  }
+}) => {
   const { theme } = useTheme();
 
   // Initialize with default chart config if not provided
@@ -317,9 +324,9 @@ const SalesChart = ({ chartConfig }) => {
           </div>
         </ChartContainer>
       </CardContent>
-      <CardFooter data-cy="card-footer">
+      <CardFooter data-cy="card-footer" className="flex flex-col gap-4">
         <div
-          className="flex w-full items-start gap-2 text-sm"
+          className="flex flex-col w-full items-start gap-2 text-sm"
           data-cy="footer-content"
         >
           <div className="grid gap-2">
@@ -353,6 +360,52 @@ const SalesChart = ({ chartConfig }) => {
             >
               {dateRangeLabel}
             </div>
+          </div>
+        </div>
+        <div className="w-full flex flex-row items-center justify-around gap-2 mt-4">
+          <div
+            className="h-full flex-1 w-1/3 flex flex-col p-2 gap-1 bg-ash-400 dark:bg-customNeutral-400 dark:text-customNeutral-100 rounded-lg"
+            data-cy="total-sales"
+          >
+            <span className="font-semibold text-xs pt-1">TOTAL SALES</span>
+            <p className="text-lg">
+              {new Intl.NumberFormat("en-PH", {
+                style: "currency",
+                currency: "PHP"
+              }).format(financialData.totalSales)}
+            </p>
+          </div>
+          <div
+            className="h-full flex-1 w-1/3 flex flex-col p-2 gap-1 bg-ash-400 dark:bg-customNeutral-400 dark:text-customNeutral-100 rounded-lg"
+            data-cy="total-expenses"
+          >
+            <span className="font-semibold text-xs pt-1">TOTAL EXPENSES</span>
+            <p className="text-lg">
+              {new Intl.NumberFormat("en-PH", {
+                style: "currency",
+                currency: "PHP"
+              }).format(financialData.totalExpenses)}
+            </p>
+          </div>
+          <div
+            className="h-full flex-1 w-1/3 flex flex-col p-2 gap-1 bg-ash-400 dark:bg-customNeutral-400 dark:text-customNeutral-100 rounded-lg"
+            data-cy="total-profit-loss"
+          >
+            <span className="font-semibold text-xs pt-1">
+              TOTAL PROFIT/LOSS
+            </span>
+            <p
+              className={`text-lg ${
+                financialData.netIncome >= 0
+                  ? "text-success-400"
+                  : "text-error-400"
+              }`}
+            >
+              {new Intl.NumberFormat("en-PH", {
+                style: "currency",
+                currency: "PHP"
+              }).format(Math.abs(financialData.netIncome))}
+            </p>
           </div>
         </div>
       </CardFooter>
