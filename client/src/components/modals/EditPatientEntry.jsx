@@ -66,8 +66,10 @@ function EditPatientContactInfo({ isOpen, onClose, entryData, onSubmit }) {
     // Age validation
     if (formData.age) {
       const ageNum = parseInt(formData.age);
-      if (isNaN(ageNum) || ageNum < 0 || ageNum > 120) {
-        errors.age = "Age must be between 0 and 120";
+      if (isNaN(ageNum) || ageNum < 18) {
+        errors.age = "Patients must be at least 18 years old";
+      } else if (ageNum > 120) {
+        errors.age = "Age must be less than 120";
       }
     }
 
@@ -246,7 +248,7 @@ function EditPatientContactInfo({ isOpen, onClose, entryData, onSubmit }) {
                 <Input
                   data-cy="age-input"
                   type="number"
-                  min="0"
+                  min="18"
                   placeholder="Age"
                   value={formData.age ?? ""}
                   onChange={(e) =>
@@ -306,7 +308,7 @@ function EditPatientContactInfo({ isOpen, onClose, entryData, onSubmit }) {
               disabled={isSubmitting}
             >
               <EditIcon />
-              EDIT CONTACT INFO
+              {isSubmitting ? "SAVING..." : "EDIT CONTACT INFO"}
             </Button>
           </div>
         </form>

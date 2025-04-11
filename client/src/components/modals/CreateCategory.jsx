@@ -41,6 +41,12 @@ function CreateCategory({ isOpen, onClose, onCreateSuccess, categories = [] }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Prevent duplicate submissions
+    if (isSubmitting) {
+      console.log("Category submission already in progress");
+      return;
+    }
+
     // Validate the form
     if (!categoryName.trim()) {
       setError("Category name is required");
@@ -57,18 +63,36 @@ function CreateCategory({ isOpen, onClose, onCreateSuccess, categories = [] }) {
       setError("A category with this name already exists");
       return;
     }
+    
     setIsSubmitting(true);
+    const startRequest = Date.now();
 
     try {
-      console.log("Making API call to create category:", categoryName);
-      // Call the API to create a new category
+      console.log(`Creating category "${categoryName}" at ${new Date().toISOString()}`);
+      
+      // Add request ID for tracking
+      const requestId = Math.random().toString(36).substring(2, 15);
+      console.log(`Request ID: ${requestId}`);
+      
+      // Use fetch with timeout controller
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 10000);
+      
       const response = await fetch("http://localhost:4000/api/categories", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: categoryName })
+        headers: { 
+          "Content-Type": "application/json",
+          "Request-ID": requestId 
+        },
+        body: JSON.stringify({ name: categoryName }),
+        signal: controller.signal
       });
+      
+      clearTimeout(timeout);
 
       const result = await response.json();
+      console.log(`Category creation took ${Date.now() - startRequest}ms`);
+      
       if (!response.ok) {
         throw new Error(result.message || "Failed to create category");
       }
@@ -85,7 +109,9 @@ function CreateCategory({ isOpen, onClose, onCreateSuccess, categories = [] }) {
       onClose();
     } catch (err) {
       console.error("Error creating category:", err);
-      setError(err.message || "An error occurred while creating the category");
+      setError(err.name === 'AbortError' 
+        ? "Request timed out. Please try again." 
+        : (err.message || "An error occurred while creating the category"));
     } finally {
       setIsSubmitting(false);
     }

@@ -34,11 +34,10 @@ function CreateTreatment({ isOpen, onClose }) {
   const [treatmentName, setTreatmentName] = useState("");
   const [price, setPrice] = useState("");
   const [duration, setDuration] = useState("");
-  const [expiration, setExpiration] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [formErrors, setFormErrors] = useState({});
   const [existingTreatments, setExistingTreatments] = useState([]);
+  const [expiration, setExpiration] = useState("");
 
   useEffect(() => {
     const fetchExisting = async () => {
@@ -57,69 +56,59 @@ function CreateTreatment({ isOpen, onClose }) {
 
   if (!isOpen) return null;
 
-  const validateForm = () => {
-    const errors = {};
-    
-    // Validate expiration
-    if (expiration) {
-      const expirationValue = parseInt(expiration);
-      if (isNaN(expirationValue)) {
-        errors.expiration = "Expiration must be a valid number";
-      } else if (expirationValue < 0) {
-        errors.expiration = "Expiration cannot be negative";
-      } else if (expirationValue > 520) { // Maximum ~10 years
-        errors.expiration = "Expiration exceeds maximum allowed (520 weeks)";
-      }
-    }
-    
-    setFormErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Prevent multiple submissions
+    if (loading) {
+      console.log("Submission already in progress");
+      return;
+    }
+    
     setLoading(true);
     setError("");
-    setFormErrors({});
+  
+    try {  
+      const trimmedName = treatmentName.trim().toLowerCase();
+      const duplicate = existingTreatments.find(
+        (t) => t.treatment_name.trim().toLowerCase() === trimmedName
+      );
+  
+      if (duplicate) {
+        setError("A treatment with this name already exists.");
+        setLoading(false);
+        return;
+      }
+  
+      // Add submission timestamp to track duration
+      const startTime = Date.now();
+      console.log(`Starting treatment creation at ${new Date(startTime).toISOString()}`);
+      
+      const payload = {
+        treatment_name: treatmentName,
+        price: parseFloat(price) || 0,
+        duration: parseInt(duration, 10) || 0,
+        expiration: expiration ? parseInt(expiration, 10) : null
+      };
 
-    // Validate form
-    if (!validateForm()) {
-      setLoading(false);
-      return;
-    }
-
-    const trimmedName = treatmentName.trim().toLowerCase();
-    const duplicate = existingTreatments.find(
-      (t) => t.treatment_name.trim().toLowerCase() === trimmedName
-    );
-
-    if (duplicate) {
-      setError("A treatment with this name already exists.");
-      setLoading(false);
-      return;
-    }
-
-    const payload = {
-      treatment_name: treatmentName,
-      price: parseFloat(price) || 0,
-      duration: parseInt(duration, 10) || 0,
-      expiration: expiration ? parseInt(expiration, 10) : null
-    };
-
-    try {
+      // Use axios with timeout
       const response = await axios.post(
         `${API_BASE_URL}/api/treatments`,
         payload,
-        { withCredentials: true }
+        { 
+          withCredentials: true,
+          timeout: 15000 // 15 second timeout
+        }
       );
+      
+      console.log(`Treatment creation completed in ${Date.now() - startTime}ms`);
+      
       if (response.data.success) {
         onClose();
       } else {
         setError(response.data.error || "Failed to create treatment");
       }
     } catch (err) {
-      console.error("Error creating treatment:", err);
-      setError("An error occurred while creating treatment");
     } finally {
       setLoading(false);
     }
@@ -196,10 +185,10 @@ function CreateTreatment({ isOpen, onClose }) {
 
             {/* Expiration */}
             <InputContainer>
-              <InputLabel>EXPIRATION (IN WEEKS)</InputLabel>
+              <InputLabel>EXPIRATION (WEEKS)</InputLabel>
               <InputTextField>
                 <InputIcon>
-                  <TreatmentIcon />
+                  <ClockIcon />
                 </InputIcon>
                 <Input
                   data-cy="treatment-expiration"
@@ -209,14 +198,9 @@ function CreateTreatment({ isOpen, onClose }) {
                   step="1"
                   value={expiration}
                   onChange={(e) => setExpiration(e.target.value)}
-                  className={formErrors.expiration ? "border-red-500" : ""}
+                  required
                 />
               </InputTextField>
-              {formErrors.expiration && (
-                <p className="text-red-500 text-sm mt-1">
-                  {formErrors.expiration}
-                </p>
-              )}
             </InputContainer>
 
             {error && <p className="text-red-500">{error}</p>}

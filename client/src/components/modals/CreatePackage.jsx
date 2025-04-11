@@ -91,39 +91,57 @@ function CreatePackage({ isOpen, onClose }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Prevent multiple submissions
+    if (loading) {
+      console.log("Submission already in progress");
+      return;
+    }
+    
     setLoading(true);
     setError("");
 
-    const duplicate = existingPackages.find(
-      (pkg) =>
-        pkg.package_name.toLowerCase().trim() ===
-        packageName.toLowerCase().trim()
-    );
-    if (duplicate) {
-      setError("A package with this name already exists.");
-      setLoading(false);
-      return;
-    }
+    try {
+      // Validation remains the same...
+      const duplicate = existingPackages.find(
+        (pkg) =>
+          pkg.package_name.toLowerCase().trim() ===
+          packageName.toLowerCase().trim()
+      );
+      if (duplicate) {
+        setError("A package with this name already exists.");
+        setLoading(false);
+        return;
+      }
 
-    const selectedTreatmentNames = treatmentsList
+      const selectedTreatmentNames = treatmentsList
       .filter((t) => selectedTreatmentIds.includes(t.id))
       .map((t) => t.treatment_name);
 
-    const payload = {
-      package_name: packageName,
-      treatments: selectedTreatmentNames,
-      sessions: parseInt(numberOfTreatments, 10) || 0,
-      price: parseFloat(amount) || 0,
-      treatment_ids: selectedTreatmentIds.map(Number),
-      expiration: parseInt(expiration, 10) || 0
-    };
+      const payload = {
+        package_name: packageName,
+        treatments: selectedTreatmentNames,
+        sessions: parseInt(numberOfTreatments, 10) || 0,
+        price: parseFloat(amount) || 0,
+        treatment_ids: selectedTreatmentIds.map(Number),
+        expiration: parseInt(expiration, 10) || 0
+      };
 
-    try {
+      // Log request start
+      console.log("Creating package:", packageName);
+      
+      // Add request timeout
       const response = await axios.post(
         `${API_BASE_URL}/api/packages`,
         payload,
-        { withCredentials: true }
+        { 
+          withCredentials: true,
+          timeout: 15000 // 15 second timeout
+        }
       );
+      
+      console.log("Package creation response received:", response.data.success);
+      
       if (response.data.success) {
         onClose();
       } else {
