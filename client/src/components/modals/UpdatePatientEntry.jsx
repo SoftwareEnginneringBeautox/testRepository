@@ -251,6 +251,18 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
       errors.date_of_session = "Next session date cannot be in the past";
     }
 
+    // Validate time is within business hours (9 AM to 6 PM)
+    if (formData.time_of_session) {
+      const [hours, minutes] = formData.time_of_session.split(':').map(Number);
+      const startBusinessHour = 9; // 9 AM
+      const endBusinessHour = 18;  // 6 PM
+      
+      if (hours < startBusinessHour || hours > endBusinessHour || 
+          (hours === endBusinessHour && minutes > 0)) {
+        errors.time_of_session = "Session time must be between 9:00 AM and 6:00 PM";
+      }
+    }
+
     // If additional payment is entered, update remaining balance
     if (
       formData.additional_payment &&
@@ -814,7 +826,7 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
                 <Input
                   data-cy="next-time-of-session-input"
                   type="time"
-                  className="text-input"
+                  className={`text-input ${formSubmitAttempted && formErrors.time_of_session ? "border-red-500" : ""}`}
                   required
                   value={formData.time_of_session || ""}
                   onChange={(e) =>
@@ -825,6 +837,11 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
                   }
                 />
               </InputTextField>
+              {formSubmitAttempted && formErrors.time_of_session && (
+                <p className="text-red-500 text-sm mt-1">
+                  {formErrors.time_of_session}
+                </p>
+              )}
             </InputContainer>
           </div>
 
