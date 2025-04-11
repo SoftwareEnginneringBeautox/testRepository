@@ -184,7 +184,7 @@ function EditPatientContactInfo({ isOpen, onClose, entryData, onSubmit }) {
               }}
             >
               <EditIcon />
-              UPDATE CONTACT INFO
+              EDIT CONTACT INFO
             </Button>
           </div>
         </form>
