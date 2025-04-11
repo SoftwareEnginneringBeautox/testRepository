@@ -219,7 +219,7 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
   };
 
   return (
-    <ModalContainer data-cy="schedule-appointment-modal">
+    <ModalContainer className="max-w-sm w-[80%] mx-auto" data-cy="schedule-appointment-modal">
       {showAlert && (
         <AlertContainer>
           <AlertText>
@@ -229,25 +229,26 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
           <CloseAlert onClick={handleAlertClose} />
         </AlertContainer>
       )}
-      <ModalHeader>
-        <ModalTitle data-cy="schedule-appointment-title">
+      <ModalHeader className="pb-1">
+        <ModalTitle className="text-base" data-cy="schedule-appointment-title">
           SCHEDULE APPOINTMENT
         </ModalTitle>
       </ModalHeader>
-      <ModalBody>
+      <ModalBody className="py-2">
         <form
-          className="flex flex-col gap-5"
+          className="flex flex-col gap-2"
           onSubmit={handleSubmit}
           data-cy="schedule-appointment-form"
         >
           {/* FULL NAME */}
           <InputContainer>
-            <InputLabel>FULL NAME</InputLabel>
-            <InputTextField>
-              <InputIcon>
-                <UserIcon />
+            <InputLabel className="text-xs mb-0.5">FULL NAME</InputLabel>
+            <InputTextField className="h-8">
+              <InputIcon className="w-7">
+                <UserIcon className="w-3.5 h-3.5" />
               </InputIcon>
               <Input
+                className="text-xs h-8"
                 data-cy="schedule-fullname-input"
                 type="text"
                 placeholder="Full name"
@@ -260,12 +261,13 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
 
           {/* CONTACT NUMBER */}
           <InputContainer>
-            <InputLabel>CONTACT NUMBER</InputLabel>
-            <InputTextField>
-              <InputIcon>
-                <UserIDIcon />
+            <InputLabel className="text-xs mb-0.5">CONTACT NUMBER</InputLabel>
+            <InputTextField className="h-8">
+              <InputIcon className="w-7">
+                <UserIDIcon className="w-3.5 h-3.5" />
               </InputIcon>
               <Input
+                className="text-xs h-8"
                 data-cy="schedule-contact-input"
                 type="tel"
                 placeholder="Contact Number"
@@ -279,21 +281,21 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
               />
             </InputTextField>
             {phoneError && (
-              <p className="text-red-500 text-xs mt-1">
-                Please enter a valid Philippine mobile number (format:
-                09XXXXXXXXX)
+              <p className="text-red-500 text-[10px] mt-0.5">
+                Please enter a valid Philippine mobile number (09XXXXXXXXX)
               </p>
             )}
           </InputContainer>
 
           {/* AGE */}
           <InputContainer>
-            <InputLabel>AGE</InputLabel>
-            <InputTextField>
-              <InputIcon>
-                <AgeIcon />
+            <InputLabel className="text-xs mb-0.5">AGE</InputLabel>
+            <InputTextField className="h-8">
+              <InputIcon className="w-7">
+                <AgeIcon className="w-3.5 h-3.5" />
               </InputIcon>
               <Input
+                className="text-xs h-8"
                 data-cy="schedule-age-input"
                 type="number"
                 placeholder="Age"
@@ -307,20 +309,21 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
               />
             </InputTextField>
             {ageError && (
-              <p className="text-red-500 text-xs mt-1">
-                You must be at least 18 years old to schedule an appointment
+              <p className="text-red-500 text-[10px] mt-0.5">
+                You must be at least 18 years old
               </p>
             )}
           </InputContainer>
 
           {/* EMAIL */}
           <InputContainer>
-            <InputLabel>EMAIL</InputLabel>
-            <InputTextField>
-              <InputIcon>
-                <EmailIcon />
+            <InputLabel className="text-xs mb-0.5">EMAIL</InputLabel>
+            <InputTextField className="h-8">
+              <InputIcon className="w-7">
+                <EmailIcon className="w-3.5 h-3.5" />
               </InputIcon>
               <Input
+                className="text-xs h-8"
                 data-cy="schedule-email-input"
                 type="email"
                 placeholder="Email"
@@ -334,21 +337,22 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
               />
             </InputTextField>
             {emailError && (
-              <p className="text-red-500 text-xs mt-1">
+              <p className="text-red-500 text-[10px] mt-0.5">
                 Please enter a valid email address
               </p>
             )}
           </InputContainer>
 
           {/* DATE & TIME OF SESSION */}
-          <div className="flex flex-row w-full gap-4">
+          <div className="flex flex-row w-full gap-2">
             <InputContainer className="flex-1">
-              <InputLabel>DATE OF SESSION</InputLabel>
-              <InputTextField>
-                <InputIcon>
-                  <CalendarIcon />
+              <InputLabel className="text-xs mb-0.5">DATE OF SESSION</InputLabel>
+              <InputTextField className="h-8">
+                <InputIcon className="w-7">
+                  <CalendarIcon className="w-3.5 h-3.5" />
                 </InputIcon>
                 <Input
+                  className="text-xs h-8"
                   data-cy="schedule-date-input"
                   type="date"
                   placeholder="Date of Session"
@@ -362,34 +366,34 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
                 />
               </InputTextField>
               {dateError && (
-                <p className="text-red-500 text-xs mt-1">
-                  Please select a date that is not in the past
+                <p className="text-red-500 text-[10px] mt-0.5">
+                  Please select a future date
                 </p>
               )}
             </InputContainer>
 
             <InputContainer className="flex-1">
-              <InputLabel>TIME OF SESSION</InputLabel>
-              <InputTextField>
-                <InputIcon>
-                  <ClockIcon />
+              <InputLabel className="text-xs mb-0.5">TIME OF SESSION</InputLabel>
+              <InputTextField className="h-8">
+                <InputIcon className="w-7">
+                  <ClockIcon className="w-3.5 h-3.5" />
                 </InputIcon>
                 <Input
+                  className="text-xs h-8"
                   data-cy="schedule-time-input"
                   type="time"
                   placeholder="Time of Session"
                   value={timeOfSession}
                   onChange={(e) => {
                     setTimeOfSession(e.target.value);
-                    // Clear alert if user changes the time
                     if (showAlert) setShowAlert(false);
                   }}
                   required
                 />
               </InputTextField>
               {!isWithinBusinessHours(timeOfSession) && timeOfSession && (
-                <p className="text-red-500 text-xs mt-1">
-                  Please select a time between 12:00 PM and 9:00 PM
+                <p className="text-red-500 text-[10px] mt-0.5">
+                  Select time between 12:00 PM - 9:00 PM
                 </p>
               )}
             </InputContainer>
@@ -397,28 +401,26 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
 
           {/* ACTION BUTTONS */}
           <div
-            className="flex sm:flex-row flex-col gap-2 w-full"
+            className="flex gap-2 w-full pt-2"
             data-cy="schedule-appointment-actions"
           >
             <Button
               data-cy="schedule-return-btn"
               variant="outline"
-              fullWidth={true}
               type="button"
               onClick={onClose}
-              className="md:w-1/2"
+              className="flex-1 h-9 text-sm"
             >
-              <ChevronLeftIcon />
+              <ChevronLeftIcon className="w-4 h-4 mr-1" />
               RETURN
             </Button>
             <Button
               data-cy="schedule-submit-btn"
-              fullWidth={true}
               type="submit"
-              className="md:w-1/2"
+              className="flex-1 h-9 text-sm"
             >
-              <ArrowNorthEastIcon />
-              SUBMIT APPOINTMENT
+              <ArrowNorthEastIcon className="w-4 h-4 mr-1" />
+              SUBMIT
             </Button>
           </div>
         </form>
