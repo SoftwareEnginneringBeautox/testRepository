@@ -48,7 +48,11 @@ function DisplayEntry({ isOpen, onClose, entryData }) {
               label: "TOTAL PACKAGE COST",
               value: `PHP ${entryData.totalAmount}`
             },
-            { label: "CONSENT STATUS", value: entryData.consentFormSigned }
+            {
+              label: "CONSENT STATUS", 
+              value: entryData.consentFormSigned === true ? "YES" : 
+                     entryData.consentFormSigned === false ? "NO" : "N/A"
+            }
           ].map(({ label, value }) => (
             <p key={label} className="text-xl leading-8 font-semibold">
               {label}: <span className="font-normal">{value || "N/A"}</span>
