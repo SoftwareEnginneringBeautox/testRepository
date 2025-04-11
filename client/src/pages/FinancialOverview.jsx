@@ -1306,7 +1306,7 @@ function FinancialOverview() {
   data-cy="total-profit-container"
 >
   <div
-    className="h-full flex-1 w-1/3 flex flex-col p-2 gap-1 bg-ash-100 dark:bg-customNeutral-500 dark:text-customNeutral-100 rounded-lg shadow-custom"
+    className="h-full flex-1 w-1/3 flex flex-col p-2 gap-1 bg-faintingLight-100 dark:bg-customNeutral-500 dark:text-customNeutral-100 rounded-lg shadow-custom"
     data-cy="total-sales"
   >
     <span className="font-semibold text-xs pt-1">TOTAL SALES</span>
@@ -1318,7 +1318,7 @@ function FinancialOverview() {
     </p>
   </div>
   <div
-    className="h-full flex-1 w-1/3 flex flex-col p-2 gap-1 bg-ash-100 dark:bg-customNeutral-500 dark:text-customNeutral-100 rounded-lg shadow-custom"
+    className="h-full flex-1 w-1/3 flex flex-col p-2 gap-1 bg-faintingLight-100 dark:bg-customNeutral-500 dark:text-customNeutral-100 rounded-lg shadow-custom"
     data-cy="total-expenses"
   >
     <span className="font-semibold text-xs pt-1">TOTAL EXPENSES</span>
@@ -1330,7 +1330,7 @@ function FinancialOverview() {
     </p>
   </div>
   <div
-    className="h-full flex-1 w-1/3 flex flex-col p-2 gap-1 bg-ash-100 dark:bg-customNeutral-500 dark:text-customNeutral-100 rounded-lg shadow-custom"
+    className="h-full flex-1 w-1/3 flex flex-col p-2 gap-1 bg-faintingLight-100 dark:bg-customNeutral-500 dark:text-customNeutral-100 rounded-lg shadow-custom"
     data-cy="total-profit-loss"
   >
     <span className="font-semibold text-xs pt-1">
