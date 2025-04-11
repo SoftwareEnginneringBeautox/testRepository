@@ -1017,16 +1017,28 @@ app.post('/api/staged-appointments/:id/reject', async (req, res) => {
 // Retrieve all appointments
 app.get('/api/appointments', async (req, res) => {
   try {
-    const today = new Date();
-    console.log("🕒 Server date today is:", today.toISOString().slice(0, 10));
-
-    const result = await pool.query(
-      'SELECT * FROM appointments ORDER BY date_of_session ASC, time_of_session ASC'
-    );
+    // Get query parameter for archived status
+    const includeArchived = req.query.archived === 'true';
+    
+    let query = 'SELECT * FROM appointments';
+    
+    // Filter by archived status if specified
+    if (req.query.archived !== undefined) {
+      if (!includeArchived) {
+        query += ' WHERE archived IS NOT TRUE OR archived IS NULL';
+      } else {
+        query += ' WHERE archived = TRUE';
+      }
+    }
+    
+    // Add any additional sorting or filtering
+    query += ' ORDER BY date_of_session ASC';
+    
+    const result = await pool.query(query);
     res.json(result.rows);
-  } catch (error) {
-    console.error('Error retrieving appointments:', error);
-    res.status(500).json({ success: false, error: 'Error retrieving appointments' });
+  } catch (err) {
+    console.error('Error fetching appointments:', err);
+    res.status(500).json({ error: err.message });
   }
 });
 
@@ -1352,8 +1364,51 @@ app.post('/api/manage-record', async (req, res) => {
     if (action === 'archive') {
       const query = `UPDATE ${table} SET archived = TRUE WHERE id = $1`;
       await pool.query(query, [id]);
-
-      return res.json({ success: true, message: `${table} record archived` });
+    
+      // If archiving a patient record, cascade the archive action to related records
+      if (table === 'patient_records') {
+        try {
+          // Get patient info before handling cascading archives
+          const patientQuery = 'SELECT patient_name, reference_number FROM patient_records WHERE id = $1';
+          const patientResult = await pool.query(patientQuery, [id]);
+          const patientInfo = patientResult.rows[0];
+          
+          if (patientInfo) {
+            try {
+              // Archive related appointment records
+              const archiveAppointments = 'UPDATE appointments SET archived = TRUE WHERE patient_record_id = $1';
+              const appResult = await pool.query(archiveAppointments, [id]);
+              console.log(`✓ Archived ${appResult.rowCount} appointments for patient record ID ${id}`);
+            } catch (err) {
+              console.error(`Error archiving related appointments: ${err.message}`);
+            }
+            
+            // Archive related sales records
+            if (patientInfo.reference_number) {
+              try {
+                const archiveSales = 'UPDATE sales_tracker SET archived = TRUE WHERE reference_no = $1';
+                const refResult = await pool.query(archiveSales, [patientInfo.reference_number]);
+                console.log(`✓ Archived ${refResult.rowCount} sales with reference number ${patientInfo.reference_number}`);
+              } catch (err) {
+                console.error(`Error archiving sales by reference: ${err.message}`);
+              }
+            }
+            
+            try {
+              // Also archive sales by patient name as fallback
+              const archiveSalesByName = 'UPDATE sales_tracker SET archived = TRUE WHERE client ILIKE $1';
+              const nameResult = await pool.query(archiveSalesByName, [`%${patientInfo.patient_name}%`]);
+              console.log(`✓ Archived ${nameResult.rowCount} sales for patient ${patientInfo.patient_name}`);
+            } catch (err) {
+              console.error(`Error archiving sales by name: ${err.message}`);
+            }
+          }
+        } catch (err) {
+          console.error(`Error in cascade archiving: ${err.message}`);
+        }
+      }
+    
+      return res.json({ success: true, message: `${table} record archived with related data` });
     }
 
     return res.status(400).json({ success: false, message: 'Invalid action' });
@@ -1369,13 +1424,29 @@ app.post('/api/manage-record', async (req, res) => {
    SALES AND EXPENSES ENDPOINTS
 --------------------------------------------- */
 
-//Fetch Sales Data
-app.get("/sales", async (req, res) => {
+//Find the /sales endpoint and update it to handle archived filtering
+
+app.get('/sales', async (req, res) => {
   try {
-    const result = await pool.query("SELECT * FROM sales_tracker ORDER BY date_transacted DESC");
+    // Check for archived parameter
+    const includeArchived = req.query.archived === 'true';
+    
+    // Base query
+    let query = "SELECT * FROM sales_tracker";
+    
+    // Add WHERE clause to filter out archived records
+    if (!includeArchived) {
+      query += " WHERE archived IS NOT TRUE OR archived IS NULL";
+    }
+    
+    // Add your existing ordering
+    query += " ORDER BY date_transacted DESC";
+    
+    const result = await pool.query(query);
     res.json(result.rows);
   } catch (err) {
-    res.status(500).send(err.message);
+    console.error('Error fetching sales data:', err);
+    res.status(500).json({ error: err.message });
   }
 });
 
@@ -1468,7 +1539,8 @@ app.post("/sales", async (req, res) => {
       packages,
       treatment,
       payment,
-      reference_no
+      reference_no,
+      patient_record_id
     } = req.body;
 
     // Basic validation
@@ -1482,9 +1554,9 @@ app.post("/sales", async (req, res) => {
     // Insert into sales_tracker table
     const insertQuery = `
       INSERT INTO sales_tracker
-        (client, person_in_charge, date_transacted, payment_method, packages, treatment, payment, reference_no)
+        (client, person_in_charge, date_transacted, payment_method, packages, treatment, payment, reference_no, patient_record_id)
       VALUES
-        ($1, $2, $3, $4, $5, $6, $7, $8)
+        ($1, $2, $3, $4, $5, $6, $7, $8, $9)
       RETURNING id;
     `;
 
@@ -1496,7 +1568,8 @@ app.post("/sales", async (req, res) => {
       packages,
       treatment,
       payment,
-      reference_no
+      reference_no,
+      patient_record_id
     ];
 
     const result = await pool.query(insertQuery, values);
@@ -1932,6 +2005,8 @@ app.put('/api/categories/:id', async (req, res) => {
     });
   }
 });
+
+/*
 app.post('/api/manage-record', async (req, res) => {
   const { table, id, action, data } = req.body; // action: 'edit' or 'archive'
 
@@ -2009,7 +2084,8 @@ app.post('/api/manage-record', async (req, res) => {
     console.error(`❌ Error in manage-record (${action}):`, err.message);
     return res.status(500).json({ success: false, message: `Server error: ${err.message}` });
   }
-});
+}); */
+
 // Archive a category
 app.patch('/api/categories/:id/archive', async (req, res) => {
   try {

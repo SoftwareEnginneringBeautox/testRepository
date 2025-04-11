@@ -188,8 +188,8 @@ function FinancialOverview() {
         showAlert("Error fetching financial overview", "destructive");
       });
 
-    // 2. Sales data for table
-    fetch(`${API_BASE_URL}/sales`)
+    // 2. Sales data for table - add archived=false query parameter
+    fetch(`${API_BASE_URL}/sales?archived=false`)
       .then((response) => response.json())
       .then((data) => setSalesData(data))
       .catch((error) => {
@@ -238,6 +238,17 @@ function FinancialOverview() {
       showAlert("Error refreshing expenses data", "destructive");
     }
   };
+
+  // Add this after setting salesData
+  useEffect(() => {
+    // Filter out any archived records that might have slipped through
+    if (salesData && salesData.length > 0) {
+      const nonArchived = salesData.filter(sale => !sale.archived);
+      setFilteredSalesData(nonArchived);
+    } else {
+      setFilteredSalesData([]);
+    }
+  }, [salesData]);
 
   // Helper functions for pagination
   const getPaginatedData = (data, page, itemsPerPage) => {
@@ -917,8 +928,8 @@ function FinancialOverview() {
             </SelectItem>
             <SelectItem value="date_transacted" data-cy="sort-option-date">
               DATE TRANSACTED
-            </SelectItem>
-          </SelectContent>
+              </SelectItem>
+            </SelectContent>
         </Select>
 
         {/* Refactored MultiSelectFilter with apply button */}

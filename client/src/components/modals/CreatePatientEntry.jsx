@@ -391,7 +391,8 @@ function CreatePatientEntry({ isOpen, onClose }) {
               packages: packageName,
               treatment: selectedTreatmentNames.join(", "),
               payment: numericAmountPaid,
-              reference_no: referenceNumber
+              reference_no: referenceNumber,
+              patient_record_id: patientId // Add this line to link to patient record
             };
 
             const salesRes = await fetch(`${API_BASE_URL}/sales`, {

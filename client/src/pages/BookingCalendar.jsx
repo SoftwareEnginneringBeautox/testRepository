@@ -82,7 +82,8 @@ function BookingCalendar() {
     const fetchAppointments = async () => {
       try {
         setIsLoading(true);
-        const response = await axios.get(`${API_BASE_URL}/api/appointments`);
+        // Add archived=false query parameter to exclude archived appointments
+        const response = await axios.get(`${API_BASE_URL}/api/appointments?archived=false`);
         setAppointments(response.data);
         setIsLoading(false);
       } catch (error) {
@@ -96,93 +97,96 @@ function BookingCalendar() {
 
   // Process appointments into events for the calendar
   const processAppointments = useCallback(() => {
-    return appointments.map((appointment) => {
-      // Get date object from the appointment
-      const appointmentDate = new Date(appointment.date_of_session);
+    return appointments
+      .filter(appointment => !appointment.archived) // Filter out archived appointments
+      .map((appointment) => {
+        // Get date object from the appointment
+        const appointmentDate = new Date(appointment.date_of_session);
 
-      // Extract hours and minutes from time_of_session (format: HH:MM:SS)
-      const [hours, minutes] = appointment.time_of_session
-        .split(":")
-        .map(Number);
+        // Extract hours and minutes from time_of_session (format: HH:MM:SS)
+        const [hours, minutes] = appointment.time_of_session
+          .split(":")
+          .map(Number);
 
-      // Set time on the appointment date
-      appointmentDate.setHours(hours);
-      appointmentDate.setMinutes(minutes);
+        // Set time on the appointment date
+        appointmentDate.setHours(hours);
+        appointmentDate.setMinutes(minutes);
 
-      // Calculate end time (assume 1 hour duration if not specified)
-      const endDate = new Date(appointmentDate);
-      endDate.setHours(endDate.getHours() + 1);
+        // Calculate end time (assume 1 hour duration if not specified)
+        const endDate = new Date(appointmentDate);
+        endDate.setHours(endDate.getHours() + 1);
 
-      // Format times
-      const startTime = formatTime(hours, minutes);
-      const endTime = formatTime(endDate.getHours(), endDate.getMinutes());
+        // Format times
+        const startTime = formatTime(hours, minutes);
+        const endTime = formatTime(endDate.getHours(), endDate.getMinutes());
 
-      // Get day abbreviation
-      const dayAbbreviation = getDayAbbreviation(appointmentDate.getDay());
+        // Get day abbreviation
+        const dayAbbreviation = getDayAbbreviation(appointmentDate.getDay());
 
-      // Find the corresponding patient record to get additional information
-      let personInCharge = "Unassigned";
-      let patientRecord = null;
-      let packageName = "";
-      let totalAmount = "";
-      let packageDiscount = "";
-      let paymentMethod = "";
-      let consentFormSigned = false;
-      let amountPaid = "";
-      let remainingBalance = "";
-      let referenceNumber = "";
-      let treatmentIds = [];
-      let sessionsLeft = "";
+        // Find the corresponding patient record to get additional information
+        let personInCharge = "Unassigned";
+        let patientRecord = null;
+        let packageName = "";
+        let totalAmount = "";
+        let packageDiscount = "";
+        let paymentMethod = "";
+        let consentFormSigned = false;
+        let amountPaid = "";
+        let remainingBalance = "";
+        let referenceNumber = "";
+        let treatmentIds = [];
+        let sessionsLeft = "";
 
-      if (appointment.patient_record_id) {
-        patientRecord = patientRecords.find(
-          (record) => record.id === appointment.patient_record_id
-        );
+        if (appointment.patient_record_id) {
+          patientRecord = patientRecords.find(
+            (record) => record.id === appointment.patient_record_id
+          );
 
-        if (patientRecord) {
-          personInCharge = patientRecord.person_in_charge || "Unassigned";
-          packageName = patientRecord.package_name || "";
-          totalAmount = patientRecord.total_amount || "";
-          packageDiscount = patientRecord.package_discount || "";
-          paymentMethod = patientRecord.payment_method || "";
-          consentFormSigned = patientRecord.consent_form_signed || false;
-          amountPaid = patientRecord.amount_paid || "";
-          remainingBalance = patientRecord.remaining_balance || "";
-          referenceNumber = patientRecord.reference_number || "";
-          treatmentIds = patientRecord.treatment_ids || [];
-          sessionsLeft = patientRecord.sessions_left || "";
+          if (patientRecord) {
+            personInCharge = patientRecord.person_in_charge || "Unassigned";
+            packageName = patientRecord.package_name || "";
+            totalAmount = patientRecord.total_amount || "";
+            packageDiscount = patientRecord.package_discount || "";
+            paymentMethod = patientRecord.payment_method || "";
+            consentFormSigned = patientRecord.consent_form_signed || false;
+            amountPaid = patientRecord.amount_paid || "";
+            remainingBalance = patientRecord.remaining_balance || "";
+            referenceNumber = patientRecord.reference_number || "";
+            treatmentIds = patientRecord.treatment_ids || [];
+            sessionsLeft = patientRecord.sessions_left || "";
+          }
         }
-      }
 
-      return {
-        id: appointment.id,
-        day: dayAbbreviation,
-        appdate: appointmentDate,
-        startTime,
-        endTime,
-        name: appointment.full_name,
-        description: `Age: ${appointment.age}`,
-        contactNumber: appointment.contact_number,
-        email: appointment.email,
-        rawDate: appointment.date_of_session,
-        rawTime: appointment.time_of_session,
-        personInCharge,
-        patientRecordId: appointment.patient_record_id,
-        // Additional patient record data
-        packageName,
-        totalAmount,
-        packageDiscount,
-        paymentMethod,
-        consentFormSigned,
-        amountPaid,
-        remainingBalance,
-        referenceNumber,
-        treatmentIds,
-        sessionsLeft,
-        // Include the complete patient record for any other needed fields
-        patientRecord
-      };
-    });
+        return {
+          id: appointment.id,
+          day: dayAbbreviation,
+          appdate: appointmentDate,
+          startTime,
+          endTime,
+          name: appointment.full_name,
+          description: `Age: ${appointment.age}`,
+          contactNumber: appointment.contact_number,
+          email: appointment.email,
+          rawDate: appointment.date_of_session,
+          rawTime: appointment.time_of_session,
+          personInCharge,
+          patientRecordId: appointment.patient_record_id,
+          // Additional patient record data
+          packageName,
+          totalAmount,
+          packageDiscount,
+          paymentMethod,
+          consentFormSigned,
+          amountPaid,
+          remainingBalance,
+          referenceNumber,
+          treatmentIds,
+          sessionsLeft,
+          // Include the complete patient record for any other needed fields
+          patientRecord,
+          archived: appointment.archived // Include for future reference
+        };
+      });
   }, [appointments, patientRecords]);
 
   // Get unique persons in charge from all appointments

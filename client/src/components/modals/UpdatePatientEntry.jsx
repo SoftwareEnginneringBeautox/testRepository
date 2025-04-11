@@ -407,7 +407,8 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
                   .join(", ")
               : "",
             payment: additionalPayment,
-            reference_no: additionalPaymentRefId // Use the generated reference ID
+            reference_no: additionalPaymentRefId ,// Use the generated reference ID
+            patient_record_id: entryData.id
           };
 
           await fetch(`${API_BASE_URL}/sales`, {

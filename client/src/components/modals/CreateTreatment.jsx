@@ -34,8 +34,10 @@ function CreateTreatment({ isOpen, onClose }) {
   const [treatmentName, setTreatmentName] = useState("");
   const [price, setPrice] = useState("");
   const [duration, setDuration] = useState("");
+  const [expiration, setExpiration] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [formErrors, setFormErrors] = useState({});
   const [existingTreatments, setExistingTreatments] = useState([]);
 
   useEffect(() => {
@@ -55,10 +57,36 @@ function CreateTreatment({ isOpen, onClose }) {
 
   if (!isOpen) return null;
 
+  const validateForm = () => {
+    const errors = {};
+    
+    // Validate expiration
+    if (expiration) {
+      const expirationValue = parseInt(expiration);
+      if (isNaN(expirationValue)) {
+        errors.expiration = "Expiration must be a valid number";
+      } else if (expirationValue < 0) {
+        errors.expiration = "Expiration cannot be negative";
+      } else if (expirationValue > 520) { // Maximum ~10 years
+        errors.expiration = "Expiration exceeds maximum allowed (520 weeks)";
+      }
+    }
+    
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
+    setFormErrors({});
+
+    // Validate form
+    if (!validateForm()) {
+      setLoading(false);
+      return;
+    }
 
     const trimmedName = treatmentName.trim().toLowerCase();
     const duplicate = existingTreatments.find(
@@ -74,7 +102,8 @@ function CreateTreatment({ isOpen, onClose }) {
     const payload = {
       treatment_name: treatmentName,
       price: parseFloat(price) || 0,
-      duration: parseInt(duration, 10) || 0
+      duration: parseInt(duration, 10) || 0,
+      expiration: expiration ? parseInt(expiration, 10) : null
     };
 
     try {
@@ -156,13 +185,38 @@ function CreateTreatment({ isOpen, onClose }) {
                   data-cy="treatment-duration"
                   placeholder="e.g. 45"
                   type="number"
-                  // min="0"
-                  // step="1"
+                  min="0"
+                  step="1"
                   value={duration}
                   onChange={(e) => setDuration(e.target.value)}
                   required
                 />
               </InputTextField>
+            </InputContainer>
+
+            {/* Expiration */}
+            <InputContainer>
+              <InputLabel>EXPIRATION (IN WEEKS)</InputLabel>
+              <InputTextField>
+                <InputIcon>
+                  <TreatmentIcon />
+                </InputIcon>
+                <Input
+                  data-cy="treatment-expiration"
+                  placeholder="e.g. 12"
+                  type="number"
+                  min="0"
+                  step="1"
+                  value={expiration}
+                  onChange={(e) => setExpiration(e.target.value)}
+                  className={formErrors.expiration ? "border-red-500" : ""}
+                />
+              </InputTextField>
+              {formErrors.expiration && (
+                <p className="text-red-500 text-sm mt-1">
+                  {formErrors.expiration}
+                </p>
+              )}
             </InputContainer>
 
             {error && <p className="text-red-500">{error}</p>}

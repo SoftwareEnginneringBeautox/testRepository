@@ -276,7 +276,7 @@ function AdministratorServices() {
                   className="py-4 text-center"
                   data-cy={`treatment-name-${treatment.id}`}
                 >
-                  {treatment.treatment_name}
+                  {treatment.treatment_name.toUpperCase()}
                 </TableCell>
                 <TableCell
                   className="py-4 text-center"
@@ -289,8 +289,8 @@ function AdministratorServices() {
                   data-cy={`treatment-expiration-${treatment.id}`}
                 >
                   {treatment.expiration
-                    ? `${treatment.expiration} week${
-                        treatment.expiration > 1 ? "s" : ""
+                    ? `${treatment.expiration} WEEK${
+                        treatment.expiration > 1 ? "S" : ""
                       }`
                     : "-"}
                 </TableCell>
@@ -337,7 +337,7 @@ function AdministratorServices() {
                 className="py-4 text-center"
                 data-cy="no-treatments-message"
               >
-                No treatments found.
+                NO TREATMENTS FOUND.
               </TableCell>
             </TableRow>
           )}
@@ -421,7 +421,7 @@ function AdministratorServices() {
                   className="py-4 text-center"
                   data-cy={`package-name-${pkg.id}`}
                 >
-                  {pkg.package_name}
+                  {pkg.package_name.toUpperCase()}
                 </TableCell>
                 <TableCell
                   className="py-4 text-left"
@@ -444,7 +444,7 @@ function AdministratorServices() {
                             variant="outline"
                             data-cy={`package-treatment-badge-${pkg.id}-${treatment.id}`}
                           >
-                            + {treatment.treatment_name}
+                            + {treatment.treatment_name.toUpperCase()}
                           </Badge>
                         ) : (
                           <span
@@ -452,7 +452,7 @@ function AdministratorServices() {
                             className="text-red-500 text-sm italic"
                             data-cy={`package-treatment-not-found-${pkg.id}-${id}`}
                           >
-                            Not found: {id}
+                            NOT FOUND: {id}
                           </span>
                         );
                       })}
@@ -462,7 +462,7 @@ function AdministratorServices() {
                       className="text-muted-foreground italic"
                       data-cy={`package-no-treatments-${pkg.id}`}
                     >
-                      No treatments found
+                      NO TREATMENTS FOUND
                     </span>
                   )}
                 </TableCell>
@@ -483,7 +483,7 @@ function AdministratorServices() {
                   data-cy={`package-expiration-${pkg.id}`}
                 >
                   {pkg.expiration
-                    ? `${pkg.expiration} week${pkg.expiration > 1 ? "s" : ""}`
+                    ? `${pkg.expiration} WEEK${pkg.expiration > 1 ? "S" : ""}`
                     : "-"}
                 </TableCell>
                 <TableCell
@@ -527,7 +527,7 @@ function AdministratorServices() {
                 className="py-4 text-center"
                 data-cy="no-packages-message"
               >
-                No packages found.
+                NO PACKAGES FOUND.
               </TableCell>
             </TableRow>
           )}
