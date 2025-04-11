@@ -1278,50 +1278,54 @@ function FinancialOverview() {
         </div>
 
         <div
-          className="w-full rounded-lg p-4 border-2 border-lavender-400 dark:border-lavender-100 text-center flex flex-col items-center gap-4 md:gap-8 dark:text-customNeutral-100"
-          data-cy="total-profit-container"
-        >
-          <div className="flex flex-col md:flex-row items-center justify-center text-lg md:text-xl leading-normal">
-            <div>
-              TOTAL SALES:{" "}
-              <span
-                className="font-bold text-success-400"
-                data-cy="total-sales-amount"
-              >
-                {new Intl.NumberFormat("en-PH", {
-                  style: "currency",
-                  currency: "PHP"
-                }).format(financialData.totalSales)}
-              </span>{" "}
-              - TOTAL EXPENSES:{" "}
-              <span
-                className="font-bold text-error-400"
-                data-cy="total-expenses-amount"
-              >
-                {new Intl.NumberFormat("en-PH", {
-                  style: "currency",
-                  currency: "PHP"
-                }).format(financialData.totalExpenses)}
-              </span>{" "}
-              =
-            </div>
-          </div>
-          <div className="text-2xl md:text-3xl leading-normal md:leading-[67.2px] font-semibold">
-            {financialData.netIncome < 0 ? "TOTAL LOSS: " : "TOTAL PROFIT: "}
-            <span
-              className={`font-bold  ${financialData.netIncome < 0
-                  ? "text-error-400"
-                  : "text-success-400"
-                }`}
-              data-cy="total-profit-amount"
-            >
-              {new Intl.NumberFormat("en-PH", {
-                style: "currency",
-                currency: "PHP"
-              }).format(Math.abs(financialData.netIncome))}
-            </span>
-          </div>
-        </div>
+  className="w-full flex flex-row items-center justify-around gap-1 mt-3"
+  data-cy="total-profit-container"
+>
+  <div
+    className="h-full flex-1 w-1/3 flex flex-col p-2 gap-1 bg-ash-100 dark:bg-customNeutral-500 dark:text-customNeutral-100 rounded-lg shadow-custom"
+    data-cy="total-sales"
+  >
+    <span className="font-semibold text-xs pt-1">TOTAL SALES</span>
+    <p className="text-lg">
+      {new Intl.NumberFormat("en-PH", {
+        style: "currency",
+        currency: "PHP"
+      }).format(financialData.totalSales)}
+    </p>
+  </div>
+  <div
+    className="h-full flex-1 w-1/3 flex flex-col p-2 gap-1 bg-ash-100 dark:bg-customNeutral-500 dark:text-customNeutral-100 rounded-lg shadow-custom"
+    data-cy="total-expenses"
+  >
+    <span className="font-semibold text-xs pt-1">TOTAL EXPENSES</span>
+    <p className="text-lg">
+      {new Intl.NumberFormat("en-PH", {
+        style: "currency",
+        currency: "PHP"
+      }).format(financialData.totalExpenses)}
+    </p>
+  </div>
+  <div
+    className="h-full flex-1 w-1/3 flex flex-col p-2 gap-1 bg-ash-100 dark:bg-customNeutral-500 dark:text-customNeutral-100 rounded-lg shadow-custom"
+    data-cy="total-profit-loss"
+  >
+    <span className="font-semibold text-xs pt-1">
+      TOTAL PROFIT/LOSS
+    </span>
+    <p
+      className={`text-lg ${
+        financialData.netIncome >= 0
+          ? "text-success-400"
+          : "text-error-400"
+      }`}
+    >
+      {new Intl.NumberFormat("en-PH", {
+        style: "currency",
+        currency: "PHP"
+      }).format(Math.abs(financialData.netIncome))}
+    </p>
+  </div>
+</div>
 
         <div
           className="w-full flex flex-col md:flex-row justify-end gap-4 pb-10"

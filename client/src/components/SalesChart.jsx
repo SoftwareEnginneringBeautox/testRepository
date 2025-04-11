@@ -364,34 +364,33 @@ const SalesChart = ({
             </div>
           </div>
         </div>
-        {/* Render sales and expenses, but never profit/loss in FinancialOverview */}
-        <div className="w-full flex flex-row items-center justify-around gap-2 mt-4">
-          <div
-            className={`h-full flex-1 ${isFinancialOverview ? "w-1/2" : "w-1/3"} flex flex-col p-2 gap-1 bg-ash-400 dark:bg-customNeutral-400 dark:text-customNeutral-100 rounded-lg`}
-            data-cy="total-sales"
-          >
-            <span className="font-semibold text-xs pt-1">TOTAL SALES</span>
-            <p className="text-lg">
-              {new Intl.NumberFormat("en-PH", {
-                style: "currency",
-                currency: "PHP"
-              }).format(financialData.totalSales)}
-            </p>
-          </div>
-          <div
-            className={`h-full flex-1 ${isFinancialOverview ? "w-1/2" : "w-1/3"} flex flex-col p-2 gap-1 bg-ash-400 dark:bg-customNeutral-400 dark:text-customNeutral-100 rounded-lg`}
-            data-cy="total-expenses"
-          >
-            <span className="font-semibold text-xs pt-1">TOTAL EXPENSES</span>
-            <p className="text-lg">
-              {new Intl.NumberFormat("en-PH", {
-                style: "currency",
-                currency: "PHP"
-              }).format(financialData.totalExpenses)}
-            </p>
-          </div>
-          {/* Only show profit/loss when NOT in FinancialOverview */}
-          {!isFinancialOverview && (
+        {/* Show summary only when NOT in FinancialOverview */}
+        {!isFinancialOverview && (
+          <div className="w-full flex flex-row items-center justify-around gap-2 mt-4">
+            <div
+              className="h-full flex-1 w-1/3 flex flex-col p-2 gap-1 bg-ash-400 dark:bg-customNeutral-400 dark:text-customNeutral-100 rounded-lg"
+              data-cy="total-sales"
+            >
+              <span className="font-semibold text-xs pt-1">TOTAL SALES</span>
+              <p className="text-lg">
+                {new Intl.NumberFormat("en-PH", {
+                  style: "currency",
+                  currency: "PHP"
+                }).format(financialData.totalSales)}
+              </p>
+            </div>
+            <div
+              className="h-full flex-1 w-1/3 flex flex-col p-2 gap-1 bg-ash-400 dark:bg-customNeutral-400 dark:text-customNeutral-100 rounded-lg"
+              data-cy="total-expenses"
+            >
+              <span className="font-semibold text-xs pt-1">TOTAL EXPENSES</span>
+              <p className="text-lg">
+                {new Intl.NumberFormat("en-PH", {
+                  style: "currency",
+                  currency: "PHP"
+                }).format(financialData.totalExpenses)}
+              </p>
+            </div>
             <div
               className="h-full flex-1 w-1/3 flex flex-col p-2 gap-1 bg-ash-400 dark:bg-customNeutral-400 dark:text-customNeutral-100 rounded-lg"
               data-cy="total-profit-loss"
@@ -411,8 +410,8 @@ const SalesChart = ({
                 }).format(Math.abs(financialData.netIncome))}
               </p>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </CardFooter>
     </Card>
   );
