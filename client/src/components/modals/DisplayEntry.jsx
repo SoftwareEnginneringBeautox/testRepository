@@ -37,7 +37,19 @@ function DisplayEntry({ isOpen, onClose, entryData }) {
             },
             { label: "TIME OF NEXT SESSION", value: entryData.startTime },
             { label: "PACKAGE", value: entryData.packageName },
-            { label: "TREATMENT", value: entryData.treatmentIds },
+            { 
+              label: "TREATMENT", 
+              value: Array.isArray(entryData.treatmentIds) 
+                ? entryData.treatmentNames || entryData.treatmentIds.map(id => {
+                    // Try to find treatment name from various possible sources in entryData
+                    if (entryData.treatments) {
+                      const treatment = entryData.treatments.find(t => t.id === id);
+                      return treatment ? treatment.treatment_name : id;
+                    }
+                    return id;
+                  }).join(", ")
+                : entryData.treatment || "N/A"
+            },
             { label: "PAYMENT METHOD", value: entryData.paymentMethod },
             { label: "AMOUNT PAID", value: `PHP ${entryData.amountPaid}` },
             {

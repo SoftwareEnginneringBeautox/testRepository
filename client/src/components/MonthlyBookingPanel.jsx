@@ -1,6 +1,4 @@
-import React from "react";
-
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useModal } from "@/hooks/useModal";
 import DisplayEntry from "@/components/modals/DisplayEntry";
 
@@ -11,7 +9,22 @@ const MonthlyBookingPanel = ({
 }) => {
   const { currentModal, openModal, closeModal } = useModal();
   const [selectedEntry, setSelectedEntry] = useState(null);
+  const [treatmentsList, setTreatmentsList] = useState([]);
   const days = ["SUN", "MON", "TUES", "WED", "THURS", "FRI", "SAT"];
+
+  useEffect(() => {
+    const fetchTreatments = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/treatments`);
+        const data = await response.json();
+        setTreatmentsList(data || []);
+      } catch (error) {
+        console.error("Error fetching treatments:", error);
+      }
+    };
+
+    fetchTreatments();
+  }, []);
 
   const handleOpenModal = (appointment) => {
     setSelectedEntry(appointment);
@@ -143,10 +156,18 @@ const MonthlyBookingPanel = ({
       </table>
 
       {currentModal === "displayEntry" && selectedEntry && (
-        <DisplayEntry
-          isOpen={true}
-          onClose={closeModal}
-          entryData={selectedEntry}
+        <DisplayEntry 
+          isOpen={true} 
+          onClose={closeModal} 
+          entryData={{
+            ...selectedEntry,
+            treatmentNames: Array.isArray(selectedEntry.treatmentIds) 
+              ? selectedEntry.treatmentIds.map(id => {
+                  const treatment = treatmentsList.find(t => t.id === id);
+                  return treatment ? treatment.treatment_name : id;
+                }).join(", ")
+              : selectedEntry.treatment || "N/A"
+          }} 
         />
       )}
     </div>
