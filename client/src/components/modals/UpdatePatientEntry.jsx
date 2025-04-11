@@ -81,8 +81,8 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
   useEffect(() => {
     if (isOpen) {
       // Generate reference IDs when the modal opens
-      setAdditionalPaymentRefId(generateReferenceId("PAY"));
-      setNewServiceRefId(generateReferenceId("SRV"));
+      setAdditionalPaymentRefId(generateReferenceId("REF"));
+      setNewServiceRefId(generateReferenceId("REF"));
     }
   }, [isOpen]);
 
