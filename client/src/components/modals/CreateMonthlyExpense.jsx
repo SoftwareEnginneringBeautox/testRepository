@@ -83,6 +83,12 @@ function CreateMonthlyExpense({
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Prevent duplicate submissions
+    if (isSubmitting) {
+      console.log("Expense submission already in progress");
+      return;
+    }
+
     // Validate form data
     if (!formData.expenseType || !formData.amount || !formData.date) {
       setAlertTitle("Error");
@@ -92,6 +98,7 @@ function CreateMonthlyExpense({
     }
 
     setIsSubmitting(true);
+    const submitTime = Date.now();
 
     try {
       // Format data to match server expectations
@@ -101,20 +108,29 @@ function CreateMonthlyExpense({
         date: formData.date
       };
 
-      console.log("Submitting expense data:", formattedData);
+      console.log(`Submitting expense data at ${new Date().toISOString()}:`, formattedData);
 
-      // Call the callback with form data
-      if (onCreateSuccess) {
-        await onCreateSuccess(formattedData);
-      }
+      // Add timeout with Promise.race to prevent hanging submissions
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error("Request timed out")), 10000)
+      );
+      
+      await Promise.race([
+        onCreateSuccess(formattedData),
+        timeoutPromise
+      ]);
 
+      console.log(`Expense creation completed in ${Date.now() - submitTime}ms`);
+      
       // Close the modal
       onClose();
     } catch (error) {
       console.error("Error creating expense:", error);
       setAlertTitle("Error");
       setAlertMessage(
-        "An error occurred while creating the expense. Please try again."
+        error.message === "Request timed out" 
+          ? "The request took too long. Please try again."
+          : "An error occurred while creating the expense. Please try again."
       );
       setShowAlert(true);
     } finally {

@@ -84,6 +84,8 @@ function CreatePatientEntry({ isOpen, onClose }) {
   const [age, setAge] = useState("");
   const [email, setEmail] = useState("");
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   // Effect for setting amount based on package or treatments
   useEffect(() => {
     if (packageName) {
@@ -208,6 +210,8 @@ function CreatePatientEntry({ isOpen, onClose }) {
   // Handle form submission, sending new patient record to the server
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return; // Prevent double submission
+    setIsSubmitting(true);
     setFormSubmitAttempted(true);
 
     const errors = {};
@@ -257,8 +261,10 @@ function CreatePatientEntry({ isOpen, onClose }) {
       errors.age = "Age is required";
     } else {
       const ageNum = parseInt(age);
-      if (isNaN(ageNum) || ageNum < 0 || ageNum > 120) {
-        errors.age = "Age must be between 0 and 120";
+      if (isNaN(ageNum) || ageNum < 18) {
+        errors.age = "Patients must be at least 18 years old";
+      } else if (ageNum > 120) {
+        errors.age = "Age must be less than 120";
       }
     }
 
@@ -293,7 +299,10 @@ function CreatePatientEntry({ isOpen, onClose }) {
     }
 
     setFormErrors(errors);
-    if (Object.keys(errors).length > 0) return;
+    if (Object.keys(errors).length > 0) {
+      setIsSubmitting(false);
+      return;
+    }
 
     const numericTotal = parseFloat(totalAmount) || 0;
     const numericDiscount = parseFloat(packageDiscount) || 0;
@@ -420,6 +429,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
       }
     } catch (error) {
       console.error("Error submitting form:", error);
+      setIsSubmitting(false); // Re-enable the button on error
     }
   };
 
@@ -491,7 +501,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
                 <Input
                   data-cy="age-input"
                   type="number"
-                  min="0"
+                  min="18"
                   placeholder="Age"
                   value={age}
                   onChange={(e) => setAge(e.target.value)}
@@ -905,9 +915,13 @@ function CreatePatientEntry({ isOpen, onClose }) {
               <ChevronLeftIcon />
               CANCEL AND RETURN
             </Button>
-            <Button type="submit" className="md:w-1/2">
+            <Button 
+              type="submit" 
+              className="md:w-1/2"
+              disabled={isSubmitting}
+            >
               <PlusIcon />
-              ADD ENTRY
+              {isSubmitting ? "ADDING..." : "ADD ENTRY"}
             </Button>
           </div>
         </form>
