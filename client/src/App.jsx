@@ -157,6 +157,16 @@ function App() {
               </AdminRoute>
             }
           />
+          
+          {/* Financial Overview is now admin-only */}
+          <Route
+            path="FinancialOverview"
+            element={
+              <AdminRoute>
+                <FinancialOverview />
+              </AdminRoute>
+            }
+          />
 
           {/* Other routes */}
           <Route path="StaffDashboard" element={<StaffDashboard />} />
@@ -168,16 +178,6 @@ function App() {
           <Route path="BookingCalendar" element={<BookingCalendar />} />
 
           <Route path="ForgotPassword" element={<ForgotPassword />} />
-
-          {/* Protected route example */}
-          <Route
-            path="FinancialOverview"
-            element={
-              <ProtectedRoute>
-                <FinancialOverview />
-              </ProtectedRoute>
-            }
-          />
 
           {/* Catch-all error page */}
           <Route path="*" element={<ErrorPage />} />
