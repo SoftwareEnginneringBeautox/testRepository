@@ -233,8 +233,8 @@ function CreatePatientEntry({ isOpen, onClose }) {
     // Validate time - ensure it's within business hours (9am-6pm)
     if (timeOfSession) {
       const [hours, minutes] = timeOfSession.split(':').map(Number);
-      const startHour = 9; // 9am
-      const endHour = 18; // 6pm
+      const startHour = 12; // 12pm
+      const endHour = 21; // 9pm
       
       if (hours < startHour || hours > endHour || (hours === endHour && minutes > 0)) {
         errors.timeOfSession = "Session time must be between 9:00 AM and 6:00 PM";

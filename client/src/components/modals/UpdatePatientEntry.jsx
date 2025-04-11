@@ -290,8 +290,8 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
     // Validate time is within business hours (9 AM to 6 PM)
     if (formData.time_of_session) {
       const [hours, minutes] = formData.time_of_session.split(':').map(Number);
-      const startBusinessHour = 9; // 9 AM
-      const endBusinessHour = 18;  // 6 PM
+      const startBusinessHour = 12; // 12 PM
+      const endBusinessHour = 21;  // 9 PM
       
       if (hours < startBusinessHour || hours > endBusinessHour || 
           (hours === endBusinessHour && minutes > 0)) {
