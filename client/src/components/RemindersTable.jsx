@@ -46,6 +46,9 @@ function RemindersTable({
 
   const toggleReminders = () => setRemindersExpanded((prev) => !prev);
 
+  // Filter out any archived reminders that might have slipped through
+  const filteredReminders = reminders.filter(item => !item.archived);
+
   return (
     <div
       className="overflow-x-auto overflow-y-hidden"
@@ -129,7 +132,7 @@ function RemindersTable({
                   </TableRow>
                 ))}
 
-                {reminders.map((item, index) => (
+                {filteredReminders.map((item, index) => (
                   <TableRow key={`reminder-${index}`}>
                     <TableCell className="flex items-center gap-2 sm:gap-4 text-sm sm:text-base [&_svg]:shrink-0">
                       <CalendarIcon className="w-4 h-4 sm:w-5 sm:h-5" />

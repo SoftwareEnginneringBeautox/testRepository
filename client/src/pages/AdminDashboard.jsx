@@ -158,7 +158,7 @@ function AdministratorDashboard() {
         axios.get(`${API_BASE_URL}/api/staged-appointments/unconfirmed`, {
           withCredentials: true
         }),
-        axios.get(`${API_BASE_URL}/api/appointments`, {
+        axios.get(`${API_BASE_URL}/api/appointments?archived=false`, {
           withCredentials: true
         })
       ]);
