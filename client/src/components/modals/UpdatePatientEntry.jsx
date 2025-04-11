@@ -69,6 +69,7 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
   const [newAmountPaid, setNewAmountPaid] = useState("0");
   const [packageDiscount, setPackageDiscount] = useState("0");
   const [sessionsLeft, setSessionsLeft] = useState(0);
+  const [originalSessionsLeft, setOriginalSessionsLeft] = useState(0);
 
   // Generate a new reference ID with prefix and timestamp
   const generateReferenceId = (prefix = "REF") => {
@@ -87,6 +88,22 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
 
   useEffect(() => {
     if (entryData) {
+      // First, ensure we properly parse the sessions_left value
+      // Handle different data types that might come from the API
+      let sessionsLeftFromData = 0;
+      
+      if (typeof entryData.sessions_left === 'number') {
+        sessionsLeftFromData = entryData.sessions_left;
+      } else if (typeof entryData.sessions_left === 'string') {
+        sessionsLeftFromData = parseInt(entryData.sessions_left, 10) || 0;
+      } else if (entryData.sessions_left) {
+        // Handle any other non-null case
+        sessionsLeftFromData = Number(entryData.sessions_left) || 0;
+      }
+      
+      console.log("Original sessions from API:", entryData.sessions_left);
+      console.log("Parsed sessions value:", sessionsLeftFromData);
+      
       const initialData = {
         ...entryData,
         package_name: entryData.package_name || "",
@@ -95,22 +112,30 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
         date_of_session: entryData.date_of_session?.slice(0, 10) || "",
         time_of_session: entryData.time_of_session?.slice(0, 5) || "",
         consent_form_signed: entryData.consent_form_signed ?? false,
-        additional_payment: "0", // New field for additional payment
-        sessions_left: entryData.sessions_left || 0 // Track sessions left
+        additional_payment: "0",
+        sessions_left: sessionsLeftFromData // Store original value
       };
 
       setOriginalData(initialData);
+      setOriginalSessionsLeft(sessionsLeftFromData);
+      
+      // Set form fields that the user can edit
       setFormData({
         date_of_session: initialData.date_of_session,
         time_of_session: initialData.time_of_session,
         consent_form_signed: initialData.consent_form_signed,
-        additional_payment: "0", // Initialize additional payment as 0
-        sessions_left: Math.max(0, (initialData.sessions_left || 0) - 1) // Decrement sessions by 1 for this visit
+        additional_payment: "0"
       });
 
-      // Initialize personInCharge state
+      // Initialize person in charge
       setPersonInCharge(initialData.person_in_charge || "");
-      setSessionsLeft(Math.max(0, (initialData.sessions_left || 0) - 1));
+      
+      // IMPORTANT FIX: Calculate what will remain AFTER this visit
+      // But don't automatically subtract 1 - that will happen when the form is submitted
+      // This ensures the UI correctly shows sessions remaining
+      setSessionsLeft(sessionsLeftFromData);
+      
+      console.log(`Will display: Originally ${sessionsLeftFromData}, ${sessionsLeftFromData} remaining`);
     }
 
     const fetchAestheticians = async () => {
@@ -236,7 +261,11 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
     }
 
     setNewAmount(calculatedAmount.toFixed(2));
-    setSessionsLeft(calculatedSessions);
+    
+    // Only update sessionsLeft if we're adding a new package/treatments
+    if (selectedPackage || selectedTreatments.length > 0) {
+      setSessionsLeft(calculatedSessions);
+    }
 
     // When payment method changes, update amount paid
     if (newPaymentMethod === "full-payment") {
@@ -267,6 +296,9 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
 
   // Is the payment complete?
   const isNewPaid = newBalance <= 0;
+
+  // Get sessions left after this visit (subtract 1 from current sessions)
+  const sessionsAfterVisit = Math.max(0, sessionsLeft - 1);
 
   // Check if current package/treatments are completed
   const hasCompletedCurrentTreatments =
@@ -350,6 +382,13 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
       return;
     }
 
+    // IMPORTANT FIX: When submitting, we need to decrease the sessions by 1
+    // This ensures we're tracking the sessions correctly
+    const updatedSessionsLeft = Math.max(0, sessionsLeft - 1);
+    
+    console.log("Original sessions:", sessionsLeft);
+    console.log("Sessions after this visit:", updatedSessionsLeft);
+
     // Prepare data for submission
     let updatedData = {
       id: entryData.id,
@@ -357,9 +396,11 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
       time_of_session: formData.time_of_session,
       consent_form_signed: formData.consent_form_signed,
       amount_paid: totalPaid.toString(), // Update total amount paid
-      sessions_left: sessionsLeft,
+      sessions_left: updatedSessionsLeft, // Decrement sessions count by 1 and save
       person_in_charge: personInCharge // Include person in charge
     };
+
+    console.log("Submitting record with sessions_left:", updatedSessionsLeft);
 
     // If adding new package/treatments, include them and the new reference number
     if (hasCompletedCurrentTreatments) {
@@ -457,7 +498,7 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
       }
 
       // If there are remaining sessions, create a new appointment
-      if (sessionsLeft > 0) {
+      if (updatedSessionsLeft > 0) {
         try {
           const appointmentPayload = {
             patient_record_id: entryData.id,
@@ -576,7 +617,7 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
               </p>
             </InputContainer>
 
-            {/* SESSIONS LEFT */}
+            {/* SESSIONS LEFT - Fixed display */}
             <InputContainer>
               <InputLabel>SESSIONS LEFT</InputLabel>
               <InputTextField>
@@ -587,14 +628,20 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
                   data-cy="sessions-left-input"
                   type="number"
                   min="0"
-                  value={sessionsLeft}
+                  value={sessionsAfterVisit}
                   readOnly
                 />
               </InputTextField>
               <p className="text-sm text-gray-500 mt-1">
-                {sessionsLeft > 0
-                  ? `${sessionsLeft} sessions left after this visit`
-                  : "No sessions left. Consider adding a new package or treatment."}
+                {sessionsLeft > 0 && (
+                  <>
+                    Current sessions: <strong>{sessionsLeft}</strong>, 
+                    <strong> {sessionsAfterVisit}</strong> will remain after this visit
+                  </>
+                )}
+                {sessionsLeft <= 0 && (
+                  "No sessions left. Consider adding a new package or treatment."
+                )}
               </p>
             </InputContainer>
 
