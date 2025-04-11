@@ -237,7 +237,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
       const endHour = 21; // 9pm
       
       if (hours < startHour || hours > endHour || (hours === endHour && minutes > 0)) {
-        errors.timeOfSession = "Session time must be between 9:00 AM and 6:00 PM";
+        errors.timeOfSession = "Session time must be between 12:00 PM and 9:00 PM";
       }
     }
 

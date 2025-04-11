@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 
 import { ModalContainer, ModalTitle } from "@/components/ui/Modal";
 
@@ -9,7 +9,22 @@ import ChevronLeftIcon from "@/assets/icons/ChevronLeftIcon";
 import ArchiveIcon from "@/assets/icons/ArchiveIcon";
 
 function ArchivePatientEntry({ isOpen, onClose, onArchive }) {
+  const [isArchiving, setIsArchiving] = useState(false);
+  
   if (!isOpen) return null;
+
+  const handleArchive = async () => {
+    if (isArchiving) return;
+    
+    setIsArchiving(true);
+    try {
+      await onArchive();
+    } catch (error) {
+      console.error("Error archiving patient entry:", error);
+    } finally {
+      setIsArchiving(false);
+    }
+  };
 
   return (
     <ModalContainer className="flex flex-col gap-4">
@@ -22,13 +37,22 @@ function ArchivePatientEntry({ isOpen, onClose, onArchive }) {
         that entry.
       </p>
       <div className=" flex sm:flex-row flex-col gap-4 w-full">
-        <Button variant="outline" className="md:w-1/2" onClick={onClose}>
+        <Button 
+          variant="outline" 
+          className="md:w-1/2" 
+          onClick={onClose}
+          disabled={isArchiving}
+        >
           <ChevronLeftIcon />
           CANCEL AND RETURN
         </Button>
-        <Button className="md:w-1/2" onClick={onArchive}>
+        <Button 
+          className="md:w-1/2" 
+          onClick={handleArchive}
+          disabled={isArchiving}
+        >
           <ArchiveIcon />
-          ARCHIVE ENTRY
+          {isArchiving ? "ARCHIVING..." : "ARCHIVE ENTRY"}
         </Button>
       </div>
     </ModalContainer>

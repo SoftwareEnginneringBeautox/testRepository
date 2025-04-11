@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 
 import { ModalContainer, ModalTitle } from "@/components/ui/Modal";
 import {
@@ -21,14 +21,30 @@ function ArchiveCategory({ isOpen, onClose, category, onArchiveSuccess }) {
   const [showAlert, setShowAlert] = useState(false);
   const [alertTitle, setAlertTitle] = useState("");
   const [alertMessage, setAlertMessage] = useState("");
+  const submitInProgressRef = useRef(false);
+
+  // Clean up when component unmounts
+  useEffect(() => {
+    return () => {
+      submitInProgressRef.current = false;
+    };
+  }, []);
 
   const handleAlertClose = () => {
     setShowAlert(false);
   };
 
   const handleArchive = async () => {
+    // Prevent duplicate submissions using both state and ref
+    if (isArchiving || submitInProgressRef.current) {
+      console.log("Archive operation already in progress");
+      return;
+    }
+    
     if (!category) return;
-
+    
+    // Set both flags immediately
+    submitInProgressRef.current = true;
     setIsArchiving(true);
 
     try {
@@ -62,6 +78,7 @@ function ArchiveCategory({ isOpen, onClose, category, onArchiveSuccess }) {
       setShowAlert(true);
     } finally {
       setIsArchiving(false);
+      submitInProgressRef.current = false;
     }
   };
 
