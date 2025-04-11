@@ -11,7 +11,6 @@ import axios from "axios";
 import ForgotPassword from "@/components/modals/ForgotPassword";
 import ChevronLeftIcon from "@/assets/icons/ChevronLeftIcon";
 import { LoaderWrapper, Loader } from "@/components/ui/Loader";
-// Import the hook for reCAPTCHA v3
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 
 import {
@@ -23,7 +22,6 @@ import {
 } from "@/components/ui/Input";
 
 function Login() {
-  // Use a fallback URL if VITE_API_URL is not defined.
   const API_BASE_URL = import.meta.env.VITE_API_URL;
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -35,10 +33,8 @@ function Login() {
   const { currentModal, openModal, closeModal } = useModal();
   const navigate = useNavigate();
 
-  // Get executeRecaptcha function from the v3 hook
   const { executeRecaptcha } = useGoogleReCaptcha();
 
-  // Listen for login events from other tabs.
   useEffect(() => {
     const syncLogin = (event) => {
       if (event.key === "login") {
@@ -67,16 +63,14 @@ function Login() {
 
     try {
       setIsLoading(true);
-      // Execute reCAPTCHA for action "login" and get the token
       const token = await executeRecaptcha("login");
 
       if (!token) {
         setRecaptchaError("reCAPTCHA verification failed. Please try again.");
-        setIsLoading(false); // ✅ Stop loading on reCAPTCHA failure
+        setIsLoading(false);
         return;
       }
 
-      // Trim the username input
       const trimmedUsername = username.trim();
 
       console.log("Attempting login for:", trimmedUsername);
@@ -90,7 +84,6 @@ function Login() {
         { withCredentials: true }
       );
 
-      // Process the response from the server
       if (response.data.success) {
         setSuccessMessage("Login successful! Redirecting...");
         console.log("Login successful for:", trimmedUsername);
@@ -102,7 +95,6 @@ function Login() {
         localStorage.setItem("login", Date.now());
         window.dispatchEvent(new Event("userProfileUpdated"));
 
-        // Redirect based on role
         if (response.data.role === "admin") {
           navigate("/AdminDashboard");
         } else if (
@@ -119,7 +111,6 @@ function Login() {
           response.data.message
         );
 
-        // Special handling for archived accounts
         if (response.data.message?.toLowerCase().includes("archived")) {
           setErrorMessage(
             "Your account has been archived. Please contact your administrator."
@@ -129,10 +120,9 @@ function Login() {
             response.data.message || "Invalid username or password"
           );
         }
-        setIsLoading(false); // ✅ Stop loading on login failure
+        setIsLoading(false);
       }
     } catch (error) {
-      // Also handle the 403 status specifically for archived accounts
       if (
         error.response?.status === 403 &&
         error.response.data?.message?.toLowerCase().includes("archived")
@@ -143,37 +133,39 @@ function Login() {
       } else {
         setErrorMessage("An error occurred. Please try again later.");
       }
-      setIsLoading(false); // ✅ Stop loading on error
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen w-full">
       {isLoading && (
         <LoaderWrapper fullScreen={true} overlay={true}>
           <Loader size={100} text="Logging in..." />
         </LoaderWrapper>
       )}
-      {/* Mobile and Tablet View (smaller than xl screens) */}
-      <div className="xl:hidden min-h-screen relative">
-        {/* Background Image with Overlay */}
-        <div
-          className="fixed inset-0 w-full h-full"
-          style={{
-            backgroundImage: "url('/images/BeautoxLoginImage.png')",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            backgroundRepeat: "no-repeat",
-            backgroundAttachment: "fixed"
-          }}
-        >
-          <div className="absolute inset-0 bg-white/20"></div>
-          <div className="absolute inset-0 bg-purple-900/5 backdrop-blur-[1px]"></div>
-        </div>
-
-        {/* Login Card */}
-        <div className="relative min-h-screen flex items-center justify-center p-4">
-          <div className="w-[320px] bg-white rounded-[24px] shadow-lg p-5">
+      
+      {/* Mobile and Tablet View */}
+      <div className="xl:hidden w-full min-h-screen">
+        {/* Using a container div with background image */}
+        <div className="min-h-screen flex flex-col justify-center items-center relative">
+          {/* Background Image Container - Using a pseudo-element approach */}
+          <div 
+            className="absolute inset-0 z-0"
+            style={{
+              background: `
+                linear-gradient(rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.2)),
+                linear-gradient(rgba(76, 29, 149, 0.05), rgba(76, 29, 149, 0.05)),
+                url('/images/BeautoxLoginImage.png')
+              `,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              willChange: 'transform', /* Hardware acceleration */
+            }}
+          ></div>
+          
+          {/* Login Card */}
+          <div className="relative z-10 w-[320px] bg-white rounded-[24px] shadow-lg p-5">
             <div className="flex flex-col items-center mb-4">
               <img
                 src={BeautoxLogo}
@@ -236,14 +228,12 @@ function Login() {
                 </InputTextField>
               </InputContainer>
 
-              {/* In reCAPTCHA v3, there is no visible widget */}
               {recaptchaError && (
                 <div className="bg-red-50 border border-red-200 text-red-600 px-2.5 py-1.5 rounded-md text-[11px] text-center mb-2">
                   {recaptchaError}
                 </div>
               )}
 
-              {/* Forgot password link */}
               <p className="text-gray-500 text-[10px] font-bold text-center mb-2.5">
                 FORGOT PASSWORD?{" "}
                 <a
@@ -258,7 +248,6 @@ function Login() {
                 </a>
               </p>
 
-              {/* Buttons */}
               <div className="space-y-2">
                 <Button type="submit" fullWidth="true">
                   <LoginIcon className="sm:w-3.5 sm:h-3.5" />
@@ -278,29 +267,38 @@ function Login() {
         </div>
       </div>
 
-      {/* Desktop View (xl and larger screens) */}
-      <div className="hidden xl:grid xl:grid-cols-12 min-h-screen">
-        <div className="md:col-span-7 lg:col-span-8 h-screen relative overflow-hidden">
-          <img
-            src="/images/BeautoxLoginImage.png"
-            alt="Beautox Login"
-            className="absolute inset-0 w-full h-full object-cover object-center"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/10 to-transparent pointer-events-none hidden lg:block"></div>
+      {/* Desktop View */}
+      <div className="hidden xl:flex w-full min-h-screen">
+        <div className="flex-[8] relative">
+          {/* Using CSS object-fit with explicit dimensions */}
+          <div className="absolute inset-0 h-full w-full overflow-hidden">
+            <img
+              src="/images/BeautoxLoginImage.png"
+              alt="Beautox Login"
+              className="h-full w-full"
+              style={{
+                objectFit: "cover",
+                objectPosition: "center",
+                width: "100%",
+                height: "100%",
+              }}
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/10 to-transparent"></div>
+          </div>
         </div>
 
-        <div className="flex items-center justify-center md:col-span-5 lg:col-span-4 py-6 px-4 sm:px-6 md:px-8">
-          <div className="w-full max-w-md mx-auto">
+        <div className="flex-[4] flex items-center justify-center py-6 px-8">
+          <div className="w-full max-w-md">
             <div className="flex flex-col items-center mb-6">
               <img
                 src={BeautoxLogo}
                 alt="Beautox Logo"
-                className="mb-4 w-32 sm:w-36 md:w-40 lg:w-44 h-auto"
+                className="mb-4 w-40 h-auto"
               />
-              <h2 className="font-semibold text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-center mb-2 leading-tight">
+              <h2 className="font-semibold text-4xl text-center mb-2 leading-tight">
                 Welcome to PRISM,
               </h2>
-              <p className="text-xs sm:text-sm md:text-base text-center mb-6 max-w-sm px-2">
+              <p className="text-sm text-center mb-6 max-w-sm px-2">
                 BEAUTOX&apos;S PATIENT RECORDS, INTEGRATION, SCHEDULING, AND
                 MANAGEMENT
               </p>
@@ -320,11 +318,11 @@ function Login() {
             <form
               data-cy="login-form"
               onSubmit={handleSubmit}
-              className="flex flex-col gap-4 sm:gap-5"
+              className="flex flex-col gap-5"
             >
               <InputContainer className="transition-all duration-200">
-                <InputLabel className="text-xs sm:text-sm">Username</InputLabel>
-                <InputTextField className="mt-1 sm:mt-2">
+                <InputLabel className="text-sm">Username</InputLabel>
+                <InputTextField className="mt-2">
                   <InputIcon className="text-gray-400">
                     <UserIcon className="sm:w-5 sm:h-5" />
                   </InputIcon>
@@ -332,7 +330,7 @@ function Login() {
                     data-cy="login-username"
                     type="text"
                     id="username"
-                    className="text-sm sm:text-base"
+                    className="text-base"
                     onChange={(e) => setUsername(e.target.value)}
                     onBlur={(e) => setUsername(e.target.value.trim())}
                     placeholder="e.g. john_doe123"
@@ -342,7 +340,7 @@ function Login() {
               </InputContainer>
 
               <InputContainer className="transition-all duration-200">
-                <InputLabel className="text-xs sm:text-sm">Password</InputLabel>
+                <InputLabel className="text-sm">Password</InputLabel>
                 <InputTextField>
                   <InputIcon>
                     <PasswordIcon className="sm:w-5 sm:h-5" />
@@ -351,7 +349,7 @@ function Login() {
                     data-cy="login-password"
                     type="password"
                     id="password"
-                    className="text-sm sm:text-base"
+                    className="text-base"
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="e.g. P@ssw0rd123"
                     value={password}

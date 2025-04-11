@@ -793,6 +793,7 @@ function FinancialOverview() {
             archived: false
           };
           setExpensesData((prevExpenses) => [newExpense, ...prevExpenses]);
+          await refreshAllFinancialData(); // This will update expenses, financial data and chart
           closeModal();
         } else {
           showAlert(result.message || "Error creating expense", "destructive");
@@ -846,7 +847,7 @@ function FinancialOverview() {
       });
       console.log("API response status:", response.status);
       if (response.ok) {
-        await refreshExpensesData();
+        await refreshAllFinancialData(); // This will update expenses, financial data and chart
         closeModal();
       } else {
         const errorData = await response.json();
@@ -874,9 +875,7 @@ function FinancialOverview() {
       console.log("Archive response status:", response.status);
 
       if (response.ok) {
-        setExpensesData((prevExpenses) =>
-          prevExpenses.filter((expense) => expense.id !== selectedExpense.id)
-        );
+        await refreshAllFinancialData(); // This will update expenses, financial data and chart
         closeModal();
       } else {
         const errorData = await response.json();
@@ -889,6 +888,39 @@ function FinancialOverview() {
     } catch (error) {
       console.error("Archive expense error:", error);
       showAlert("An error occurred. Please try again.", "destructive");
+    }
+  };
+
+  // 1. First, add a function to refresh financial overview data
+  const refreshFinancialData = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/financial-overview`);
+      const data = await response.json();
+      setFinancialData(data);
+    } catch (error) {
+      console.error("Error refreshing financial data:", error);
+      showAlert("Error refreshing financial summary", "destructive");
+    }
+  };
+
+  // 2. Add a function to refresh the BeautoxPieChart
+  const refreshPieChart = () => {
+    // Create and dispatch a custom event that BeautoxPieChart will listen for
+    const refreshEvent = new CustomEvent('refresh-pie-chart');
+    window.dispatchEvent(refreshEvent);
+  };
+
+  // 3. Create a comprehensive refresh function that updates all necessary data
+  const refreshAllFinancialData = async () => {
+    try {
+      await Promise.all([
+        refreshExpensesData(),
+        refreshFinancialData()
+      ]);
+      refreshPieChart();
+    } catch (error) {
+      console.error("Error refreshing data:", error);
+      showAlert("Error refreshing financial data", "destructive");
     }
   };
 
