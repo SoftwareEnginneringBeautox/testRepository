@@ -327,7 +327,7 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
       
       if (hours < startBusinessHour || hours > endBusinessHour || 
           (hours === endBusinessHour && minutes > 0)) {
-        errors.time_of_session = "Session time must be between 9:00 AM and 6:00 PM";
+        errors.time_of_session = "Session time must be between 12:00 PM and 9:00 PM";
       }
     }
 
