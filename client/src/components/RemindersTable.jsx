@@ -122,7 +122,7 @@ function RemindersTable({
                         className="ml-auto"
                         onClick={() => onEvaluateAppointment(item)}
                       >
-                        EVALUATE
+                        VERIFY
                         <EvaluateIcon />
                       </Button>
                     </TableCell>

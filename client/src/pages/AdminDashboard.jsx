@@ -50,11 +50,11 @@ const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 function AdministratorDashboard() {
   const { theme } = useTheme();
-  
+
   // Theme-dependent colors
   const primaryColor = theme === "dark" ? "#A5B4FC" : "#3730A3"; // Light indigo for dark mode, dark purple for light mode
   const secondaryColor = theme === "dark" ? "#E9D5FF" : "#5B21B6"; // Light purple for dark mode, dark purple for light mode
-  
+
   const [userName, setUserName] = useState(
     localStorage.getItem("username") || ""
   );
@@ -146,7 +146,8 @@ function AdministratorDashboard() {
 
   // For backwards compatibility with existing code
   const handleEditStaff = (staffData) => handleStaffAction("edit", staffData);
-  const handleArchiveStaff = (staffData) => handleStaffAction("archive", staffData);
+  const handleArchiveStaff = (staffData) =>
+    handleStaffAction("archive", staffData);
 
   // Appointment Functions
   const fetchAppointments = useCallback(async () => {
@@ -460,9 +461,8 @@ function AdministratorDashboard() {
   };
 
   // Dropdown menu hover style
-  const dropdownItemHoverClass = theme === "dark" 
-    ? "hover:bg-gray-700" 
-    : "hover:bg-gray-100";
+  const dropdownItemHoverClass =
+    theme === "dark" ? "hover:bg-gray-700" : "hover:bg-gray-100";
 
   return (
     <div
@@ -553,7 +553,11 @@ function AdministratorDashboard() {
           data-cy="staff-list-title"
         >
           <UserIcon className="sm:w-8 sm:h-8" data-cy="staff-icon" />
-          <span style={{ color: theme === "dark" ? secondaryColor : "inherit" }}>STAFF LIST</span>
+          <span
+            style={{ color: theme === "dark" ? secondaryColor : "inherit" }}
+          >
+            STAFF LIST
+          </span>
         </h3>
         {loadingStaff ? (
           <div className="w-full my-6" data-cy="loading-staff-message">
@@ -567,7 +571,10 @@ function AdministratorDashboard() {
             {errorStaff}
           </p>
         ) : staffList.length === 0 ? (
-          <p className="text-sm sm:text-base dark:text-gray-300" data-cy="no-staff-message">
+          <p
+            className="text-sm sm:text-base dark:text-gray-300"
+            data-cy="no-staff-message"
+          >
             No staff found.
           </p>
         ) : (
@@ -587,7 +594,11 @@ function AdministratorDashboard() {
               <div
                 key={index}
                 className="w-full flex justify-between px-3 sm:px-4 py-2 sm:py-3 rounded-md mb-2 bg-white/50 dark:bg-gray-700"
-                style={theme === "dark" ? { border: `2px solid ${primaryColor}` } : { border: "2px solid var(--reflexBlue-400)" }}
+                style={
+                  theme === "dark"
+                    ? { border: `2px solid ${primaryColor}` }
+                    : { border: "2px solid var(--reflexBlue-400)" }
+                }
                 data-cy={`staff-card-${index}`}
               >
                 <div className="flex flex-col" data-cy={`staff-info-${index}`}>
@@ -599,13 +610,13 @@ function AdministratorDashboard() {
                   </span>
                   {(staff.role === "receptionist" ||
                     staff.role === "aesthetician") && (
-                      <span
-                        className="text-xs sm:text-sm text-gray-500 dark:text-gray-300 capitalize"
-                        data-cy={`staff-role-${index}`}
-                      >
-                        ({staff.role})
-                      </span>
-                    )}
+                    <span
+                      className="text-xs sm:text-sm text-gray-500 dark:text-gray-300 capitalize"
+                      data-cy={`staff-role-${index}`}
+                    >
+                      ({staff.role})
+                    </span>
+                  )}
                 </div>
                 <DropdownMenu>
                   <DropdownMenuTrigger
@@ -626,8 +637,12 @@ function AdministratorDashboard() {
                           openModal("modifyStaff");
                         }}
                       >
-                        <EditIcon className="w-4 h-4 sm:w-5 sm:h-5 mr-2"
-                          style={{ color: theme === "dark" ? secondaryColor : "inherit" }} />
+                        <EditIcon
+                          className="w-4 h-4 sm:w-5 sm:h-5 mr-2"
+                          style={{
+                            color: theme === "dark" ? secondaryColor : "inherit"
+                          }}
+                        />
                         <p className="font-semibold text-sm sm:text-base">
                           Edit
                         </p>
@@ -641,8 +656,12 @@ function AdministratorDashboard() {
                           openModal("archiveStaff");
                         }}
                       >
-                        <ArchiveIcon className="w-4 h-4 sm:w-5 sm:h-5 mr-2"
-                          style={{ color: theme === "dark" ? secondaryColor : "inherit" }} />
+                        <ArchiveIcon
+                          className="w-4 h-4 sm:w-5 sm:h-5 mr-2"
+                          style={{
+                            color: theme === "dark" ? secondaryColor : "inherit"
+                          }}
+                        />
                         <p className="font-semibold text-sm sm:text-base">
                           Archive
                         </p>

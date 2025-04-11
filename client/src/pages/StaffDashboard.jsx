@@ -483,23 +483,12 @@ function StaffDashboard() {
                   </div>
                 ))}
               </div>
-              <div className="flex justify-center">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex items-center gap-2 text-xs sm:text-sm"
-                  onClick={handleDownloadStaffList}
-                >
-                  <DownloadIcon className="w-2 h-2 sm:w-4 sm:h-4" />
-                  <span>DOWNLOAD STAFF LIST</span>
-                </Button>
-              </div>
             </div>
           )}
         </div>
 
         {/* Reminders Card */}
-        <div
+        {/* <div
           className={cn(
             "shadow-custom p-4 sm:p-6 md:p-8 lg:p-10 bg-ash-100 dark:bg-customNeutral-500 rounded-lg flex flex-col items-center gap-3 sm:gap-4 overflow-y-auto",
             "[&::-webkit-scrollbar]:w-2",
@@ -560,7 +549,7 @@ function StaffDashboard() {
               )}
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );
