@@ -58,7 +58,17 @@ export function TreatmentMultiSelect({
         </div>
       </PopoverTrigger>
 
-      <PopoverContent className="relative z-50 bg-customNeutral-100 dark:bg-customNeutral-400 dark:text-customNeutral-100 shadow-md rounded-md p-1 max-h-60 overflow-y-auto min-w-[var(--radix-popover-trigger-width)] ">
+      <PopoverContent
+        className={cn(
+          "relative z-50 bg-customNeutral-100 dark:bg-customNeutral-400 dark:text-customNeutral-100 shadow-md rounded-md p-1 max-h-60 overflow-y-auto min-w-[var(--radix-popover-trigger-width)]",
+          // Scrollbar-specific styling
+          "[&::-webkit-scrollbar]:w-2",
+          "[&::-webkit-scrollbar-thumb]:bg-gray-400",
+          "[&::-webkit-scrollbar-thumb]:rounded-full",
+          "[&::-webkit-scrollbar-track]:bg-transparent",
+          "[&::-webkit-scrollbar-thumb:hover]:bg-lavender-400"
+        )}
+      >
         {Array.isArray(options) && options.length > 0 ? (
           options.map((option) => (
             <div

@@ -952,7 +952,10 @@ function FinancialOverview() {
                 .map((column) => (
                   <TableHead
                     key={column.value}
-                    className="py-4 text-center whitespace-nowrap"
+                    className={cn(
+                      "py-4 whitespace-nowrap",
+                      column.value === "client" ? "text-start" : "text-center"
+                    )}
                     data-cy={`table-header-${column.value}`}
                   >
                     {column.label}
@@ -969,7 +972,12 @@ function FinancialOverview() {
                     .map((column) => (
                       <TableCell
                         key={column.value}
-                        className="whitespace-nowrap"
+                        className={cn(
+                          "whitespace-nowrap",
+                          column.value === "client"
+                            ? "text-start"
+                            : "text-center"
+                        )}
                         data-cy={`sales-cell-${column.value}-${index}`}
                       >
                         {column.value === "date_transacted"

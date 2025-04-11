@@ -16,9 +16,7 @@ function ArchivePatientEntry({ isOpen, onClose, onArchive }) {
       <div className="flex w-full flex-1 items-center justify-center text-warning-300">
         <WarningIcon size={48} />
       </div>
-      <ModalTitle className="text-center">
-        ARCHIVE PATIENT INFORMATION?
-      </ModalTitle>
+      <ModalTitle className="text-center">ARCHIVE PATIENT RECORD?</ModalTitle>
       <p className="dark:text-customNeutral-100">
         Deleting the chosen patient entry would mean there is no recovery for
         that entry.

@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend } from "recharts";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+  Legend,
+  Tooltip
+} from "recharts";
 import {
   Card,
   CardContent,
@@ -8,16 +15,21 @@ import {
   CardFooter,
   CardTitle
 } from "@/components/ui/card";
-
+import { useTheme } from "./ThemeProvider";
 import { Loader } from "@/components/ui/Loader";
 
-// Simple color palette
-const COLORS = ["#4361ee", "#3a0ca3", "#7209b7", "#f72585", "#4cc9f0"];
-
 const BeautoxPieChart = () => {
+  const { theme } = useTheme();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [expensesData, setExpensesData] = useState([]);
+
+  // Dynamic color palettes based on theme
+  const LIGHT_COLORS = ["#4361ee", "#3a0ca3", "#7209b7", "#f72585", "#4cc9f0"];
+  const DARK_COLORS = ["#80b1ff", "#9b72ff", "#cf8eff", "#ff9ed2", "#8df3ff"];
+
+  // Select color palette based on theme
+  const COLORS = theme === "dark" ? DARK_COLORS : LIGHT_COLORS;
 
   // Fetch expenses data when component mounts
   useEffect(() => {
@@ -98,64 +110,48 @@ const BeautoxPieChart = () => {
     })}`;
   };
 
-  // Custom label renderer for external labels to avoid overlap
-  const renderCustomizedLabel = ({
-    name,
-    percent,
-    cx,
-    cy,
-    midAngle,
-    innerRadius,
-    outerRadius,
-    index
-  }) => {
-    // Truncate long category names
-    const shortenedName =
-      name.length > 10 ? `${name.substring(0, 8)}...` : name;
-    const RADIAN = Math.PI / 180;
+  // Custom tooltip for displaying data on hover
+  const CustomTooltip = ({ active, payload }) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload;
+      return (
+        <div className="text-base p-4 rounded-lg dark:bg-customNeutral-500 dark:text-customNeutral-100 bg-ash-100 border border-customNeutral-200 dark:border-customNeutral-300">
+          <p className="font-semibold">{data.name}</p>
+          <div className="flex flex-row justify-between items-center gap-4">
+            <p>{formatCurrency(data.value)}</p>
+            <p>{((data.value / totalExpenses) * 100).toFixed(1)}%</p>
+          </div>
+        </div>
+      );
+    }
+    return null;
+  };
 
-    // Position labels outside the pie chart
-    const radius = outerRadius * 1.2;
-    const x = cx + radius * Math.cos(-midAngle * RADIAN);
-    const y = cy + radius * Math.sin(-midAngle * RADIAN);
-
-    // Get the segment's color
-    const fill = COLORS[index % COLORS.length];
-
-    // Determine if label should be on left or right side for text anchor
-    const textAnchor = x > cx ? "start" : "end";
+  // Custom legend formatter to include percentages
+  const renderLegendText = (value, entry) => {
+    const item = chartData.find((d) => d.name === value);
+    const percentage = item
+      ? ((item.value / totalExpenses) * 100).toFixed(0)
+      : 0;
 
     return (
-      <g>
-        {/* Draw line from segment to label */}
-        <path
-          d={`M${cx + outerRadius * Math.cos(-midAngle * RADIAN)},${
-            cy + outerRadius * Math.sin(-midAngle * RADIAN)
-          }L${x},${y}`}
-          stroke={fill}
-          fill="none"
-        />
-        {/* Draw the text label */}
-        <text
-          x={x}
-          y={y}
-          fill={fill}
-          textAnchor={textAnchor}
-          dominantBaseline="central"
-          fontSize="12"
-          fontWeight="bold"
-        >
-          {`${shortenedName}: ${(percent * 100).toFixed(0)}%`}
-        </text>
-      </g>
+      <span className="dark:text-customNeutral-100 font-semibold">
+        {value} ({percentage}%)
+      </span>
     );
   };
 
   return (
-    <Card className="w-full h-full shadow-md bg-white flex flex-col items-center justify-evenly">
+    <Card
+      className={`w-full h-full shadow-custom bg-ash-100 dark:bg-customNeutral-500 dark:text-customNeutral-100 flex flex-col items-center justify-evenly`}
+    >
       <CardHeader className="items-center pb-2">
-        <CardTitle>MONTHLY EXPENSES</CardTitle>
-        <CardDescription>April 2025</CardDescription>
+        <CardTitle className="dark:text-customNeutral-100 ">
+          MONTHLY EXPENSES
+        </CardTitle>
+        <CardDescription className="dark:text-customNeutral-100">
+          April 2025
+        </CardDescription>
       </CardHeader>
       <CardContent className="pb-0 w-full flex-1 flex flex-col items-center justify-center">
         {loading ? (
@@ -163,11 +159,21 @@ const BeautoxPieChart = () => {
             <Loader />
           </div>
         ) : error ? (
-          <div className="px-3 py-2 bg-red-50 border border-error-200 rounded text-error-400 text-xs mb-4">
+          <div
+            className={`px-3 py-2 ${
+              theme === "dark"
+                ? "bg-red-900 border-red-700 text-red-200"
+                : "bg-red-50 border-error-200 text-error-400"
+            } border rounded text-xs mb-4`}
+          >
             Error loading data: {error}
           </div>
         ) : chartData.length === 0 ? (
-          <div className="flex flex-col justify-center items-center h-64 text-gray-400">
+          <div
+            className={`flex flex-col justify-center items-center h-64 ${
+              theme === "dark" ? "text-gray-400" : "text-gray-400"
+            }`}
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="64"
@@ -185,36 +191,39 @@ const BeautoxPieChart = () => {
             <p className="mt-4 text-lg font-medium">No expense data</p>
           </div>
         ) : (
-          <>
-            <ResponsiveContainer width="100%" height={250}>
-              <PieChart>
-                <Pie
-                  data={chartData}
-                  dataKey="value"
-                  nameKey="name"
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={80}
-                  labelLine={true}
-                  label={renderCustomizedLabel}
-                >
-                  {chartData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.fill} />
-                  ))}
-                </Pie>
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
-          </>
+          <ResponsiveContainer width="100%" height={320}>
+            <PieChart>
+              <Legend
+                layout="horizontal"
+                verticalAlign="bottom"
+                align="center"
+                formatter={renderLegendText}
+                wrapperStyle={{ paddingBottom: "20px" }}
+              />
+              <Tooltip content={<CustomTooltip />} />
+              <Pie
+                data={chartData}
+                dataKey="value"
+                nameKey="name"
+                cx="50%"
+                cy="50%"
+                innerRadius={70}
+                outerRadius={100}
+              >
+                {chartData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.fill} />
+                ))}
+              </Pie>
+            </PieChart>
+          </ResponsiveContainer>
         )}
       </CardContent>
       <CardFooter>
         <div className="text-center mt-4">
-          <div className="text-2xl font-bold">
+          <div className="text-2xl font-bold ">
             {formatCurrency(totalExpenses)}
           </div>
-          <div className="text-sm text-gray-500">TOTAL EXPENSES</div>
+          <div className="text-sm bg-transparent">TOTAL EXPENSES</div>
         </div>
       </CardFooter>
     </Card>

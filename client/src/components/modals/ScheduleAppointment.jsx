@@ -44,7 +44,7 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
   const [alertMessage, setAlertMessage] = useState("");
   const [alertTitle, setAlertTitle] = useState("");
   const [showAlert, setShowAlert] = useState(false);
-  
+
   // Add validation error states
   const [ageError, setAgeError] = useState(false);
   const [phoneError, setPhoneError] = useState(false);
@@ -97,7 +97,7 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
       return true;
     }
   };
-  
+
   const validatePhone = (value) => {
     if (value && !isValidPhoneNumber(value)) {
       setPhoneError(true);
@@ -107,7 +107,7 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
       return true;
     }
   };
-  
+
   const validateDate = (value) => {
     if (value && !isValidDate(value)) {
       setDateError(true);
@@ -135,16 +135,22 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
     // Reset alert
     setAlertTitle("");
     setAlertMessage("");
-    
+
     // Run all validations
     const isAgeValid = validateAge(age);
     const isPhoneValid = validatePhone(contactNumber);
     const isDateValid = validateDate(dateOfSession);
     const isTimeValid = isWithinBusinessHours(timeOfSession);
     const isEmailValid = validateEmail(email);
-    
+
     // If any validation fails, prevent form submission
-    if (!isAgeValid || !isPhoneValid || !isDateValid || !isTimeValid || !isEmailValid) {
+    if (
+      !isAgeValid ||
+      !isPhoneValid ||
+      !isDateValid ||
+      !isTimeValid ||
+      !isEmailValid
+    ) {
       return;
     }
 
@@ -173,17 +179,17 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
         setEmail("");
         setDateOfSession("");
         setTimeOfSession("");
-        
+
         // Reset validation errors
         setAgeError(false);
         setPhoneError(false);
         setDateError(false);
         setEmailError(false);
-        
+
         // Show success message
         setAlertTitle("Success");
         setAlertMessage(
-          "Appointment scheduled successfully! Awaiting confirmation."
+          "Appointment scheduled successfully! Kindly await for confirmation."
         );
         setShowAlert(true);
       } else {
@@ -274,7 +280,8 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
             </InputTextField>
             {phoneError && (
               <p className="text-red-500 text-xs mt-1">
-                Please enter a valid Philippine mobile number (format: 09XXXXXXXXX)
+                Please enter a valid Philippine mobile number (format:
+                09XXXXXXXXX)
               </p>
             )}
           </InputContainer>

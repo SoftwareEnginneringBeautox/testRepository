@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { useModal } from "@/hooks/useModal";
@@ -67,6 +67,7 @@ import UpdateIcon from "@/assets/icons/UpdateIcon";
 
 // Add Checkbox import at the top of the file
 import { Checkbox } from "@/components/ui/Checkbox";
+import { Loader } from "@/components/ui/Loader";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -76,99 +77,125 @@ function PatientRecordsDatabase() {
   const [records, setRecords] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortOption, setSortOption] = useState("");
-  const [loading, setLoading] = useState(true); // Add loading state
+  const [loading, setLoading] = useState(true);
 
-  // State for managing column visibility
-  const [selectedColumns, setSelectedColumns] = useState([
-    "client", // Mandatory
-    "dateofsession", // Mandatory
-    "timeofsession",
-    "personincharge",
-    "package",
-    "treatment",
-    "sessionsleft", // New column for sessions left
-    "consentformsigned",
-    "paymentmethod",
-    "totalamount",
-    "amountpaid",
-    "remainingbalance",
-    "referenceno",
-    "contactnumber", 
-    "age", 
-    "email"
-  ]);
-
-  // State for temp column selection (before applying)
-  const [tempSelectedColumns, setTempSelectedColumns] = useState([
-    ...selectedColumns
-  ]);
-
-  const columns = [
+  // Define the column configuration
+  const columnConfig = [
     { label: "CLIENT", value: "client", mandatory: true },
     { label: "DATE OF SESSION", value: "dateofsession", mandatory: true },
-    { label: "TIME OF SESSION", value: "timeofsession" },
-    { label: "CONTACT NUMBER", value: "contactnumber" },
-    { label: "AGE", value: "age" },
-    { label: "EMAIL", value: "email" },
-    { label: "PERSON IN CHARGE", value: "personincharge" },
-    { label: "PACKAGE", value: "package" },
-    { label: "TREATMENT", value: "treatment" },
-    { label: "SESSIONS LEFT", value: "sessionsleft" }, // New column
-    { label: "CONSENT FORM SIGNED", value: "consentformsigned" },
-    { label: "PAYMENT METHOD", value: "paymentmethod" },
-    { label: "TOTAL AMOUNT", value: "totalamount" },
-    { label: "AMOUNT PAID", value: "amountpaid" },
-    { label: "REMAINING BALANCE", value: "remainingbalance" },
-    { label: "REFERENCE NO.", value: "referenceno" }
+    { label: "TIME OF SESSION", value: "timeofsession", mandatory: false },
+    { label: "CONTACT NUMBER", value: "contactnumber", mandatory: false },
+    { label: "AGE", value: "age", mandatory: false },
+    { label: "EMAIL", value: "email", mandatory: false },
+    { label: "PERSON IN CHARGE", value: "personincharge", mandatory: false },
+    { label: "PACKAGE", value: "package", mandatory: false },
+    { label: "TREATMENT", value: "treatment", mandatory: false },
+    { label: "SESSIONS LEFT", value: "sessionsleft", mandatory: false },
+    {
+      label: "CONSENT FORM SIGNED",
+      value: "consentformsigned",
+      mandatory: false
+    },
+    { label: "PAYMENT METHOD", value: "paymentmethod", mandatory: false },
+    { label: "TOTAL AMOUNT", value: "totalamount", mandatory: false },
+    { label: "AMOUNT PAID", value: "amountpaid", mandatory: false },
+    { label: "REMAINING BALANCE", value: "remainingbalance", mandatory: false },
+    { label: "REFERENCE NO.", value: "referenceno", mandatory: false }
   ];
 
-  // Handle applying column filter changes
-  const applyColumnFilters = () => {
-    // Ensure mandatory columns are included
-    const mandatoryColumns = columns
-      .filter((col) => col.mandatory)
-      .map((col) => col.value);
+  // Get all column values
+  const allColumns = columnConfig.map((col) => col.value);
 
-    const updatedColumns = [...tempSelectedColumns];
+  // Get only mandatory column values
+  const mandatoryColumns = columnConfig
+    .filter((col) => col.mandatory)
+    .map((col) => col.value);
 
-    // Add any missing mandatory columns
-    mandatoryColumns.forEach((mandatoryCol) => {
-      if (!updatedColumns.includes(mandatoryCol)) {
-        updatedColumns.push(mandatoryCol);
-      }
+  // State to manage column visibility - initialize with all columns visible
+  const [columnVisibility, setColumnVisibility] = useState(() => {
+    const initialVisibility = {};
+    allColumns.forEach((col) => {
+      initialVisibility[col] = true;
     });
+    return initialVisibility;
+  });
 
-    setSelectedColumns(updatedColumns);
-  };
+  // State for temporary column selections (before applying)
+  const [tempColumnVisibility, setTempColumnVisibility] = useState({
+    ...columnVisibility
+  });
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
   const recordsPerPage = 10;
 
+  // Function to handle individual column selection change
+  const handleColumnToggle = (column) => {
+    // Don't allow toggling mandatory columns
+    if (mandatoryColumns.includes(column)) return;
+
+    setTempColumnVisibility((prev) => ({
+      ...prev,
+      [column]: !prev[column]
+    }));
+  };
+
+  // Function to handle "Select All" action
+  const handleSelectAll = (isSelected) => {
+    const newState = { ...tempColumnVisibility };
+
+    // Set all non-mandatory columns to the selected state
+    allColumns.forEach((col) => {
+      if (!mandatoryColumns.includes(col)) {
+        newState[col] = isSelected;
+      }
+    });
+
+    setTempColumnVisibility(newState);
+  };
+
+  // Function to apply column filter changes
+  const applyColumnFilters = useCallback(() => {
+    // Ensure mandatory columns are visible
+    const newVisibility = { ...tempColumnVisibility };
+
+    mandatoryColumns.forEach((col) => {
+      newVisibility[col] = true;
+    });
+
+    // Set the new column visibility
+    setColumnVisibility(newVisibility);
+
+    // Debug output
+    console.log("Applied column filters:", newVisibility);
+  }, [tempColumnVisibility, mandatoryColumns]);
+
+  // Reset tempColumnVisibility whenever columnVisibility changes
   useEffect(() => {
-    console.log(
-      "📅 Client date today:",
-      new Date().toISOString().split("T")[0]
-    );
-  }, []);
+    setTempColumnVisibility({ ...columnVisibility });
+  }, [columnVisibility]);
+
+  // Log visibility state changes for debugging
+  useEffect(() => {
+    console.log("Column visibility state:", columnVisibility);
+  }, [columnVisibility]);
 
   // Fetch patient records from the API
   const fetchRecords = async () => {
     try {
-      setLoading(true); // Set loading to true before fetching
+      setLoading(true);
       const response = await fetch(`${API_BASE_URL}/api/patients`, {
         method: "GET",
         credentials: "include"
       });
       const data = await response.json();
-      console.log("API Response Data:", data); // 🔍 Debugging line
-      setRecords(data.filter((record) => !record.archived)); // only show active records
-      // Reset to first page when data changes
+      console.log("API Response Data:", data);
+      setRecords(data.filter((record) => !record.archived));
       setCurrentPage(1);
     } catch (error) {
       console.error("Error fetching records:", error);
     } finally {
-      setLoading(false); // Set loading to false when done
+      setLoading(false);
     }
   };
 
@@ -176,7 +203,7 @@ function PatientRecordsDatabase() {
   useEffect(() => {
     fetchRecords();
   }, []);
-  
+
   const [treatmentsList, setTreatmentsList] = useState([]);
   useEffect(() => {
     const fetchTreatments = async () => {
@@ -196,11 +223,6 @@ function PatientRecordsDatabase() {
 
     fetchTreatments();
   }, []);
-
-  // Initialize the temporary column selection
-  useEffect(() => {
-    setTempSelectedColumns([...selectedColumns]);
-  }, [selectedColumns]);
 
   const getTreatmentNames = (ids) => {
     if (!Array.isArray(ids)) return [];
@@ -288,7 +310,7 @@ function PatientRecordsDatabase() {
       };
 
       await fetch(`${API_BASE_URL}/api/appointments`, {
-        method: "POST", // or PUT if your backend handles updates
+        method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify(appointmentPayload)
@@ -312,16 +334,15 @@ function PatientRecordsDatabase() {
         body: JSON.stringify({
           table: "patient_records",
           id: selectedEntry.id,
-          action: "edit", 
+          action: "edit",
           data: safeData
         })
       });
-      
-      // If this is updating a session, update sessions left count
+
       if (safeData.sessions_left !== undefined) {
         // Implementation would go here if needed
       }
-      
+
       closeModal();
       fetchRecords();
     } catch (error) {
@@ -367,92 +388,14 @@ function PatientRecordsDatabase() {
     }
   };
 
-  // Generate pagination links
-  const generatePaginationItems = () => {
-    const items = [];
-    const maxVisiblePages = 5;
-
-    // Always show first page
-    items.push(
-      <PaginationItem key="first">
-        <PaginationLink
-          isActive={currentPage === 1}
-          onClick={() => paginate(1)}
-        >
-          1
-        </PaginationLink>
-      </PaginationItem>
-    );
-
-    // Show ellipsis if needed
-    if (currentPage > 3) {
-      items.push(
-        <PaginationItem key="ellipsis-start">
-          <PaginationEllipsis />
-        </PaginationItem>
-      );
-    }
-
-    // Calculate range of visible pages
-    let startPage = Math.max(2, currentPage - 1);
-    let endPage = Math.min(totalPages - 1, currentPage + 1);
-
-    // Adjust if at the beginning or end
-    if (currentPage <= 3) {
-      endPage = Math.min(maxVisiblePages - 1, totalPages - 1);
-    } else if (currentPage >= totalPages - 2) {
-      startPage = Math.max(2, totalPages - maxVisiblePages + 2);
-    }
-
-    // Add middle pages
-    for (let i = startPage; i <= endPage; i++) {
-      if (i > 1 && i < totalPages) {
-        items.push(
-          <PaginationItem key={i}>
-            <PaginationLink
-              isActive={currentPage === i}
-              onClick={() => paginate(i)}
-            >
-              {i}
-            </PaginationLink>
-          </PaginationItem>
-        );
-      }
-    }
-
-    // Show ellipsis if needed
-    if (currentPage < totalPages - 2 && totalPages > maxVisiblePages) {
-      items.push(
-        <PaginationItem key="ellipsis-end">
-          <PaginationEllipsis />
-        </PaginationItem>
-      );
-    }
-
-    // Always show last page if there's more than one page
-    if (totalPages > 1) {
-      items.push(
-        <PaginationItem key="last">
-          <PaginationLink
-            isActive={currentPage === totalPages}
-            onClick={() => paginate(totalPages)}
-          >
-            {totalPages}
-          </PaginationLink>
-        </PaginationItem>
-      );
-    }
-
-    return items;
-  };
-
+  // Generate PDF report function
   const generatePRDReport = (patientRecords) => {
     if (!patientRecords || patientRecords.length === 0) {
       console.error("No records available to generate PDF.");
       return;
     }
 
-    // First create a temporary jsPDF instance to measure the table
+    // Implementation for PDF generation (unchanged)
     const tempDoc = new jsPDF({
       orientation: "landscape",
       unit: "pt",
@@ -476,8 +419,8 @@ function PatientRecordsDatabase() {
       { header: "PIC", width: 70 },
       { header: "PACKAGE", width: 100 },
       { header: "TREATMENT", width: 100 },
-      { header: "SESS LEFT", width: 40 }, // Added this column
-      { header: "CS", width: 30 }, 
+      { header: "SESS LEFT", width: 40 },
+      { header: "CS", width: 30 },
       { header: "MODE", width: 50 },
       { header: "TOTAL", width: 70 },
       { header: "PAID", width: 70 },
@@ -562,7 +505,7 @@ function PatientRecordsDatabase() {
         formatDate(record.dateTransacted || record.date_of_session),
         formatTime(record.nextSessionTime || record.time_of_session),
         record.contact_number || "N/A",
-        record.age?.toString() || "N/A", 
+        record.age?.toString() || "N/A",
         record.email || "N/A",
         (record.personInCharge || record.person_in_charge)?.toUpperCase() ||
           "N/A",
@@ -660,24 +603,94 @@ function PatientRecordsDatabase() {
     doc.save(`Beautox_PatientRecords_${formattedDateForFilename}.pdf`);
   };
 
-  // Column mapping to determine visibility
-  const isColumnVisible = {
-    client: true, // Always true - mandatory
-    dateofsession: true, // Always true - mandatory
-    timeofsession: selectedColumns.includes("timeofsession"),
-    contactnumber: selectedColumns.includes("contactnumber"),
-    age: selectedColumns.includes("age"),
-    email: selectedColumns.includes("email"),
-    personincharge: selectedColumns.includes("personincharge"),
-    package: selectedColumns.includes("package"),
-    treatment: selectedColumns.includes("treatment"),
-    sessionsleft: selectedColumns.includes("sessionsleft"), // New column
-    consentformsigned: selectedColumns.includes("consentformsigned"),
-    paymentmethod: selectedColumns.includes("paymentmethod"),
-    totalamount: selectedColumns.includes("totalamount"),
-    amountpaid: selectedColumns.includes("amountpaid"),
-    remainingbalance: selectedColumns.includes("remainingbalance"),
-    referenceno: selectedColumns.includes("referenceno")
+  // Custom filter component for column selection
+  const ColumnFilterMenu = () => {
+    const allSelected = allColumns.every(
+      (col) => mandatoryColumns.includes(col) || tempColumnVisibility[col]
+    );
+
+    return (
+      <div className="bg-white dark:bg-slate-950 py-2 rounded-md shadow-md border border-slate-200 dark:border-slate-800 w-72">
+        <div className="px-3 py-2 border-b border-slate-200 dark:border-slate-800">
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="select-all"
+              checked={allSelected}
+              onCheckedChange={(checked) => handleSelectAll(checked)}
+            />
+            <label htmlFor="select-all" className="font-medium">
+              Select All
+            </label>
+          </div>
+        </div>
+        <div className="max-h-60 overflow-y-auto py-1">
+          {columnConfig.map((column) => (
+            <div
+              key={column.value}
+              className="px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-800"
+            >
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id={`column-${column.value}`}
+                  checked={tempColumnVisibility[column.value]}
+                  onCheckedChange={() => handleColumnToggle(column.value)}
+                  disabled={column.mandatory}
+                />
+                <label
+                  htmlFor={`column-${column.value}`}
+                  className={`text-sm ${column.mandatory ? "font-medium" : ""}`}
+                >
+                  {column.label}
+                  {column.mandatory && (
+                    <span className="ml-1 text-xs text-slate-500">
+                      (required)
+                    </span>
+                  )}
+                </label>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="px-3 py-2 border-t border-slate-200 dark:border-slate-800 flex justify-end">
+          <Button size="sm" onClick={applyColumnFilters}>
+            Apply
+          </Button>
+        </div>
+      </div>
+    );
+  };
+
+  // Convert columnConfig to format expected by MultiSelectFilter component
+  const multiSelectOptions = columnConfig.map((col) => ({
+    label: col.label,
+    value: col.value,
+    mandatory: col.mandatory
+  }));
+
+  // Convert columnVisibility object to array of selected values for MultiSelectFilter
+  const getSelectedValuesArray = () => {
+    return Object.entries(tempColumnVisibility)
+      .filter(([key, value]) => value)
+      .map(([key]) => key);
+  };
+
+  // Handle MultiSelectFilter selection changes
+  const handleMultiSelectChange = (selectedValues) => {
+    const newVisibility = { ...tempColumnVisibility };
+
+    // First, set all non-mandatory columns to false
+    allColumns.forEach((col) => {
+      if (!mandatoryColumns.includes(col)) {
+        newVisibility[col] = false;
+      }
+    });
+
+    // Then set selected columns to true
+    selectedValues.forEach((val) => {
+      newVisibility[val] = true;
+    });
+
+    setTempColumnVisibility(newVisibility);
   };
 
   return (
@@ -720,11 +733,11 @@ function PatientRecordsDatabase() {
           </Select>
 
           <MultiSelectFilter
-            options={columns}
-            selectedValues={tempSelectedColumns}
-            setSelectedValues={setTempSelectedColumns}
+            options={multiSelectOptions}
+            selectedValues={getSelectedValuesArray()}
+            setSelectedValues={handleMultiSelectChange}
             placeholder="FILTER COLUMNS"
-            mandatoryValues={["client", "dateofsession"]}
+            mandatoryValues={mandatoryColumns}
             showApplyButton={true}
             onApply={applyColumnFilters}
             data-cy="column-filter"
@@ -733,10 +746,7 @@ function PatientRecordsDatabase() {
       </div>
 
       {loading ? (
-        <div className="w-full flex flex-col items-center justify-center p-12 space-y-4" data-cy="loading-spinner">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent"></div>
-          <p className="text-center text-primary font-medium">Loading patient records...</p>
-        </div>
+        <Loader />
       ) : (
         <div className="w-full overflow-x-auto" data-cy="patient-records-table">
           <Table
@@ -747,93 +757,81 @@ function PatientRecordsDatabase() {
           >
             <TableHeader>
               <TableRow>
-                {/* Always show CLIENT column */}
-                <TableHead className=" whitespace-nowrap">CLIENT</TableHead>
-
-                {/* Always show DATE OF SESSION column */}
-                <TableHead className=" text-center whitespace-nowrap">
-                  DATE OF SESSION
-                </TableHead>
-
-                {/* Conditionally show other columns based on selectedColumns */}
-                {isColumnVisible.timeofsession && (
-                  <TableHead className=" text-center whitespace-nowrap">
+                {/* Conditionally render all columns based on visibility */}
+                {columnVisibility.client && (
+                  <TableHead className="whitespace-nowrap">CLIENT</TableHead>
+                )}
+                {columnVisibility.dateofsession && (
+                  <TableHead className="text-center whitespace-nowrap">
+                    DATE OF SESSION
+                  </TableHead>
+                )}
+                {columnVisibility.timeofsession && (
+                  <TableHead className="text-center whitespace-nowrap">
                     TIME OF SESSION
                   </TableHead>
                 )}
-
-                {isColumnVisible.contactnumber && (
-                  <TableHead className=" text-center whitespace-nowrap">
+                {columnVisibility.contactnumber && (
+                  <TableHead className="text-center whitespace-nowrap">
                     CONTACT NUMBER
                   </TableHead>
                 )}
-                {isColumnVisible.age && (
-                  <TableHead className=" text-center whitespace-nowrap">
+                {columnVisibility.age && (
+                  <TableHead className="text-center whitespace-nowrap">
                     AGE
                   </TableHead>
                 )}
-                {isColumnVisible.email && (
-                  <TableHead className=" text-center whitespace-nowrap">
+                {columnVisibility.email && (
+                  <TableHead className="text-center whitespace-nowrap">
                     EMAIL
                   </TableHead>
                 )}
-
-                {isColumnVisible.personincharge && (
-                  <TableHead className=" text-center whitespace-nowrap">
+                {columnVisibility.personincharge && (
+                  <TableHead className="text-center whitespace-nowrap">
                     PERSON IN CHARGE
                   </TableHead>
                 )}
-
-                {isColumnVisible.package && (
-                  <TableHead className=" whitespace-nowrap">PACKAGE</TableHead>
+                {columnVisibility.package && (
+                  <TableHead className="whitespace-nowrap">PACKAGE</TableHead>
                 )}
-
-                {isColumnVisible.treatment && (
-                  <TableHead className=" whitespace-nowrap">TREATMENT</TableHead>
+                {columnVisibility.treatment && (
+                  <TableHead className="whitespace-nowrap">TREATMENT</TableHead>
                 )}
-                
-                {isColumnVisible.sessionsleft && (
-                  <TableHead className=" text-center whitespace-nowrap">
+                {columnVisibility.sessionsleft && (
+                  <TableHead className="text-center whitespace-nowrap">
                     SESSIONS LEFT
                   </TableHead>
                 )}
-
-                {isColumnVisible.consentformsigned && (
-                  <TableHead className=" text-center whitespace-nowrap">
+                {columnVisibility.consentformsigned && (
+                  <TableHead className="text-center whitespace-nowrap">
                     CONSENT FORM SIGNED
                   </TableHead>
                 )}
-
-                {isColumnVisible.paymentmethod && (
-                  <TableHead className=" text-center whitespace-nowrap">
+                {columnVisibility.paymentmethod && (
+                  <TableHead className="text-center whitespace-nowrap">
                     PAYMENT METHOD
                   </TableHead>
                 )}
-
-                {isColumnVisible.totalamount && (
-                  <TableHead className=" text-center whitespace-nowrap">
+                {columnVisibility.totalamount && (
+                  <TableHead className="text-center whitespace-nowrap">
                     TOTAL AMOUNT
                   </TableHead>
                 )}
-
-                {isColumnVisible.amountpaid && (
-                  <TableHead className=" text-center whitespace-nowrap">
+                {columnVisibility.amountpaid && (
+                  <TableHead className="text-center whitespace-nowrap">
                     AMOUNT PAID
                   </TableHead>
                 )}
-
-                {isColumnVisible.remainingbalance && (
-                  <TableHead className=" text-center whitespace-nowrap">
+                {columnVisibility.remainingbalance && (
+                  <TableHead className="text-center whitespace-nowrap">
                     REMAINING BALANCE
                   </TableHead>
                 )}
-
-                {isColumnVisible.referenceno && (
-                  <TableHead className=" text-center whitespace-nowrap">
+                {columnVisibility.referenceno && (
+                  <TableHead className="text-center whitespace-nowrap">
                     REFERENCE NO.
                   </TableHead>
                 )}
-
                 <TableHead></TableHead>
               </TableRow>
             </TableHeader>
@@ -841,33 +839,35 @@ function PatientRecordsDatabase() {
               {currentRecords.length > 0 ? (
                 currentRecords.map((record, index) => (
                   <TableRow key={index} data-cy={`record-row-${index}`}>
-                    {/* Always show CLIENT column */}
-                    <TableCell
-                      className="whitespace-nowrap"
-                      data-cy={`record-client-${index}`}
-                    >
-                      {record.client ||
-                        record.patient_name?.toUpperCase() ||
-                        "N/A"}
-                    </TableCell>
+                    {/* Conditionally render all cells based on visibility */}
+                    {columnVisibility.client && (
+                      <TableCell
+                        className="whitespace-nowrap"
+                        data-cy={`record-client-${index}`}
+                      >
+                        {record.client ||
+                          record.patient_name?.toUpperCase() ||
+                          "N/A"}
+                      </TableCell>
+                    )}
 
-                    {/* Always show DATE OF SESSION column */}
-                    <TableCell
-                      className="text-center whitespace-nowrap"
-                      data-cy={`record-date-${index}`}
-                    >
-                      {record.dateTransacted || record.date_of_session
-                        ? format(
-                            new Date(
-                              record.dateTransacted || record.date_of_session
-                            ),
-                            "MMMM dd, yyyy"
-                          ).toUpperCase()
-                        : "N/A"}
-                    </TableCell>
+                    {columnVisibility.dateofsession && (
+                      <TableCell
+                        className="text-center whitespace-nowrap"
+                        data-cy={`record-date-${index}`}
+                      >
+                        {record.dateTransacted || record.date_of_session
+                          ? format(
+                              new Date(
+                                record.dateTransacted || record.date_of_session
+                              ),
+                              "MMMM dd, yyyy"
+                            ).toUpperCase()
+                          : "N/A"}
+                      </TableCell>
+                    )}
 
-                    {/* Conditionally show other cells based on selectedColumns */}
-                    {isColumnVisible.timeofsession && (
+                    {columnVisibility.timeofsession && (
                       <TableCell
                         className="text-center whitespace-nowrap"
                         data-cy={`record-time-${index}`}
@@ -875,7 +875,8 @@ function PatientRecordsDatabase() {
                         {record.nextSessionTime || record.time_of_session
                           ? (() => {
                               const timeValue =
-                                record.nextSessionTime || record.time_of_session;
+                                record.nextSessionTime ||
+                                record.time_of_session;
                               const parsedTime = new Date(
                                 `1970-01-01T${timeValue}`
                               );
@@ -883,225 +884,226 @@ function PatientRecordsDatabase() {
                                 ? "Invalid Time"
                                 : format(parsedTime, "hh:mm a");
                             })()
-                    
-                         : "N/A"}
-                     </TableCell>
-                   )}
+                          : "N/A"}
+                      </TableCell>
+                    )}
 
-                   {isColumnVisible.contactnumber && (
-                     <TableCell
-                       className="text-center whitespace-nowrap"
-                       data-cy={`record-contact-${index}`}
-                     >
-                       {record.contact_number || "N/A"}
-                     </TableCell>
-                   )}
+                    {columnVisibility.contactnumber && (
+                      <TableCell
+                        className="text-center whitespace-nowrap"
+                        data-cy={`record-contact-${index}`}
+                      >
+                        {record.contact_number || "N/A"}
+                      </TableCell>
+                    )}
 
-                   {isColumnVisible.age && (
-                     <TableCell
-                       className="text-center whitespace-nowrap"
-                       data-cy={`record-age-${index}`}
-                     >
-                       {record.age || "N/A"}
-                     </TableCell>
-                   )}
+                    {columnVisibility.age && (
+                      <TableCell
+                        className="text-center whitespace-nowrap"
+                        data-cy={`record-age-${index}`}
+                      >
+                        {record.age || "N/A"}
+                      </TableCell>
+                    )}
 
-                   {isColumnVisible.email && (
-                     <TableCell
-                       className="text-center whitespace-nowrap"
-                       data-cy={`record-email-${index}`}
-                     >
-                       {record.email || "N/A"}
-                     </TableCell>
-                   )}
+                    {columnVisibility.email && (
+                      <TableCell
+                        className="text-center whitespace-nowrap"
+                        data-cy={`record-email-${index}`}
+                      >
+                        {record.email || "N/A"}
+                      </TableCell>
+                    )}
 
-                   {isColumnVisible.personincharge && (
-                     <TableCell
-                       className="text-center whitespace-nowrap"
-                       data-cy={`record-personincharge-${index}`}
-                     >
-                       {(
-                         record.personInCharge || record.person_in_charge
-                       )?.toUpperCase()}
-                     </TableCell>
-                   )}
+                    {columnVisibility.personincharge && (
+                      <TableCell
+                        className="text-center whitespace-nowrap"
+                        data-cy={`record-personincharge-${index}`}
+                      >
+                        {(
+                          record.personInCharge || record.person_in_charge
+                        )?.toUpperCase()}
+                      </TableCell>
+                    )}
 
-                   {isColumnVisible.package && (
-                     <TableCell
-                       className="whitespace-nowrap"
-                       data-cy={`record-package-${index}`}
-                     >
-                       {(record.package || record.package_name)?.toUpperCase()}
-                     </TableCell>
-                   )}
+                    {columnVisibility.package && (
+                      <TableCell
+                        className="whitespace-nowrap"
+                        data-cy={`record-package-${index}`}
+                      >
+                        {(record.package || record.package_name)?.toUpperCase()}
+                      </TableCell>
+                    )}
 
-                   {isColumnVisible.treatment && (
-                     <TableCell
-                       className="text-left whitespace-nowrap"
-                       data-cy={`record-treatment-${index}`}
-                     >
-                       {Array.isArray(record.treatment_ids) &&
-                       record.treatment_ids.length > 0 ? (
-                         <div className="flex flex-col gap-1">
-                           {record.treatment_ids.map((id) => {
-                             const treatment = treatmentsList.find(
-                               (t) => t.id === id
-                             );
-                             return treatment ? (
-                               <Badge
-                                 key={treatment.id}
-                                 variant="outline"
-                                 data-cy={`record-treatment-badge-${record.id}-${treatment.id}`}
-                               >
-                                 + {treatment.treatment_name.toUpperCase()}
-                               </Badge>
-                             ) : null;
-                           })}
-                         </div>
-                       ) : (
-                         <span className="text-muted-foreground italic">
-                           N/A
-                         </span>
-                       )}
-                     </TableCell>
-                   )}
-                   
-                   {isColumnVisible.sessionsleft && (
-                     <TableCell
-                       className="text-center whitespace-nowrap"
-                       data-cy={`record-sessionsleft-${index}`}
-                     >
-                       {record.sessions_left || 0}
-                     </TableCell>
-                   )}
+                    {columnVisibility.treatment && (
+                      <TableCell
+                        className="text-left whitespace-nowrap"
+                        data-cy={`record-treatment-${index}`}
+                      >
+                        {Array.isArray(record.treatment_ids) &&
+                        record.treatment_ids.length > 0 ? (
+                          <div className="flex flex-col gap-1">
+                            {record.treatment_ids.map((id) => {
+                              const treatment = treatmentsList.find(
+                                (t) => t.id === id
+                              );
+                              return treatment ? (
+                                <Badge
+                                  key={treatment.id}
+                                  variant="outline"
+                                  data-cy={`record-treatment-badge-${record.id}-${treatment.id}`}
+                                >
+                                  + {treatment.treatment_name.toUpperCase()}
+                                </Badge>
+                              ) : null;
+                            })}
+                          </div>
+                        ) : (
+                          <span className="text-muted-foreground italic">
+                            N/A
+                          </span>
+                        )}
+                      </TableCell>
+                    )}
 
-                   {isColumnVisible.consentformsigned && (
-                     <TableCell
-                       className="text-center whitespace-nowrap"
-                       data-cy={`record-consent-${index}`}
-                     >
-                       {record.consentStatus ||
-                         (typeof record.consent_form_signed === "boolean"
-                           ? record.consent_form_signed
-                             ? "YES"
-                             : "NO"
-                           : record.consent_form_signed)}
-                     </TableCell>
-                   )}
+                    {columnVisibility.sessionsleft && (
+                      <TableCell
+                        className="text-center whitespace-nowrap"
+                        data-cy={`record-sessionsleft-${index}`}
+                      >
+                        {record.sessions_left || 0}
+                      </TableCell>
+                    )}
 
-                   {isColumnVisible.paymentmethod && (
-                     <TableCell
-                       className="whitespace-nowrap"
-                       data-cy={`record-paymentmethod-${index}`}
-                     >
-                       {(
-                         record.paymentMethod || record.payment_method
-                       )?.toUpperCase()}
-                     </TableCell>
-                   )}
+                    {columnVisibility.consentformsigned && (
+                      <TableCell
+                        className="text-center whitespace-nowrap"
+                        data-cy={`record-consent-${index}`}
+                      >
+                        {record.consentStatus ||
+                          (typeof record.consent_form_signed === "boolean"
+                            ? record.consent_form_signed
+                              ? "YES"
+                              : "NO"
+                            : record.consent_form_signed)}
+                      </TableCell>
+                    )}
 
-                   {isColumnVisible.totalamount && (
-                     <TableCell
-                       className="text-center"
-                       data-cy={`record-total-${index}`}
-                     >
-                       {new Intl.NumberFormat("en-PH", {
-                         style: "currency",
-                         currency: "PHP"
-                       }).format(parseFloat(record.total_amount || 0))}
-                     </TableCell>
-                   )}
+                    {columnVisibility.paymentmethod && (
+                      <TableCell
+                        className="whitespace-nowrap"
+                        data-cy={`record-paymentmethod-${index}`}
+                      >
+                        {(
+                          record.paymentMethod || record.payment_method
+                        )?.toUpperCase()}
+                      </TableCell>
+                    )}
 
-                   {isColumnVisible.amountpaid && (
-                     <TableCell
-                       className="text-center"
-                       data-cy={`record-paid-${index}`}
-                     >
-                       {record.amount_paid
-                         ? new Intl.NumberFormat("en-PH", {
-                             style: "currency",
-                             currency: "PHP"
-                           }).format(record.amount_paid)
-                         : "₱0.00"}
-                     </TableCell>
-                   )}
+                    {columnVisibility.totalamount && (
+                      <TableCell
+                        className="text-center"
+                        data-cy={`record-total-${index}`}
+                      >
+                        {new Intl.NumberFormat("en-PH", {
+                          style: "currency",
+                          currency: "PHP"
+                        }).format(parseFloat(record.total_amount || 0))}
+                      </TableCell>
+                    )}
 
-                   {isColumnVisible.remainingbalance && (
-                     <TableCell
-                       className="text-center"
-                       data-cy={`record-remaining-${index}`}
-                     >
-                       {(() => {
-                         const total = parseFloat(record.total_amount || 0);
-                         const paid = parseFloat(record.amount_paid || 0);
-                         const remaining = total - paid;
-                         return new Intl.NumberFormat("en-PH", {
-                           style: "currency",
-                           currency: "PHP"
-                         }).format(remaining);
-                       })()}
-                     </TableCell>
-                   )}
+                    {columnVisibility.amountpaid && (
+                      <TableCell
+                        className="text-center"
+                        data-cy={`record-paid-${index}`}
+                      >
+                        {record.amount_paid
+                          ? new Intl.NumberFormat("en-PH", {
+                              style: "currency",
+                              currency: "PHP"
+                            }).format(record.amount_paid)
+                          : "₱0.00"}
+                      </TableCell>
+                    )}
 
-                   {isColumnVisible.referenceno && (
-                     <TableCell
-                       className="text-center"
-                       data-cy={`record-refno-${index}`}
-                     >
-                       {record.reference_number || "N/A"}
-                     </TableCell>
-                   )}
+                    {columnVisibility.remainingbalance && (
+                      <TableCell
+                        className="text-center"
+                        data-cy={`record-remaining-${index}`}
+                      >
+                        {(() => {
+                          const total = parseFloat(record.total_amount || 0);
+                          const paid = parseFloat(record.amount_paid || 0);
+                          const remaining = total - paid;
+                          return new Intl.NumberFormat("en-PH", {
+                            style: "currency",
+                            currency: "PHP"
+                          }).format(remaining);
+                        })()}
+                      </TableCell>
+                    )}
 
-                   <TableCell>
-                     <DropdownMenu>
-                       <DropdownMenuTrigger
-                         data-cy={`record-menu-trigger-${index}`}
-                       >
-                         <EllipsisIcon />
-                       </DropdownMenuTrigger>
-                       <DropdownMenuContent>
-                         <DropdownMenuGroup>
-                           <DropdownMenuItem
-                             onClick={() => handleOpenUpdateEntry(record)}
-                             data-cy={`record-update-button-${index}`}
-                           >
-                             <UpdateIcon />
-                             <p className="font-semibold">Update</p>
-                           </DropdownMenuItem>
-                           <DropdownMenuItem
-                             onClick={() => handleOpenEditEntry(record)}
-                             data-cy={`record-edit-button-${index}`}
-                           >
-                             <EditIcon />
-                             <p className="font-semibold">Edit</p>
-                           </DropdownMenuItem>
-                           <DropdownMenuItem
-                             onClick={() => handleOpenArchiveEntry(record)}
-                             data-cy={`record-archive-button-${index}`}
-                           >
-                             <ArchiveIcon />
-                             <p className="font-semibold">Archive</p>
-                           </DropdownMenuItem>
-                         </DropdownMenuGroup>
-                       </DropdownMenuContent>
-                     </DropdownMenu>
-                   </TableCell>
-                 </TableRow>
-               ))
-             ) : (
-               <TableRow>
-                 <TableCell
-                   colSpan={selectedColumns.length + 2}
-                   className="text-center"
-                   data-cy="no-records-message"
-                 >
-                   NO PATIENT RECORDS CURRENTLY AVAILABLE
-                 </TableCell>
-               </TableRow>
-             )}
-           </TableBody>
-         </Table>
-       </div>
+                    {columnVisibility.referenceno && (
+                      <TableCell
+                        className="text-center"
+                        data-cy={`record-refno-${index}`}
+                      >
+                        {record.reference_number || "N/A"}
+                      </TableCell>
+                    )}
+
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger
+                          data-cy={`record-menu-trigger-${index}`}
+                        >
+                          <EllipsisIcon />
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                          <DropdownMenuGroup>
+                            <DropdownMenuItem
+                              onClick={() => handleOpenUpdateEntry(record)}
+                              data-cy={`record-update-button-${index}`}
+                            >
+                              <UpdateIcon />
+                              <p className="font-semibold">Update</p>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => handleOpenEditEntry(record)}
+                              data-cy={`record-edit-button-${index}`}
+                            >
+                              <EditIcon />
+                              <p className="font-semibold">Edit</p>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => handleOpenArchiveEntry(record)}
+                              data-cy={`record-archive-button-${index}`}
+                            >
+                              <ArchiveIcon />
+                              <p className="font-semibold">Archive</p>
+                            </DropdownMenuItem>
+                          </DropdownMenuGroup>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={
+                      Object.values(columnVisibility).filter(Boolean).length + 1
+                    }
+                    className="text-center"
+                    data-cy="no-records-message"
+                  >
+                    NO PATIENT RECORDS CURRENTLY AVAILABLE
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
       )}
 
       <div

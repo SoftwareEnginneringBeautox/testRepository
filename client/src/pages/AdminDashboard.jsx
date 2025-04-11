@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "../App.css";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 import { cn } from "@/lib/utils";
 import { useModal } from "@/hooks/useModal";
 import { Button } from "@/components/ui/Button";
@@ -39,6 +41,9 @@ import {
 import EditIcon from "@/assets/icons/EditIcon";
 import ArchiveIcon from "@/assets/icons/ArchiveIcon";
 import CalendarIcon from "@/assets/icons/CalendarIcon";
+import ChevronDownIcon from "@/assets/icons/ChevronDownIcon";
+import EvaluateIcon from "@/assets/icons/EvaluateIcon";
+import DownloadIcon from "@/assets/icons/DownloadIcon";
 import axios from "axios";
 import { format, parseISO } from "date-fns";
 
@@ -486,6 +491,91 @@ function AdministratorDashboard() {
     }
   };
 
+  const generateStaffListReport = (staffData = []) => {
+    const doc = new jsPDF({
+      orientation: "portrait",
+      unit: "pt",
+      format: "a4"
+    });
+
+    const now = new Date();
+    const dateString = now
+      .toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric"
+      })
+      .toUpperCase();
+
+    const title = `BEAUTOX PRISM STAFF LIST REPORT AS OF ${dateString}`;
+
+    // Set font and title
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(16);
+    doc.text(title, doc.internal.pageSize.getWidth() / 2, 50, {
+      align: "center"
+    });
+
+    const tableColumnHeaders = [
+      "STAFF ID",
+      "STAFF NAME",
+      "ROLE",
+      "EMAIL",
+      "DAY OFF"
+    ];
+
+    const tableRows = staffData.map((staff) => [
+      staff.id || "N/A",
+      staff.username?.toUpperCase() || "N/A",
+      staff.role?.toUpperCase() || "N/A",
+      staff.email || "N/A",
+      staff.dayoff?.toUpperCase() || "N/A"
+    ]);
+
+    autoTable(doc, {
+      head: [tableColumnHeaders],
+      body: tableRows,
+      startY: 70,
+      margin: { left: 40, right: 40 },
+      styles: {
+        font: "helvetica",
+        fontSize: 9,
+        halign: "center",
+        cellPadding: 3,
+        overflow: "linebreak",
+        minCellHeight: 14,
+        valign: "middle"
+      },
+      headStyles: {
+        fillColor: "#381B4C",
+        textColor: "#FFFFFF",
+        fontSize: 8,
+        fontStyle: "bold",
+        halign: "center",
+        valign: "middle",
+        lineWidth: 0
+      },
+      alternateRowStyles: {
+        fillColor: "#F8F8F8"
+      },
+      didDrawPage: function (data) {
+        const pageWidth = doc.internal.pageSize.width;
+        const pageHeight = doc.internal.pageSize.height;
+        const margin = 40;
+
+        doc.setFontSize(8);
+        doc.text(
+          `Page ${data.pageNumber} of ${doc.internal.getNumberOfPages()}`,
+          pageWidth - margin,
+          pageHeight - 10,
+          { align: "right" }
+        );
+      }
+    });
+
+    doc.save(`Beautox_StaffListReport_${now.toISOString().slice(0, 10)}.pdf`);
+  };
+
   return (
     <div
       className="flex flex-col lg:flex-row items-start gap-6 justify-center w-full p-3 sm:p-4 md:p-6 lg:w-[90%] mx-auto"
@@ -538,42 +628,39 @@ function AdministratorDashboard() {
             <TableHeader data-cy="reminders-header">
               <TableRow>
                 <TableHead
-                  className="text-base sm:text-lg md:text-xl text-left font-semibold py-2 sm:py-4 flex items-center justify-between"
+                  className="text-left py-8 flex items-center justify-between"
                   data-cy="reminders-title"
                 >
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-row text-xl items-center gap-2">
                     REMINDERS
-                    {(stagedAppointments.length > 0 || reminders.length > 0) && (
+                    {(stagedAppointments.length > 0 ||
+                      reminders.length > 0) && (
                       <span className="text-xs bg-lavender-300 text-white rounded-full px-2 py-0.5">
                         {stagedAppointments.length + reminders.length}
                       </span>
                     )}
                   </div>
-                  <button 
-                    onClick={toggleReminders} 
-                    className="focus:outline-none transition-transform duration-200"
-                    aria-label={remindersExpanded ? "Collapse reminders" : "Expand reminders"}
+                  <button
+                    onClick={toggleReminders}
+                    className="flex flex-row gap-2 items-center justify-center rounded-lg focus:outline-none text-sm transition-transform duration-200 border-2 border-customNeutral-100 p-1 pl-3"
+                    aria-label={
+                      remindersExpanded
+                        ? "Collapse reminders"
+                        : "Expand reminders"
+                    }
                     data-cy="toggle-reminders"
                   >
-                    <svg 
-                      xmlns="http://www.w3.org/2000/svg" 
-                      width="24" 
-                      height="24" 
-                      viewBox="0 0 24 24" 
-                      fill="none" 
-                      stroke="currentColor" 
-                      strokeWidth="2" 
-                      strokeLinecap="round" 
-                      strokeLinejoin="round"
-                      className={`transform ${remindersExpanded ? "rotate-180" : "rotate-0"}`}
-                    >
-                      <polyline points="6 9 12 15 18 9"></polyline>
-                    </svg>
+                    VIEW ALL
+                    <ChevronDownIcon
+                      className={`transform ${
+                        remindersExpanded ? "rotate-180" : "rotate-0"
+                      }`}
+                    />
                   </button>
                 </TableHead>
               </TableRow>
             </TableHeader>
-            
+
             {remindersExpanded ? (
               <TableBody data-cy="reminders-body">
                 {loadingAppointments ? (
@@ -592,11 +679,11 @@ function AdministratorDashboard() {
                     {stagedAppointments.length > 0
                       ? stagedAppointments.map((item, index) => (
                           <TableRow key={`staged-${index}`}>
-                            <TableCell className="flex items-center gap-2 sm:gap-4 text-sm sm:text-base">
+                            <TableCell className="flex items-center gap-2 sm:gap-4 text-sm sm:text-base [&_svg]:shrink-0 ">
                               <CalendarIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                               <span>
-                                <strong>{item.full_name}</strong> has scheduled an
-                                appointment on{" "}
+                                <strong>{item.full_name}</strong> has scheduled
+                                an appointment on{" "}
                                 <strong>
                                   {formatSafeDate(
                                     item.date_of_session,
@@ -617,7 +704,8 @@ function AdministratorDashboard() {
                                 className="ml-auto"
                                 onClick={() => viewAppointmentDetails(item)}
                               >
-                                View
+                                EVALUATE
+                                <EvaluateIcon />
                               </Button>
                             </TableCell>
                           </TableRow>
@@ -628,7 +716,7 @@ function AdministratorDashboard() {
                     {reminders.length > 0
                       ? reminders.map((item, index) => (
                           <TableRow key={`reminder-${index}`}>
-                            <TableCell className="flex items-center gap-2 sm:gap-4 text-sm sm:text-base">
+                            <TableCell className="flex items-center gap-2 sm:gap-4 text-sm sm:text-base [&_svg]:shrink-0">
                               <CalendarIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                               <span>
                                 {item.full_name} has an appointment on{" "}
@@ -669,22 +757,33 @@ function AdministratorDashboard() {
                       "Loading appointments..."
                     ) : appointmentError ? (
                       <span className="text-error-400">{appointmentError}</span>
-                    ) : stagedAppointments.length > 0 || reminders.length > 0 ? (
+                    ) : stagedAppointments.length > 0 ||
+                      reminders.length > 0 ? (
                       <div className="flex items-center justify-between">
                         <span>
                           {stagedAppointments.length > 0 ? (
                             <span className="font-medium">
-                              {stagedAppointments.length} pending {stagedAppointments.length === 1 ? "confirmation" : "confirmations"}
+                              {stagedAppointments.length} pending{" "}
+                              {stagedAppointments.length === 1
+                                ? "confirmation"
+                                : "confirmations"}
                             </span>
                           ) : null}
-                          {stagedAppointments.length > 0 && reminders.length > 0 ? " • " : ""}
+                          {stagedAppointments.length > 0 && reminders.length > 0
+                            ? " • "
+                            : ""}
                           {reminders.length > 0 ? (
                             <span>
-                              {reminders.length} upcoming {reminders.length === 1 ? "appointment" : "appointments"}
+                              {reminders.length} upcoming{" "}
+                              {reminders.length === 1
+                                ? "appointment"
+                                : "appointments"}
                             </span>
                           ) : null}
                         </span>
-                        <span className="text-xs text-gray-500">Click arrow to view details</span>
+                        <span className="text-xs text-gray-500">
+                          Click arrow to view details
+                        </span>
                       </div>
                     ) : (
                       "No upcoming appointments"
@@ -740,7 +839,15 @@ function AdministratorDashboard() {
           </p>
         ) : (
           <div
-            className="w-full max-h-[300px] sm:max-h-[400px] overflow-y-auto"
+            className={cn(
+              "w-full max-h-[300px] sm:max-h-[400px] overflow-y-auto",
+              // Scrollbar-specific styling
+              "[&::-webkit-scrollbar]:w-2",
+              "[&::-webkit-scrollbar-thumb]:bg-gray-400",
+              "[&::-webkit-scrollbar-thumb]:rounded-full",
+              "[&::-webkit-scrollbar-track]:bg-transparent",
+              "[&::-webkit-scrollbar-thumb:hover]:bg-lavender-400"
+            )}
             data-cy="staff-list-container"
           >
             {staffList.map((staff, index) => (
@@ -817,6 +924,15 @@ function AdministratorDashboard() {
           <PlusIcon className="w-4 h-4 sm:w-5 sm:h-5" />
           ADD NEW STAFF
           <UserIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+        </Button>
+        <Button
+          data-cy="download-staff-btn"
+          fullWidth="true"
+          onClick={() => generateStaffListReport(staffList)}
+          className="mt-2 text-sm sm:text-base py-2 sm:py-3"
+        >
+          <DownloadIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+          DOWNLOAD STAFF LIST
         </Button>
         {currentModal === "createStaff" && (
           <CreateStaff

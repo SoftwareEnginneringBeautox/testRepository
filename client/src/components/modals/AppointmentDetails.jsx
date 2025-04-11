@@ -12,6 +12,7 @@ import CircleUserIcon from "@/assets/icons/CircleUserIcon";
 import PlusIcon from "@/assets/icons/PlusIcon";
 import { format } from "date-fns";
 import ChevronLeftIcon from "@/assets/icons/ChevronLeftIcon";
+import ChevronRightIcon from "@/assets/icons/ChevronRightIcon";
 import axios from "axios";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
@@ -33,26 +34,31 @@ function AppointmentDetails({
     try {
       setIsProcessing(true);
       setStatusMessage({ type: "info", text: "Processing confirmation..." });
-      
-      const response = await axios.post(`${API_BASE_URL}/api/staged-appointments/${id}/confirm`);
-      
+
+      const response = await axios.post(
+        `${API_BASE_URL}/api/staged-appointments/${id}/confirm`
+      );
+
       if (response.data.success) {
-        setStatusMessage({ type: "success", text: "Appointment confirmed successfully!" });
+        setStatusMessage({
+          type: "success",
+          text: "Appointment confirmed successfully!"
+        });
         // Call the onConfirm callback to update UI
         onConfirm(id);
         // Close the modal after a short delay
         setTimeout(() => onClose(), 1500);
       } else {
-        setStatusMessage({ 
-          type: "error", 
-          text: response.data.message || "Failed to confirm appointment" 
+        setStatusMessage({
+          type: "error",
+          text: response.data.message || "Failed to confirm appointment"
         });
       }
     } catch (error) {
       console.error("Error confirming appointment:", error);
-      setStatusMessage({ 
-        type: "error", 
-        text: "Error confirming appointment. Please try again." 
+      setStatusMessage({
+        type: "error",
+        text: "Error confirming appointment. Please try again."
       });
     } finally {
       setIsProcessing(false);
@@ -64,26 +70,31 @@ function AppointmentDetails({
     try {
       setIsProcessing(true);
       setStatusMessage({ type: "info", text: "Processing rejection..." });
-      
-      const response = await axios.post(`${API_BASE_URL}/api/staged-appointments/${id}/reject`);
-      
+
+      const response = await axios.post(
+        `${API_BASE_URL}/api/staged-appointments/${id}/reject`
+      );
+
       if (response.data.success) {
-        setStatusMessage({ type: "success", text: "Appointment rejected successfully!" });
+        setStatusMessage({
+          type: "success",
+          text: "Appointment rejected successfully!"
+        });
         // Call the onReject callback to update UI
         onReject(id);
         // Close the modal after a short delay
         setTimeout(() => onClose(), 1500);
       } else {
-        setStatusMessage({ 
-          type: "error", 
-          text: response.data.message || "Failed to reject appointment" 
+        setStatusMessage({
+          type: "error",
+          text: response.data.message || "Failed to reject appointment"
         });
       }
     } catch (error) {
       console.error("Error rejecting appointment:", error);
-      setStatusMessage({ 
-        type: "error", 
-        text: "Error rejecting appointment. Please try again." 
+      setStatusMessage({
+        type: "error",
+        text: "Error rejecting appointment. Please try again."
       });
     } finally {
       setIsProcessing(false);
@@ -135,17 +146,21 @@ function AppointmentDetails({
               {label}: <span className="font-normal">{value || "N/A"}</span>
             </p>
           ))}
-          
+
           {statusMessage && (
-            <div className={`p-3 rounded mb-2 ${
-              statusMessage.type === 'success' ? 'bg-green-100 text-green-800' :
-              statusMessage.type === 'error' ? 'bg-red-100 text-red-800' :
-              'bg-blue-100 text-blue-800'
-            }`}>
+            <div
+              className={`p-3 rounded mb-2 ${
+                statusMessage.type === "success"
+                  ? "bg-green-100 text-green-800"
+                  : statusMessage.type === "error"
+                  ? "bg-red-100 text-red-800"
+                  : "bg-blue-100 text-blue-800"
+              }`}
+            >
               {statusMessage.text}
             </div>
           )}
-          
+
           <div className="flex sm:flex-row flex-col gap-4 w-full">
             <Button
               variant="outline"
@@ -162,6 +177,7 @@ function AppointmentDetails({
               disabled={isProcessing}
             >
               CONFIRM
+              <ChevronRightIcon />
             </Button>
           </div>
         </div>

@@ -35,34 +35,6 @@ function Login() {
   const { currentModal, openModal, closeModal } = useModal();
   const navigate = useNavigate();
 
-  // useEffect(() => {
-  //   // Initialize theme if not set in localStorage
-  //   if (!localStorage.getItem("vite-ui-theme")) {
-  //     localStorage.setItem("vite-ui-theme", "system");
-  //   }
-  //   // Dispatch a custom event to notify that the theme has changed
-  //   window.dispatchEvent(new Event("themeChanged"));
-
-  //   // Apply the "light" theme specifically for the login page
-  //   const root = document.documentElement;
-  //   root.classList.remove("dark", "light");
-  //   root.classList.add("light");
-
-  //   return () => {
-  //     // When leaving the login page, restore the theme from localStorage
-  //     const storedTheme = localStorage.getItem("vite-ui-theme") || "system";
-  //     root.classList.remove("dark", "light");
-  //     if (storedTheme === "system") {
-  //       const systemPrefersDark = window.matchMedia(
-  //         "(prefers-color-scheme: dark)"
-  //       ).matches;
-  //       root.classList.add(systemPrefersDark ? "dark" : "light");
-  //     } else {
-  //       root.classList.add(storedTheme);
-  //     }
-  //   };
-  // }, []);
-
   // Get executeRecaptcha function from the v3 hook
   const { executeRecaptcha } = useGoogleReCaptcha();
 
@@ -146,20 +118,28 @@ function Login() {
           `Login failed for "${trimmedUsername}":`,
           response.data.message
         );
-        
+
         // Special handling for archived accounts
-        if (response.data.message?.toLowerCase().includes('archived')) {
-          setErrorMessage("Your account has been archived. Please contact your administrator.");
+        if (response.data.message?.toLowerCase().includes("archived")) {
+          setErrorMessage(
+            "Your account has been archived. Please contact your administrator."
+          );
         } else {
-          setErrorMessage(response.data.message || "Invalid username or password");
+          setErrorMessage(
+            response.data.message || "Invalid username or password"
+          );
         }
         setIsLoading(false); // ✅ Stop loading on login failure
       }
     } catch (error) {
       // Also handle the 403 status specifically for archived accounts
-      if (error.response?.status === 403 && 
-          error.response.data?.message?.toLowerCase().includes('archived')) {
-        setErrorMessage("Your account has been archived. Please contact your administrator.");
+      if (
+        error.response?.status === 403 &&
+        error.response.data?.message?.toLowerCase().includes("archived")
+      ) {
+        setErrorMessage(
+          "Your account has been archived. Please contact your administrator."
+        );
       } else {
         setErrorMessage("An error occurred. Please try again later.");
       }
@@ -290,7 +270,7 @@ function Login() {
                   fullWidth="true"
                 >
                   <ChevronLeftIcon />
-                  RETURN
+                  VISIT BEAUTOX
                 </Button>
               </div>
             </form>
