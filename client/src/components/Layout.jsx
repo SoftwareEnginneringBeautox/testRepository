@@ -129,9 +129,7 @@ export default function Layout() {
         )}
       >
         {/* Fixed header with proper positioning */}
-        <header className="fixed w-full flex items-center justify-between px-2 py-2 z-40 bg-white/95 shadow-sm">
-          {/* Left side - sidebar trigger */}
-          <div className="flex-shrink-0">
+        <header className="fixed w-full flex items-center justify-between px-2 py-2 z-40 bg-white/95 dark:bg-gray-800 dark:border-b dark:border-gray-700 shadow-sm">          <div className="flex-shrink-0">
             {shouldShowSidebar && <SidebarTrigger />}
           </div>
 

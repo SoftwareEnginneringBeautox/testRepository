@@ -5,6 +5,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { cn } from "@/lib/utils";
 import { useModal } from "@/hooks/useModal";
+import { useTheme } from "@/components/ThemeProvider";
 import { Button } from "@/components/ui/Button";
 import CreateStaff from "@/components/modals/CreateStaff";
 import ModifyStaff from "@/components/modals/ModifyStaff";
@@ -48,6 +49,12 @@ import { format, parseISO } from "date-fns";
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 function AdministratorDashboard() {
+  const { theme } = useTheme();
+  
+  // Theme-dependent colors
+  const primaryColor = theme === "dark" ? "#A5B4FC" : "#3730A3"; // Light indigo for dark mode, dark purple for light mode
+  const secondaryColor = theme === "dark" ? "#E9D5FF" : "#5B21B6"; // Light purple for dark mode, dark purple for light mode
+  
   const [userName, setUserName] = useState(
     localStorage.getItem("username") || ""
   );
@@ -136,6 +143,10 @@ function AdministratorDashboard() {
     },
     [closeModal, fetchStaff, showAlert]
   );
+
+  // For backwards compatibility with existing code
+  const handleEditStaff = (staffData) => handleStaffAction("edit", staffData);
+  const handleArchiveStaff = (staffData) => handleStaffAction("archive", staffData);
 
   // Appointment Functions
   const fetchAppointments = useCallback(async () => {
@@ -234,14 +245,15 @@ function AdministratorDashboard() {
     { day: "Sun", currentWeek: 1900, previousWeek: 1400 }
   ];
 
+  // Chart config updated for dark mode
   const chartConfig = {
     currentWeek: {
       label: "Current Week",
-      color: "#381B4C"
+      color: theme === "dark" ? primaryColor : "#381B4C"
     },
     previousWeek: {
       label: "Previous Week",
-      color: "#002B7F"
+      color: theme === "dark" ? secondaryColor : "#002B7F"
     }
   };
 
@@ -400,6 +412,9 @@ function AdministratorDashboard() {
       staff.dayoff?.toUpperCase() || "N/A"
     ]);
 
+    // Use theme-aware color for PDF header
+    const headerColor = theme === "dark" ? "#5B21B6" : "#381B4C";
+
     autoTable(doc, {
       head: [tableColumnHeaders],
       body: tableRows,
@@ -415,7 +430,7 @@ function AdministratorDashboard() {
         valign: "middle"
       },
       headStyles: {
-        fillColor: "#381B4C",
+        fillColor: headerColor,
         textColor: "#FFFFFF",
         fontSize: 8,
         fontStyle: "bold",
@@ -443,6 +458,11 @@ function AdministratorDashboard() {
 
     doc.save(`Beautox_StaffListReport_${now.toISOString().slice(0, 10)}.pdf`);
   };
+
+  // Dropdown menu hover style
+  const dropdownItemHoverClass = theme === "dark" 
+    ? "hover:bg-gray-700" 
+    : "hover:bg-gray-100";
 
   return (
     <div
@@ -502,8 +522,8 @@ function AdministratorDashboard() {
           <RemindersTable
             stagedAppointments={stagedAppointments}
             reminders={reminders}
-            isLoading={loadingAppointments} // Changed from isLoading to loadingAppointments
-            error={appointmentError} // Changed from error to appointmentError
+            isLoading={loadingAppointments}
+            error={appointmentError}
             onEvaluateAppointment={handleEvaluateAppointment}
           />
         </div>
@@ -519,7 +539,7 @@ function AdministratorDashboard() {
       {/* Right Section */}
       <div
         className={cn(
-          "w-full lg:w-1/4 shadow-custom p-4 sm:p-6 md:p-8 lg:p-10 bg-ash-100 dark:bg-customNeutral-500 rounded-lg flex flex-col items-center gap-3 sm:gap-4 mt-4 lg:mt-0",
+          "w-full lg:w-1/4 shadow-custom p-4 sm:p-6 md:p-8 lg:p-10 bg-ash-100 dark:bg-gray-800 rounded-lg flex flex-col items-center gap-3 sm:gap-4 mt-4 lg:mt-0",
           "[&::-webkit-scrollbar]:w-2",
           "[&::-webkit-scrollbar-thumb]:bg-gray-400",
           "[&::-webkit-scrollbar-thumb]:rounded-full",
@@ -532,8 +552,8 @@ function AdministratorDashboard() {
           className="flex items-center gap-2 text-lg sm:text-xl md:text-2xl lg:text-[2rem] leading-tight sm:leading-[2.8rem] font-semibold dark:text-customNeutral-100"
           data-cy="staff-list-title"
         >
-          <UserIcon className="sm:w-8 sm:h-8 " data-cy="staff-icon" />
-          STAFF LIST
+          <UserIcon className="sm:w-8 sm:h-8" data-cy="staff-icon" />
+          <span style={{ color: theme === "dark" ? secondaryColor : "inherit" }}>STAFF LIST</span>
         </h3>
         {loadingStaff ? (
           <div className="w-full my-6" data-cy="loading-staff-message">
@@ -547,7 +567,7 @@ function AdministratorDashboard() {
             {errorStaff}
           </p>
         ) : staffList.length === 0 ? (
-          <p className="text-sm sm:text-base" data-cy="no-staff-message">
+          <p className="text-sm sm:text-base dark:text-gray-300" data-cy="no-staff-message">
             No staff found.
           </p>
         ) : (
@@ -566,10 +586,11 @@ function AdministratorDashboard() {
             {staffList.map((staff, index) => (
               <div
                 key={index}
-                className="w-full flex justify-between border-2 border-reflexBlue-400 dark:border-lavender-300 px-3 sm:px-4 py-2 sm:py-3 rounded-md mb-2"
+                className="w-full flex justify-between px-3 sm:px-4 py-2 sm:py-3 rounded-md mb-2 bg-white/50 dark:bg-gray-700"
+                style={theme === "dark" ? { border: `2px solid ${primaryColor}` } : { border: "2px solid var(--reflexBlue-400)" }}
                 data-cy={`staff-card-${index}`}
               >
-                <div className="flex flex-col " data-cy={`staff-info-${index}`}>
+                <div className="flex flex-col" data-cy={`staff-info-${index}`}>
                   <span
                     className="font-semibold text-sm sm:text-base dark:text-customNeutral-100"
                     data-cy={`staff-name-${index}`}
@@ -578,13 +599,13 @@ function AdministratorDashboard() {
                   </span>
                   {(staff.role === "receptionist" ||
                     staff.role === "aesthetician") && (
-                    <span
-                      className="text-xs sm:text-sm text-gray-500 capitalize"
-                      data-cy={`staff-role-${index}`}
-                    >
-                      ({staff.role})
-                    </span>
-                  )}
+                      <span
+                        className="text-xs sm:text-sm text-gray-500 dark:text-gray-300 capitalize"
+                        data-cy={`staff-role-${index}`}
+                      >
+                        ({staff.role})
+                      </span>
+                    )}
                 </div>
                 <DropdownMenu>
                   <DropdownMenuTrigger
@@ -593,30 +614,35 @@ function AdministratorDashboard() {
                     <EllipsisIcon className="w-5 h-5 sm:w-6 sm:h-6 dark:text-customNeutral-100" />
                   </DropdownMenuTrigger>
                   <DropdownMenuContent
+                    className="dark:bg-gray-800 dark:border-gray-700"
                     data-cy={`staff-actions-content-${index}`}
                   >
                     <DropdownMenuGroup>
                       <DropdownMenuItem
+                        className={`dark:text-white ${dropdownItemHoverClass}`}
                         data-cy={`edit-staff-btn-${index}`}
                         onClick={() => {
                           setSelectedStaff(staff);
                           openModal("modifyStaff");
                         }}
                       >
-                        <EditIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                        <EditIcon className="w-4 h-4 sm:w-5 sm:h-5 mr-2"
+                          style={{ color: theme === "dark" ? secondaryColor : "inherit" }} />
                         <p className="font-semibold text-sm sm:text-base">
                           Edit
                         </p>
                       </DropdownMenuItem>
 
                       <DropdownMenuItem
+                        className={`dark:text-white ${dropdownItemHoverClass}`}
                         data-cy={`archive-staff-btn-${index}`}
                         onClick={() => {
                           setSelectedStaff(staff);
                           openModal("archiveStaff");
                         }}
                       >
-                        <ArchiveIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                        <ArchiveIcon className="w-4 h-4 sm:w-5 sm:h-5 mr-2"
+                          style={{ color: theme === "dark" ? secondaryColor : "inherit" }} />
                         <p className="font-semibold text-sm sm:text-base">
                           Archive
                         </p>
@@ -632,19 +658,21 @@ function AdministratorDashboard() {
           data-cy="add-staff-btn"
           fullWidth="true"
           onClick={() => openModal("createStaff")}
-          className="mt-2 text-sm sm:text-base py-2 sm:py-3"
+          className="mt-2 text-sm sm:text-base py-2 sm:py-3 dark:bg-indigo-700 dark:hover:bg-indigo-600"
+          style={theme === "dark" ? { background: primaryColor } : {}}
         >
-          <PlusIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+          <PlusIcon className="w-4 h-4 sm:w-5 sm:h-5 mr-1" />
           ADD NEW STAFF
-          <UserIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+          <UserIcon className="w-4 h-4 sm:w-5 sm:h-5 ml-1" />
         </Button>
         <Button
           data-cy="download-staff-btn"
           fullWidth="true"
           onClick={() => generateStaffListReport(staffList)}
-          className="mt-2 text-sm sm:text-base py-2 sm:py-3"
+          className="mt-2 text-sm sm:text-base py-2 sm:py-3 dark:bg-indigo-700 dark:hover:bg-indigo-600"
+          style={theme === "dark" ? { background: primaryColor } : {}}
         >
-          <DownloadIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+          <DownloadIcon className="w-4 h-4 sm:w-5 sm:h-5 mr-1" />
           DOWNLOAD STAFF LIST
         </Button>
         {currentModal === "createStaff" && (
