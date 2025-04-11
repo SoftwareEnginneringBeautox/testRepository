@@ -33,7 +33,6 @@ import ClockIcon from "@/assets/icons/ClockIcon";
 function CreateTreatment({ isOpen, onClose }) {
   const [treatmentName, setTreatmentName] = useState("");
   const [price, setPrice] = useState("");
-  const [duration, setDuration] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [existingTreatments, setExistingTreatments] = useState([]);
@@ -87,7 +86,6 @@ function CreateTreatment({ isOpen, onClose }) {
       const payload = {
         treatment_name: treatmentName,
         price: parseFloat(price) || 0,
-        duration: parseInt(duration, 10) || 0,
         expiration: expiration ? parseInt(expiration, 10) : null
       };
 
@@ -158,26 +156,6 @@ function CreateTreatment({ isOpen, onClose }) {
                   allowNegativeValue={false}
                   value={price}
                   onValueChange={(value) => setPrice(value || "")}
-                  required
-                />
-              </InputTextField>
-            </InputContainer>
-
-            {/* Duration */}
-            <InputContainer>
-              <InputLabel>DURATION (MINUTES)</InputLabel>
-              <InputTextField>
-                <InputIcon>
-                  <ClockIcon />
-                </InputIcon>
-                <Input
-                  data-cy="treatment-duration"
-                  placeholder="e.g. 45"
-                  type="number"
-                  min="0"
-                  step="1"
-                  value={duration}
-                  onChange={(e) => setDuration(e.target.value)}
                   required
                 />
               </InputTextField>

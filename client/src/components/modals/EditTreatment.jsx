@@ -30,7 +30,6 @@ function EditTreatment({ isOpen, onClose, entryData, onSubmit }) {
   const [formData, setFormData] = useState({
     treatment_name: "",
     price: "",
-    duration: "",
     expiration: ""
   });
 
@@ -39,7 +38,6 @@ function EditTreatment({ isOpen, onClose, entryData, onSubmit }) {
       setFormData({
         treatment_name: entryData.treatment_name || "",
         price: entryData.price || "",
-        duration: entryData.duration || "",
         expiration: entryData.expiration || ""
       });
     }
@@ -109,32 +107,14 @@ function EditTreatment({ isOpen, onClose, entryData, onSubmit }) {
                 />
               </InputTextField>
             </InputContainer>
-            <InputContainer>
-              <InputLabel>DURATION (MINUTES)</InputLabel>
-              <InputTextField>
-                <InputIcon>
-                  <ClockIcon />
-                </InputIcon>
-                <Input
-                  data-cy="treatment-duration"
-                  placeholder="e.g. 45"
-                  type="number"
-                  min="0"
-                  step="1"
-                  value={formData.duration}
-                  onChange={(e) =>
-                    setFormData({ ...formData, duration: e.target.value })
-                  }
-                  required
-                />
-              </InputTextField>
-            </InputContainer>
+
+            {/* Duration field removed */}
 
             <InputContainer>
               <InputLabel>EXPIRATION (IN WEEKS)</InputLabel>
               <InputTextField>
                 <InputIcon>
-                  <TreatmentIcon />
+                  <ClockIcon />
                 </InputIcon>
                 <Input
                   data-cy="treatment-expiration"

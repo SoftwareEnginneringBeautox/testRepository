@@ -865,18 +865,17 @@ app.get('/api/appointments', async (req, res) => {
 // Create a new treatment
 app.post('/api/treatments', async (req, res) => {
   try {
-    const { treatment_name, price, duration, expiration } = req.body;
+    const { treatment_name, price, expiration } = req.body;
     const insertQuery = `
       INSERT INTO treatments (
         treatment_name,
         price,
-        duration,
         expiration
       )
-      VALUES ($1, $2, $3, $4)
+      VALUES ($1, $2, $3)
       RETURNING id;
     `;
-    const result = await pool.query(insertQuery, [treatment_name, price, duration, expiration]);
+    const result = await pool.query(insertQuery, [treatment_name, price, expiration]);
     res.json({ success: true, message: 'Treatment created', treatmentId: result.rows[0].id });
   } catch (error) {
     console.error('Error creating treatment:', error);

@@ -54,27 +54,35 @@ function AdministratorServices() {
   const [packagesData, setPackagesData] = useState([]);
   const [selectedPackage, setSelectedPackage] = useState(null);
   const [selectedTreatment, setSelectedTreatment] = useState(null);
+  const [loadingTreatments, setLoadingTreatments] = useState(true);
+  const [loadingPackages, setLoadingPackages] = useState(true);
   // Fetch Treatments from /api/treatments
   const fetchTreatments = async () => {
     try {
+      setLoadingTreatments(true);
       const response = await axios.get(`${API_BASE_URL}/api/treatments`, {
         withCredentials: true
       });
       setTreatmentsData(response.data.filter((item) => !item.archived));
     } catch (error) {
       console.error("Error fetching treatments:", error);
+    } finally {
+      setLoadingTreatments(false);
     }
   };
 
   // Fetch Packages from /api/packages
   const fetchPackages = async () => {
     try {
+      setLoadingPackages(true);
       const response = await axios.get(`${API_BASE_URL}/api/packages`, {
         withCredentials: true
       });
       setPackagesData(response.data.filter((item) => !item.archived));
     } catch (error) {
       console.error("Error fetching packages:", error);
+    } finally {
+      setLoadingPackages(false);
     }
   };
 
@@ -260,7 +268,17 @@ function AdministratorServices() {
           </TableRow>
         </TableHeader>
         <TableBody data-cy="treatments-table-body">
-          {paginatedTreatments.length > 0 ? (
+          {loadingTreatments ? (
+            <TableRow>
+              <TableCell
+                colSpan="4"
+                className="py-4 text-center font-medium"
+                data-cy="loading-treatments-message"
+              >
+                LOADING TREATMENTS...
+              </TableCell>
+            </TableRow>
+          ) : paginatedTreatments.length > 0 ? (
             paginatedTreatments.map((treatment) => (
               <TableRow
                 key={treatment.id}
@@ -408,7 +426,17 @@ function AdministratorServices() {
           </TableRow>
         </TableHeader>
         <TableBody data-cy="packages-table-body">
-          {paginatedPackages.length > 0 ? (
+          {loadingPackages ? (
+            <TableRow>
+              <TableCell
+                colSpan="6"
+                className="py-4 text-center font-medium"
+                data-cy="loading-packages-message"
+              >
+                LOADING PACKAGES...
+              </TableCell>
+            </TableRow>
+          ) : paginatedPackages.length > 0 ? (
             paginatedPackages.map((pkg) => (
               <TableRow key={pkg.id} data-cy={`package-row-${pkg.id}`}>
                 <TableCell
