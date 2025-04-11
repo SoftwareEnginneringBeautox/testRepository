@@ -4,17 +4,74 @@ import { useState, useEffect } from "react";
 
 import { PaginationWithPageCount } from "@/components/ui/Pagination";
 
-const Table = React.forwardRef(({ className, ...props }, ref) => (
+const Table = React.forwardRef(
+  (
+    {
+      className,
+      children,
+      // Pagination props
+      currentPage = 1,
+      totalPages = 1,
+      onPageChange,
+      showPagination = false,
+      ...props
+    },
+    ref
+  ) => {
+    // Use this state to count rows if you still want the dynamic background feature
+    const [rowCount, setRowCount] = useState(0);
+
+    // Count logic for row background
+    useEffect(() => {
+      // Find TableBody in children and count its direct tr children
+      React.Children.forEach(children, (child) => {
+        if (child?.type?.displayName === "TableBody") {
+          let count = 0;
+          React.Children.forEach(child.props.children, (row) => {
+            if (
+              React.isValidElement(row) &&
+              row.type?.displayName === "TableRow"
+            ) {
+              count++;
+            }
+          });
+          setRowCount(count);
+        }
+      });
+    }, [children]);
+
+    const scrollbarBgClass =
+      rowCount % 2 === 0
+        ? "bg-faintingLight-100 dark:bg-customNeutral-500"
+        : "bg-reflexBlue-100 dark:bg-customNeutral-400";
+
+    return (
   <div className="w-full overflow-hidden rounded-lg">
     <div className="w-full overflow-x-auto relative">
       <table
         ref={ref}
         className={cn("w-full border-collapse text-sm relative", className)}
         {...props}
+        >
+        {children}
+      </table>
+    </div>
+
+    {/* Pagination component - separated from scroll container */}
+    {showPagination && totalPages > 1 && (
+      <div className={cn("w-full ", scrollbarBgClass)}>
+        <PaginationWithPageCount
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={onPageChange}
+          siblingsCount={1}
       />
     </div>
+      )}
   </div>
-));
+    );
+  }
+);
 Table.displayName = "Table";
 
 const TableHeader = React.forwardRef(({ className, ...props }, ref) => (
