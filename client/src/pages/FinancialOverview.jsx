@@ -847,7 +847,7 @@ function FinancialOverview() {
         })
       });
       console.log("Archive response status:", response.status);
-     
+
       if (response.ok) {
         setExpensesData((prevExpenses) =>
           prevExpenses.filter((expense) => expense.id !== selectedExpense.id)
@@ -888,7 +888,7 @@ function FinancialOverview() {
         </p>
       </div>
 
-      {/* Sales Tracker Section */}
+      {/* Sales Tracker Section - Updated with isFinancialOverview prop */}
       <div data-cy="sales-chart-container" className="flex flex-col gap-4">
         <h2
           className="font-bold text-xl md:text-[2rem] dark:text-customNeutral-100"
@@ -898,7 +898,8 @@ function FinancialOverview() {
         </h2>
         <SalesChart
           chartConfig={chartConfig}
-          financialData={financialData} // Pass the financial data as a prop
+          financialData={financialData}
+          isFinancialOverview={true} // Set this prop to true in FinancialOverview
           data-cy="sales-chart"
         />
       </div>
@@ -928,8 +929,8 @@ function FinancialOverview() {
             </SelectItem>
             <SelectItem value="date_transacted" data-cy="sort-option-date">
               DATE TRANSACTED
-              </SelectItem>
-            </SelectContent>
+            </SelectItem>
+          </SelectContent>
         </Select>
 
         {/* Refactored MultiSelectFilter with apply button */}
@@ -995,16 +996,16 @@ function FinancialOverview() {
                         {column.value === "date_transacted"
                           ? sale.date_transacted
                             ? format(
-                                new Date(sale.date_transacted),
-                                "MMMM dd, yyyy"
-                              ).toUpperCase()
+                              new Date(sale.date_transacted),
+                              "MMMM dd, yyyy"
+                            ).toUpperCase()
                             : "N/A"
                           : column.value === "payment"
-                          ? new Intl.NumberFormat("en-PH", {
+                            ? new Intl.NumberFormat("en-PH", {
                               style: "currency",
                               currency: "PHP"
                             }).format(sale.payment)
-                          : (sale[column.value] || "N/A").toUpperCase()}
+                            : (sale[column.value] || "N/A").toUpperCase()}
                       </TableCell>
                     ))}
                 </TableRow>
@@ -1197,9 +1198,9 @@ function FinancialOverview() {
                     >
                       {expense.date
                         ? format(
-                            new Date(expense.date),
-                            "MMMM dd, yyyy"
-                          ).toUpperCase()
+                          new Date(expense.date),
+                          "MMMM dd, yyyy"
+                        ).toUpperCase()
                         : "N/A"}
                     </TableCell>
                     <TableCell
@@ -1223,9 +1224,8 @@ function FinancialOverview() {
                     >
                       <DropdownMenu>
                         <DropdownMenuTrigger
-                          data-cy={`expense-actions-trigger-${
-                            expense.id || index
-                          }`}
+                          data-cy={`expense-actions-trigger-${expense.id || index
+                            }`}
                         >
                           <EllipsisIcon />
                         </DropdownMenuTrigger>
@@ -1309,11 +1309,10 @@ function FinancialOverview() {
           <div className="text-2xl md:text-3xl leading-normal md:leading-[67.2px] font-semibold">
             {financialData.netIncome < 0 ? "TOTAL LOSS: " : "TOTAL PROFIT: "}
             <span
-              className={`font-bold  ${
-                financialData.netIncome < 0
+              className={`font-bold  ${financialData.netIncome < 0
                   ? "text-error-400"
                   : "text-success-400"
-              }`}
+                }`}
               data-cy="total-profit-amount"
             >
               {new Intl.NumberFormat("en-PH", {

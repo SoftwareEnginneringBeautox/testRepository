@@ -66,7 +66,8 @@ const SalesChart = ({
     totalSales: 0,
     totalExpenses: 0,
     netIncome: 0
-  }
+  },
+  isFinancialOverview = false // New prop to check if the component is used in FinancialOverview
 }) => {
   const { theme } = useTheme();
 
@@ -324,6 +325,7 @@ const SalesChart = ({
           </div>
         </ChartContainer>
       </CardContent>
+      {/* Only render the financial summary in CardFooter if isFinancialOverview is true */}
       <CardFooter data-cy="card-footer" className="flex flex-col gap-4">
         <div
           className="flex flex-col w-full items-start gap-2 text-sm"
@@ -362,9 +364,10 @@ const SalesChart = ({
             </div>
           </div>
         </div>
+        {/* Render sales and expenses, but never profit/loss in FinancialOverview */}
         <div className="w-full flex flex-row items-center justify-around gap-2 mt-4">
           <div
-            className="h-full flex-1 w-1/3 flex flex-col p-2 gap-1 bg-ash-400 dark:bg-customNeutral-400 dark:text-customNeutral-100 rounded-lg"
+            className={`h-full flex-1 ${isFinancialOverview ? "w-1/2" : "w-1/3"} flex flex-col p-2 gap-1 bg-ash-400 dark:bg-customNeutral-400 dark:text-customNeutral-100 rounded-lg`}
             data-cy="total-sales"
           >
             <span className="font-semibold text-xs pt-1">TOTAL SALES</span>
@@ -376,7 +379,7 @@ const SalesChart = ({
             </p>
           </div>
           <div
-            className="h-full flex-1 w-1/3 flex flex-col p-2 gap-1 bg-ash-400 dark:bg-customNeutral-400 dark:text-customNeutral-100 rounded-lg"
+            className={`h-full flex-1 ${isFinancialOverview ? "w-1/2" : "w-1/3"} flex flex-col p-2 gap-1 bg-ash-400 dark:bg-customNeutral-400 dark:text-customNeutral-100 rounded-lg`}
             data-cy="total-expenses"
           >
             <span className="font-semibold text-xs pt-1">TOTAL EXPENSES</span>
@@ -387,26 +390,28 @@ const SalesChart = ({
               }).format(financialData.totalExpenses)}
             </p>
           </div>
-          <div
-            className="h-full flex-1 w-1/3 flex flex-col p-2 gap-1 bg-ash-400 dark:bg-customNeutral-400 dark:text-customNeutral-100 rounded-lg"
-            data-cy="total-profit-loss"
-          >
-            <span className="font-semibold text-xs pt-1">
-              TOTAL PROFIT/LOSS
-            </span>
-            <p
-              className={`text-lg ${
-                financialData.netIncome >= 0
-                  ? "text-success-400"
-                  : "text-error-400"
-              }`}
+          {/* Only show profit/loss when NOT in FinancialOverview */}
+          {!isFinancialOverview && (
+            <div
+              className="h-full flex-1 w-1/3 flex flex-col p-2 gap-1 bg-ash-400 dark:bg-customNeutral-400 dark:text-customNeutral-100 rounded-lg"
+              data-cy="total-profit-loss"
             >
-              {new Intl.NumberFormat("en-PH", {
-                style: "currency",
-                currency: "PHP"
-              }).format(Math.abs(financialData.netIncome))}
-            </p>
-          </div>
+              <span className="font-semibold text-xs pt-1">
+                TOTAL PROFIT/LOSS
+              </span>
+              <p
+                className={`text-lg ${financialData.netIncome >= 0
+                    ? "text-success-400"
+                    : "text-error-400"
+                  }`}
+              >
+                {new Intl.NumberFormat("en-PH", {
+                  style: "currency",
+                  currency: "PHP"
+                }).format(Math.abs(financialData.netIncome))}
+              </p>
+            </div>
+          )}
         </div>
       </CardFooter>
     </Card>
