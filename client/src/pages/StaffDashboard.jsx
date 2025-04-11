@@ -207,15 +207,42 @@ function StaffDashboard() {
   }, []);
 
   // Load data on component mount
+  // Replace the existing useEffect with this:
   useEffect(() => {
+    let isSubscribed = true; // Add subscription flag
+
     const fetchData = async () => {
-      await Promise.all([fetchStaff(), fetchAppointments(), fetchTreatments()]);
+      try {
+        const [staffRes, appointmentsRes, treatmentsRes] = await Promise.all([
+          fetchStaff(),
+          fetchAppointments(),
+          fetchTreatments()
+        ]);
+
+        // Only update state if component is still mounted
+        if (isSubscribed) {
+          // State updates will happen in individual fetch functions
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
     };
+
     fetchData();
 
-    const pollingInterval = setInterval(fetchAppointments, 300000);
-    return () => clearInterval(pollingInterval);
-  }, [fetchStaff, fetchAppointments, fetchTreatments]);
+    // Set up polling only for appointments
+    const pollingInterval = setInterval(() => {
+      if (isSubscribed) {
+        fetchAppointments();
+      }
+    }, 300000);
+
+    // Cleanup function
+    return () => {
+      isSubscribed = false;
+      clearInterval(pollingInterval);
+    };
+  }, []); // Empty dependency array since fetch functions are wrapped in useCallback
 
   // Helper Functions
   const formatSafeDate = (dateString, formatStr) => {
