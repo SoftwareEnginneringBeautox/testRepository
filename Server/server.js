@@ -886,7 +886,18 @@ app.post('/api/treatments', async (req, res) => {
 // Retrieve all treatments
 app.get('/api/treatments', async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM treatments ORDER BY id ASC');
+    let query = 'SELECT * FROM treatments'; // Remove the first ORDER BY
+    
+    // Check if we should filter archived treatments
+    const showArchived = req.query.archived === 'true';
+    
+    if (!showArchived) {
+      query += ' WHERE archived = FALSE OR archived IS NULL';
+    }
+    
+    query += ' ORDER BY id ASC'; // Keep only one ORDER BY at the end
+    
+    const result = await pool.query(query);
     res.json(result.rows);
   } catch (error) {
     console.error('Error retrieving treatments:', error);
@@ -924,7 +935,18 @@ app.post('/api/packages', async (req, res) => {
 // Retrieve all packages
 app.get('/api/packages', async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM packages ORDER BY id ASC');
+    let query = 'SELECT * FROM packages';
+    
+    // Check if we should filter archived packages
+    const showArchived = req.query.archived === 'true';
+    
+    if (!showArchived) {
+      query += ' WHERE archived = FALSE OR archived IS NULL';
+    }
+    
+    query += ' ORDER BY id ASC';
+    
+    const result = await pool.query(query);
     res.json(result.rows);
   } catch (error) {
     console.error('Error retrieving packages:', error);

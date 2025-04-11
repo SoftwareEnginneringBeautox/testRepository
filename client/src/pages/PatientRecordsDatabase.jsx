@@ -175,9 +175,11 @@ function PatientRecordsDatabase() {
           }
         );
         const data = await res.json();
-        setTreatmentsList(data);
+        // Make sure we set an array even if the API returns something else
+        setTreatmentsList(Array.isArray(data) ? data : []);
       } catch (err) {
         console.error("Error fetching treatments:", err);
+        setTreatmentsList([]); // Set empty array on error
       }
     };
 
@@ -612,7 +614,11 @@ function PatientRecordsDatabase() {
           record.treatment_ids.length > 0 ? (
           <div className="flex flex-col gap-1">
             {record.treatment_ids.map((id) => {
-              const treatment = treatmentsList.find((t) => t.id === id);
+              // Add safety check to ensure treatmentsList is an array
+              const treatment = Array.isArray(treatmentsList) 
+                ? treatmentsList.find((t) => t.id === id)
+                : null;
+              
               return treatment ? (
                 <Badge
                   key={treatment.id}
@@ -621,7 +627,9 @@ function PatientRecordsDatabase() {
                 >
                   + {treatment.treatment_name.toUpperCase()}
                 </Badge>
-              ) : null;
+              ) : (
+                <Badge key={id} variant="outline">+ Unknown Treatment ({id})</Badge>
+              );
             })}
           </div>
         ) : (
