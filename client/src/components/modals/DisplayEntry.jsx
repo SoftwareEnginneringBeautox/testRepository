@@ -33,11 +33,11 @@ function DisplayEntry({ isOpen, onClose, entryData }) {
             { label: "PERSON IN CHARGE", value: entryData.personInCharge },
             {
               label: "DATE OF INITIAL SESSION",
-              value: entryData.dateTransacted
+              value: entryData.day
             },
-            { label: "TIME OF NEXT SESSION", value: entryData.nextSessionTime },
-            { label: "PACKAGE", value: entryData.package },
-            { label: "TREATMENT", value: entryData.treatment },
+            { label: "TIME OF NEXT SESSION", value: entryData.startTime },
+            { label: "PACKAGE", value: entryData.packageName },
+            { label: "TREATMENT", value: entryData.treatmentIds },
             { label: "PAYMENT METHOD", value: entryData.paymentMethod },
             { label: "AMOUNT PAID", value: `PHP ${entryData.amountPaid}` },
             {
@@ -48,7 +48,7 @@ function DisplayEntry({ isOpen, onClose, entryData }) {
               label: "TOTAL PACKAGE COST",
               value: `PHP ${entryData.totalAmount}`
             },
-            { label: "CONSENT STATUS", value: entryData.consentStatus }
+            { label: "CONSENT STATUS", value: entryData.consentFormSigned }
           ].map(({ label, value }) => (
             <p key={label} className="text-xl leading-8 font-semibold">
               {label}: <span className="font-normal">{value || "N/A"}</span>

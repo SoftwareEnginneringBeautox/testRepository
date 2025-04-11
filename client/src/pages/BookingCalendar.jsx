@@ -58,7 +58,7 @@ function BookingCalendar() {
     const fetchPatientRecords = async () => {
       try {
         const response = await axios.get(
-          `${API_BASE_URL}/api/patient-records`,
+          `${API_BASE_URL}/api/patients`,
           {
             withCredentials: true
           }
@@ -110,42 +110,65 @@ function BookingCalendar() {
     return appointments.map((appointment) => {
       // Get date object from the appointment
       const appointmentDate = new Date(appointment.date_of_session);
-
+  
       // Extract hours and minutes from time_of_session (format: HH:MM:SS)
       const [hours, minutes] = appointment.time_of_session
         .split(":")
         .map(Number);
-
+  
       // Set time on the appointment date
       appointmentDate.setHours(hours);
       appointmentDate.setMinutes(minutes);
-
+  
       // Calculate end time (assume 1 hour duration if not specified)
       const endDate = new Date(appointmentDate);
       endDate.setHours(endDate.getHours() + 1);
-
+  
       // Format times
       const startTime = formatTime(hours, minutes);
       const endTime = formatTime(endDate.getHours(), endDate.getMinutes());
-
+  
       // Get day abbreviation
       const dayAbbreviation = getDayAbbreviation(appointmentDate.getDay());
-
-      // Find the corresponding patient record to get the person in charge
+  
+      // Find the corresponding patient record to get additional information
       let personInCharge = "Unassigned";
+      let patientRecord = null;
+      let packageName = "";
+      let totalAmount = "";
+      let packageDiscount = "";
+      let paymentMethod = "";
+      let consentFormSigned = false;
+      let amountPaid = "";
+      let remainingBalance = "";
+      let referenceNumber = "";
+      let treatmentIds = [];
+      let sessionsLeft = "";
+  
       if (appointment.patient_record_id) {
-        const patientRecord = patientRecords.find(
+        patientRecord = patientRecords.find(
           (record) => record.id === appointment.patient_record_id
         );
-        if (patientRecord && patientRecord.person_in_charge) {
-          personInCharge = patientRecord.person_in_charge;
+        
+        if (patientRecord) {
+          personInCharge = patientRecord.person_in_charge || "Unassigned";
+          packageName = patientRecord.package_name || "";
+          totalAmount = patientRecord.total_amount || "";
+          packageDiscount = patientRecord.package_discount || "";
+          paymentMethod = patientRecord.payment_method || "";
+          consentFormSigned = patientRecord.consent_form_signed || false;
+          amountPaid = patientRecord.amount_paid || "";
+          remainingBalance = patientRecord.remaining_balance || "";
+          referenceNumber = patientRecord.reference_number || "";
+          treatmentIds = patientRecord.treatment_ids || [];
+          sessionsLeft = patientRecord.sessions_left || "";
         }
       }
-
+  
       return {
         id: appointment.id,
         day: dayAbbreviation,
-        date: appointmentDate,
+        appdate: appointmentDate,
         startTime,
         endTime,
         name: appointment.full_name,
@@ -155,7 +178,20 @@ function BookingCalendar() {
         rawDate: appointment.date_of_session,
         rawTime: appointment.time_of_session,
         personInCharge,
-        patientRecordId: appointment.patient_record_id
+        patientRecordId: appointment.patient_record_id,
+        // Additional patient record data
+        packageName,
+        totalAmount,
+        packageDiscount,
+        paymentMethod,
+        consentFormSigned,
+        amountPaid,
+        remainingBalance,
+        referenceNumber,
+        treatmentIds,
+        sessionsLeft,
+        // Include the complete patient record for any other needed fields
+        patientRecord
       };
     });
   };

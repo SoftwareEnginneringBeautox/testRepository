@@ -31,6 +31,7 @@ function EditPatientContactInfo({ isOpen, onClose, entryData, onSubmit }) {
   const [formData, setFormData] = useState({});
   const [formErrors, setFormErrors] = useState({});
   const [formSubmitAttempted, setFormSubmitAttempted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (entryData) {
@@ -45,6 +46,73 @@ function EditPatientContactInfo({ isOpen, onClose, entryData, onSubmit }) {
       setFormData(initial);
     }
   }, [entryData]);
+
+  const validateForm = () => {
+    const errors = {};
+
+    // Email validation
+    if (formData.email && !/\S+@\S+\.\S+/.test(formData.email)) {
+      errors.email = "Please enter a valid email address";
+    }
+
+    // Phone number validation
+    if (formData.contact_number && !/^09\d{9}$/.test(formData.contact_number)) {
+      errors.contact_number = "Please enter a valid phone number (format: 09XXXXXXXXX)";
+    }
+
+    // Age validation
+    if (formData.age) {
+      const ageNum = parseInt(formData.age);
+      if (isNaN(ageNum) || ageNum < 0 || ageNum > 120) {
+        errors.age = "Age must be between 0 and 120";
+      }
+    }
+
+    return errors;
+  };
+
+  const handleSubmit = async () => {
+    setFormSubmitAttempted(true);
+    setIsSubmitting(true);
+    
+    const errors = validateForm();
+    setFormErrors(errors);
+    
+    if (Object.keys(errors).length > 0) {
+      setIsSubmitting(false);
+      return;
+    }
+    
+    // Check if any changes were made
+    if (
+      formData.contact_number === originalData.contact_number &&
+      formData.age === originalData.age &&
+      formData.email === originalData.email
+    ) {
+      // No changes made, close modal
+      setIsSubmitting(false);
+      onClose();
+      return;
+    }
+
+    // Only submit the contact information fields
+    const contactData = {
+      id: entryData.id,
+      contact_number: formData.contact_number || null,
+      age: formData.age ? parseInt(formData.age) : null,
+      email: formData.email || null
+    };
+
+    try {
+      await onSubmit(contactData);
+      setIsSubmitting(false);
+      // Success - modal will be closed by parent component
+    } catch (error) {
+      console.error("Error updating contact info:", error);
+      setIsSubmitting(false);
+      // Could add error handling here
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -93,8 +161,14 @@ function EditPatientContactInfo({ isOpen, onClose, entryData, onSubmit }) {
                   onChange={(e) =>
                     setFormData({ ...formData, contact_number: e.target.value })
                   }
+                  className={formErrors.contact_number ? "border-red-500" : ""}
                 />
               </InputTextField>
+              {formSubmitAttempted && formErrors.contact_number && (
+                <p className="text-red-500 text-sm mt-1">
+                  {formErrors.contact_number}
+                </p>
+              )}
             </InputContainer>
 
             {/* AGE - Editable */}
@@ -113,8 +187,14 @@ function EditPatientContactInfo({ isOpen, onClose, entryData, onSubmit }) {
                   onChange={(e) =>
                     setFormData({ ...formData, age: e.target.value })
                   }
+                  className={formErrors.age ? "border-red-500" : ""}
                 />
               </InputTextField>
+              {formSubmitAttempted && formErrors.age && (
+                <p className="text-red-500 text-sm mt-1">
+                  {formErrors.age}
+                </p>
+              )}
             </InputContainer>
 
             {/* EMAIL - Editable */}
@@ -132,8 +212,14 @@ function EditPatientContactInfo({ isOpen, onClose, entryData, onSubmit }) {
                   onChange={(e) =>
                     setFormData({ ...formData, email: e.target.value })
                   }
+                  className={formErrors.email ? "border-red-500" : ""}
                 />
               </InputTextField>
+              {formSubmitAttempted && formErrors.email && (
+                <p className="text-red-500 text-sm mt-1">
+                  {formErrors.email}
+                </p>
+              )}
             </InputContainer>
           </div>
 
@@ -143,6 +229,7 @@ function EditPatientContactInfo({ isOpen, onClose, entryData, onSubmit }) {
               variant="outline"
               className="md:w-1/2"
               onClick={onClose}
+              disabled={isSubmitting}
             >
               <ChevronLeftIcon />
               CANCEL AND RETURN
@@ -150,41 +237,17 @@ function EditPatientContactInfo({ isOpen, onClose, entryData, onSubmit }) {
             <Button
               type="button"
               className="md:w-1/2"
-              onClick={() => {
-                setFormSubmitAttempted(true);
-                const errors = {};
-
-                // Add any validation for contact fields if needed
-                // For example, validate email format
-                if (formData.email && !/\S+@\S+\.\S+/.test(formData.email)) {
-                  errors.email = "Please enter a valid email address";
-                }
-
-                // Validate phone number format if needed
-                if (
-                  formData.contact_number &&
-                  !/^09\d{9}$/.test(formData.contact_number)
-                ) {
-                  errors.contact_number =
-                    "Please enter a valid phone number (format: 09XXXXXXXXX)";
-                }
-
-                setFormErrors(errors);
-                if (Object.keys(errors).length > 0) return;
-
-                // Only submit the contact information fields
-                const contactData = {
-                  id: entryData.id,
-                  contact_number: formData.contact_number || null,
-                  age: formData.age || null,
-                  email: formData.email || null
-                };
-
-                onSubmit(contactData);
-              }}
+              onClick={handleSubmit}
+              disabled={isSubmitting}
             >
-              <EditIcon />
-              UPDATE CONTACT INFO
+              {isSubmitting ? (
+                "UPDATING..."
+              ) : (
+                <>
+                  <EditIcon />
+                  UPDATE CONTACT INFO
+                </>
+              )}
             </Button>
           </div>
         </form>
