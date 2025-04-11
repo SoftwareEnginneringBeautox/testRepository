@@ -33,6 +33,8 @@ function EditTreatment({ isOpen, onClose, entryData, onSubmit }) {
     expiration: ""
   });
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   useEffect(() => {
     if (entryData) {
       setFormData({
@@ -46,8 +48,13 @@ function EditTreatment({ isOpen, onClose, entryData, onSubmit }) {
   if (!isOpen) return null;
 
   const handleSubmit = () => {
+    if (isSubmitting) return;
+    
+    setIsSubmitting(true);
+    
     if (!entryData?.id) {
       console.error("entryData is missing or invalid");
+      setIsSubmitting(false);
       return;
     }
 
@@ -56,7 +63,12 @@ function EditTreatment({ isOpen, onClose, entryData, onSubmit }) {
       if (cleanedData[key] === "") delete cleanedData[key];
     });
 
-    onSubmit({ id: entryData.id, ...cleanedData });
+    try {
+      onSubmit({ id: entryData.id, ...cleanedData });
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -145,9 +157,10 @@ function EditTreatment({ isOpen, onClose, entryData, onSubmit }) {
               data-cy="save-treatment-btn"
               className="md:w-1/2"
               onClick={handleSubmit}
+              disabled={isSubmitting}
             >
               <EditIcon />
-              EDIT TREATMENT
+              {isSubmitting ? "UPDATING..." : "EDIT TREATMENT"}
             </Button>
           </div>
         </form>

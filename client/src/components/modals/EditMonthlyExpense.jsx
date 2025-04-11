@@ -44,6 +44,7 @@ function EditMonthlySales({
     category: "",
     date: ""
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (initialData) {
@@ -68,12 +69,23 @@ function EditMonthlySales({
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    
+    if (isSubmitting) return;
+    
+    setIsSubmitting(true);
+    
     console.log("Form submitted with data:", formData);
-    // Call the onEditSuccess function with the form data
-    onEditSuccess({
-      ...formData,
-      amount: parseFloat(formData.amount) || 0
-    });
+    
+    try {
+      // Call the onEditSuccess function with the form data
+      onEditSuccess({
+        ...formData,
+        amount: parseFloat(formData.amount) || 0
+      });
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -184,9 +196,10 @@ function EditMonthlySales({
               data-cy="submit-edit-expense"
               className="md:w-1/2"
               type="submit"
+              disabled={isSubmitting}
             >
               <EditIcon />
-              SAVE CHANGES
+              {isSubmitting ? "SAVING..." : "SAVE CHANGES"}
             </Button>
           </div>
         </form>

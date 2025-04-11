@@ -39,6 +39,7 @@ function EditPackage({ isOpen, onClose, entryData, onSubmit }) {
 
   const [treatments, setTreatments] = useState([]);
   const initialized = useRef(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // ✅ Fetch treatment list
   useEffect(() => {
@@ -89,21 +90,33 @@ function EditPackage({ isOpen, onClose, entryData, onSubmit }) {
   if (!isOpen) return null;
 
   const handleSubmit = () => {
-    if (!entryData?.id) return;
-
+    if (isSubmitting) return;
+    
+    setIsSubmitting(true);
+    
+    if (!entryData?.id) {
+      setIsSubmitting(false);
+      return;
+    }
+  
     const cleanedData = { ...formData };
-
+  
     Object.keys(cleanedData).forEach((key) => {
       if (cleanedData[key] === "" || cleanedData[key]?.length === 0) {
         delete cleanedData[key];
       }
     });
-
+  
     if (cleanedData.treatment_ids) {
       cleanedData.treatment_ids = cleanedData.treatment_ids.map(Number);
     }
-
-    onSubmit({ id: entryData.id, ...cleanedData });
+  
+    try {
+      onSubmit({ id: entryData.id, ...cleanedData });
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -223,9 +236,10 @@ function EditPackage({ isOpen, onClose, entryData, onSubmit }) {
               data-cy="save-package-btn"
               className="md:w-1/2"
               onClick={handleSubmit}
+              disabled={isSubmitting}
             >
               <EditIcon />
-              EDIT PACKAGE
+              {isSubmitting ? "UPDATING..." : "EDIT PACKAGE"}
             </Button>
           </div>
         </form>

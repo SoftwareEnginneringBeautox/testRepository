@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
@@ -35,6 +35,7 @@ function EditPatientContactInfo({ isOpen, onClose, entryData, onSubmit }) {
   const [formErrors, setFormErrors] = useState({});
   const [formSubmitAttempted, setFormSubmitAttempted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const submitInProgressRef = useRef(false);
 
   useEffect(() => {
     if (entryData) {
@@ -49,6 +50,14 @@ function EditPatientContactInfo({ isOpen, onClose, entryData, onSubmit }) {
       setFormData(initial);
     }
   }, [entryData]);
+
+  useEffect(() => {
+    // Reset submission status when modal opens/closes
+    return () => {
+      submitInProgressRef.current = false;
+      setIsSubmitting(false);
+    };
+  }, [isOpen]);
 
   const validateForm = () => {
     const errors = {};
@@ -129,6 +138,13 @@ function EditPatientContactInfo({ isOpen, onClose, entryData, onSubmit }) {
   };
 
   const handleSubmit = async () => {
+    // Check both state AND ref to prevent race conditions
+    if (isSubmitting || submitInProgressRef.current) {
+      console.log("Submission already in progress");
+      return;
+    }
+    
+    submitInProgressRef.current = true;
     setFormSubmitAttempted(true);
     setIsSubmitting(true);
     
@@ -137,6 +153,7 @@ function EditPatientContactInfo({ isOpen, onClose, entryData, onSubmit }) {
     
     if (Object.keys(errors).length > 0) {
       setIsSubmitting(false);
+      submitInProgressRef.current = false;
       return;
     }
     
@@ -148,6 +165,7 @@ function EditPatientContactInfo({ isOpen, onClose, entryData, onSubmit }) {
     ) {
       // No changes made, close modal
       setIsSubmitting(false);
+      submitInProgressRef.current = false;
       onClose();
       return;
     }
@@ -173,10 +191,12 @@ function EditPatientContactInfo({ isOpen, onClose, entryData, onSubmit }) {
       }
       
       setIsSubmitting(false);
+      submitInProgressRef.current = false;
       // Success - modal will be closed by parent component
     } catch (error) {
       console.error("Error updating contact info:", error);
       setIsSubmitting(false);
+      submitInProgressRef.current = false;
       // Could add error handling here
     }
   };

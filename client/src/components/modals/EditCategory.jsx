@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 import {
   ModalContainer,
@@ -36,6 +36,7 @@ function EditCategory({ isOpen, onClose, category, onEditSuccess }) {
   const [showAlert, setShowAlert] = useState(false);
   const [alertTitle, setAlertTitle] = useState("");
   const [alertMessage, setAlertMessage] = useState("");
+  const submitInProgressRef = useRef(false);
 
   // Set the initial category name when the category prop changes
   useEffect(() => {
@@ -44,17 +45,34 @@ function EditCategory({ isOpen, onClose, category, onEditSuccess }) {
     }
   }, [category]);
 
+  useEffect(() => {
+    // Reset submission status when modal opens/closes
+    return () => {
+      submitInProgressRef.current = false;
+      setIsSubmitting(false);
+    };
+  }, [isOpen]);
+
   const handleAlertClose = () => {
     setShowAlert(false);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Check both state AND ref to prevent race conditions
+    if (isSubmitting || submitInProgressRef.current) {
+      console.log("Submission already in progress");
+      return;
+    }
+    
+    submitInProgressRef.current = true;
 
     if (!categoryName || !categoryName.trim()) {
       setAlertTitle("Error");
       setAlertMessage("Please enter a category name");
       setShowAlert(true);
+      submitInProgressRef.current = false;
       return;
     }
 
@@ -95,6 +113,7 @@ function EditCategory({ isOpen, onClose, category, onEditSuccess }) {
       setShowAlert(true);
     } finally {
       setIsSubmitting(false);
+      submitInProgressRef.current = false;
     }
   };
 

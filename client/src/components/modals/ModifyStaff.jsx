@@ -41,6 +41,8 @@ const ModifyStaff = ({ isOpen, onClose, entryData, onSubmit }) => {
     email: ""
   });
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   useEffect(() => {
     if (entryData) {
       setFormData({
@@ -55,8 +57,13 @@ const ModifyStaff = ({ isOpen, onClose, entryData, onSubmit }) => {
   if (!isOpen) return null;
 
   const handleSubmit = () => {
+    if (isSubmitting) return;
+    
+    setIsSubmitting(true);
+    
     if (!entryData?.id) {
       console.error("entryData is missing or invalid");
+      setIsSubmitting(false);
       return;
     }
 
@@ -65,7 +72,14 @@ const ModifyStaff = ({ isOpen, onClose, entryData, onSubmit }) => {
       if (value === "") delete cleanedData[key];
     });
 
-    onSubmit({ id: entryData.id, ...cleanedData });
+    try {
+      // Call the submission function
+      onSubmit({ id: entryData.id, ...cleanedData });
+    } catch (error) {
+      console.error("Error submitting form:", error);
+    } finally {
+      // Don't need to reset here since the component will unmount after submission
+    }
   };
 
   return (
@@ -184,9 +198,10 @@ const ModifyStaff = ({ isOpen, onClose, entryData, onSubmit }) => {
               data-cy="submit-edit-staff"
               className="md:w-1/2"
               onClick={handleSubmit}
+              disabled={isSubmitting}
             >
               <EditIcon />
-              EDIT STAFF
+              {isSubmitting ? "UPDATING..." : "EDIT STAFF"}
             </Button>
           </div>
         </form>
