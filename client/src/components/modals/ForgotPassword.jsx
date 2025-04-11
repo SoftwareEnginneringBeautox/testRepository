@@ -43,16 +43,16 @@ function ForgotPassword({ isOpen, onClose }) {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  
+
   // Add email validation error state
   const [emailError, setEmailError] = useState(false);
-  
+
   // Email validation function
   const isValidEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
-  
+
   // Validate email
   const validateEmail = (value) => {
     if (value && !isValidEmail(value)) {
@@ -66,42 +66,54 @@ function ForgotPassword({ isOpen, onClose }) {
 
   const sendOTP = async (e) => {
     e.preventDefault();
-    
+
     // Validate email before submitting
     if (!validateEmail(email)) {
       setMessage("Please enter a valid email address");
       return;
     }
-    
+
     setIsLoading(true);
     setMessage(""); // Clear any previous messages
 
     try {
       // Send both email and username to the server
-      const response = await axios.post("http://localhost:4000/forgot-password", { 
-        email,
-        username 
-      });
-      
+      const response = await axios.post(
+        "http://localhost:4000/forgot-password",
+        {
+          email,
+          username
+        }
+      );
+
       if (response.data.success) {
         setStep(2);
         setMessage("OTP sent to your email.");
       } else {
         // Check for archived account specifically
         if (response.data.archived) {
-          setMessage("This account has been archived. Please contact your administrator.");
+          setMessage(
+            "This account has been archived. Please contact your administrator."
+          );
         } else {
-          setMessage(response.data.message || "Failed to send OTP. Please check your email and username.");
+          setMessage(
+            response.data.message ||
+              "Failed to send OTP. Please check your email and username."
+          );
         }
       }
     } catch (err) {
       console.error("Failed to send OTP:", err);
-      
+
       // Handle archived account error response
       if (err.response?.data?.archived) {
-        setMessage("This account has been archived. Please contact your administrator.");
+        setMessage(
+          "This account has been archived. Please contact your administrator."
+        );
       } else if (err.response?.status === 404) {
-        setMessage("No account found with this email and username combination.");
+        setMessage(
+          "No account found with this email and username combination."
+        );
       } else {
         setMessage("Failed to send OTP. Please check your information.");
       }
@@ -119,7 +131,7 @@ function ForgotPassword({ isOpen, onClose }) {
       // Ensure OTP is clean and properly formatted before sending
       const cleanOtp = String(otp).trim();
       console.log("Sending OTP verification:", cleanOtp);
-      
+
       const response = await axios.post("http://localhost:4000/verify-otp", {
         email,
         username, // Include username for more secure verification
@@ -137,7 +149,9 @@ function ForgotPassword({ isOpen, onClose }) {
     } catch (err) {
       console.error("Error verifying OTP:", err);
       // Extract error message from response if available
-      const errorMessage = err.response?.data?.message || "Failed to verify OTP. Please try again.";
+      const errorMessage =
+        err.response?.data?.message ||
+        "Failed to verify OTP. Please try again.";
       setMessage(errorMessage);
     } finally {
       setIsLoading(false);
@@ -170,7 +184,9 @@ function ForgotPassword({ isOpen, onClose }) {
     } catch (err) {
       console.error("Error resetting password:", err);
       // Show specific error message from server if available
-      const errorMessage = err.response?.data?.message || "Failed to reset password. Please try again.";
+      const errorMessage =
+        err.response?.data?.message ||
+        "Failed to reset password. Please try again.";
       setMessage(errorMessage);
     } finally {
       setIsLoading(false);
@@ -208,7 +224,7 @@ function ForgotPassword({ isOpen, onClose }) {
           <form onSubmit={sendOTP} className="flex flex-col gap-4 items-center">
             <div className="flex gap-4 flex-col w-full">
               <p>Enter your username and email to retrieve your account.</p>
-              
+
               {/* Username input field */}
               <InputContainer data-cy="forgot-username-container">
                 <InputLabel>Username</InputLabel>
@@ -227,7 +243,7 @@ function ForgotPassword({ isOpen, onClose }) {
                   />
                 </InputTextField>
               </InputContainer>
-              
+
               {/* Email input field */}
               <InputContainer data-cy="forgot-email-container">
                 <InputLabel>Email</InputLabel>
@@ -317,7 +333,7 @@ function ForgotPassword({ isOpen, onClose }) {
             onSubmit={handleResetPassword}
             className="flex flex-col gap-4 items-center"
           >
-            <div className="w-full">
+            <div className="w-full flex flex-col gap-4">
               <p>
                 Enter a new password for your account and retype it to verify.
               </p>
