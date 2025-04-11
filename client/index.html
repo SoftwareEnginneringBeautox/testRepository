@@ -9,15 +9,32 @@
     href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=person" />
   <title>PRISM by Beautox</title>
   <script>
-    // Immediately invoked function to set the theme before any rendering
     (function() {
       try {
         const storageKey = "vite-ui-theme";
         const savedTheme = localStorage.getItem(storageKey);
-        const theme = savedTheme || "light";
         
-        // ...rest of the script...
-      } catch (e) { /* handling */ }
+        // Only apply theme if not on login or other special pages
+        const isSpecialPage = window.location.pathname === "/login" || 
+                             window.location.pathname === "/" || 
+                             window.location.pathname === "/scheduleappointment";
+        
+        if (savedTheme && !isSpecialPage) {
+          const root = document.documentElement;
+          
+          // Apply the theme
+          root.classList.remove("light", "dark");
+          
+          if (savedTheme === "system") {
+            const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+            root.classList.add(systemTheme);
+          } else {
+            root.classList.add(savedTheme);
+          }
+        }
+      } catch (e) {
+        console.error("Theme initialization error:", e);
+      }
     })();
   </script>
 </head>

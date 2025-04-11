@@ -41,39 +41,33 @@ export default function Layout() {
         location.pathname.toLowerCase().startsWith(route.toLowerCase() + "/")
     ) && !sidebarlessRoutes.includes(location.pathname.toLowerCase());
 
-    useEffect(() => {
-      const root = window.document.documentElement;
-      const userTheme = localStorage.getItem("vite-ui-theme");
-    
-      // Define routes that should always use light theme regardless of preference
-      const forceableLightRoutes = ["/", "/login", "/scheduleappointment"];
-    
-      // Check if current route should force light theme
-      const shouldForceLightTheme = forceableLightRoutes.some(
-        (route) => location.pathname.toLowerCase() === route.toLowerCase()
-      );
-    
-      // If on a route that must be light, force light theme temporarily
-      if (shouldForceLightTheme) {
-        root.classList.remove("dark");
-        root.classList.add("light");
-      } else {
-        // For all other routes, restore the user's theme preference
-        if (userTheme) {
-          if (userTheme === "system") {
-            // Handle system preference
-            const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-            const systemTheme = systemPrefersDark ? "dark" : "light";
-            
-            root.classList.remove("light", "dark");
-            root.classList.add(systemTheme);
-          } else {
-            root.classList.remove("light", "dark");
-            root.classList.add(userTheme);
-          }
-        }
+  useEffect(() => {
+    const pathname = location.pathname.toLowerCase();
+    const root = window.document.documentElement;
+    const userTheme = localStorage.getItem("vite-ui-theme");
+
+    // Define routes that should always use light theme
+    const forceableLightRoutes = ["/", "/login", "/scheduleappointment", "/landingpage"];
+
+    // Check if current route should force light theme
+    const shouldForceLightTheme = forceableLightRoutes.some(
+      (route) => pathname === route.toLowerCase()
+    );
+
+    // If on a route that must be light, force light theme
+    if (shouldForceLightTheme) {
+      root.classList.remove("dark");
+      root.classList.add("light");
+    } else {
+      // For regular routes, restore user preference
+      // But only if we're coming from a forced light route
+      const currentTheme = root.classList.contains("dark") ? "dark" : "light";
+      if (currentTheme === "light" && userTheme === "dark") {
+        root.classList.remove("light");
+        root.classList.add("dark");
       }
-    }, [location.pathname]);
+    }
+  }, [location.pathname]);
 
   // Only show the sidebar and user profile if the current route is allowed and it's not the error page
   const shouldShowSidebar =
@@ -151,8 +145,8 @@ export default function Layout() {
           className={cn(
             "flex flex-col flex-1 items-center",
             !sidebarlessRoutes.includes(location.pathname.toLowerCase()) &&
-              !isErrorPage &&
-              "my-16 lg:my-20"
+            !isErrorPage &&
+            "my-16 lg:my-20"
           )}
         >
           <div className="flex flex-col flex-1 w-full gap-4">
