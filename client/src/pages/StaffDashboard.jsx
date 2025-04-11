@@ -5,6 +5,14 @@ import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { format } from "date-fns";
 import { useModal } from "@/hooks/useModal";
+import AppointmentDetails from "@/components/modals/AppointmentDetails";
+import {
+  AlertContainer,
+  AlertDescription,
+  AlertTitle,
+  AlertText,
+  CloseAlert
+} from "@/components/ui/Alert";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -67,30 +75,6 @@ function StaffDashboard() {
   const [packagesData, setPackagesData] = useState([]);
   const [loadingTreatments, setLoadingTreatments] = useState(true);
   const [errorTreatments, setErrorTreatments] = useState(null);
-
-  // Add this new fetch function
-  const fetchTreatments = useCallback(async () => {
-    try {
-      setLoadingTreatments(true);
-      const [treatmentsRes, packagesRes] = await Promise.all([
-        axios.get(`${API_BASE_URL}/api/treatments`, {
-          withCredentials: true
-        }),
-        axios.get(`${API_BASE_URL}/api/packages`, {
-          withCredentials: true
-        })
-      ]);
-
-      setTreatmentsData(treatmentsRes.data || []);
-      setPackagesData(packagesRes.data || []);
-      setErrorTreatments(null);
-    } catch (error) {
-      console.error("Error fetching treatments:", error);
-      setErrorTreatments("Failed to load treatments");
-    } finally {
-      setLoadingTreatments(false);
-    }
-  }, []);
 
   // Alert Functions
   const showAlert = useCallback((message, variant = "default") => {
@@ -186,17 +170,41 @@ function StaffDashboard() {
     [handleAppointmentAction]
   );
 
-  const handleEvaluateAppointment = useCallback((appointment) => {
-    setSelectedAppointment(appointment);
-    setShowAppointmentModal(true);
-  }, []);
-
   const handleRejectAppointment = useCallback(
     (id) => {
       handleAppointmentAction(id, "reject");
     },
     [handleAppointmentAction]
   );
+
+  const handleEvaluateAppointment = useCallback((appointment) => {
+    setSelectedAppointment(appointment);
+    setShowAppointmentModal(true);
+  }, []);
+
+  // Treatment Functions
+  const fetchTreatments = useCallback(async () => {
+    try {
+      setLoadingTreatments(true);
+      const [treatmentsRes, packagesRes] = await Promise.all([
+        axios.get(`${API_BASE_URL}/api/treatments`, {
+          withCredentials: true
+        }),
+        axios.get(`${API_BASE_URL}/api/packages`, {
+          withCredentials: true
+        })
+      ]);
+
+      setTreatmentsData(treatmentsRes.data || []);
+      setPackagesData(packagesRes.data || []);
+      setErrorTreatments(null);
+    } catch (error) {
+      console.error("Error fetching treatments:", error);
+      setErrorTreatments("Failed to load treatments");
+    } finally {
+      setLoadingTreatments(false);
+    }
+  }, []);
 
   // Load data on component mount
   useEffect(() => {
@@ -270,10 +278,6 @@ function StaffDashboard() {
       console.error("Error in getReminderLabel:", error);
       return null;
     }
-  };
-
-  const handleDownloadStaffList = () => {
-    // Implementation of handleDownloadStaffList function
   };
 
   return (
@@ -510,6 +514,15 @@ function StaffDashboard() {
           )}
         </div>
       </div>
+      {showAppointmentModal && selectedAppointment && (
+        <AppointmentDetails
+          isOpen={showAppointmentModal}
+          onClose={() => setShowAppointmentModal(false)}
+          appointmentData={selectedAppointment}
+          onConfirm={handleConfirmAppointment}
+          onReject={handleRejectAppointment}
+        />
+      )}
     </div>
   );
 }
