@@ -129,13 +129,13 @@ export default function Layout() {
         )}
       >
         {/* Fixed header with proper positioning */}
-        <header className={`fixed w-full flex items-center justify-between px-2 py-2 z-[9999] ${
+        <header className={`fixed w-full flex items-center justify-between px-2 py-2 z-[50] ${
           location.pathname === "/" || location.pathname === "/login" || location.pathname === "/landingpage"
             ? ""
             : "bg-white dark:bg-black shadow-sm"
         }`}>
           {/* Left side - sidebar trigger */}
-          <div className="flex-shrink-0 relative z-[9999]">
+          <div className="flex-shrink-0 relative z-[50]">
             {shouldShowSidebar && (
               <div className="text-purple-950 dark:text-lavender-300">
                 <SidebarTrigger />
@@ -144,7 +144,7 @@ export default function Layout() {
           </div>
 
           {/* Right side - user profile with fixed positioning */}
-          <div className="flex-shrink-0 fixed right-4 z-[9999]">
+          <div className="flex-shrink-0 fixed right-4 z-[50]">
             {shouldShowSidebar && <UserProfile />}
           </div>
         </header>
