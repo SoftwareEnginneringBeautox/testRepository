@@ -26,20 +26,68 @@ function AppointmentDetails({
 }) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [statusMessage, setStatusMessage] = useState(null);
+  const [processingStep, setProcessingStep] = useState(null);
 
   if (!isOpen || !appointmentData) return null;
 
-  // Handle confirm action
+  // Helper function to create a patient record
+  const createPatientRecord = async (appointmentData) => {
+    setProcessingStep("Creating patient record...");
+    
+    try {
+      // Prepare patient data from appointment
+      const patientData = {
+        patient_name: appointmentData.full_name,
+        contact_number: appointmentData.contact_number,
+        age: appointmentData.age ? parseInt(appointmentData.age) : null,
+        email: appointmentData.email,
+        date_of_session: appointmentData.date_of_session,
+        time_of_session: appointmentData.time_of_session,
+        archived: false
+      };
+      
+      // Create patient record
+      const response = await axios.post(
+        `${API_BASE_URL}/api/patients`, 
+        patientData
+      );
+      
+      console.log("Patient record created with ID:", response.data.patientId);
+      return response.data.patientId;
+    } catch (error) {
+      console.error("Error creating patient record:", error);
+      throw new Error("Failed to create patient record");
+    }
+  };
+
+  // Handle confirm action with improved workflow
   const handleConfirm = async (id) => {
     try {
       setIsProcessing(true);
       setStatusMessage({ type: "info", text: "Processing confirmation..." });
+      setProcessingStep("Starting confirmation process...");
 
+      // Step 1: First try to create a patient record
+      let patientId;
+      try {
+        patientId = await createPatientRecord(appointmentData);
+        setProcessingStep(`Patient record created (ID: ${patientId}). Confirming appointment...`);
+      } catch (error) {
+        setStatusMessage({
+          type: "error",
+          text: "Failed to create patient record: " + error.message
+        });
+        throw error; // Propagate error to stop the process
+      }
+
+      // Step 2: Now confirm the appointment with the patient_record_id
       const response = await axios.post(
-        `${API_BASE_URL}/api/staged-appointments/${id}/confirm`
+        `${API_BASE_URL}/api/staged-appointments/${id}/confirm`,
+        { patient_record_id: patientId } // Pass the patient ID to the endpoint
       );
 
       if (response.data.success) {
+        setProcessingStep("Appointment confirmed successfully!");
         setStatusMessage({
           type: "success",
           text: "Appointment confirmed successfully!"
@@ -62,6 +110,7 @@ function AppointmentDetails({
       });
     } finally {
       setIsProcessing(false);
+      setProcessingStep(null);
     }
   };
 
@@ -70,12 +119,14 @@ function AppointmentDetails({
     try {
       setIsProcessing(true);
       setStatusMessage({ type: "info", text: "Processing rejection..." });
+      setProcessingStep("Rejecting appointment...");
 
       const response = await axios.post(
         `${API_BASE_URL}/api/staged-appointments/${id}/reject`
       );
 
       if (response.data.success) {
+        setProcessingStep("Appointment rejected successfully!");
         setStatusMessage({
           type: "success",
           text: "Appointment rejected successfully!"
@@ -98,6 +149,7 @@ function AppointmentDetails({
       });
     } finally {
       setIsProcessing(false);
+      setProcessingStep(null);
     }
   };
 
@@ -112,7 +164,11 @@ function AppointmentDetails({
             ? appointmentData.full_name.toUpperCase() + "'S APPOINTMENT"
             : "CLIENT'S APPOINTMENT"}
         </ModalTitle>
-        <button className="font-xl rotate-45 ml-auto" onClick={onClose}>
+        <button 
+          className="font-xl rotate-45 ml-auto" 
+          onClick={onClose}
+          disabled={isProcessing}
+        >
           <PlusIcon />
         </button>
       </ModalHeader>
@@ -147,7 +203,14 @@ function AppointmentDetails({
             </p>
           ))}
 
-          {statusMessage && (
+          {isProcessing && (
+            <div className="flex flex-col items-center justify-center py-3">
+              <div className="spinner w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-2"></div>
+              <p className="text-blue-600 font-medium">{processingStep || "Processing..."}</p>
+            </div>
+          )}
+
+          {statusMessage && !isProcessing && (
             <div
               className={`p-3 rounded mb-2 ${
                 statusMessage.type === "success"

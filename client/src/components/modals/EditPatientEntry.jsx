@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios";
+
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 import {
   ModalContainer,
@@ -71,6 +74,58 @@ function EditPatientContactInfo({ isOpen, onClose, entryData, onSubmit }) {
     return errors;
   };
 
+  // New function to update appointment records with new contact information
+  const updateAppointmentRecords = async (patientData) => {
+    try {
+      // Fetch appointments with this patient_record_id
+      const response = await axios.get(`${API_BASE_URL}/api/appointments`, {
+        withCredentials: true
+      });
+      
+      const patientAppointments = response.data.filter(
+        appointment => appointment.patient_record_id === patientData.id
+      );
+      
+      // If no appointments exist, we're done
+      if (patientAppointments.length === 0) {
+        console.log("No appointments found for this patient record");
+        return;
+      }
+      
+      // For each appointment, update the contact information while preserving scheduling data
+      for (const appointment of patientAppointments) {
+        // Prepare appointment update payload
+        const appointmentPayload = {
+          table: 'appointments',
+          id: appointment.id,
+          action: 'edit',
+          data: {
+            full_name: entryData.patient_name, // Keep original patient name
+            contact_number: patientData.contact_number,
+            age: patientData.age,
+            email: patientData.email,
+            patient_record_id: patientData.id
+            // Intentionally not including date_of_session and time_of_session to preserve them
+          }
+        };
+        
+        // Update the appointment record
+        await axios.post(
+          `${API_BASE_URL}/api/manage-record`, 
+          appointmentPayload,
+          { withCredentials: true }
+        );
+        
+        console.log(`✅ Updated appointment ID ${appointment.id} with new contact info`);
+      }
+      
+      return patientAppointments.length;
+    } catch (error) {
+      console.error("Error updating appointment records:", error);
+      throw error; // Re-throw for handling in the main submission function
+    }
+  };
+
   const handleSubmit = async () => {
     setFormSubmitAttempted(true);
     setIsSubmitting(true);
@@ -104,7 +159,17 @@ function EditPatientContactInfo({ isOpen, onClose, entryData, onSubmit }) {
     };
 
     try {
+      // First, update the patient record
       await onSubmit(contactData);
+      
+      // Second, update any associated appointment records
+      const updatedAppointments = await updateAppointmentRecords(contactData);
+      
+      // Log success if appointments were updated
+      if (updatedAppointments) {
+        console.log(`Successfully updated ${updatedAppointments} appointment records`);
+      }
+      
       setIsSubmitting(false);
       // Success - modal will be closed by parent component
     } catch (error) {
