@@ -5,6 +5,7 @@ import { useTheme } from "@/components/ThemeProvider";
 import TrendUpIcon from "@/assets/icons/TrendUpIcon";
 import TrendDownIcon from "@/assets/icons/TrendDownIcon";
 import { Loader } from "@/components/ui/Loader";
+import { cn } from "@/lib/utils";
 
 import {
   Area,
@@ -366,13 +367,18 @@ const SalesChart = ({
         </div>
         {/* Show summary only when NOT in FinancialOverview */}
         {!isFinancialOverview && (
-          <div className="w-full flex flex-row items-center justify-around gap-2 mt-4">
+          <div
+            className="w-full flex flex-row items-center justify-around gap-4 mt-3"
+            data-cy="total-profit-container"
+          >
             <div
-              className="h-full flex-1 w-1/3 flex flex-col p-2 gap-1 bg-ash-400 dark:bg-customNeutral-400 dark:text-customNeutral-100 rounded-lg"
+              className="h-full flex-1 w-1/3 flex flex-col p-4 py-5 gap-2 bg-ash-200/50 dark:bg-customNeutral-400 rounded-lg"
               data-cy="total-sales"
             >
-              <span className="font-semibold text-xs pt-1">TOTAL SALES</span>
-              <p className="text-lg">
+              <span className="font-semibold text-xs text-customNeutral-400 dark:text-customNeutral-200">
+                TOTAL SALES
+              </span>
+              <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-semibold dark:text-customNeutral-100">
                 {new Intl.NumberFormat("en-PH", {
                   style: "currency",
                   currency: "PHP"
@@ -380,11 +386,13 @@ const SalesChart = ({
               </p>
             </div>
             <div
-              className="h-full flex-1 w-1/3 flex flex-col p-2 gap-1 bg-ash-400 dark:bg-customNeutral-400 dark:text-customNeutral-100 rounded-lg"
+              className="h-full flex-1 w-1/3 flex flex-col p-4 py-5 gap-2 bg-ash-200/50 dark:bg-customNeutral-400 rounded-lg"
               data-cy="total-expenses"
             >
-              <span className="font-semibold text-xs pt-1">TOTAL EXPENSES</span>
-              <p className="text-lg">
+              <span className="font-semibold text-xs text-customNeutral-400 dark:text-customNeutral-200">
+                TOTAL EXPENSES
+              </span>
+              <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-semibold dark:text-customNeutral-100">
                 {new Intl.NumberFormat("en-PH", {
                   style: "currency",
                   currency: "PHP"
@@ -392,23 +400,32 @@ const SalesChart = ({
               </p>
             </div>
             <div
-              className="h-full flex-1 w-1/3 flex flex-col p-2 gap-1 bg-ash-400 dark:bg-customNeutral-400 dark:text-customNeutral-100 rounded-lg"
+              className="h-full flex-1 w-1/3 flex flex-col p-4 py-5 gap-2 bg-ash-200/50 dark:bg-customNeutral-400 rounded-lg"
               data-cy="total-profit-loss"
             >
-              <span className="font-semibold text-xs pt-1">
-                TOTAL PROFIT/LOSS
+              <span className="font-semibold text-xs text-customNeutral-400 dark:text-customNeutral-200">
+                {financialData.netIncome >= 0 ? "TOTAL PROFIT" : "TOTAL LOSS"}
               </span>
-              <p
-                className={`text-lg ${financialData.netIncome >= 0
-                    ? "text-success-400"
-                    : "text-error-400"
-                  }`}
-              >
-                {new Intl.NumberFormat("en-PH", {
-                  style: "currency",
-                  currency: "PHP"
-                }).format(Math.abs(financialData.netIncome))}
-              </p>
+              <div className="flex items-center gap-2">
+                <p
+                  className={cn(
+                    "text-lg sm:text-xl md:text-2xl lg:text-3xl font-semibold",
+                    financialData.netIncome >= 0
+                      ? "text-success-500 dark:text-success-400"
+                      : "text-error-500 dark:text-error-400"
+                  )}
+                >
+                  {new Intl.NumberFormat("en-PH", {
+                    style: "currency",
+                    currency: "PHP"
+                  }).format(Math.abs(financialData.netIncome))}
+                </p>
+                {financialData.netIncome >= 0 ? (
+                  <TrendUpIcon className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-success-500 dark:text-success-400" />
+                ) : (
+                  <TrendDownIcon className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-error-500 dark:text-error-400" />
+                )}
+              </div>
             </div>
           </div>
         )}

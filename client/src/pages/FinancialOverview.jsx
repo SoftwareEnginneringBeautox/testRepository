@@ -4,6 +4,8 @@ import "../App.css";
 import { useModal } from "@/hooks/useModal";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
+import TrendDownIcon from "@/assets/icons/TrendDownIcon";
+import TrendUpIcon from "@/assets/icons/TrendDownIcon";
 
 import CreateMonthlyExpense from "@/components/modals/CreateMonthlyExpense";
 import EditMonthlyExpense from "@/components/modals/EditMonthlyExpense";
@@ -1302,55 +1304,66 @@ function FinancialOverview() {
         </div>
 
         <div
-  className="w-full flex flex-row items-center justify-around gap-1 mt-3"
-  data-cy="total-profit-container"
->
-  <div
-    className="h-full flex-1 w-1/3 flex flex-col p-2 gap-1 bg-faintingLight-100 dark:bg-customNeutral-500 dark:text-customNeutral-100 rounded-lg shadow-custom"
-    data-cy="total-sales"
-  >
-    <span className="font-semibold text-xs pt-1">TOTAL SALES</span>
-    <p className="text-lg">
-      {new Intl.NumberFormat("en-PH", {
-        style: "currency",
-        currency: "PHP"
-      }).format(financialData.totalSales)}
-    </p>
-  </div>
-  <div
-    className="h-full flex-1 w-1/3 flex flex-col p-2 gap-1 bg-faintingLight-100 dark:bg-customNeutral-500 dark:text-customNeutral-100 rounded-lg shadow-custom"
-    data-cy="total-expenses"
-  >
-    <span className="font-semibold text-xs pt-1">TOTAL EXPENSES</span>
-    <p className="text-lg">
-      {new Intl.NumberFormat("en-PH", {
-        style: "currency",
-        currency: "PHP"
-      }).format(financialData.totalExpenses)}
-    </p>
-  </div>
-  <div
-    className="h-full flex-1 w-1/3 flex flex-col p-2 gap-1 bg-faintingLight-100 dark:bg-customNeutral-500 dark:text-customNeutral-100 rounded-lg shadow-custom"
-    data-cy="total-profit-loss"
-  >
-    <span className="font-semibold text-xs pt-1">
-      TOTAL PROFIT/LOSS
-    </span>
-    <p
-      className={`text-lg ${
-        financialData.netIncome >= 0
-          ? "text-success-400"
-          : "text-error-400"
-      }`}
-    >
-      {new Intl.NumberFormat("en-PH", {
-        style: "currency",
-        currency: "PHP"
-      }).format(Math.abs(financialData.netIncome))}
-    </p>
-  </div>
-</div>
-
+          className="w-full flex flex-row items-center justify-around gap-4 mt-3"
+          data-cy="total-profit-container"
+        >
+          <div
+            className="h-full flex-1 w-1/3 flex flex-col p-3 py-4 gap-1 bg-faintingLight-100 dark:bg-customNeutral-500 rounded-lg shadow-custom"
+            data-cy="total-sales"
+          >
+            <span className="font-semibold text-xs text-customNeutral-400 dark:text-customNeutral-200">
+              TOTAL SALES
+            </span>
+            <p className="text-xl sm:text-2xl md:text-3xl font-semibold dark:text-customNeutral-100">
+              {new Intl.NumberFormat("en-PH", {
+                style: "currency",
+                currency: "PHP"
+              }).format(financialData.totalSales)}
+            </p>
+          </div>
+          <div
+            className="h-full flex-1 w-1/3 flex flex-col p-3 py-4 gap-1 bg-faintingLight-100 dark:bg-customNeutral-500 rounded-lg shadow-custom"
+            data-cy="total-expenses"
+          >
+            <span className="font-semibold text-xs text-customNeutral-400 dark:text-customNeutral-200">
+              TOTAL EXPENSES
+            </span>
+            <p className="text-xl sm:text-2xl md:text-3xl font-semibold dark:text-customNeutral-100">
+              {new Intl.NumberFormat("en-PH", {
+                style: "currency",
+                currency: "PHP"
+              }).format(financialData.totalExpenses)}
+            </p>
+          </div>
+          <div
+            className="h-full flex-1 w-1/3 flex flex-col p-3 py-4 gap-1 bg-faintingLight-100 dark:bg-customNeutral-500 rounded-lg shadow-custom"
+            data-cy="total-profit-loss"
+          >
+            <span className="font-semibold text-xs text-customNeutral-400 dark:text-customNeutral-200">
+              {financialData.netIncome >= 0 ? "TOTAL PROFIT" : "TOTAL LOSS"}
+            </span>
+            <div className="flex items-center gap-1">
+              <p
+                className={cn(
+                  "text-xl sm:text-2xl md:text-3xl font-semibold",
+                  financialData.netIncome >= 0
+                    ? "text-success-500 dark:text-success-400"
+                    : "text-error-500 dark:text-error-400"
+                )}
+              >
+                {new Intl.NumberFormat("en-PH", {
+                  style: "currency",
+                  currency: "PHP"
+                }).format(Math.abs(financialData.netIncome))}
+              </p>
+              {financialData.netIncome >= 0 ? (
+                <TrendUpIcon className="w-6 h-6 text-success-500 dark:text-success-400" />
+              ) : (
+                <TrendDownIcon className="w-6 h-6 text-error-500 dark:text-error-400" />
+              )}
+            </div>
+          </div>
+        </div>
         <div
           className="w-full flex flex-col md:flex-row justify-end gap-4 pb-10"
           data-cy="bottom-actions"
