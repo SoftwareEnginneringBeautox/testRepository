@@ -229,11 +229,16 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
           <CloseAlert onClick={handleAlertClose} />
         </AlertContainer>
       )}
-      <ModalHeader className="pb-1">
-        <ModalTitle className="text-base" data-cy="schedule-appointment-title">
+      <ModalHeader className="pb-1 flex justify-center">
+        <ModalTitle
+          className="text-xl text-center text-lavender-400"
+          data-cy="schedule-appointment-title"
+        >
           SCHEDULE APPOINTMENT
         </ModalTitle>
       </ModalHeader>
+
+
       <ModalBody className="py-2">
         <form
           className="flex flex-col gap-2"
@@ -243,7 +248,7 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
           {/* FULL NAME */}
           <InputContainer>
             <InputLabel className="text-xs mb-0.5">FULL NAME</InputLabel>
-            <InputTextField className="h-8">
+            <InputTextField className="h-10">
               <InputIcon className="w-7">
                 <UserIcon className="w-3.5 h-3.5" />
               </InputIcon>
@@ -262,7 +267,7 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
           {/* CONTACT NUMBER */}
           <InputContainer>
             <InputLabel className="text-xs mb-0.5">CONTACT NUMBER</InputLabel>
-            <InputTextField className="h-8">
+            <InputTextField className="h-10">
               <InputIcon className="w-7">
                 <UserIDIcon className="w-3.5 h-3.5" />
               </InputIcon>
@@ -290,7 +295,7 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
           {/* AGE */}
           <InputContainer>
             <InputLabel className="text-xs mb-0.5">AGE</InputLabel>
-            <InputTextField className="h-8">
+            <InputTextField className="h-10">
               <InputIcon className="w-7">
                 <AgeIcon className="w-3.5 h-3.5" />
               </InputIcon>
@@ -318,7 +323,7 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
           {/* EMAIL */}
           <InputContainer>
             <InputLabel className="text-xs mb-0.5">EMAIL</InputLabel>
-            <InputTextField className="h-8">
+            <InputTextField className="h-10">
               <InputIcon className="w-7">
                 <EmailIcon className="w-3.5 h-3.5" />
               </InputIcon>
@@ -347,7 +352,7 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
           <div className="flex flex-row w-full gap-2">
             <InputContainer className="flex-1">
               <InputLabel className="text-xs mb-0.5">DATE OF SESSION</InputLabel>
-              <InputTextField className="h-8">
+              <InputTextField className="h-10">
                 <InputIcon className="w-7">
                   <CalendarIcon className="w-3.5 h-3.5" />
                 </InputIcon>
@@ -374,7 +379,7 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
 
             <InputContainer className="flex-1">
               <InputLabel className="text-xs mb-0.5">TIME OF SESSION</InputLabel>
-              <InputTextField className="h-8">
+              <InputTextField className="h-10">
                 <InputIcon className="w-7">
                   <ClockIcon className="w-3.5 h-3.5" />
                 </InputIcon>
@@ -409,7 +414,7 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
               variant="outline"
               type="button"
               onClick={onClose}
-              className="flex-1 h-9 text-sm"
+              className="flex-1 h-10 text-sm"
             >
               <ChevronLeftIcon className="w-4 h-4 mr-1" />
               RETURN
@@ -417,7 +422,7 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
             <Button
               data-cy="schedule-submit-btn"
               type="submit"
-              className="flex-1 h-9 text-sm"
+              className="flex-1 h-10 text-sm"
             >
               <ArrowNorthEastIcon className="w-4 h-4 mr-1" />
               SUBMIT
