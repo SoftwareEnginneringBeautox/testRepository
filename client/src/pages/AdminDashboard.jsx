@@ -536,29 +536,29 @@ function AdministratorDashboard() {
         </div>
       </div>
 
-      {/* Right Section */}
+      {/* Right Section - Staff List */}
       <div
         className={cn(
           "w-full lg:w-1/4 shadow-custom p-4 sm:p-6 md:p-8 lg:p-10 bg-ash-100 dark:bg-gray-800 rounded-lg flex flex-col items-center gap-3 sm:gap-4 mt-4 lg:mt-0",
-          "[&::-webkit-scrollbar]:w-2",
-          "[&::-webkit-scrollbar-thumb]:bg-gray-400",
-          "[&::-webkit-scrollbar-thumb]:rounded-full",
-          "[&::-webkit-scrollbar-track]:bg-transparent",
-          "[&::-webkit-scrollbar-thumb:hover]:bg-lavender-400"
+          "max-h-[calc(100vh-2rem)]"
         )}
         data-cy="staff-section"
       >
-        <h3
-          className="flex items-center gap-2 text-lg sm:text-xl md:text-2xl lg:text-[2rem] leading-tight sm:leading-[2.8rem] font-semibold dark:text-customNeutral-100"
-          data-cy="staff-list-title"
-        >
-          <UserIcon className="sm:w-8 sm:h-8" data-cy="staff-icon" />
-          <span
+        <div className="flex items-center gap-2 w-full" data-cy="staff-header">
+          <UserIcon
+            className="sm:w-8 sm:h-8"
+            data-cy="staff-icon"
+            fill={theme === "dark" ? secondaryColor : "inherit"}
+          />
+          <h3
+            className="text-lg sm:text-xl md:text-2xl lg:text-[2rem] whitespace-nowrap font-semibold dark:text-customNeutral-100"
             style={{ color: theme === "dark" ? secondaryColor : "inherit" }}
+            data-cy="staff-list-title"
           >
             STAFF LIST
-          </span>
-        </h3>
+          </h3>
+        </div>
+
         {loadingStaff ? (
           <div className="w-full my-6" data-cy="loading-staff-message">
             <Loader />
@@ -580,8 +580,7 @@ function AdministratorDashboard() {
         ) : (
           <div
             className={cn(
-              "w-full max-h-[300px] sm:max-h-[400px] overflow-y-auto",
-              // Scrollbar-specific styling
+              "w-full max-h-[300px] sm:max-h-[400px] overflow-y-auto pr-1",
               "[&::-webkit-scrollbar]:w-2",
               "[&::-webkit-scrollbar-thumb]:bg-gray-400",
               "[&::-webkit-scrollbar-thumb]:rounded-full",
@@ -647,7 +646,6 @@ function AdministratorDashboard() {
                           Edit
                         </p>
                       </DropdownMenuItem>
-
                       <DropdownMenuItem
                         className={`dark:text-white ${dropdownItemHoverClass}`}
                         data-cy={`archive-staff-btn-${index}`}
@@ -673,27 +671,31 @@ function AdministratorDashboard() {
             ))}
           </div>
         )}
+
         <Button
           data-cy="add-staff-btn"
           fullWidth="true"
+          size="sm"
           onClick={() => openModal("createStaff")}
-          className="mt-2 text-sm sm:text-base py-2 sm:py-3 dark:bg-indigo-700 dark:hover:bg-indigo-600"
+          className="mt-2 text-sm dark:bg-indigo-700 dark:hover:bg-indigo-600"
           style={theme === "dark" ? { background: primaryColor } : {}}
         >
-          <PlusIcon className="w-4 h-4 sm:w-5 sm:h-5 mr-1" />
+          <PlusIcon className="w-4 h-4 mr-1" />
           ADD NEW STAFF
-          <UserIcon className="w-4 h-4 sm:w-5 sm:h-5 ml-1" />
         </Button>
+
         <Button
           data-cy="download-staff-btn"
           fullWidth="true"
+          size="sm"
           onClick={() => generateStaffListReport(staffList)}
-          className="mt-2 text-sm sm:text-base py-2 sm:py-3 dark:bg-indigo-700 dark:hover:bg-indigo-600"
+          className="mt-2 text-sm dark:bg-indigo-700 dark:hover:bg-indigo-600"
           style={theme === "dark" ? { background: primaryColor } : {}}
         >
-          <DownloadIcon className="w-4 h-4 sm:w-5 sm:h-5 mr-1" />
+          <DownloadIcon className="w-4 h-4 mr-1" />
           DOWNLOAD STAFF LIST
         </Button>
+
         {currentModal === "createStaff" && (
           <CreateStaff
             isOpen={true}
@@ -713,7 +715,6 @@ function AdministratorDashboard() {
             data-cy="modify-staff-modal"
           />
         )}
-
         {currentModal === "archiveStaff" && selectedStaff && (
           <ArchiveStaff
             isOpen={true}
