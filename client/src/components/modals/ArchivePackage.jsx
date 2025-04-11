@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 
 import { ModalContainer, ModalTitle } from "@/components/ui/Modal";
 
@@ -9,7 +9,22 @@ import ChevronLeftIcon from "@/assets/icons/ChevronLeftIcon";
 import ArchiveIcon from "@/assets/icons/ArchiveIcon";
 
 function ArchivePackage({ isOpen, onClose, onArchive }) {
+  const [isArchiving, setIsArchiving] = useState(false);
+  
   if (!isOpen) return null;
+
+  const handleArchive = async () => {
+    if (isArchiving) return;
+    
+    setIsArchiving(true);
+    try {
+      await onArchive();
+    } catch (error) {
+      console.error("Error archiving package:", error);
+    } finally {
+      setIsArchiving(false);
+    }
+  };
 
   return (
     <ModalContainer
@@ -31,6 +46,7 @@ function ArchivePackage({ isOpen, onClose, onArchive }) {
           variant="outline"
           className="md:w-1/2"
           onClick={onClose}
+          disabled={isArchiving}
         >
           <ChevronLeftIcon />
           CANCEL AND RETURN
@@ -38,10 +54,11 @@ function ArchivePackage({ isOpen, onClose, onArchive }) {
         <Button
           data-cy="confirm-archive-btn"
           className="md:w-1/2"
-          onClick={onArchive}
+          onClick={handleArchive}
+          disabled={isArchiving}
         >
           <ArchiveIcon />
-          ARCHIVE PACKAGE
+          {isArchiving ? "ARCHIVING..." : "ARCHIVE PACKAGE"}
         </Button>
       </div>
     </ModalContainer>

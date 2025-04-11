@@ -53,7 +53,7 @@ function EditPackage({ isOpen, onClose, entryData, onSubmit }) {
         );
         const data = await res.json();
         const activeTreatments = Array.isArray(data)
-          ? data.filter((t) => !t.is_archived)
+          ? data.filter((t) => !t.archived)
           : [];
         setTreatments(activeTreatments);
       } catch (error) {
@@ -64,27 +64,31 @@ function EditPackage({ isOpen, onClose, entryData, onSubmit }) {
     fetchTreatments();
   }, []);
 
-  // ✅ Initialize formData only once per modal open
+  // Fix initialization logic to always show original data
   useEffect(() => {
-    if (
-      !isOpen ||
-      !entryData ||
-      !Array.isArray(entryData.treatments) ||
-      entryData.treatments.length === 0 ||
-      initialized.current
-    )
+    // Reset the initialization flag when the modal opens/closes
+    if (!isOpen) {
+      initialized.current = false;
       return;
+    }
 
-    setFormData({
-      package_name: entryData.package_name || "",
-      treatment_ids: entryData.treatments.map((t) => t?.id).filter(Boolean),
-      sessions: entryData.sessions || "",
-      price: entryData.price || "",
-      expiration: entryData.expiration || ""
-    });
-    console.log("entryData received:", entryData);
-
-    initialized.current = true;
+    // Only initialize when modal is open and we have entryData
+    if (isOpen && entryData && !initialized.current) {
+      setFormData({
+        package_name: entryData.package_name || "",
+        treatment_ids: Array.isArray(entryData.treatment_ids) 
+          ? entryData.treatment_ids 
+          : (Array.isArray(entryData.treatments) 
+              ? entryData.treatments.map(t => t?.id).filter(Boolean) 
+              : []),
+        sessions: entryData.sessions || "",
+        price: entryData.price || "",
+        expiration: entryData.expiration || ""
+      });
+      
+      console.log("entryData loaded into form:", entryData);
+      initialized.current = true;
+    }
   }, [isOpen, entryData]);
 
   if (!isOpen) return null;

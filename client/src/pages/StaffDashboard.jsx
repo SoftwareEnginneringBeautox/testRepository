@@ -1,9 +1,18 @@
 import React from "react";
 import "../App.css";
+import { useTheme } from "@/components/ThemeProvider";
 import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { format } from "date-fns";
 import { useModal } from "@/hooks/useModal";
+import AppointmentDetails from "@/components/modals/AppointmentDetails";
+import {
+  AlertContainer,
+  AlertDescription,
+  AlertTitle,
+  AlertText,
+  CloseAlert
+} from "@/components/ui/Alert";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -31,6 +40,11 @@ import { Button } from "@/components/ui/Button";
 import DownloadIcon from "@/assets/icons/DownloadIcon";
 
 function StaffDashboard() {
+  const { theme } = useTheme();
+  // Theme-dependent colors
+  const primaryColor = theme === "dark" ? "#A5B4FC" : "#3730A3";
+  const secondaryColor = theme === "dark" ? "#E9D5FF" : "#5B21B6";
+
   const [userName, setUserName] = useState(
     localStorage.getItem("username") || ""
   );
@@ -61,30 +75,6 @@ function StaffDashboard() {
   const [packagesData, setPackagesData] = useState([]);
   const [loadingTreatments, setLoadingTreatments] = useState(true);
   const [errorTreatments, setErrorTreatments] = useState(null);
-
-  // Add this new fetch function
-  const fetchTreatments = useCallback(async () => {
-    try {
-      setLoadingTreatments(true);
-      const [treatmentsRes, packagesRes] = await Promise.all([
-        axios.get(`${API_BASE_URL}/api/treatments`, {
-          withCredentials: true
-        }),
-        axios.get(`${API_BASE_URL}/api/packages`, {
-          withCredentials: true
-        })
-      ]);
-
-      setTreatmentsData(treatmentsRes.data || []);
-      setPackagesData(packagesRes.data || []);
-      setErrorTreatments(null);
-    } catch (error) {
-      console.error("Error fetching treatments:", error);
-      setErrorTreatments("Failed to load treatments");
-    } finally {
-      setLoadingTreatments(false);
-    }
-  }, []);
 
   // Alert Functions
   const showAlert = useCallback((message, variant = "default") => {
@@ -146,23 +136,34 @@ function StaffDashboard() {
   }, []);
 
   const handleAppointmentAction = useCallback(
-    async (id, action) => {
+    async (id, action, patientId = null) => {
       try {
+        // Prevent duplicate API calls
         setLoadingAppointments(true);
-        await axios.post(
+        
+        // Include patientId in request body if provided
+        const requestBody = patientId ? { patient_record_id: patientId } : {};
+        
+        // Single API call with proper payload
+        const response = await axios.post(
           `${API_BASE_URL}/api/staged-appointments/${id}/${action}`,
-          {},
+          requestBody,
           { withCredentials: true }
         );
 
-        showAlert(
-          `Appointment ${
-            action === "confirm" ? "confirmed" : "rejected"
-          } successfully`,
-          "success"
-        );
-        setShowAppointmentModal(false);
-        fetchAppointments();
+        // Check response for success
+        if (response.data?.success) {
+          showAlert(
+            `Appointment ${
+              action === "confirm" ? "confirmed" : "rejected"
+            } successfully`,
+            "success"
+          );
+          setShowAppointmentModal(false);
+          fetchAppointments(); // Refresh data after successful action
+        } else {
+          throw new Error(response.data?.message || "Unknown error");
+        }
       } catch (error) {
         console.error(`Error ${action}ing appointment:`, error);
         showAlert(`Failed to ${action} appointment`, "destructive");
@@ -174,8 +175,15 @@ function StaffDashboard() {
   );
 
   const handleConfirmAppointment = useCallback(
+    (id, patientId = null) => {
+      handleAppointmentAction(id, "confirm", patientId);
+    },
+    [handleAppointmentAction]
+  );
+
+  const handleRejectAppointment = useCallback(
     (id) => {
-      handleAppointmentAction(id, "confirm");
+      handleAppointmentAction(id, "reject");
     },
     [handleAppointmentAction]
   );
@@ -185,23 +193,67 @@ function StaffDashboard() {
     setShowAppointmentModal(true);
   }, []);
 
-  const handleRejectAppointment = useCallback(
-    (id) => {
-      handleAppointmentAction(id, "reject");
-    },
-    [handleAppointmentAction]
-  );
+  // Treatment Functions
+  const fetchTreatments = useCallback(async () => {
+    try {
+      setLoadingTreatments(true);
+      const [treatmentsRes, packagesRes] = await Promise.all([
+        axios.get(`${API_BASE_URL}/api/treatments`, {
+          withCredentials: true
+        }),
+        axios.get(`${API_BASE_URL}/api/packages`, {
+          withCredentials: true
+        })
+      ]);
+
+      setTreatmentsData(treatmentsRes.data || []);
+      setPackagesData(packagesRes.data || []);
+      setErrorTreatments(null);
+    } catch (error) {
+      console.error("Error fetching treatments:", error);
+      setErrorTreatments("Failed to load treatments");
+    } finally {
+      setLoadingTreatments(false);
+    }
+  }, []);
 
   // Load data on component mount
+  // Replace the existing useEffect with this:
   useEffect(() => {
+    let isSubscribed = true; // Add subscription flag
+
     const fetchData = async () => {
-      await Promise.all([fetchStaff(), fetchAppointments(), fetchTreatments()]);
+      try {
+        const [staffRes, appointmentsRes, treatmentsRes] = await Promise.all([
+          fetchStaff(),
+          fetchAppointments(),
+          fetchTreatments()
+        ]);
+
+        // Only update state if component is still mounted
+        if (isSubscribed) {
+          // State updates will happen in individual fetch functions
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
     };
+
     fetchData();
 
-    const pollingInterval = setInterval(fetchAppointments, 300000);
-    return () => clearInterval(pollingInterval);
-  }, [fetchStaff, fetchAppointments, fetchTreatments]);
+    // Set up polling only for appointments
+    const pollingInterval = setInterval(() => {
+      if (isSubscribed) {
+        fetchAppointments();
+      }
+    }, 300000);
+
+    // Cleanup function
+    return () => {
+      isSubscribed = false;
+      clearInterval(pollingInterval);
+    };
+  }, []); // Empty dependency array since fetch functions are wrapped in useCallback
 
   // Helper Functions
   const formatSafeDate = (dateString, formatStr) => {
@@ -264,10 +316,6 @@ function StaffDashboard() {
       console.error("Error in getReminderLabel:", error);
       return null;
     }
-  };
-
-  const handleDownloadStaffList = () => {
-    // Implementation of handleDownloadStaffList function
   };
 
   return (
@@ -434,22 +482,24 @@ function StaffDashboard() {
           </Table>
         </div>
       </div>
-
+      {/* Right Section - Staff List */}
       {/* Right Section - Staff List */}
       <div className="w-full lg:w-1/4 flex flex-col gap-4">
         <div
           className={cn(
-            "shadow-custom p-4 sm:p-6 md:p-8 lg:p-10 bg-ash-100 dark:bg-customNeutral-500 rounded-lg flex flex-col items-center gap-3 sm:gap-4 mt-4 lg:mt-0 overflow-y-auto",
-            "[&::-webkit-scrollbar]:w-2",
-            "[&::-webkit-scrollbar-thumb]:bg-gray-400",
-            "[&::-webkit-scrollbar-thumb]:rounded-full",
-            "[&::-webkit-scrollbar-track]:bg-transparent",
-            "[&::-webkit-scrollbar-thumb:hover]:bg-lavender-400"
+            "shadow-custom p-4 sm:p-6 md:p-8 lg:p-10 bg-ash-100 dark:bg-gray-800 rounded-lg flex flex-col items-center gap-3 sm:gap-4 mt-4 lg:mt-0",
+            "max-h-[calc(100vh-2rem)]"
           )}
         >
           <h3 className="flex items-center gap-2 text-lg sm:text-xl md:text-2xl lg:text-[2rem] leading-tight sm:leading-[2.8rem] font-semibold dark:text-customNeutral-100">
-            <UserIcon size={24} className="sm:w-8 sm:h-8" />
-            STAFF LIST
+            <UserIcon
+              size={24}
+              className="sm:w-8 sm:h-8"
+              fill={theme === "dark" ? "#E9D5FF" : "inherit"}
+            />
+            <span style={{ color: theme === "dark" ? "#E9D5FF" : "inherit" }}>
+              STAFF LIST
+            </span>
           </h3>
           {loadingStaff ? (
             <p className="text-sm sm:text-base dark:text-customNeutral-100">
@@ -463,11 +513,26 @@ function StaffDashboard() {
             </p>
           ) : (
             <div className="w-full flex flex-col gap-4">
-              <div className="w-full max-h-[300px] sm:max-h-[400px] overflow-y-auto">
+              <div
+                className={cn(
+                  "w-full overflow-y-auto pr-1",
+                  "max-h-[calc(100vh-15rem)]",
+                  "[&::-webkit-scrollbar]:w-2",
+                  "[&::-webkit-scrollbar-thumb]:bg-gray-400",
+                  "[&::-webkit-scrollbar-thumb]:rounded-full",
+                  "[&::-webkit-scrollbar-track]:bg-transparent",
+                  "[&::-webkit-scrollbar-thumb:hover]:bg-lavender-400"
+                )}
+              >
                 {staffList.map((staff, index) => (
                   <div
                     key={index}
-                    className="w-full flex justify-between border-2 border-reflexBlue-400 dark:border-lavender-300 px-3 sm:px-4 py-2 sm:py-3 rounded-md mb-2"
+                    className="w-full flex justify-between px-3 sm:px-4 py-2 sm:py-3 rounded-md mb-2 bg-white/50 dark:bg-gray-700"
+                    style={
+                      theme === "dark"
+                        ? { border: `2px solid #A5B4FC` }
+                        : { border: "2px solid var(--reflexBlue-400)" }
+                    }
                   >
                     <div className="flex flex-col">
                       <span className="font-semibold text-sm sm:text-base dark:text-customNeutral-100">
@@ -475,7 +540,7 @@ function StaffDashboard() {
                       </span>
                       {(staff.role === "receptionist" ||
                         staff.role === "aesthetician") && (
-                        <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 capitalize">
+                        <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-300 capitalize">
                           ({staff.role})
                         </span>
                       )}
@@ -486,71 +551,16 @@ function StaffDashboard() {
             </div>
           )}
         </div>
-
-        {/* Reminders Card */}
-        {/* <div
-          className={cn(
-            "shadow-custom p-4 sm:p-6 md:p-8 lg:p-10 bg-ash-100 dark:bg-customNeutral-500 rounded-lg flex flex-col items-center gap-3 sm:gap-4 overflow-y-auto",
-            "[&::-webkit-scrollbar]:w-2",
-            "[&::-webkit-scrollbar-thumb]:bg-gray-400",
-            "[&::-webkit-scrollbar-thumb]:rounded-full",
-            "[&::-webkit-scrollbar-track]:bg-transparent",
-            "[&::-webkit-scrollbar-thumb:hover]:bg-lavender-400"
-          )}
-        >
-          <h3 className="flex items-center gap-2 text-lg sm:text-xl md:text-2xl lg:text-[2rem] leading-tight sm:leading-[2.8rem] font-semibold dark:text-customNeutral-100">
-            <CalendarIcon className="w-6 h-6 sm:w-8 sm:h-8" />
-            REMINDERS
-          </h3>
-          <div className="w-full">
-            <h4 className="text-base text-center sm:text-lg font-semibold mb-2 dark:text-customNeutral-100">
-              UPCOMING APPOINTMENTS
-            </h4>
-            <div className="flex flex-col gap-2">
-              {reminders.length > 0 ? (
-                reminders.map((item, index) => (
-                  <div
-                    key={index}
-                    className="flex items-start text-xs sm:text-sm bg-white/50 dark:bg-customNeutral-400 pt-8 pb-4 px-4 rounded-lg relative min-h-[80px]"
-                  >
-                    {getReminderLabel(item.date_of_session) && (
-                      <div className="absolute top-3 right-3">
-                        <span className="px-3 py-1 text-[10px] rounded-full bg-lavender-300 text-white font-semibold whitespace-nowrap">
-                          {getReminderLabel(item.date_of_session)}
-                        </span>
-                      </div>
-                    )}
-                    <div className="w-[calc(100%-100px)]">
-                      <span className="dark:text-customNeutral-100 ">
-                        {item.full_name} has an appointment on{" "}
-                        <strong>
-                          {format(
-                            new Date(item.date_of_session),
-                            "MMMM dd, yyyy"
-                          )}
-                        </strong>{" "}
-                        at{" "}
-                        <strong>
-                          {format(
-                            new Date(`1970-01-01T${item.time_of_session}`),
-                            "hh:mm a"
-                          )}
-                        </strong>
-                      </span>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="flex items-center gap-2 text-xs sm:text-sm bg-white/50 dark:bg-customNeutral-400   rounded-lg">
-                  <span className="dark:text-customNeutral-100">
-                    No upcoming appointments in the next 3 days.
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
-        </div> */}
       </div>
+      {showAppointmentModal && selectedAppointment && (
+        <AppointmentDetails
+          isOpen={showAppointmentModal}
+          onClose={() => setShowAppointmentModal(false)}
+          appointmentData={selectedAppointment}
+          onConfirm={handleConfirmAppointment}
+          onReject={handleRejectAppointment}
+        />
+      )}
     </div>
   );
 }

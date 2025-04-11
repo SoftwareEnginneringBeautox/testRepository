@@ -51,7 +51,10 @@ function CreatePackage({ isOpen, onClose }) {
           })
         ]);
 
-        setTreatmentsList(treatmentsRes.data);
+        // Filter out archived treatments on the client side to ensure none appear
+        const activeTreatments = treatmentsRes.data.filter(treatment => !treatment.archived);
+        setTreatmentsList(activeTreatments);
+        
         setExistingPackages(packagesRes.data);
       } catch (err) {
         console.error("Error fetching data:", err);

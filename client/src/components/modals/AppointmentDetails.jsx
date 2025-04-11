@@ -67,41 +67,31 @@ function AppointmentDetails({
       setStatusMessage({ type: "info", text: "Processing confirmation..." });
       setProcessingStep("Starting confirmation process...");
 
-      // Step 1: First try to create a patient record
+      // Step 1: Create patient record
       let patientId;
       try {
         patientId = await createPatientRecord(appointmentData);
-        setProcessingStep(`Patient record created (ID: ${patientId}). Confirming appointment...`);
+        setProcessingStep(`Patient record created (ID: ${patientId}).`);
       } catch (error) {
         setStatusMessage({
           type: "error",
           text: "Failed to create patient record: " + error.message
         });
-        throw error; // Propagate error to stop the process
+        throw error;
       }
 
-      // Step 2: Now confirm the appointment with the patient_record_id
-      const response = await axios.post(
-        `${API_BASE_URL}/api/staged-appointments/${id}/confirm`,
-        { patient_record_id: patientId } // Pass the patient ID to the endpoint
-      );
-
-      if (response.data.success) {
-        setProcessingStep("Appointment confirmed successfully!");
-        setStatusMessage({
-          type: "success",
-          text: "Appointment confirmed successfully!"
-        });
-        // Call the onConfirm callback to update UI
-        onConfirm(id);
-        // Close the modal after a short delay
-        setTimeout(() => onClose(), 1500);
-      } else {
-        setStatusMessage({
-          type: "error",
-          text: response.data.message || "Failed to confirm appointment"
-        });
-      }
+      // Step 2: Call the parent's onConfirm with the patientId
+      // This avoids the duplicate API call
+      onConfirm(id, patientId);
+      
+      setProcessingStep("Appointment confirmed successfully!");
+      setStatusMessage({
+        type: "success",
+        text: "Appointment confirmed successfully!"
+      });
+      
+      // Close the modal after a short delay
+      setTimeout(() => onClose(), 1500);
     } catch (error) {
       console.error("Error confirming appointment:", error);
       setStatusMessage({
