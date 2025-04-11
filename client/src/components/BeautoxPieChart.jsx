@@ -86,6 +86,18 @@ const BeautoxPieChart = () => {
     };
 
     fetchExpenses();
+    
+    // Add event listener for the refresh event
+    const handleRefresh = () => {
+      fetchExpenses();
+    };
+    
+    window.addEventListener('refresh-pie-chart', handleRefresh);
+    
+    // Clean up event listener when component unmounts
+    return () => {
+      window.removeEventListener('refresh-pie-chart', handleRefresh);
+    };
   }, []);
 
   // Filter out rows with null for critical data fields
