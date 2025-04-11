@@ -136,23 +136,34 @@ function StaffDashboard() {
   }, []);
 
   const handleAppointmentAction = useCallback(
-    async (id, action) => {
+    async (id, action, patientId = null) => {
       try {
+        // Prevent duplicate API calls
         setLoadingAppointments(true);
-        await axios.post(
+        
+        // Include patientId in request body if provided
+        const requestBody = patientId ? { patient_record_id: patientId } : {};
+        
+        // Single API call with proper payload
+        const response = await axios.post(
           `${API_BASE_URL}/api/staged-appointments/${id}/${action}`,
-          {},
+          requestBody,
           { withCredentials: true }
         );
 
-        showAlert(
-          `Appointment ${
-            action === "confirm" ? "confirmed" : "rejected"
-          } successfully`,
-          "success"
-        );
-        setShowAppointmentModal(false);
-        fetchAppointments();
+        // Check response for success
+        if (response.data?.success) {
+          showAlert(
+            `Appointment ${
+              action === "confirm" ? "confirmed" : "rejected"
+            } successfully`,
+            "success"
+          );
+          setShowAppointmentModal(false);
+          fetchAppointments(); // Refresh data after successful action
+        } else {
+          throw new Error(response.data?.message || "Unknown error");
+        }
       } catch (error) {
         console.error(`Error ${action}ing appointment:`, error);
         showAlert(`Failed to ${action} appointment`, "destructive");
@@ -164,8 +175,8 @@ function StaffDashboard() {
   );
 
   const handleConfirmAppointment = useCallback(
-    (id) => {
-      handleAppointmentAction(id, "confirm");
+    (id, patientId = null) => {
+      handleAppointmentAction(id, "confirm", patientId);
     },
     [handleAppointmentAction]
   );
