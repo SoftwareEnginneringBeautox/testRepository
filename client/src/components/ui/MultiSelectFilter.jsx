@@ -18,7 +18,8 @@ const MultiSelectFilter = ({
   placeholder = "Select options",
   mandatoryValues = [], // Add support for mandatory values
   showApplyButton = true,
-  onApply // Optional callback for when changes are applied
+  onApply, // Optional callback for when changes are applied
+  className // Add className prop
 }) => {
   const [tempSelectedValues, setTempSelectedValues] = useState([
     ...selectedValues
@@ -70,14 +71,15 @@ const MultiSelectFilter = ({
 
   return (
     <Select
-      className="w-full md:w-auto"
+      className={cn("w-full md:w-auto", className)}
       data-cy="multi-select-filter"
       onOpenChange={handleOpenChange}
     >
       <SelectTrigger
         placeholder={placeholder}
-        icon={<FilterIcon />}
+        icon={<FilterIcon className="w-2.5 h-2.5 sm:w-3 sm:h-3 md:w-3.5 md:h-3.5" />}
         data-cy="multi-select-trigger"
+        className="text-[10px] sm:text-xs md:text-sm py-1 sm:py-2 px-2 sm:px-3"
       >
         <SelectValue>
           {selectedValues.length > 0
@@ -107,7 +109,7 @@ const MultiSelectFilter = ({
               />
               <label
                 htmlFor="select-all-checkbox"
-                className="flex-1 cursor-pointer text-sm"
+                className="flex-1 cursor-pointer text-[10px] sm:text-xs"
               >
                 Select All
               </label>
@@ -126,7 +128,7 @@ const MultiSelectFilter = ({
                 />
                 <label
                   htmlFor={`checkbox-${option.value}`}
-                  className="flex-1 cursor-pointer text-sm"
+                  className="flex-1 cursor-pointer text-[10px] sm:text-xs"
                 >
                   {option.label}
                   {mandatoryValues.includes(option.value) && " (required)"}
@@ -142,6 +144,7 @@ const MultiSelectFilter = ({
                 size="sm"
                 onClick={handleApply}
                 data-cy="apply-filter-button"
+                className="text-[10px] sm:text-xs"
               >
                 APPLY
               </Button>

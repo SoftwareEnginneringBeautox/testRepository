@@ -71,34 +71,34 @@ const WeeklyBookingPanel = ({ events = [], currentDate }) => {
       className="w-full overflow-x-auto"
       data-cy="weekly-booking-panel-container"
     >
-      <table className="w-full min-w-[800px]" data-cy="weekly-booking-table">
+      <table className="w-full min-w-[600px]" data-cy="weekly-booking-table">
         <thead
-          className="bg-lavender-400 text-customNeutral-100 text-center font-semibold text-xs sm:text-sm md:text-base lg:text-lg leading-6 sm:leading-7 md:leading-8 py-2 sm:py-3 md:py-4"
+          className="bg-lavender-400 text-customNeutral-100 text-center font-semibold text-[10px] sm:text-xs md:text-sm lg:text-base leading-4 sm:leading-5 md:leading-6 py-1 sm:py-2 md:py-3"
           data-cy="weekly-booking-table-header"
         >
           <tr>
             <th
-              className="w-16 sm:w-20 md:w-24 bg-ash-100 dark:bg-customNeutral-500"
+              className="w-12 sm:w-16 md:w-20 bg-ash-100 dark:bg-customNeutral-500"
               data-cy="time-column-header"
             ></th>
             {days.map((day, idx) => (
               <th
                 key={idx}
-                className={`p-1 sm:p-2 ${
+                className={`p-0.5 sm:p-1 ${
                   idx === 0 ? "rounded-l-[0.5rem]" : ""
                 } ${idx === days.length - 1 ? "rounded-r-[0.5rem]" : ""}`}
                 data-cy={`day-column-header-${day.toLowerCase()}`}
               >
                 <div
-                  className="text-[10px] sm:text-xs md:text-sm lg:text-base"
+                  className="text-[8px] sm:text-[10px] md:text-xs lg:text-sm"
                   data-cy={`day-name-${day.toLowerCase()}`}
                 >
                   {day}
                 </div>
                 <div
-                  className={`text-[10px] sm:text-xs md:text-sm ${
+                  className={`text-[8px] sm:text-[10px] md:text-xs ${
                     isToday(weekDates[idx])
-                      ? "bg-white text-lavender-400 rounded-full inline-block px-1 sm:px-2"
+                      ? "bg-white text-lavender-400 rounded-full inline-block px-0.5 sm:px-1"
                       : ""
                   }`}
                   data-cy={`day-date-${day.toLowerCase()}`}
@@ -112,17 +112,17 @@ const WeeklyBookingPanel = ({ events = [], currentDate }) => {
       </table>
 
       <div
-        className="flex relative min-w-[800px]"
+        className="flex relative min-w-[600px]"
         data-cy="weekly-booking-content"
       >
         <div
-          className="w-16 sm:w-20 md:w-24 flex flex-col"
+          className="w-12 sm:w-16 md:w-20 flex flex-col"
           data-cy="time-column"
         >
           {hours.map((hour, idx) => (
             <div
               key={idx}
-              className="h-12 sm:h-14 md:h-16 text-right pr-2 sm:pr-3 md:pr-4 font-semibold text-customNeutral-300 text-[10px] sm:text-xs md:text-sm"
+              className="h-8 sm:h-10 md:h-12 text-right pr-1 sm:pr-2 md:pr-3 font-semibold text-customNeutral-300 text-[8px] sm:text-[10px] md:text-xs"
               data-cy={`time-slot-${hour.replace(":", "-")}`}
             >
               {hour}
@@ -144,7 +144,7 @@ const WeeklyBookingPanel = ({ events = [], currentDate }) => {
                 {[...Array(24)].map((_, timeIdx) => (
                   <div
                     key={timeIdx}
-                    className="h-12 sm:h-14 md:h-16 border-b border-gray-300"
+                    className="h-8 sm:h-10 md:h-12 border-b border-gray-300"
                     data-cy={`hour-slot-${timeIdx}`}
                   ></div>
                 ))}
@@ -167,19 +167,19 @@ const WeeklyBookingPanel = ({ events = [], currentDate }) => {
                   return (
                     <button
                       key={idx}
-                      className="absolute shadow-custom left-1 right-1 bg-lavender-400 text-white rounded-md p-1 sm:p-2 md:p-2.5 focus:outline-none text-left flex flex-col justify-end"
+                      className="absolute shadow-custom left-0.5 right-0.5 bg-lavender-400 text-white rounded-md p-0.5 sm:p-1 md:p-1.5 focus:outline-none text-left flex flex-col justify-end"
                       style={{ top, height }}
                       onClick={() => handleOpenModal(event)}
                       data-cy={`event-${event.id}`}
                     >
                       <strong
-                        className="block text-[10px] sm:text-xs md:text-sm truncate"
+                        className="block text-[8px] sm:text-[10px] md:text-xs truncate"
                         data-cy="event-name"
                       >
                         {event.name}
                       </strong>
                       <p
-                        className="text-[8px] sm:text-[10px] md:text-xs truncate"
+                        className="text-[6px] sm:text-[8px] md:text-[10px] truncate"
                         data-cy="event-time"
                       >
                         {event.startTime} - {event.endTime}
