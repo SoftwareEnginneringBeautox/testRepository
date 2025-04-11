@@ -27,6 +27,8 @@ import { Badge } from "@/components/ui/Badge";
 import EditIcon from "@/assets/icons/EditIcon";
 import DeleteIcon from "@/assets/icons/DeleteIcon";
 import CalendarIcon from "@/assets/icons/CalendarIcon";
+import { Button } from "@/components/ui/Button";
+import DownloadIcon from "@/assets/icons/DownloadIcon";
 
 function StaffDashboard() {
   const [userName, setUserName] = useState(
@@ -264,6 +266,10 @@ function StaffDashboard() {
     }
   };
 
+  const handleDownloadStaffList = () => {
+    // Implementation of handleDownloadStaffList function
+  };
+
   return (
     <div className="flex flex-col lg:flex-row items-start gap-6 justify-center w-full p-3 sm:p-4 md:p-6 lg:w-[90%] mx-auto">
       {/* Left Section */}
@@ -456,25 +462,38 @@ function StaffDashboard() {
               No staff found.
             </p>
           ) : (
-            <div className="w-full max-h-[300px] sm:max-h-[400px] overflow-y-auto">
-              {staffList.map((staff, index) => (
-                <div
-                  key={index}
-                  className="w-full flex justify-between border-2 border-reflexBlue-400 dark:border-lavender-300 px-3 sm:px-4 py-2 sm:py-3 rounded-md mb-2"
-                >
-                  <div className="flex flex-col">
-                    <span className="font-semibold text-sm sm:text-base dark:text-customNeutral-100">
-                      {staff.username}
-                    </span>
-                    {(staff.role === "receptionist" ||
-                      staff.role === "aesthetician") && (
-                      <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 capitalize">
-                        ({staff.role})
+            <div className="w-full flex flex-col gap-4">
+              <div className="w-full max-h-[300px] sm:max-h-[400px] overflow-y-auto">
+                {staffList.map((staff, index) => (
+                  <div
+                    key={index}
+                    className="w-full flex justify-between border-2 border-reflexBlue-400 dark:border-lavender-300 px-3 sm:px-4 py-2 sm:py-3 rounded-md mb-2"
+                  >
+                    <div className="flex flex-col">
+                      <span className="font-semibold text-sm sm:text-base dark:text-customNeutral-100">
+                        {staff.username}
                       </span>
-                    )}
+                      {(staff.role === "receptionist" ||
+                        staff.role === "aesthetician") && (
+                        <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 capitalize">
+                          ({staff.role})
+                        </span>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
+              <div className="flex justify-center">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-2 text-xs sm:text-sm"
+                  onClick={handleDownloadStaffList}
+                >
+                  <DownloadIcon className="w-2 h-2 sm:w-4 sm:h-4" />
+                  <span>DOWNLOAD STAFF LIST</span>
+                </Button>
+              </div>
             </div>
           )}
         </div>

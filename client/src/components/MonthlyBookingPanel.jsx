@@ -54,14 +54,14 @@ const MonthlyBookingPanel = ({
   };
 
   return (
-    <div className="w-full">
-      <table className="w-full border-spacing-y-2 border-separate table-fixed">
-        <thead className="bg-lavender-400 text-customNeutral-100 text-center font-semibold text-[1.25rem] leading-8">
+    <div className="w-full overflow-x-auto">
+      <table className="w-full min-w-[600px] border-spacing-y-2 border-separate table-fixed">
+        <thead className="bg-lavender-400 text-customNeutral-100 text-center font-semibold text-xs sm:text-sm md:text-base lg:text-lg leading-6 sm:leading-7 md:leading-8">
           <tr className="rounded-lg">
             {days.map((day, index) => (
               <th
                 key={index}
-                className={`p-2 w-1/7 ${
+                className={`p-1 sm:p-2 w-1/7 ${
                   index === 0 ? "rounded-l-[0.5rem]" : ""
                 } ${index === days.length - 1 ? "rounded-r-[0.5rem]" : ""}`}
               >
@@ -71,7 +71,7 @@ const MonthlyBookingPanel = ({
           </tr>
         </thead>
 
-        <tbody className="space-y-2">
+        <tbody className="space-y-1 sm:space-y-2">
           {calendarDays.map((week, weekIndex) => (
             <tr key={weekIndex} className="shadow-sm">
               {week.map((day, dayIndex) => {
@@ -83,7 +83,7 @@ const MonthlyBookingPanel = ({
                 return (
                   <td
                     key={dayIndex}
-                    className={`p-2 align-top w-1/7 h-32 ${
+                    className={`p-1 sm:p-2 align-top w-1/7 h-20 sm:h-24 md:h-28 lg:h-32 ${
                       // Ensure all cells have the same height
                       !day
                         ? "bg-gray-100 dark:bg-customNeutral-600"
@@ -103,30 +103,30 @@ const MonthlyBookingPanel = ({
                         {/* Flex container for TODAY label and date number */}
                         <div className="flex justify-between items-center">
                           {isCurrentDay && (
-                            <span className="text-lavender-400 dark:text-white text-xs font-semibold">
+                            <span className="text-lavender-400 dark:text-white text-[10px] sm:text-xs font-semibold">
                               TODAY
                             </span>
                           )}
-                          <span className="text-right font-semibold dark:text-white">
+                          <span className="text-right font-semibold text-xs sm:text-sm dark:text-white">
                             {day.getDate()}
                           </span>
                         </div>
 
                         {/* Appointments Wrapper */}
-                        <div className="mt-2 space-y-1 flex-1 flex flex-col">
+                        <div className="mt-1 sm:mt-2 space-y-0.5 sm:space-y-1 flex-1 flex flex-col">
                           {dayAppointments.map((appointment, idx) => (
                             <div
                               key={idx}
-                              className="text-xs p-1 bg-lavender-400 text-white rounded truncate cursor-pointer"
+                              className="text-[10px] sm:text-xs p-0.5 sm:p-1 bg-lavender-400 text-white rounded truncate cursor-pointer"
                               title={`${appointment.name} - ${formatTimeDisplay(
                                 appointment.rawTime
                               )}`}
                               onClick={() => handleOpenModal(appointment)}
                             >
-                              <div className="font-semibold">
+                              <div className="font-semibold truncate">
                                 {appointment.name}
                               </div>
-                              <div>
+                              <div className="truncate">
                                 {formatTimeDisplay(appointment.rawTime)}
                               </div>
                             </div>

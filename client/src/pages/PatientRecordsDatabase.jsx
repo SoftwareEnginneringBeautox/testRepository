@@ -112,14 +112,13 @@ function PatientRecordsDatabase() {
     .map((col) => col.value);
 
   // State to manage column visibility - initialize with all columns visible
-  // 
+  //
 
   const [selectedColumns, setSelectedColumns] = useState([]);
   // Define isColumnVisible here, before it's used
   const isColumnVisible = (columnValue) => {
     return selectedColumns.includes(columnValue);
   };
-
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
@@ -469,7 +468,7 @@ function PatientRecordsDatabase() {
         record.age?.toString() || "N/A",
         record.email || "N/A",
         (record.personInCharge || record.person_in_charge)?.toUpperCase() ||
-        "N/A",
+          "N/A",
         (record.package || record.package_name)?.toUpperCase() || "N/A",
         Array.isArray(record.treatment_ids)
           ? getTreatmentNames(record.treatment_ids).join(", ").toUpperCase()
@@ -573,20 +572,21 @@ function PatientRecordsDatabase() {
       case "dateofsession":
         return record.dateTransacted || record.date_of_session
           ? format(
-            new Date(record.dateTransacted || record.date_of_session),
-            "MMMM dd, yyyy"
-          ).toUpperCase()
+              new Date(record.dateTransacted || record.date_of_session),
+              "MMMM dd, yyyy"
+            ).toUpperCase()
           : "N/A";
 
       case "timeofsession":
         return record.nextSessionTime || record.time_of_session
           ? (() => {
-            const timeValue = record.nextSessionTime || record.time_of_session;
-            const parsedTime = new Date(`1970-01-01T${timeValue}`);
-            return isNaN(parsedTime.getTime())
-              ? "Invalid Time"
-              : format(parsedTime, "hh:mm a");
-          })()
+              const timeValue =
+                record.nextSessionTime || record.time_of_session;
+              const parsedTime = new Date(`1970-01-01T${timeValue}`);
+              return isNaN(parsedTime.getTime())
+                ? "Invalid Time"
+                : format(parsedTime, "hh:mm a");
+            })()
           : "N/A";
 
       case "contactnumber":
@@ -599,13 +599,17 @@ function PatientRecordsDatabase() {
         return record.email || "N/A";
 
       case "personincharge":
-        return (record.personInCharge || record.person_in_charge)?.toUpperCase() || "N/A";
+        return (
+          (record.personInCharge || record.person_in_charge)?.toUpperCase() ||
+          "N/A"
+        );
 
       case "package":
         return (record.package || record.package_name)?.toUpperCase() || "N/A";
 
       case "treatment":
-        return Array.isArray(record.treatment_ids) && record.treatment_ids.length > 0 ? (
+        return Array.isArray(record.treatment_ids) &&
+          record.treatment_ids.length > 0 ? (
           <div className="flex flex-col gap-1">
             {record.treatment_ids.map((id) => {
               const treatment = treatmentsList.find((t) => t.id === id);
@@ -628,13 +632,21 @@ function PatientRecordsDatabase() {
         return record.sessions_left || 0;
 
       case "consentformsigned":
-        return record.consentStatus ||
+        return (
+          record.consentStatus ||
           (typeof record.consent_form_signed === "boolean"
-            ? record.consent_form_signed ? "YES" : "NO"
-            : record.consent_form_signed) || "N/A";
+            ? record.consent_form_signed
+              ? "YES"
+              : "NO"
+            : record.consent_form_signed) ||
+          "N/A"
+        );
 
       case "paymentmethod":
-        return (record.paymentMethod || record.payment_method)?.toUpperCase() || "N/A";
+        return (
+          (record.paymentMethod || record.payment_method)?.toUpperCase() ||
+          "N/A"
+        );
 
       case "totalamount":
         return new Intl.NumberFormat("en-PH", {
@@ -645,9 +657,9 @@ function PatientRecordsDatabase() {
       case "amountpaid":
         return record.amount_paid
           ? new Intl.NumberFormat("en-PH", {
-            style: "currency",
-            currency: "PHP"
-          }).format(record.amount_paid)
+              style: "currency",
+              currency: "PHP"
+            }).format(record.amount_paid)
           : "₱0.00";
 
       case "remainingbalance":
@@ -747,7 +759,10 @@ function PatientRecordsDatabase() {
                       {column.label}
                     </TableHead>
                   ))}
-                <TableHead></TableHead>
+                <TableHead
+                  isSticky
+                  className="bg-lavender-400 dark:bg-customNeutral-600"
+                ></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -762,17 +777,27 @@ function PatientRecordsDatabase() {
                           key={column.value}
                           className={cn(
                             "whitespace-nowrap",
-                            column.value === "client" ? "text-start" : "text-center",
-                            ["totalamount", "amountpaid", "remainingbalance"].includes(column.value) ? "text-right" : ""
+                            column.value === "client"
+                              ? "text-start"
+                              : "text-center",
+                            [
+                              "totalamount",
+                              "amountpaid",
+                              "remainingbalance"
+                            ].includes(column.value)
+                              ? "text-right"
+                              : ""
                           )}
                           data-cy={`record-cell-${column.value}-${index}`}
                         >
                           {renderCellContent(record, column.value, index)}
                         </TableCell>
                       ))}
-                    <TableCell>
+                    <TableCell isSticky>
                       <DropdownMenu>
-                        <DropdownMenuTrigger data-cy={`record-menu-trigger-${index}`}>
+                        <DropdownMenuTrigger
+                          data-cy={`record-menu-trigger-${index}`}
+                        >
                           <EllipsisIcon />
                         </DropdownMenuTrigger>
                         <DropdownMenuContent>
