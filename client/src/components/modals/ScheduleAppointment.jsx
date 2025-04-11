@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   ModalContainer,
   ModalHeader,
@@ -51,6 +51,19 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
   const [dateError, setDateError] = useState(false);
   const [emailError, setEmailError] = useState(false);
 
+  // Add these state variables
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const submitInProgressRef = useRef(false);
+  
+  // IMPORTANT: Move useEffect here, before any conditional returns
+  useEffect(() => {
+    return () => {
+      submitInProgressRef.current = false;
+      setIsSubmitting(false);
+    };
+  }, []);
+
+  // Now it's safe to have an early return
   if (!isOpen) return null;
 
   // Function to check if time is within business hours (12pm - 9pm)
@@ -131,7 +144,16 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    
+    // Prevent duplicate submissions
+    if (isSubmitting || submitInProgressRef.current) {
+      console.log("Submission already in progress");
+      return;
+    }
+    
+    submitInProgressRef.current = true;
+    setIsSubmitting(true);
+    
     // Reset alert
     setAlertTitle("");
     setAlertMessage("");
@@ -151,6 +173,8 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
       !isTimeValid ||
       !isEmailValid
     ) {
+      setIsSubmitting(false);
+      submitInProgressRef.current = false;
       return;
     }
 
@@ -192,6 +216,7 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
           "Appointment scheduled successfully! Kindly await for confirmation."
         );
         setShowAlert(true);
+        
       } else {
         // Handle a failed response
         setAlertTitle("Error");
@@ -205,6 +230,9 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
       setAlertTitle("Error");
       setAlertMessage("An error occurred while scheduling the appointment.");
       setShowAlert(true);
+    } finally {
+      setIsSubmitting(false);
+      submitInProgressRef.current = false;
     }
   };
 
@@ -423,9 +451,10 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
               data-cy="schedule-submit-btn"
               type="submit"
               className="flex-1 h-10 text-sm"
+              disabled={isSubmitting}
             >
               <ArrowNorthEastIcon className="w-4 h-4 mr-1" />
-              SUBMIT
+              {isSubmitting ? "SUBMITTING..." : "SUBMIT"}
             </Button>
           </div>
         </form>
