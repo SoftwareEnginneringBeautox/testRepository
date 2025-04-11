@@ -1637,18 +1637,39 @@ app.get("/api/test-expenses", async (req, res) => {
 });
 
 // Fetch Financial Overview (Total Sales, Expenses, Net Income)
+
 app.get("/financial-overview", async (req, res) => {
   try {
-    const totalSalesResult = await pool.query("SELECT SUM(payment) AS total_sales FROM sales_tracker");
-    const totalExpensesResult = await pool.query("SELECT SUM(expense) AS total_expenses FROM expenses_tracker");
+    // For sales, exclude archived records
+    const totalSalesQuery = `
+      SELECT SUM(payment) AS total_sales 
+      FROM sales_tracker 
+      WHERE archived IS NOT TRUE OR archived IS NULL
+    `;
+    const totalSalesResult = await pool.query(totalSalesQuery);
+    
+    // For expenses, explicitly exclude archived records
+    const totalExpensesQuery = `
+      SELECT SUM(expense) AS total_expenses 
+      FROM expenses_tracker 
+      WHERE archived IS NOT TRUE OR archived IS NULL
+    `;
+    const totalExpensesResult = await pool.query(totalExpensesQuery);
 
-    const totalSales = totalSalesResult.rows[0].total_sales || 0;
-    const totalExpenses = totalExpensesResult.rows[0].total_expenses || 0;
+    const totalSales = parseFloat(totalSalesResult.rows[0].total_sales || 0);
+    const totalExpenses = parseFloat(totalExpensesResult.rows[0].total_expenses || 0);
     const netIncome = totalSales - totalExpenses;
 
-    res.json({ totalSales, totalExpenses, netIncome });
+    console.log(`Calculated financial overview: Sales ${totalSales}, Expenses ${totalExpenses}, Net ${netIncome}`);
+    
+    res.json({ 
+      totalSales, 
+      totalExpenses, 
+      netIncome 
+    });
   } catch (err) {
-    res.status(500).send(err.message);
+    console.error("Financial overview error:", err);
+    res.status(500).json({ error: err.message });
   }
 });
 // Add this endpoint to your server.js file
@@ -1665,13 +1686,12 @@ app.get("/api/expenses-by-month", async (req, res) => {
     
     // Get query parameters for optional filtering
     const { month, year } = req.query;
-    let query = "SELECT * FROM expenses_tracker WHERE archived = FALSE";
+    let query = "SELECT * FROM expenses_tracker WHERE archived IS NOT TRUE OR archived IS NULL";
     const queryParams = [];
     
     // Add date filtering if month and year are provided
     if (month && year) {
-      // SQL date filtering for PostgreSQL
-      query += ` AND EXTRACT(MONTH FROM date) = $1 AND EXTRACT(YEAR FROM date) = $2`;
+      query += " AND EXTRACT(MONTH FROM date) = $1 AND EXTRACT(YEAR FROM date) = $2";
       queryParams.push(parseInt(month), parseInt(year));
     }
     
@@ -1682,6 +1702,7 @@ app.get("/api/expenses-by-month", async (req, res) => {
     const result = await pool.query(query, queryParams);
     
     console.log(`API /api/expenses-by-month endpoint: Returning ${result.rows.length} records`);
+    
     if (month && year) {
       console.log(`Filtered for month ${month}, year ${year}`);
     }
@@ -1952,8 +1973,35 @@ app.post('/api/manage-record', async (req, res) => {
     if (action === 'archive') {
       const query = `UPDATE ${table} SET archived = TRUE WHERE id = $1`;
       await pool.query(query, [id]);
-
-      return res.json({ success: true, message: `${table} record archived` });
+    
+      // If archiving a patient record, cascade the archive action to related records
+      if (table === 'patient_records') {
+        // Get patient info before handling cascading archives
+        const patientQuery = 'SELECT patient_name, reference_number FROM patient_records WHERE id = $1';
+        const patientResult = await pool.query(patientQuery, [id]);
+        const patientInfo = patientResult.rows[0];
+        
+        if (patientInfo) {
+          // Archive related appointment records
+          const archiveAppointments = 'UPDATE appointments SET archived = TRUE WHERE patient_record_id = $1';
+          await pool.query(archiveAppointments, [id]);
+          console.log(`✓ Archived appointments for patient record ID ${id}`);
+          
+          // Archive related sales records by reference_number if present
+          if (patientInfo.reference_number) {
+            const archiveSales = 'UPDATE sales_tracker SET archived = TRUE WHERE reference_no = $1';
+            await pool.query(archiveSales, [patientInfo.reference_number]);
+            console.log(`✓ Archived sales with reference number ${patientInfo.reference_number}`);
+          }
+          
+          // Also archive sales by patient name as fallback
+          const archiveSalesByName = 'UPDATE sales_tracker SET archived = TRUE WHERE client ILIKE $1';
+          await pool.query(archiveSalesByName, [`%${patientInfo.patient_name}%`]);
+          console.log(`✓ Archived sales for patient ${patientInfo.patient_name}`);
+        }
+      }
+    
+      return res.json({ success: true, message: `${table} record archived with related data` });
     }
 
     return res.status(400).json({ success: false, message: 'Invalid action' });
