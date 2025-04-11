@@ -185,13 +185,6 @@ function StaffDashboard() {
     setShowAppointmentModal(true);
   }, []);
 
-  const handleRejectAppointment = useCallback(
-    (id) => {
-      handleAppointmentAction(id, "reject");
-    },
-    [handleAppointmentAction]
-  );
-
   // Load data on component mount
   useEffect(() => {
     const fetchData = async () => {
