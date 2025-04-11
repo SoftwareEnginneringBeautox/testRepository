@@ -54,6 +54,10 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
   const [treatmentsList, setTreatmentsList] = useState([]);
   const [aestheticianList, setAestheticianList] = useState([]);
   const [personInCharge, setPersonInCharge] = useState("");
+  
+  // Add reference ID state
+  const [additionalPaymentRefId, setAdditionalPaymentRefId] = useState("");
+  const [newServiceRefId, setNewServiceRefId] = useState("");
 
   const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -65,6 +69,21 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
   const [newAmountPaid, setNewAmountPaid] = useState("0");
   const [packageDiscount, setPackageDiscount] = useState("0");
   const [sessionsLeft, setSessionsLeft] = useState(0);
+
+  // Generate a new reference ID with prefix and timestamp
+  const generateReferenceId = (prefix = "REF") => {
+    const timestamp = new Date().getTime();
+    const randomDigits = Math.floor(Math.random() * 1000).toString().padStart(3, "0");
+    return `${prefix}${timestamp}${randomDigits}`;
+  };
+
+  useEffect(() => {
+    if (isOpen) {
+      // Generate reference IDs when the modal opens
+      setAdditionalPaymentRefId(generateReferenceId("PAY"));
+      setNewServiceRefId(generateReferenceId("SRV"));
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     if (entryData) {
@@ -170,6 +189,21 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
       }));
     }
   }, [entryData, formData.date_of_session]);
+
+  // Generate a new reference ID when additional payment value changes from 0
+  useEffect(() => {
+    const paymentAmount = parseFloat(formData.additional_payment || "0");
+    if (paymentAmount > 0 && additionalPaymentRefId === "") {
+      setAdditionalPaymentRefId(generateReferenceId("PAY"));
+    }
+  }, [formData.additional_payment, additionalPaymentRefId]);
+
+  // Generate a new reference ID when a new package or treatment is selected
+  useEffect(() => {
+    if ((selectedPackage || selectedTreatments.length > 0) && newServiceRefId === "") {
+      setNewServiceRefId(generateReferenceId("SRV"));
+    }
+  }, [selectedPackage, selectedTreatments, newServiceRefId]);
 
   // Calculate new amount based on package or treatment selection
   useEffect(() => {
@@ -327,7 +361,7 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
       person_in_charge: personInCharge // Include person in charge
     };
 
-    // If adding new package/treatments, include them
+    // If adding new package/treatments, include them and the new reference number
     if (hasCompletedCurrentTreatments) {
       if (selectedPackage) {
         updatedData.package_name = selectedPackage;
@@ -337,6 +371,7 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
         updatedData.payment_method = newPaymentMethod;
         updatedData.package_discount = parseFloat(packageDiscount);
         updatedData.remaining_balance = newBalance;
+        updatedData.reference_number = newServiceRefId; // Add new reference number
       } else if (selectedTreatments.length > 0) {
         updatedData.package_name = "";
         updatedData.treatment_ids = selectedTreatments;
@@ -345,7 +380,11 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
         updatedData.payment_method = newPaymentMethod;
         updatedData.package_discount = parseFloat(packageDiscount);
         updatedData.remaining_balance = newBalance;
+        updatedData.reference_number = newServiceRefId; // Add new reference number
       }
+    } else if (additionalPayment > 0) {
+      // If making additional payment on existing package, update reference number
+      updatedData.reference_number = additionalPaymentRefId;
     }
 
     try {
@@ -368,7 +407,7 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
                   .join(", ")
               : "",
             payment: additionalPayment,
-            reference_no: entryData.reference_number || `REF${Date.now()}`
+            reference_no: additionalPaymentRefId // Use the generated reference ID
           };
 
           await fetch(`${API_BASE_URL}/sales`, {
@@ -402,7 +441,7 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
                     .join(", ")
                 : "",
             payment: parseFloat(newAmountPaid),
-            reference_no: `NEWSRV${Date.now()}`
+            reference_no: newServiceRefId // Use the generated reference ID
           };
 
           await fetch(`${API_BASE_URL}/sales`, {
@@ -586,34 +625,46 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
                 </InputContainer>
 
                 {remainingBalance > 0 && (
-                  <InputContainer>
-                    <InputLabel>ADDITIONAL PAYMENT</InputLabel>
-                    <InputTextField>
-                      <InputIcon>
-                        <PesoIcon />
-                      </InputIcon>
-                      <CurrencyInput
-                        data-cy="additional-payment-input"
-                        className="outline-none flex-1 bg-transparent dark:text-customNeutral-100 dark:placeholder-customNeutral-300"
-                        prefix="₱"
-                        placeholder="₱0.00"
-                        decimalsLimit={2}
-                        allowNegativeValue={false}
-                        value={formData.additional_payment || ""}
-                        onValueChange={(value) =>
-                          setFormData({
-                            ...formData,
-                            additional_payment: value || "0"
-                          })
-                        }
-                      />
-                    </InputTextField>
-                    {formSubmitAttempted && formErrors.additional_payment && (
-                      <p className="text-red-500 text-sm mt-1">
-                        {formErrors.additional_payment}
-                      </p>
+                  <>
+                    <InputContainer>
+                      <InputLabel>ADDITIONAL PAYMENT</InputLabel>
+                      <InputTextField>
+                        <InputIcon>
+                          <PesoIcon />
+                        </InputIcon>
+                        <CurrencyInput
+                          data-cy="additional-payment-input"
+                          className="outline-none flex-1 bg-transparent dark:text-customNeutral-100 dark:placeholder-customNeutral-300"
+                          prefix="₱"
+                          placeholder="₱0.00"
+                          decimalsLimit={2}
+                          allowNegativeValue={false}
+                          value={formData.additional_payment || ""}
+                          onValueChange={(value) =>
+                            setFormData({
+                              ...formData,
+                              additional_payment: value || "0"
+                            })
+                          }
+                        />
+                      </InputTextField>
+                      {formSubmitAttempted && formErrors.additional_payment && (
+                        <p className="text-red-500 text-sm mt-1">
+                          {formErrors.additional_payment}
+                        </p>
+                      )}
+                    </InputContainer>
+
+                    {/* Display reference number for additional payment if entered */}
+                    {parseFloat(formData.additional_payment || "0") > 0 && (
+                      <InputContainer>
+                        <InputLabel>REFERENCE NUMBER</InputLabel>
+                        <p data-cy="additional-payment-reference">
+                          {additionalPaymentRefId}
+                        </p>
+                      </InputContainer>
                     )}
-                  </InputContainer>
+                  </>
                 )}
 
                 <InputContainer>
@@ -718,6 +769,12 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
 
                 {(selectedPackage || selectedTreatments.length > 0) && (
                   <>
+                    {/* Display new reference ID for new package/treatment */}
+                    <InputContainer>
+                      <InputLabel>REFERENCE NUMBER</InputLabel>
+                      <p data-cy="new-service-reference">{newServiceRefId}</p>
+                    </InputContainer>
+                    
                     {/* PACKAGE DISCOUNT */}
                     <InputContainer>
                       <InputLabel>PACKAGE DISCOUNT</InputLabel>
