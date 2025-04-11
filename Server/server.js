@@ -560,6 +560,9 @@ app.get('/api/staged-appointments/unconfirmed', async (req, res) => {
 app.post('/api/staged-appointments/:id/confirm', async (req, res) => {
   try {
     const { id } = req.params;
+    const { patient_record_id } = req.body; // Get patient_record_id if provided from frontend
+    
+    console.log(`Processing appointment confirmation for ID ${id}, patient record ID: ${patient_record_id || 'Not provided'}`);
     
     // Get the staged appointment
     const stagedResult = await pool.query(
@@ -582,7 +585,57 @@ app.post('/api/staged-appointments/:id/confirm', async (req, res) => {
       ['yes', id]
     );
     
-    // Insert into the appointments table
+    let patientId;
+    
+    // If patient_record_id was provided, use it instead of creating a new patient record
+    if (patient_record_id) {
+      console.log(`Using provided patient record ID: ${patient_record_id}`);
+      patientId = patient_record_id;
+      
+      // Verify the patient record exists
+      const patientCheck = await pool.query(
+        'SELECT id FROM patient_records WHERE id = $1',
+        [patientId]
+      );
+      
+      if (patientCheck.rows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: 'Patient record not found'
+        });
+      }
+    } else {
+      // Create a new patient record with the info we have (legacy behavior)
+      console.log('No patient record ID provided, creating a new patient record');
+      const patientRecordInsert = `
+        INSERT INTO patient_records (
+          patient_name,
+          contact_number,
+          age,
+          email,
+          date_of_session,
+          time_of_session,
+          archived
+        )
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        RETURNING id;
+      `;
+      
+      const patientResult = await pool.query(patientRecordInsert, [
+        appointment.full_name,
+        appointment.contact_number,
+        appointment.age,
+        appointment.email,
+        appointment.date_of_session,
+        appointment.time_of_session,
+        false
+      ]);
+      
+      patientId = patientResult.rows[0].id;
+      console.log(`Created new patient record with ID: ${patientId}`);
+    }
+    
+    // Insert into the appointments table with the patient_record_id
     const insertQuery = `
       INSERT INTO appointments (
         full_name,
@@ -591,9 +644,10 @@ app.post('/api/staged-appointments/:id/confirm', async (req, res) => {
         email,
         date_of_session,
         time_of_session,
-        archived
+        archived,
+        patient_record_id
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
       RETURNING id;
     `;
     
@@ -604,33 +658,11 @@ app.post('/api/staged-appointments/:id/confirm', async (req, res) => {
       appointment.email,
       appointment.date_of_session,
       appointment.time_of_session,
-      false
+      false,
+      patientId // Add the patient_record_id
     ]);
     
-    // Create a limited patient record with the info we have
-    const patientRecordInsert = `
-      INSERT INTO patient_records (
-        patient_name,
-        contact_number,
-        age,
-        email,
-        date_of_session,
-        time_of_session,
-        archived
-      )
-      VALUES ($1, $2, $3, $4, $5, $6, $7)
-      RETURNING id;
-    `;
-    
-    const patientResult = await pool.query(patientRecordInsert, [
-      appointment.full_name,
-      appointment.contact_number,
-      appointment.age,
-      appointment.email,
-      appointment.date_of_session,
-      appointment.time_of_session,
-      false
-    ]);
+    console.log(`Created appointment with ID: ${result.rows[0].id} linked to patient record: ${patientId}`);
     
     // Send confirmation email
     if (appointment.email) {
@@ -692,7 +724,7 @@ app.post('/api/staged-appointments/:id/confirm', async (req, res) => {
       success: true,
       message: 'Appointment confirmed',
       appointmentId: result.rows[0].id,
-      patientId: patientResult.rows[0].id
+      patientId: patientId
     });
   } catch (error) {
     console.error('Error confirming appointment:', error);
@@ -710,6 +742,9 @@ app.post('/api/staged-appointments/:id/confirm', async (req, res) => {
 app.post('/api/staged-appointments/:id/confirm', async (req, res) => {
   try {
     const { id } = req.params;
+    const { patient_record_id } = req.body; // Get patient_record_id if provided from frontend
+    
+    console.log(`Processing appointment confirmation for ID ${id}, patient record ID: ${patient_record_id || 'Not provided'}`);
     
     // Get the staged appointment
     const stagedResult = await pool.query(
@@ -732,7 +767,58 @@ app.post('/api/staged-appointments/:id/confirm', async (req, res) => {
       ['yes', id]
     );
     
-    // Insert into the appointments table
+    let patientId;
+    
+    // Check if patient_record_id was provided
+    if (patient_record_id) {
+      console.log(`Using provided patient record ID: ${patient_record_id}`);
+      patientId = patient_record_id;
+      
+      // Verify the patient record exists
+      const patientCheck = await pool.query(
+        'SELECT id FROM patient_records WHERE id = $1',
+        [patientId]
+      );
+      
+      if (patientCheck.rows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: 'Patient record not found'
+        });
+      }
+    } else {
+      // Only create a patient record if no ID was provided
+      // This is the legacy flow and should not happen with the updated frontend
+      console.log('WARNING: No patient record ID provided, creating a new patient record');
+      const patientRecordInsert = `
+        INSERT INTO patient_records (
+          patient_name,
+          contact_number,
+          age,
+          email,
+          date_of_session,
+          time_of_session,
+          archived
+        )
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        RETURNING id;
+      `;
+      
+      const patientResult = await pool.query(patientRecordInsert, [
+        appointment.full_name,
+        appointment.contact_number,
+        appointment.age,
+        appointment.email,
+        appointment.date_of_session,
+        appointment.time_of_session,
+        false
+      ]);
+      
+      patientId = patientResult.rows[0].id;
+      console.log(`Created new patient record with ID: ${patientId}`);
+    }
+    
+    // Insert into the appointments table with the patient_record_id
     const insertQuery = `
       INSERT INTO appointments (
         full_name,
@@ -741,9 +827,10 @@ app.post('/api/staged-appointments/:id/confirm', async (req, res) => {
         email,
         date_of_session,
         time_of_session,
-        archived
+        archived,
+        patient_record_id
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
       RETURNING id;
     `;
     
@@ -754,33 +841,11 @@ app.post('/api/staged-appointments/:id/confirm', async (req, res) => {
       appointment.email,
       appointment.date_of_session,
       appointment.time_of_session,
-      false
+      false,
+      patientId // Add the patient_record_id
     ]);
     
-    // Create a limited patient record with the info we have
-    const patientRecordInsert = `
-      INSERT INTO patient_records (
-        patient_name,
-        contact_number,
-        age,
-        email,
-        date_of_session,
-        time_of_session,
-        archived
-      )
-      VALUES ($1, $2, $3, $4, $5, $6, $7)
-      RETURNING id;
-    `;
-    
-    const patientResult = await pool.query(patientRecordInsert, [
-      appointment.full_name,
-      appointment.contact_number,
-      appointment.age,
-      appointment.email,
-      appointment.date_of_session,
-      appointment.time_of_session,
-      false
-    ]);
+    console.log(`Created appointment with ID: ${result.rows[0].id} linked to patient record: ${patientId}`);
     
     // Send confirmation email
     if (appointment.email) {
@@ -842,7 +907,7 @@ app.post('/api/staged-appointments/:id/confirm', async (req, res) => {
       success: true,
       message: 'Appointment confirmed',
       appointmentId: result.rows[0].id,
-      patientId: patientResult.rows[0].id
+      patientId: patientId
     });
   } catch (error) {
     console.error('Error confirming appointment:', error);

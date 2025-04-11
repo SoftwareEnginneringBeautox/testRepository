@@ -74,14 +74,12 @@ const UserProfile = () => {
         <h6 className="text-base font-semibold dark:text-customNeutral-100">
           {userName.toUpperCase()}
         </h6>
-        <p className="text-xs text-gray-600">{userRole?.toUpperCase()}</p>
-      </div>
+        <p className="text-xs text-gray-600 dark:text-gray-300">{userRole?.toUpperCase()}</p>      </div>
       {isIconVisible && (
         <UserIcon
           size={36}
-          className={`h-full ${
-            currentTheme === "dark" ? "text-customNeutral-100" : ""
-          }`}
+          className={`h-full ${currentTheme === "dark" ? "text-customNeutral-100" : ""
+            }`}
         />
       )}
     </div>
