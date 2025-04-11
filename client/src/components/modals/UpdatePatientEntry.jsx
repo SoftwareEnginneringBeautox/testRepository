@@ -174,7 +174,8 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
           credentials: "include"
         });
         const data = await res.json();
-        setPackagesList(data);
+        // Additional client-side filtering as a safeguard
+        setPackagesList(data.filter(pkg => !pkg.archived));
       } catch (err) {
         console.error("Failed to fetch packages:", err);
       }
@@ -189,7 +190,8 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
           }
         );
         const data = await res.json();
-        setTreatmentsList(data);
+        // Additional client-side filtering as a safeguard
+        setTreatmentsList(data.filter(treatment => !treatment.archived));
       } catch (err) {
         console.error("Failed to fetch treatments:", err);
       }
