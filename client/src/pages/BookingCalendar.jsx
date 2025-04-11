@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useReducer, useRef, useCallback } from "react";
 import axios from "axios";
 import { useModal } from "@/hooks/useModal";
 
@@ -14,6 +14,7 @@ import MultiSelectFilter from "@/components/ui/MultiSelectFilter";
 import { Loader } from "@/components/ui/Loader";
 
 function BookingCalendar() {
+  // Main states
   const [currentDate, setCurrentDate] = useState(new Date());
   const [view, setView] = useState("monthly");
   const [appointments, setAppointments] = useState([]);
@@ -22,13 +23,17 @@ function BookingCalendar() {
   const { currentModal, openModal, closeModal } = useModal();
   const [selectedEntry, setSelectedEntry] = useState(null);
 
-  // For the checkbox filter using MultiSelectFilter
+  // For filtering
   const [staffList, setStaffList] = useState([]);
-  const [selectedStaff, setSelectedStaff] = useState([]);
+  const [filterOptions, setFilterOptions] = useState([]);
   const [tempSelectedStaff, setTempSelectedStaff] = useState([]);
 
-  // Create filter options for MultiSelectFilter
-  const [filterOptions, setFilterOptions] = useState([]);
+  // State that directly controls what's displayed
+  const [displayedAppointments, setDisplayedAppointments] = useState([]);
+
+  // Force update mechanism
+  const [renderKey, setRenderKey] = useState(0);
+  const forceRender = () => setRenderKey(prev => prev + 1);
 
   const month = currentDate.getMonth();
   const year = currentDate.getFullYear();
@@ -89,48 +94,32 @@ function BookingCalendar() {
     fetchAppointments();
   }, []);
 
-  // Update filter options when unique persons are determined
-  useEffect(() => {
-    if (appointments.length > 0) {
-      const personsInCharge = getUniquePersonsInCharge();
-      const options = personsInCharge.map((person) => ({
-        label: person.toUpperCase(),
-        value: person
-      }));
-      setFilterOptions(options);
-
-      // Initialize temp selected values with all options (for "select all" initial state)
-      setTempSelectedStaff(personsInCharge);
-      setSelectedStaff(personsInCharge);
-    }
-  }, [appointments, patientRecords]);
-
   // Process appointments into events for the calendar
-  const processAppointments = () => {
+  const processAppointments = useCallback(() => {
     return appointments.map((appointment) => {
       // Get date object from the appointment
       const appointmentDate = new Date(appointment.date_of_session);
-  
+
       // Extract hours and minutes from time_of_session (format: HH:MM:SS)
       const [hours, minutes] = appointment.time_of_session
         .split(":")
         .map(Number);
-  
+
       // Set time on the appointment date
       appointmentDate.setHours(hours);
       appointmentDate.setMinutes(minutes);
-  
+
       // Calculate end time (assume 1 hour duration if not specified)
       const endDate = new Date(appointmentDate);
       endDate.setHours(endDate.getHours() + 1);
-  
+
       // Format times
       const startTime = formatTime(hours, minutes);
       const endTime = formatTime(endDate.getHours(), endDate.getMinutes());
-  
+
       // Get day abbreviation
       const dayAbbreviation = getDayAbbreviation(appointmentDate.getDay());
-  
+
       // Find the corresponding patient record to get additional information
       let personInCharge = "Unassigned";
       let patientRecord = null;
@@ -144,12 +133,12 @@ function BookingCalendar() {
       let referenceNumber = "";
       let treatmentIds = [];
       let sessionsLeft = "";
-  
+
       if (appointment.patient_record_id) {
         patientRecord = patientRecords.find(
           (record) => record.id === appointment.patient_record_id
         );
-        
+
         if (patientRecord) {
           personInCharge = patientRecord.person_in_charge || "Unassigned";
           packageName = patientRecord.package_name || "";
@@ -164,7 +153,7 @@ function BookingCalendar() {
           sessionsLeft = patientRecord.sessions_left || "";
         }
       }
-  
+
       return {
         id: appointment.id,
         day: dayAbbreviation,
@@ -194,7 +183,16 @@ function BookingCalendar() {
         patientRecord
       };
     });
-  };
+  }, [appointments, patientRecords]);
+
+  // Get unique persons in charge from all appointments
+  const getUniquePersonsInCharge = useCallback(() => {
+    const events = processAppointments();
+    const uniquePersons = [
+      ...new Set(events.map((event) => event.personInCharge))
+    ];
+    return uniquePersons.sort();
+  }, [processAppointments]);
 
   // Helper to format time as "1:30PM" format
   const formatTime = (hours, minutes) => {
@@ -216,6 +214,28 @@ function BookingCalendar() {
     return result;
   };
 
+  // Update filter options when data is loaded
+  useEffect(() => {
+    if (appointments.length > 0 && patientRecords.length > 0) {
+      const personsInCharge = getUniquePersonsInCharge();
+
+      console.log("Unique persons in charge:", personsInCharge);
+
+      const options = personsInCharge.map((person) => ({
+        label: person.toUpperCase(),
+        value: person
+      }));
+      setFilterOptions(options);
+
+      // Initialize temp selected values with all options values (for "select all" initial state)
+      setTempSelectedStaff(personsInCharge);
+
+      // Set initial displayed appointments (all appointments)
+      updateDisplayedAppointments(personsInCharge);
+    }
+  }, [appointments, patientRecords, getUniquePersonsInCharge]);
+
+  // Calendar setup
   const firstDayOfMonth = new Date(year, month, 1);
   const lastDayOfMonth = new Date(year, month + 1, 0);
 
@@ -247,6 +267,7 @@ function BookingCalendar() {
     calendar.push(currentWeek);
   }
 
+  // Navigation handlers
   const handlePrevious = () => {
     if (view === "monthly") {
       setCurrentDate(new Date(year, month - 1, 1));
@@ -267,13 +288,10 @@ function BookingCalendar() {
     }
   };
 
-  // Apply filter changes
-  const applyStaffFilters = () => {
-    setSelectedStaff([...tempSelectedStaff]);
-  };
+  // Filter appointments and update displayed appointments
+  const updateDisplayedAppointments = useCallback((staffToFilter) => {
+    console.log("Updating displayed appointments with staff filter:", staffToFilter);
 
-  // Filter appointments based on the current view and selected staff
-  const getFilteredAppointments = () => {
     const events = processAppointments();
 
     // First filter by date range according to view
@@ -301,49 +319,58 @@ function BookingCalendar() {
 
     // Then filter by selected staff if any are selected
     if (
-      selectedStaff.length > 0 &&
-      selectedStaff.length < getUniquePersonsInCharge().length
+      staffToFilter.length > 0 &&
+      staffToFilter.length < getUniquePersonsInCharge().length
     ) {
-      return dateFilteredEvents.filter((event) =>
-        selectedStaff.includes(event.personInCharge)
+      console.log("Filtering by specific staff:", staffToFilter);
+
+      // Normalize staff values to handle both string and object formats
+      const selectedValues = staffToFilter.map(item =>
+        typeof item === 'object' && item !== null && item.value ? item.value : item
       );
+
+      console.log("Normalized staff values:", selectedValues);
+
+      const filtered = dateFilteredEvents.filter((event) => {
+        const result = selectedValues.includes(event.personInCharge);
+        console.log(`Event ${event.id}, person: "${event.personInCharge}", included? ${result}`);
+        return result;
+      });
+
+      console.log(`Filtered from ${dateFilteredEvents.length} to ${filtered.length} appointments`);
+      setDisplayedAppointments(filtered);
+    } else {
+      setDisplayedAppointments(dateFilteredEvents);
     }
 
-    return dateFilteredEvents;
+    // Force a re-render
+    forceRender();
+  }, [processAppointments, view, month, year, currentDate, getUniquePersonsInCharge]);
+
+  // Update displayed appointments when view or date changes
+  useEffect(() => {
+    if (tempSelectedStaff.length > 0) {
+      updateDisplayedAppointments(tempSelectedStaff);
+    }
+  }, [view, currentDate, updateDisplayedAppointments, tempSelectedStaff]);
+
+  // Apply staff filter
+  const applyStaffFilters = () => {
+    console.log("Apply button clicked with selections:", tempSelectedStaff);
+
+    // Immediately update displayed appointments with the current temp selection
+    updateDisplayedAppointments(tempSelectedStaff);
+
+    return tempSelectedStaff;
   };
-
-  // Get all unique persons in charge from appointments (using patient records)
-  const getUniquePersonsInCharge = () => {
-    const events = processAppointments();
-    const uniquePersons = [
-      ...new Set(events.map((event) => event.personInCharge))
-    ];
-    return uniquePersons.sort();
-  };
-
-  // Count appointments for each person in charge
-  const getStaffCounts = () => {
-    const events = processAppointments();
-    const counts = {};
-
-    getUniquePersonsInCharge().forEach((person) => {
-      counts[person] = events.filter(
-        (event) => event.personInCharge === person
-      ).length;
-    });
-
-    return counts;
-  };
-
-  const staffCounts = getStaffCounts();
 
   return (
     <div
-      className="w-full flex flex-col items-center justify-center px-3 sm:px-4 md:px-6 lg:px-8"
+      className="w-full flex flex-col items-center justify-center px-2 sm:px-3 md:px-4 lg:px-6"
       data-cy="booking-calendar-container"
     >
       <h3
-        className="text-lg dark:text-customNeutral-100 sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl leading-tight sm:leading-[3.75rem] font-semibold my-2 sm:my-3 md:my-4 w-full md:w-[90%]"
+        className="text-base dark:text-customNeutral-100 sm:text-lg md:text-xl lg:text-2xl xl:text-3xl leading-tight sm:leading-[2.5rem] font-semibold my-2 sm:my-3 md:my-4 w-full md:w-[90%]"
         data-cy="booking-calendar-title"
       >
         BOOKING CALENDAR
@@ -351,142 +378,115 @@ function BookingCalendar() {
       <div
         data-cy="calendar-view"
         id="booking-container"
-        className="flex flex-col shadow-custom items-center rounded-lg p-2 sm:p-3 md:p-4 lg:p-6 bg-ash-100 dark:bg-customNeutral-500 w-full md:w-[90%] mb-3 sm:mb-4 md:mb-6 lg:mb-8"
+        className="flex flex-col shadow-custom items-center rounded-lg p-1.5 sm:p-2 md:p-3 lg:p-4 bg-ash-100 dark:bg-customNeutral-500 w-full md:w-[90%] mb-2 sm:mb-3 md:mb-4 lg:mb-6"
       >
         {/* Header Section */}
-        <div
-          className="flex flex-col sm:flex-row justify-between w-full gap-2 sm:gap-3 md:gap-4"
-          data-cy="calendar-header"
-        >
-          <div
-            className="flex flex-row items-center gap-1 sm:gap-2"
-            data-cy="calendar-navigation"
-          >
-            <button
-              data-cy="previous-month-btn"
-              className="border border-transparent p-1 rounded hover:border-lavender-400 text-lavender-400 dark:hover:border-lavender-100 dark:text-lavender-100"
-              onClick={handlePrevious}
-              aria-label="Previous"
-            >
-              <ChevronLeftIcon
-                className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5"
-                data-cy="previous-icon"
-              />
-            </button>
-            <h2
-              data-cy="calendar-month-label"
-              className="text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl font-semibold dark:text-customNeutral-100"
-            >
-              {currentDate.toLocaleString("default", { month: "long" })} {year}
-            </h2>
-            <button
-              data-cy="next-month-btn"
-              className="border border-transparent p-1 rounded hover:border-lavender-400 text-lavender-400 dark:hover:border-lavender-100 dark:text-lavender-100"
-              onClick={handleNext}
-              aria-label="Next"
-            >
-              <ChevronRightIcon
-                className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5"
-                data-cy="next-icon"
-              />
-            </button>
-          </div>
-
-          <div
-            className="flex flex-col sm:flex-row gap-1 sm:gap-2 md:gap-3 items-start sm:items-center justify-between sm:justify-end w-full sm:w-auto"
-            data-cy="calendar-controls"
-          >
-            <div
-              className="flex gap-1 sm:gap-2 text-[10px] sm:text-xs md:text-sm lg:text-base"
-              data-cy="view-toggle-buttons"
-            >
-              <button
-                data-cy="calendar-view-monthly"
-                onClick={() => setView("monthly")}
-                className={`relative dark:text-customNeutral-100 inline-block px-1 sm:px-2 py-1 font-semibold overflow-hidden group ${
-                  view === "monthly" ? "text-lavender-500 " : ""
-                }`}
-              >
-                <span
-                  className="hidden sm:inline"
-                  data-cy="monthly-view-text-full"
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center w-full gap-1.5 sm:gap-2 md:gap-3">
+          <div className="w-full sm:w-auto">
+            <div className="flex flex-row justify-between sm:justify-start items-center gap-2 sm:gap-4">
+              <div className="flex flex-row items-center gap-0.5 sm:gap-1" data-cy="calendar-navigation">
+                <button
+                  data-cy="previous-month-btn"
+                  className="border border-transparent p-0.5 sm:p-1 rounded hover:border-lavender-400 text-lavender-400 dark:hover:border-lavender-100 dark:text-lavender-100"
+                  onClick={handlePrevious}
+                  aria-label="Previous"
                 >
-                  MONTHLY
-                </span>
-                <span className="sm:hidden " data-cy="monthly-view-text-short">
-                  MONTH
-                </span>
-                <span
-                  className={`absolute left-0 bottom-0 block h-0.5 bg-lavender-400 transition-all duration-300 ${
-                    view === "monthly" ? "w-full" : "w-0 group-hover:w-full"
-                  }`}
-                  data-cy="monthly-view-indicator"
-                ></span>
-              </button>
-
-              <button
-                data-cy="calendar-view-weekly"
-                onClick={() => setView("weekly")}
-                className={`relative dark:text-customNeutral-100 inline-block px-1 sm:px-2 py-1 font-semibold overflow-hidden group ${
-                  view === "weekly"
-                    ? "text-lavender-500 dark:text-customNeutral-100"
-                    : ""
-                }`}
-              >
-                <span
-                  className="hidden sm:inline"
-                  data-cy="weekly-view-text-full"
+                  <ChevronLeftIcon
+                    className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5"
+                    data-cy="previous-icon"
+                  />
+                </button>
+                <h2
+                  data-cy="calendar-month-label"
+                  className="text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl font-semibold dark:text-customNeutral-100"
                 >
-                  WEEKLY
-                </span>
-                <span className="sm:hidden" data-cy="weekly-view-text-short">
-                  WEEK
-                </span>
-                <span
-                  className={`absolute left-0 bottom-0 block h-0.5 bg-lavender-400 transition-all duration-300 ${
-                    view === "weekly" ? "w-full" : "w-0 group-hover:w-full"
+                  {currentDate.toLocaleString("default", { month: "long" })} {year}
+                </h2>
+                <button
+                  data-cy="next-month-btn"
+                  className="border border-transparent p-0.5 sm:p-1 rounded hover:border-lavender-400 text-lavender-400 dark:hover:border-lavender-100 dark:text-lavender-100"
+                  onClick={handleNext}
+                  aria-label="Next"
+                >
+                  <ChevronRightIcon
+                    className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5"
+                    data-cy="next-icon"
+                  />
+                </button>
+              </div>
+
+              <div
+                className="flex gap-0.5 sm:gap-1 text-xs sm:text-base md:text-lg lg:text-xl"
+                data-cy="view-toggle-buttons"
+              >
+                <button
+                  data-cy="calendar-view-monthly"
+                  onClick={() => setView("monthly")}
+                  className={`relative dark:text-customNeutral-100 inline-block px-1 sm:px-2 py-1 font-semibold overflow-hidden group ${
+                    view === "monthly" ? "text-lavender-500 " : ""
                   }`}
-                  data-cy="weekly-view-indicator"
-                ></span>
-              </button>
+                >
+                  <span
+                    className="hidden sm:inline"
+                    data-cy="monthly-view-text-full"
+                  >
+                    MONTHLY
+                  </span>
+                  <span className="sm:hidden" data-cy="monthly-view-text-short">
+                    MONTHLY
+                  </span>
+                  <span
+                    className={`absolute left-0 bottom-0 block h-0.5 bg-lavender-400 transition-all duration-300 ${view === "monthly" ? "w-full" : "w-0 group-hover:w-full"
+                      }`}
+                    data-cy="monthly-view-indicator"
+                  ></span>
+                </button>
+
+                <button
+                  data-cy="calendar-view-weekly"
+                  onClick={() => setView("weekly")}
+                  className={`relative dark:text-customNeutral-100 inline-block px-1 sm:px-2 py-1 font-semibold overflow-hidden group ${
+                    view === "weekly"
+                      ? "text-lavender-500 dark:text-customNeutral-100"
+                      : ""
+                  }`}
+                >
+                  <span
+                    className="hidden sm:inline"
+                    data-cy="weekly-view-text-full"
+                  >
+                    WEEKLY
+                  </span>
+                  <span className="sm:hidden" data-cy="weekly-view-text-short">
+                    WEEKLY
+                  </span>
+                  <span
+                    className={`absolute left-0 bottom-0 block h-0.5 bg-lavender-400 transition-all duration-300 ${view === "weekly" ? "w-full" : "w-0 group-hover:w-full"
+                      }`}
+                    data-cy="weekly-view-indicator"
+                  ></span>
+                </button>
+              </div>
             </div>
 
-            {/* <Select
-              onValueChange={(value) => {
-                if (value === "all") {
-                  setSelectedStaff(getUniquePersonsInCharge());
-                  setTempSelectedStaff(getUniquePersonsInCharge());
-                } else {
-                  setSelectedStaff([value]);
-                  setTempSelectedStaff([value]);
-                }
-              }}
-              data-cy="sort-select"
-            >
-              <SelectTrigger
-                placeholder="SORT BY"
-                icon={<SortIcon />}
-                data-cy="sort-trigger"
-              >
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent data-cy="sort-content">
-                <SelectItem value="all" data-cy="sort-option-all">
-                  ALL DATA
-                </SelectItem>
-                {getUniquePersonsInCharge().map((person, index) => (
-                  <SelectItem
-                    key={index}
-                    value={person}
-                    data-cy={`sort-option-${index}`}
-                  >
-                    {person.toUpperCase()}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select> */}
+            {/* Using MultiSelectFilter component for Staff filtering - Mobile Only */}
+            <div className="flex justify-end w-full mt-2 sm:hidden">
+              <MultiSelectFilter
+                options={filterOptions}
+                selectedValues={tempSelectedStaff}
+                setSelectedValues={setTempSelectedStaff}
+                placeholder="FILTER BY STAFF"
+                mandatoryValues={[]}
+                onApply={applyStaffFilters}
+                showApplyButton={true}
+                className="h-8 min-w-[100px]"
+                data-cy="staff-filter-mobile"
+              />
+            </div>
+          </div>
 
-            {/* Using MultiSelectFilter component for Staff filtering */}
+          {/* Using MultiSelectFilter component for Staff filtering - Desktop Only */}
+          <div className="hidden sm:block">
             <MultiSelectFilter
               options={filterOptions}
               selectedValues={tempSelectedStaff}
@@ -495,18 +495,19 @@ function BookingCalendar() {
               mandatoryValues={[]}
               onApply={applyStaffFilters}
               showApplyButton={true}
-              data-cy="staff-filter"
+              className="h-10 md:h-12 min-w-[120px] md:min-w-[150px]"
+              data-cy="staff-filter-desktop"
             />
           </div>
         </div>
 
         <div
-          className="w-full flex flex-1 mt-2 sm:mt-3 md:mt-4"
+          className="w-full flex flex-1 mt-1.5 sm:mt-2 md:mt-3"
           data-cy="calendar-content"
         >
           {isLoading ? (
             <div
-              className="w-full py-4 sm:py-6 md:py-10 lg:py-20 text-center text-xs sm:text-sm md:text-base lg:text-lg"
+              className="w-full py-3 sm:py-4 md:py-6 lg:py-8 text-center text-xs sm:text-sm md:text-base lg:text-lg"
               data-cy="loading-message"
             >
               <Loader />
@@ -514,13 +515,14 @@ function BookingCalendar() {
           ) : view === "monthly" ? (
             <div
               data-cy="monthly-calendar-view"
-              className="w-full  overflow-x-auto overflow-y-hidden"
+              className="w-full overflow-x-auto overflow-y-hidden"
             >
               <MonthlyBookingPanel
                 calendarDays={calendar}
-                appointments={getFilteredAppointments()}
+                appointments={displayedAppointments}
                 currentMonth={month}
                 data-cy="monthly-booking-panel"
+                key={`monthly-${renderKey}-${view}-${month}-${year}`}
               />
             </div>
           ) : (
@@ -530,9 +532,10 @@ function BookingCalendar() {
             >
               <div className="w-full">
                 <WeeklyBookingPanel
-                  events={getFilteredAppointments()}
+                  events={displayedAppointments}
                   currentDate={currentDate}
                   data-cy="weekly-booking-panel"
+                  key={`weekly-${renderKey}-${view}-${currentDate.toISOString()}`}
                 />
               </div>
             </div>
