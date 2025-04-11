@@ -381,95 +381,112 @@ function BookingCalendar() {
         className="flex flex-col shadow-custom items-center rounded-lg p-1.5 sm:p-2 md:p-3 lg:p-4 bg-ash-100 dark:bg-customNeutral-500 w-full md:w-[90%] mb-2 sm:mb-3 md:mb-4 lg:mb-6"
       >
         {/* Header Section */}
-        <div className="flex flex-col gap-2 sm:gap-3 w-full">
-          <div className="flex flex-row justify-between items-center w-full">
-            <div className="flex flex-row items-center gap-0.5 sm:gap-1" data-cy="calendar-navigation">
-              <button
-                data-cy="previous-month-btn"
-                className="border border-transparent p-0.5 sm:p-1 rounded hover:border-lavender-400 text-lavender-400 dark:hover:border-lavender-100 dark:text-lavender-100"
-                onClick={handlePrevious}
-                aria-label="Previous"
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center w-full gap-1.5 sm:gap-2 md:gap-3">
+          <div className="w-full sm:w-auto">
+            <div className="flex flex-row justify-between sm:justify-start items-center gap-2 sm:gap-4">
+              <div className="flex flex-row items-center gap-0.5 sm:gap-1" data-cy="calendar-navigation">
+                <button
+                  data-cy="previous-month-btn"
+                  className="border border-transparent p-0.5 sm:p-1 rounded hover:border-lavender-400 text-lavender-400 dark:hover:border-lavender-100 dark:text-lavender-100"
+                  onClick={handlePrevious}
+                  aria-label="Previous"
+                >
+                  <ChevronLeftIcon
+                    className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5"
+                    data-cy="previous-icon"
+                  />
+                </button>
+                <h2
+                  data-cy="calendar-month-label"
+                  className="text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl font-semibold dark:text-customNeutral-100"
+                >
+                  {currentDate.toLocaleString("default", { month: "long" })} {year}
+                </h2>
+                <button
+                  data-cy="next-month-btn"
+                  className="border border-transparent p-0.5 sm:p-1 rounded hover:border-lavender-400 text-lavender-400 dark:hover:border-lavender-100 dark:text-lavender-100"
+                  onClick={handleNext}
+                  aria-label="Next"
+                >
+                  <ChevronRightIcon
+                    className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5"
+                    data-cy="next-icon"
+                  />
+                </button>
+              </div>
+
+              <div
+                className="flex gap-0.5 sm:gap-1 text-xs sm:text-base md:text-lg lg:text-xl"
+                data-cy="view-toggle-buttons"
               >
-                <ChevronLeftIcon
-                  className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5"
-                  data-cy="previous-icon"
-                />
-              </button>
-              <h2
-                data-cy="calendar-month-label"
-                className="text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl font-semibold dark:text-customNeutral-100"
-              >
-                {currentDate.toLocaleString("default", { month: "long" })} {year}
-              </h2>
-              <button
-                data-cy="next-month-btn"
-                className="border border-transparent p-0.5 sm:p-1 rounded hover:border-lavender-400 text-lavender-400 dark:hover:border-lavender-100 dark:text-lavender-100"
-                onClick={handleNext}
-                aria-label="Next"
-              >
-                <ChevronRightIcon
-                  className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5"
-                  data-cy="next-icon"
-                />
-              </button>
+                <button
+                  data-cy="calendar-view-monthly"
+                  onClick={() => setView("monthly")}
+                  className={`relative dark:text-customNeutral-100 inline-block px-1 sm:px-2 py-1 font-semibold overflow-hidden group ${
+                    view === "monthly" ? "text-lavender-500 " : ""
+                  }`}
+                >
+                  <span
+                    className="hidden sm:inline"
+                    data-cy="monthly-view-text-full"
+                  >
+                    MONTHLY
+                  </span>
+                  <span className="sm:hidden" data-cy="monthly-view-text-short">
+                    MONTHLY
+                  </span>
+                  <span
+                    className={`absolute left-0 bottom-0 block h-0.5 bg-lavender-400 transition-all duration-300 ${view === "monthly" ? "w-full" : "w-0 group-hover:w-full"
+                      }`}
+                    data-cy="monthly-view-indicator"
+                  ></span>
+                </button>
+
+                <button
+                  data-cy="calendar-view-weekly"
+                  onClick={() => setView("weekly")}
+                  className={`relative dark:text-customNeutral-100 inline-block px-1 sm:px-2 py-1 font-semibold overflow-hidden group ${
+                    view === "weekly"
+                      ? "text-lavender-500 dark:text-customNeutral-100"
+                      : ""
+                  }`}
+                >
+                  <span
+                    className="hidden sm:inline"
+                    data-cy="weekly-view-text-full"
+                  >
+                    WEEKLY
+                  </span>
+                  <span className="sm:hidden" data-cy="weekly-view-text-short">
+                    WEEKLY
+                  </span>
+                  <span
+                    className={`absolute left-0 bottom-0 block h-0.5 bg-lavender-400 transition-all duration-300 ${view === "weekly" ? "w-full" : "w-0 group-hover:w-full"
+                      }`}
+                    data-cy="weekly-view-indicator"
+                  ></span>
+                </button>
+              </div>
             </div>
 
-            <div
-              className="flex gap-0.5 sm:gap-1 text-xs sm:text-base md:text-lg lg:text-xl"
-              data-cy="view-toggle-buttons"
-            >
-              <button
-                data-cy="calendar-view-monthly"
-                onClick={() => setView("monthly")}
-                className={`relative dark:text-customNeutral-100 inline-block px-1 sm:px-2 py-1 font-semibold overflow-hidden group ${
-                  view === "monthly" ? "text-lavender-500 " : ""
-                }`}
-              >
-                <span
-                  className="hidden sm:inline"
-                  data-cy="monthly-view-text-full"
-                >
-                  MONTHLY
-                </span>
-                <span className="sm:hidden" data-cy="monthly-view-text-short">
-                  MONTHLY
-                </span>
-                <span
-                  className={`absolute left-0 bottom-0 block h-0.5 bg-lavender-400 transition-all duration-300 ${view === "monthly" ? "w-full" : "w-0 group-hover:w-full"
-                    }`}
-                  data-cy="monthly-view-indicator"
-                ></span>
-              </button>
-
-              <button
-                data-cy="calendar-view-weekly"
-                onClick={() => setView("weekly")}
-                className={`relative dark:text-customNeutral-100 inline-block px-1 sm:px-2 py-1 font-semibold overflow-hidden group ${
-                  view === "weekly"
-                    ? "text-lavender-500 dark:text-customNeutral-100"
-                    : ""
-                }`}
-              >
-                <span
-                  className="hidden sm:inline"
-                  data-cy="weekly-view-text-full"
-                >
-                  WEEKLY
-                </span>
-                <span className="sm:hidden" data-cy="weekly-view-text-short">
-                  WEEKLY
-                </span>
-                <span
-                  className={`absolute left-0 bottom-0 block h-0.5 bg-lavender-400 transition-all duration-300 ${view === "weekly" ? "w-full" : "w-0 group-hover:w-full"
-                    }`}
-                  data-cy="weekly-view-indicator"
-                ></span>
-              </button>
+            {/* Using MultiSelectFilter component for Staff filtering - Mobile Only */}
+            <div className="flex justify-end w-full mt-2 sm:hidden">
+              <MultiSelectFilter
+                options={filterOptions}
+                selectedValues={tempSelectedStaff}
+                setSelectedValues={setTempSelectedStaff}
+                placeholder="FILTER BY STAFF"
+                mandatoryValues={[]}
+                onApply={applyStaffFilters}
+                showApplyButton={true}
+                className="h-8 min-w-[100px]"
+                data-cy="staff-filter-mobile"
+              />
             </div>
           </div>
 
-          {/* Using MultiSelectFilter component for Staff filtering */}
-          <div className="flex justify-end w-full">
+          {/* Using MultiSelectFilter component for Staff filtering - Desktop Only */}
+          <div className="hidden sm:block">
             <MultiSelectFilter
               options={filterOptions}
               selectedValues={tempSelectedStaff}
@@ -478,8 +495,8 @@ function BookingCalendar() {
               mandatoryValues={[]}
               onApply={applyStaffFilters}
               showApplyButton={true}
-              className="h-8 sm:h-10 md:h-12 min-w-[100px] sm:min-w-[120px] md:min-w-[150px]"
-              data-cy="staff-filter"
+              className="h-10 md:h-12 min-w-[120px] md:min-w-[150px]"
+              data-cy="staff-filter-desktop"
             />
           </div>
         </div>
