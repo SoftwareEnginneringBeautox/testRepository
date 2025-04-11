@@ -48,6 +48,18 @@ function CreateStaff({ isOpen, onClose }) {
 
   if (!isOpen) return null;
 
+  const validateEmail = (email) => {
+    if (!email) return "Email is required";
+    
+    // Basic email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return "Please enter a valid email address";
+    }
+    
+    return ""; // Empty string means no error
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -63,6 +75,14 @@ function CreateStaff({ isOpen, onClose }) {
     // Validate inputs
     if (!staffName || !staffEmail || !staffRole || !staffPassword) {
       setError("All fields are required");
+      setLoading(false);
+      return;
+    }
+    
+    // Validate email specifically
+    const emailError = validateEmail(staffEmail);
+    if (emailError) {
+      setError(emailError);
       setLoading(false);
       return;
     }
@@ -94,13 +114,25 @@ function CreateStaff({ isOpen, onClose }) {
         console.log("Staff created successfully");
         onClose();
       } else {
-        setError(response.data.message || "Failed to create staff.");
+        // Handle specific email errors from server
+        if (response.data.message?.toLowerCase().includes("email")) {
+          setError(response.data.message || "Email error. The email may already be in use.");
+        } else {
+          setError(response.data.message || "Failed to create staff.");
+        }
       }
     } catch (err) {
       console.error("Error creating staff:", err);
-      setError(err.name === 'AbortError' 
-        ? "Request timed out. Please try again."
-        : "An error occurred while creating staff.");
+      
+      // Handle email-specific errors
+      if (err.response?.data?.message?.toLowerCase().includes("email") || 
+          err.message?.toLowerCase().includes("email")) {
+        setError("Invalid email or email already in use");
+      } else {
+        setError(err.name === 'AbortError' 
+          ? "Request timed out. Please try again."
+          : "An error occurred while creating staff.");
+      }
     } finally {
       setLoading(false);
     }
@@ -144,9 +176,20 @@ function CreateStaff({ isOpen, onClose }) {
                   placeholder="Email of the Staff"
                   type="email"
                   value={staffEmail}
-                  onChange={(e) => setStaffEmail(e.target.value)}
+                  onChange={(e) => {
+                    setStaffEmail(e.target.value);
+                    // Clear error if they're fixing their email
+                    if (error && error.toLowerCase().includes("email")) {
+                      setError("");
+                    }
+                  }}
+                  className={error && error.toLowerCase().includes("email") ? "border-red-500" : ""}
+                  required
                 />
               </InputTextField>
+              {error && error.toLowerCase().includes("email") && (
+                <p className="text-red-500 text-sm mt-1">{error}</p>
+              )}
             </InputContainer>
 
             {/* STAFF ROLE */}
@@ -222,7 +265,7 @@ function CreateStaff({ isOpen, onClose }) {
               </Select>
             </InputContainer>
 
-            {error && <p className="text-red-500">{error}</p>}
+            {error && !error.toLowerCase().includes("email") && <p className="text-red-500">{error}</p>}
           </div>
 
           <div className="flex sm:flex-row flex-col gap-4 mt-6 w-full">
