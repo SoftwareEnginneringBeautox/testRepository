@@ -48,10 +48,12 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
   const [formData, setFormData] = useState({});
   const [formErrors, setFormErrors] = useState({});
   const [formSubmitAttempted, setFormSubmitAttempted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [packagesList, setPackagesList] = useState([]);
   const [treatmentsList, setTreatmentsList] = useState([]);
   const [aestheticianList, setAestheticianList] = useState([]);
+  const [personInCharge, setPersonInCharge] = useState("");
 
   const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -87,6 +89,8 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
         sessions_left: Math.max(0, (initialData.sessions_left || 0) - 1) // Decrement sessions by 1 for this visit
       });
 
+      // Initialize personInCharge state
+      setPersonInCharge(initialData.person_in_charge || "");
       setSessionsLeft(Math.max(0, (initialData.sessions_left || 0) - 1));
     }
 
@@ -228,7 +232,6 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
   const newBalance = newTotal - newPaid;
 
   // Is the payment complete?
-
   const isNewPaid = newBalance <= 0;
 
   // Check if current package/treatments are completed
@@ -238,8 +241,7 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
       originalData.treatment_ids.length === 0 ||
       sessionsLeft <= 0);
 
-  const handleSubmit = async () => {
-    setFormSubmitAttempted(true);
+  const validateForm = () => {
     const errors = {};
 
     // Validate date is not in the past
@@ -261,6 +263,11 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
           (hours === endBusinessHour && minutes > 0)) {
         errors.time_of_session = "Session time must be between 9:00 AM and 6:00 PM";
       }
+    }
+
+    // Validate person in charge is selected
+    if (!personInCharge) {
+      errors.personInCharge = "Person in charge is required";
     }
 
     // If additional payment is entered, update remaining balance
@@ -294,8 +301,20 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
         "Please enter a valid amount paid (greater than 0 and not exceeding the total)";
     }
 
+    return errors;
+  };
+
+  const handleSubmit = async () => {
+    setFormSubmitAttempted(true);
+    setIsSubmitting(true);
+    
+    const errors = validateForm();
     setFormErrors(errors);
-    if (Object.keys(errors).length > 0) return;
+    
+    if (Object.keys(errors).length > 0) {
+      setIsSubmitting(false);
+      return;
+    }
 
     // Prepare data for submission
     let updatedData = {
@@ -304,8 +323,8 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
       time_of_session: formData.time_of_session,
       consent_form_signed: formData.consent_form_signed,
       amount_paid: totalPaid.toString(), // Update total amount paid
-      sessions_left: sessionsLeft
-      // Update paid status based on remaining balance
+      sessions_left: sessionsLeft,
+      person_in_charge: personInCharge // Include person in charge
     };
 
     // If adding new package/treatments, include them
@@ -329,96 +348,104 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
       }
     }
 
-    // Submit to server
-    await onSubmit(updatedData);
+    try {
+      // Submit to server
+      await onSubmit(updatedData);
 
-    // If additional payment made, add to sales records
-    if (additionalPayment > 0) {
-      try {
-        const salesPayload = {
-          client: entryData.patient_name,
-          person_in_charge: entryData.person_in_charge,
-          date_transacted: new Date().toISOString().split("T")[0],
-          payment_method: entryData.payment_method || "Installment",
-          packages: entryData.package_name || "",
-          treatment: Array.isArray(entryData.treatment_ids)
-            ? treatmentsList
-                .filter((t) => entryData.treatment_ids.includes(t.id))
-                .map((t) => t.treatment_name)
-                .join(", ")
-            : "",
-          payment: additionalPayment,
-          reference_no: entryData.reference_number || `REF${Date.now()}`
-        };
-
-        await fetch(`${API_BASE_URL}/sales`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify(salesPayload)
-        });
-      } catch (err) {
-        console.error("Error adding sales record:", err);
-      }
-    }
-
-    // If a new package or treatment is selected, create a new sales record
-    if (
-      hasCompletedCurrentTreatments &&
-      (selectedPackage || selectedTreatments.length > 0)
-    ) {
-      try {
-        const newSalesPayload = {
-          client: entryData.patient_name,
-          person_in_charge: entryData.person_in_charge,
-          date_transacted: new Date().toISOString().split("T")[0],
-          payment_method: newPaymentMethod,
-          packages: selectedPackage || "",
-          treatment:
-            selectedTreatments.length > 0
+      // If additional payment made, add to sales records
+      if (additionalPayment > 0) {
+        try {
+          const salesPayload = {
+            client: entryData.patient_name,
+            person_in_charge: personInCharge, // Use the updated person in charge
+            date_transacted: new Date().toISOString().split("T")[0],
+            payment_method: entryData.payment_method || "Installment",
+            packages: entryData.package_name || "",
+            treatment: Array.isArray(entryData.treatment_ids)
               ? treatmentsList
-                  .filter((t) => selectedTreatments.includes(t.id))
+                  .filter((t) => entryData.treatment_ids.includes(t.id))
                   .map((t) => t.treatment_name)
                   .join(", ")
               : "",
-          payment: parseFloat(newAmountPaid),
-          reference_no: `NEWSRV${Date.now()}`
-        };
+            payment: additionalPayment,
+            reference_no: entryData.reference_number || `REF${Date.now()}`
+          };
 
-        await fetch(`${API_BASE_URL}/sales`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify(newSalesPayload)
-        });
-      } catch (err) {
-        console.error("Error adding new service sales record:", err);
+          await fetch(`${API_BASE_URL}/sales`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify(salesPayload)
+          });
+        } catch (err) {
+          console.error("Error adding sales record:", err);
+        }
       }
-    }
 
-    // If there are remaining sessions, create a new appointment
-    if (sessionsLeft > 0) {
-      try {
-        const appointmentPayload = {
-          patient_record_id: entryData.id,
-          full_name: entryData.patient_name,
-          contact_number: entryData.contact_number,
-          age: entryData.age ? parseInt(entryData.age) : null,
-          email: entryData.email,
-          date_of_session: formData.date_of_session,
-          time_of_session: formData.time_of_session,
-          archived: false
-        };
+      // If a new package or treatment is selected, create a new sales record
+      if (
+        hasCompletedCurrentTreatments &&
+        (selectedPackage || selectedTreatments.length > 0)
+      ) {
+        try {
+          const newSalesPayload = {
+            client: entryData.patient_name,
+            person_in_charge: personInCharge, // Use the updated person in charge
+            date_transacted: new Date().toISOString().split("T")[0],
+            payment_method: newPaymentMethod,
+            packages: selectedPackage || "",
+            treatment:
+              selectedTreatments.length > 0
+                ? treatmentsList
+                    .filter((t) => selectedTreatments.includes(t.id))
+                    .map((t) => t.treatment_name)
+                    .join(", ")
+                : "",
+            payment: parseFloat(newAmountPaid),
+            reference_no: `NEWSRV${Date.now()}`
+          };
 
-        await fetch(`${API_BASE_URL}/api/appointments`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify(appointmentPayload)
-        });
-      } catch (err) {
-        console.error("Error creating next appointment:", err);
+          await fetch(`${API_BASE_URL}/sales`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify(newSalesPayload)
+          });
+        } catch (err) {
+          console.error("Error adding new service sales record:", err);
+        }
       }
+
+      // If there are remaining sessions, create a new appointment
+      if (sessionsLeft > 0) {
+        try {
+          const appointmentPayload = {
+            patient_record_id: entryData.id,
+            full_name: entryData.patient_name,
+            contact_number: entryData.contact_number,
+            age: entryData.age ? parseInt(entryData.age) : null,
+            email: entryData.email,
+            date_of_session: formData.date_of_session,
+            time_of_session: formData.time_of_session,
+            archived: false
+          };
+
+          await fetch(`${API_BASE_URL}/api/appointments`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify(appointmentPayload)
+          });
+        } catch (err) {
+          console.error("Error creating next appointment:", err);
+        }
+      }
+      
+      setIsSubmitting(false);
+      onClose();
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      setIsSubmitting(false);
     }
   };
 
@@ -443,11 +470,48 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
               {originalData.patient_name?.toUpperCase() || "UNKNOWN"}
             </p>
 
+            {/* PERSON IN CHARGE - Now conditionally editable */}
             <InputContainer>
               <InputLabel>PERSON IN CHARGE</InputLabel>
-              <p data-cy="person-in-charge-display">
-                {originalData.person_in_charge}
-              </p>
+              {originalData.person_in_charge ? (
+                // Show as text if already assigned
+                <p data-cy="person-in-charge-display">
+                  {originalData.person_in_charge}
+                </p>
+              ) : (
+                // Show as dropdown if not assigned
+                <Select
+                  value={personInCharge}
+                  onValueChange={(value) => setPersonInCharge(value)}
+                >
+                  <ModalSelectTrigger
+                    data-cy="person-in-charge-select"
+                    icon={<UserIDIcon className="w-4 h-4" />}
+                    placeholder="Select person in charge"
+                    className={
+                      formSubmitAttempted && formErrors.personInCharge
+                        ? "border-red-500"
+                        : ""
+                    }
+                  />
+                  <ModalSelectContent>
+                    {aestheticianList.map((user) => (
+                      <SelectItem
+                        data-cy="person-in-charge-option"
+                        key={user.id}
+                        value={user.username}
+                      >
+                        {user.username}
+                      </SelectItem>
+                    ))}
+                  </ModalSelectContent>
+                </Select>
+              )}
+              {formSubmitAttempted && formErrors.personInCharge && (
+                <p className="text-red-500 text-sm mt-1">
+                  {formErrors.personInCharge}
+                </p>
+              )}
             </InputContainer>
 
             {/* Current PACKAGE */}
@@ -873,6 +937,7 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
               variant="outline"
               className="md:w-1/2"
               onClick={onClose}
+              disabled={isSubmitting}
             >
               <ChevronLeftIcon />
               CANCEL AND RETURN
@@ -881,6 +946,7 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
               data-cy="submit-update-patient"
               className="md:w-1/2"
               onClick={handleSubmit}
+              disabled={isSubmitting}
             >
               <UpdateIcon />
               UPDATE ENTRY
