@@ -473,6 +473,21 @@ function FinancialOverview() {
       return sum + amount;
     }, 0);
 
+    // Add weekly total section after the sales table
+    const finalY = doc.lastAutoTable.finalY + 20;
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
+
+    // Add total weekly sales
+    doc.text("TOTAL WEEKLY SALES:", margin, finalY);
+    doc.text(formatCurrency(totalAmount), pageWidth - margin, finalY, {
+      align: "right"
+    });
+
+    // Add separator line
+    doc.setLineWidth(0.5);
+    doc.line(margin, finalY + 10, pageWidth - margin, finalY + 10);
+
     // Save the PDF with week dates in filename
     const startDateFilename = format(oneWeekAgo, "MMdd");
     const endDateFilename = format(today, "MMdd");
@@ -490,13 +505,17 @@ function FinancialOverview() {
       );
       return;
     }
-    if (!expensesData || expensesData.length === 0) {
-      console.warn("No expense data available. Proceeding with zero expenses.");
-      showAlert(
-        "No expense data available. Proceeding with zero expenses.",
-        "destructive"
-      );
-    }
+    
+    // Get current month and year
+    const currentDate = new Date();
+    const currentMonth = currentDate.getMonth();
+    const currentYear = currentDate.getFullYear();
+    
+    // Filter sales data to only show current month
+    const currentMonthSales = salesData.filter(sale => {
+      const saleDate = new Date(sale.date_transacted);
+      return saleDate.getMonth() === currentMonth && saleDate.getFullYear() === currentYear;
+    });
 
     const doc = new jsPDF({
       orientation: "portrait",
@@ -515,80 +534,96 @@ function FinancialOverview() {
     const availableWidth = pageWidth - margin * 2;
 
     // Format current date
-    const currentDate = new Date();
-    const formattedCurrentDate = format(
-      currentDate,
-      "MMMM dd, yyyy"
-    ).toUpperCase();
+    const formattedCurrentDate = format(currentDate, "MMMM dd, yyyy").toUpperCase();
     const formattedDateForFilename = format(currentDate, "MMMM_dd_yyyy");
 
     // Add title
     doc.setFont("helvetica", "bold");
     doc.text(
-      `BEAUTOX PRISM MONTHLY SALES REPORT AS OF ${formattedCurrentDate}`,
+      `BEAUTOX PRISM MONTHLY PROFIT REPORT AS OF ${formattedCurrentDate}`,
       pageWidth / 2,
       margin + 30,
       { align: "center" }
     );
 
-    // Compute expense totals grouped by category
-    const computeExpenseCategoryTotals = () => {
-      return expensesData.reduce((acc, expense) => {
-        const category = expense.category || "Uncategorized";
-        const value = parseFloat(expense.expense);
-        acc[category] = (acc[category] || 0) + (isNaN(value) ? 0 : value);
-        return acc;
-      }, {});
-    };
-
-    // Compute total sales
-    const computeTotalSales = () => {
-      return salesData.reduce((sum, sale) => {
-        const rawPayment =
-          sale.payment || sale.totalAmount || sale.total_amount;
-        const numericPayment = parseFloat(rawPayment);
-        return sum + (isNaN(numericPayment) ? 0 : numericPayment);
-      }, 0);
-    };
-
-    const expenseCategoryTotals = computeExpenseCategoryTotals();
-    const monthlyExpenses = Object.values(expenseCategoryTotals).reduce(
-      (total, val) => total + val,
-      0
-    );
-    const totalSales = computeTotalSales();
-    const totalProfit = totalSales - monthlyExpenses;
-
-    // Format currency
+    // Manual currency formatting function
     const formatCurrency = (amount) => {
       if (!amount || isNaN(amount) || parseFloat(amount) === 0) return "P0";
       const num = Math.abs(Math.round(parseFloat(amount)));
       const formatted = num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
       return `P${formatted}`;
     };
+    
+    // Format payment method - match weekly report format
+    const formatPaymentMethod = (method) => {
+      if (!method) return "N/A";
+      return method.toLowerCase().includes("full") ? "FULL" : "INST"; // Shortened to match weekly report
+    };
 
-    // Prepare expenses data for table
-    const expensesTableData = Object.entries(expenseCategoryTotals)
-      .sort((a, b) => a[0].localeCompare(b[0]))
-      .map(([category, amount]) => [
-        category.toUpperCase(),
-        formatCurrency(amount)
-      ]);
+    // 1. FIRST ADD SALES TABLE - List all sales for the current month
+    doc.setFontSize(14);
+    doc.text("MONTHLY SALES", pageWidth / 2, margin + 70, { align: "center" });
+    
+    // Define base column configuration (matching weekly report)
+    const baseColumns = [
+      { header: "CLIENT", width: 80 },
+      { header: "PIC", width: 60 },
+      { header: "DATE", width: 60 },
+      { header: "MODE", width: 40 },
+      { header: "PKG", width: 70 },
+      { header: "TREATMENT", width: 90 },
+      { header: "TOTAL", width: 60 },
+      { header: "REF#", width: 70 }
+    ];
 
-    // Configure and draw the expenses table
+    // Calculate total natural width
+    const naturalWidth = baseColumns.reduce((sum, col) => sum + col.width, 0);
+    
+    // Calculate scaling factor to fit available width
+    const scaleFactor = availableWidth / naturalWidth;
+    
+    // Scale column widths
+    const headers = baseColumns.map((col) => ({
+      header: col.header,
+      width: col.width * scaleFactor
+    }));
+
+    // Sales table data - formatted like weekly report
+    const salesTableData = currentMonthSales.map(sale => [
+      (sale.client || "N/A").toUpperCase(),
+      (sale.person_in_charge || "N/A").toUpperCase(),
+      sale.date_transacted
+        ? format(new Date(sale.date_transacted), "MM/dd/yy").toUpperCase()
+        : "N/A",
+      formatPaymentMethod(sale.payment_method),
+      (sale.packages || "N/A").toUpperCase(),
+      (sale.treatment || "N/A").toUpperCase(),
+      formatCurrency(sale.payment),
+      (sale.reference_no || "N/A").toUpperCase()
+    ]);
+
+    // Draw sales table using same styling as weekly report
     autoTable(doc, {
-      head: [["CATEGORY", "AMOUNT"]],
-      body: expensesTableData,
-      startY: margin + 70,
+      head: [headers.map((h) => h.header)],
+      body: salesTableData,
+      startY: margin + 90,
       margin: { top: margin, right: margin, bottom: margin, left: margin },
       columnStyles: {
-        0: { cellWidth: "auto", halign: "left" },
-        1: { cellWidth: "auto", halign: "right" }
+        ...headers.reduce((acc, col, index) => {
+          acc[index] = {
+            cellWidth: col.width,
+            fontSize: 8,
+            cellPadding: 3,
+            overflow: "linebreak"
+          };
+          return acc;
+        }, {}),
+        6: { halign: "right", cellPadding: { right: 5 } } // Total amount column
       },
       styles: {
         font: "helvetica",
-        fontSize: 10,
-        cellPadding: 5,
+        fontSize: 8,
+        cellPadding: 3,
         overflow: "linebreak",
         cellWidth: "wrap",
         minCellHeight: 14,
@@ -597,11 +632,11 @@ function FinancialOverview() {
       headStyles: {
         fillColor: "#381B4C",
         textColor: "#FFFFFF",
-        fontSize: 10,
+        fontSize: 8,
         fontStyle: "bold",
         halign: "center",
         valign: "middle",
-        lineWidth: 0
+        lineWidth: 0 // Remove header borders
       },
       alternateRowStyles: {
         fillColor: "#F8F8F8"
@@ -614,13 +649,117 @@ function FinancialOverview() {
           pageHeight - 10,
           { align: "right" }
         );
+      },
+      willDrawCell: function (data) {
+        if (
+          data.cell.text &&
+          typeof data.cell.text === "string" &&
+          data.column.index !== 6
+        ) {
+          const maxWidth =
+            data.cell.styles.cellWidth - data.cell.styles.cellPadding * 2;
+          const textWidth =
+            doc.getStringUnitWidth(data.cell.text) * data.cell.styles.fontSize;
+
+          if (textWidth > maxWidth) {
+            const charactersPerLine = Math.floor(
+              (maxWidth / textWidth) * data.cell.text.length
+            );
+            data.cell.text =
+              data.cell.text.substring(0, charactersPerLine - 3) + "...";
+          }
+        }
       }
     });
+
+    // 2. THEN ADD EXPENSES TABLE (after sales table)
+    // Compute expense totals grouped by category
+    const computeExpenseCategoryTotals = () => {
+      return expensesData.reduce((acc, expense) => {
+        const category = expense.category || "Uncategorized";
+        const value = parseFloat(expense.expense);
+        acc[category] = (acc[category] || 0) + (isNaN(value) ? 0 : value);
+        return acc;
+      }, {});
+    };
+
+    // Get the Y position after the sales table
+    const salesTableEndY = doc.lastAutoTable.finalY + 20;
+    
+    // Add expenses title
+    doc.setFontSize(14);
+    doc.text("MONTHLY EXPENSES", pageWidth / 2, salesTableEndY, { align: "center" });
+
+    // Prepare expenses data
+    const expenseCategoryTotals = computeExpenseCategoryTotals();
+    const expensesTableData = Object.entries(expenseCategoryTotals)
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([category, amount]) => [
+        category.toUpperCase(),
+        formatCurrency(amount)
+      ]);
+
+    // Draw expenses table with matching styling
+    autoTable(doc, {
+      head: [["CATEGORY", "AMOUNT"]],
+      body: expensesTableData,
+      startY: salesTableEndY + 20,
+      margin: { top: margin, right: margin, bottom: margin, left: margin },
+      columnStyles: {
+        0: { 
+          cellWidth: availableWidth * 0.7,
+          halign: "left",
+          fontSize: 8,
+          fontStyle: "normal"
+        },
+        1: { 
+          cellWidth: availableWidth * 0.3,
+          halign: "right",
+          fontSize: 8, 
+          fontStyle: "normal"
+        }
+      },
+      styles: {
+        font: "helvetica",
+        fontSize: 8,
+        cellPadding: 3,
+        overflow: "linebreak",
+        cellWidth: "wrap",
+        valign: "middle"
+      },
+      headStyles: {
+        fillColor: "#381B4C",
+        textColor: "#FFFFFF",
+        fontStyle: "bold",
+        halign: "center",
+        fontSize: 8,
+        lineWidth: 0
+      },
+      alternateRowStyles: {
+        fillColor: "#F8F8F8"
+      }
+    });
+
+    // 3. SUMMARY SECTION
+    // Compute total sales and expenses
+    const computeTotalSales = () => {
+      return salesData.reduce((sum, sale) => {
+        const rawPayment = sale.payment || sale.totalAmount || sale.total_amount;
+        const numericPayment = parseFloat(rawPayment);
+        return sum + (isNaN(numericPayment) ? 0 : numericPayment);
+      }, 0);
+    };
+
+    const totalSales = computeTotalSales();
+    const monthlyExpenses = Object.values(expenseCategoryTotals).reduce(
+      (total, val) => total + val, 0
+    );
+    const totalProfit = totalSales - monthlyExpenses;
 
     // Add summary section
     const finalY = doc.lastAutoTable.finalY + 20;
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(12);
+    doc.setFontSize(10);
 
     // Add total sales
     doc.text("TOTAL SALES:", margin, finalY);
@@ -639,7 +778,7 @@ function FinancialOverview() {
     doc.line(margin, finalY + 30, pageWidth - margin, finalY + 30);
 
     // Add final total
-    doc.setFontSize(14);
+    doc.setFontSize(12);
     doc.text(
       totalProfit < 0 ? "TOTAL LOSS:" : "TOTAL PROFIT:",
       margin,
@@ -1415,7 +1554,7 @@ function FinancialOverview() {
           >
             <DownloadIcon />
             <span className="hidden md:inline">
-              DOWNLOAD MONTHLY SALES REPORT
+              DOWNLOAD MONTHLY PROFIT REPORT
             </span>
             <span className="md:hidden">MONTHLY REPORT</span>
           </Button>
