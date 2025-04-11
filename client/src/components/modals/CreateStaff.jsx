@@ -50,18 +50,29 @@ function CreateStaff({ isOpen, onClose }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Prevent duplicate submissions
+    if (loading) {
+      console.log("Staff creation already in progress");
+      return;
+    }
+    
     setLoading(true);
     setError("");
 
-    console.log("Submitting staff:", {
-      staffName,
-      staffEmail,
-      staffRole,
-      staffPassword,
-      dayOff
-    });
+    // Validate inputs
+    if (!staffName || !staffEmail || !staffRole || !staffPassword) {
+      setError("All fields are required");
+      setLoading(false);
+      return;
+    }
+
+    console.log("Submitting staff creation request");
 
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000);
+      
       const response = await axios.post(
         `${API_BASE_URL}/adduser`,
         {
@@ -71,17 +82,25 @@ function CreateStaff({ isOpen, onClose }) {
           role: staffRole,
           dayoff: dayOff
         },
-        { withCredentials: true }
+        { 
+          withCredentials: true,
+          signal: controller.signal
+        }
       );
+      
+      clearTimeout(timeoutId);
 
       if (response.data.success) {
+        console.log("Staff created successfully");
         onClose();
       } else {
         setError(response.data.message || "Failed to create staff.");
       }
     } catch (err) {
       console.error("Error creating staff:", err);
-      setError("An error occurred while creating staff.");
+      setError(err.name === 'AbortError' 
+        ? "Request timed out. Please try again."
+        : "An error occurred while creating staff.");
     } finally {
       setLoading(false);
     }

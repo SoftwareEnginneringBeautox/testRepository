@@ -243,7 +243,7 @@ function FinancialOverview() {
   useEffect(() => {
     // Filter out any archived records that might have slipped through
     if (salesData && salesData.length > 0) {
-      const nonArchived = salesData.filter(sale => !sale.archived);
+      const nonArchived = salesData.filter((sale) => !sale.archived);
       setFilteredSalesData(nonArchived);
     } else {
       setFilteredSalesData([]);
@@ -291,6 +291,22 @@ function FinancialOverview() {
       return;
     }
 
+    // Filter data to only include sales from the past week
+    const today = new Date();
+    const oneWeekAgo = new Date(today);
+    oneWeekAgo.setDate(today.getDate() - 7);
+
+    const weekSalesData = salesData.filter((sale) => {
+      const saleDate = new Date(sale.date_transacted);
+      return saleDate >= oneWeekAgo && saleDate <= today;
+    });
+
+    if (weekSalesData.length === 0) {
+      console.error("No sales data available for the past week.");
+      showAlert("No sales data available for the past week.", "destructive");
+      return;
+    }
+
     const doc = new jsPDF({
       orientation: "portrait",
       unit: "pt",
@@ -315,10 +331,13 @@ function FinancialOverview() {
     ).toUpperCase();
     const formattedDateForFilename = format(currentDate, "MMMM_dd_yyyy");
 
-    // Add title (combined into one line)
+    // Add title with date range
+    const startDateFormatted = format(oneWeekAgo, "MMMM dd").toUpperCase();
+    const endDateFormatted = format(today, "MMMM dd, yyyy").toUpperCase();
+
     doc.setFont("helvetica", "bold");
     doc.text(
-      `BEAUTOX WEEKLY SALES REPORT AS OF ${formattedCurrentDate}`,
+      `BEAUTOX WEEKLY SALES REPORT (${startDateFormatted} - ${endDateFormatted})`,
       pageWidth / 2,
       margin + 30,
       { align: "center" }
@@ -330,10 +349,10 @@ function FinancialOverview() {
       { header: "PIC", width: 60 },
       { header: "DATE", width: 60 },
       { header: "MODE", width: 40 },
-      { header: "PKG", width: 70 }, // Shortened "PACKAGE" to "PKG" for space
+      { header: "PKG", width: 70 },
       { header: "TREATMENT", width: 90 },
       { header: "TOTAL", width: 60 },
-      { header: "REF#", width: 50 }
+      { header: "REF#", width: 70 }
     ];
 
     // Calculate total natural width
@@ -362,8 +381,8 @@ function FinancialOverview() {
       return method.toLowerCase().includes("full") ? "FULL" : "INST"; // Shortened "INSTALL" to "INST"
     };
 
-    // Prepare table data with shorter formats for portrait layout
-    const tableData = salesData.map((sale) => [
+    // Prepare table data with shorter formats for portrait layout - using weekSalesData
+    const tableData = weekSalesData.map((sale) => [
       (sale.client || "N/A").toUpperCase(),
       (sale.person_in_charge || "N/A").toUpperCase(),
       sale.date_transacted
@@ -446,14 +465,18 @@ function FinancialOverview() {
       }
     });
 
-    // Calculate total amount (keeping this part but removing the duplicate title)
-    const totalAmount = salesData.reduce((sum, sale) => {
+    // Calculate total amount from the week's data
+    const totalAmount = weekSalesData.reduce((sum, sale) => {
       const amount = parseFloat(sale.payment) || 0;
       return sum + amount;
     }, 0);
 
-    // Save the PDF
-    doc.save(`Beautox_WeeklySalesReport_${formattedDateForFilename}.pdf`);
+    // Save the PDF with week dates in filename
+    const startDateFilename = format(oneWeekAgo, "MMdd");
+    const endDateFilename = format(today, "MMdd");
+    doc.save(
+      `Beautox_WeeklySalesReport_${startDateFilename}_${endDateFilename}.pdf`
+    );
   };
 
   const generateMonthlySalesReport = (salesData, expensesData) => {
@@ -996,16 +1019,16 @@ function FinancialOverview() {
                         {column.value === "date_transacted"
                           ? sale.date_transacted
                             ? format(
-                              new Date(sale.date_transacted),
-                              "MMMM dd, yyyy"
-                            ).toUpperCase()
+                                new Date(sale.date_transacted),
+                                "MMMM dd, yyyy"
+                              ).toUpperCase()
                             : "N/A"
                           : column.value === "payment"
-                            ? new Intl.NumberFormat("en-PH", {
+                          ? new Intl.NumberFormat("en-PH", {
                               style: "currency",
                               currency: "PHP"
                             }).format(sale.payment)
-                            : (sale[column.value] || "N/A").toUpperCase()}
+                          : (sale[column.value] || "N/A").toUpperCase()}
                       </TableCell>
                     ))}
                 </TableRow>
@@ -1198,9 +1221,9 @@ function FinancialOverview() {
                     >
                       {expense.date
                         ? format(
-                          new Date(expense.date),
-                          "MMMM dd, yyyy"
-                        ).toUpperCase()
+                            new Date(expense.date),
+                            "MMMM dd, yyyy"
+                          ).toUpperCase()
                         : "N/A"}
                     </TableCell>
                     <TableCell
@@ -1224,8 +1247,9 @@ function FinancialOverview() {
                     >
                       <DropdownMenu>
                         <DropdownMenuTrigger
-                          data-cy={`expense-actions-trigger-${expense.id || index
-                            }`}
+                          data-cy={`expense-actions-trigger-${
+                            expense.id || index
+                          }`}
                         >
                           <EllipsisIcon />
                         </DropdownMenuTrigger>
