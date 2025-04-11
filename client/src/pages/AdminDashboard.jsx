@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useCallback, useEffect } from "react";
+import axios from "axios";
 import "../App.css";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -13,6 +14,7 @@ import SalesChart from "../components/SalesChart";
 import PlusIcon from "../assets/icons/PlusIcon";
 import UserIcon from "../assets/icons/UserIcon";
 import UserAdminIcon from "../assets/icons/UserAdminIcon";
+import RemindersTable from "@/components/RemindersTable";
 import { Loader } from "@/components/ui/Loader";
 import {
   AlertContainer,
@@ -40,11 +42,7 @@ import {
 } from "@/components/ui/Table";
 import EditIcon from "@/assets/icons/EditIcon";
 import ArchiveIcon from "@/assets/icons/ArchiveIcon";
-import CalendarIcon from "@/assets/icons/CalendarIcon";
-import ChevronDownIcon from "@/assets/icons/ChevronDownIcon";
-import EvaluateIcon from "@/assets/icons/EvaluateIcon";
 import DownloadIcon from "@/assets/icons/DownloadIcon";
-import axios from "axios";
 import { format, parseISO } from "date-fns";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
@@ -54,309 +52,177 @@ function AdministratorDashboard() {
     localStorage.getItem("username") || ""
   );
   const { currentModal, openModal, closeModal } = useModal();
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const [view, setView] = useState("monthly");
-  const [remindersExpanded, setRemindersExpanded] = useState(false);
 
-  const month = currentDate.getMonth();
-  const year = currentDate.getFullYear();
-  const [reminders, setReminders] = useState([]);
+  // Alert State
+  const [alert, setAlert] = useState({
+    visible: false,
+    message: "",
+    variant: "default"
+  });
 
-  // Add state for staged appointments
+  // Staff State
+  const [staffList, setStaffList] = useState([]);
+  const [selectedStaff, setSelectedStaff] = useState(null);
+  const [loadingStaff, setLoadingStaff] = useState(true);
+  const [errorStaff, setErrorStaff] = useState(null);
+
+  // Appointments State
   const [stagedAppointments, setStagedAppointments] = useState([]);
+  const [reminders, setReminders] = useState([]);
+  const [loadingAppointments, setLoadingAppointments] = useState(true);
+  const [appointmentError, setAppointmentError] = useState(null);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [showAppointmentModal, setShowAppointmentModal] = useState(false);
 
-  const [staffList, setStaffList] = useState([]);
-  const [loadingStaff, setLoadingStaff] = useState(true);
-  const [errorStaff, setErrorStaff] = useState(null);
-  const [loadingAppointments, setLoadingAppointments] = useState(true);
-  const [appointmentError, setAppointmentError] = useState(null);
+  // Chart State
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [view, setView] = useState("monthly");
 
-  const [selectedStaff, setSelectedStaff] = useState(null);
+  // Alert Functions
+  const showAlert = useCallback((message, variant = "default") => {
+    setAlert({ visible: true, message, variant });
+    setTimeout(() => setAlert((prev) => ({ ...prev, visible: false })), 3000);
+  }, []);
 
-  // Alert state
-  const [showAlert, setShowAlert] = useState(false);
-  const [alertTitle, setAlertTitle] = useState("");
-  const [alertMessage, setAlertMessage] = useState("");
-
-  const handleCloseAlert = () => {
-    setShowAlert(false);
-  };
-
-  const toggleReminders = () => {
-    setRemindersExpanded(!remindersExpanded);
-  };
-
-  const displayAlert = (title, message, duration = 3000) => {
-    setAlertTitle(title);
-    setAlertMessage(message);
-    setShowAlert(true);
-
-    if (duration > 0) {
-      setTimeout(() => {
-        setShowAlert(false);
-      }, duration);
-    }
-  };
-
-  const handleEditStaff = async (updatedData) => {
-    console.log("Sending to backend:", updatedData);
-    try {
-      await axios.post(
-        `${API_BASE_URL}/api/manage-record`,
-        {
-          table: "accounts",
-          id: updatedData.id,
-          action: "edit",
-          data: updatedData
-        },
-        {
-          withCredentials: true
-        }
-      );
-
-      closeModal();
-      fetchStaff();
-    } catch (error) {
-      console.error("Error editing staff:", error);
-      displayAlert("Error", "Failed to edit staff member");
-    }
-  };
-
-  const handleArchiveStaff = async () => {
-    if (!selectedStaff?.id) return;
-
-    try {
-      await axios.post(
-        `${API_BASE_URL}/api/manage-record`,
-        {
-          table: "accounts",
-          id: selectedStaff.id,
-          action: "archive"
-        },
-        {
-          withCredentials: true
-        }
-      );
-
-      closeModal();
-      fetchStaff();
-    } catch (error) {
-      console.error("Error archiving staff:", error);
-      displayAlert("Error", "Failed to archive staff member");
-    }
-  };
-
-  const fetchStaff = async () => {
+  // Staff Functions
+  const fetchStaff = useCallback(async () => {
     try {
       setLoadingStaff(true);
       const response = await axios.get(`${API_BASE_URL}/getusers`, {
         withCredentials: true
       });
-      console.log("Raw staff response:", response.data);
 
-      const data = response.data;
-      const filteredStaff = data.filter(
+      const filteredStaff = response.data.filter(
         (user) =>
           (user.role === "receptionist" || user.role === "aesthetician") &&
-          !user.archived // ✅ only include unarchived staff
+          !user.archived
       );
 
       setStaffList(filteredStaff);
       setErrorStaff(null);
     } catch (error) {
       console.error("Error fetching staff:", error);
-      if (error.response && error.response.status === 401) {
-        setErrorStaff("Session expired. Please log in again.");
-      } else {
-        setErrorStaff(error.message);
-      }
+      setErrorStaff(
+        error.response?.status === 401
+          ? "Session expired. Please log in again."
+          : error.message
+      );
     } finally {
       setLoadingStaff(false);
     }
-  };
+  }, []);
 
-  const fetchStagedAppointments = async () => {
-    try {
-      setLoadingAppointments(true);
-      setAppointmentError(null);
-
-      const res = await axios.get(
-        `${API_BASE_URL}/api/staged-appointments/unconfirmed`,
-        {
-          withCredentials: true
-        }
-      );
-
-      console.log("Fetched staged appointments:", res.data);
-
-      // Make sure we have data and it's an array
-      if (res.data && Array.isArray(res.data)) {
-        // Ensure all records have required fields for rendering
-        const validatedData = res.data.map((appointment) => ({
-          ...appointment,
-          // Make sure date_of_session is a string
-          date_of_session: appointment.date_of_session || "2025-01-01",
-          // Make sure time_of_session is a string
-          time_of_session: appointment.time_of_session || "00:00:00",
-          // Make sure full_name is a string
-          full_name: appointment.full_name || "Unknown Client"
-        }));
-
-        setStagedAppointments(validatedData);
-        console.log("Validated staged appointments:", validatedData);
-      } else {
-        console.warn("Invalid staged appointments data:", res.data);
-        setStagedAppointments([]);
-      }
-    } catch (error) {
-      console.error("Error fetching staged appointments:", error);
-      setAppointmentError("Failed to load staged appointments");
-    } finally {
-      setLoadingAppointments(false);
-    }
-  };
-
-  const handleConfirmAppointment = async (id) => {
-    try {
-      await axios.post(
-        `${API_BASE_URL}/api/staged-appointments/${id}/confirm`,
-        {},
-        {
-          withCredentials: true
-        }
-      );
-
-      displayAlert("Success", "Appointment confirmed successfully!");
-      setShowAppointmentModal(false);
-      fetchStagedAppointments(); // Refresh the list
-      fetchReminders(); // Refresh regular appointments
-    } catch (error) {
-      console.error("Error confirming appointment:", error);
-      displayAlert("Error", "Failed to confirm appointment");
-    }
-  };
-
-  const handleRejectAppointment = async (id) => {
-    try {
-      await axios.post(
-        `${API_BASE_URL}/api/staged-appointments/${id}/reject`,
-        {},
-        {
-          withCredentials: true
-        }
-      );
-
-      displayAlert("Success", "Appointment rejected");
-      setShowAppointmentModal(false);
-      fetchStagedAppointments(); // Refresh the list
-    } catch (error) {
-      console.error("Error rejecting appointment:", error);
-      displayAlert("Error", "Failed to reject appointment");
-    }
-  };
-
-  const viewAppointmentDetails = (appointment) => {
-    setSelectedAppointment(appointment);
-    setShowAppointmentModal(true);
-  };
-
-  const fetchReminders = async () => {
-    try {
-      setLoadingAppointments(true);
-      setAppointmentError(null);
-
-      const res = await axios.get(`${API_BASE_URL}/api/appointments`, {
-        withCredentials: true
-      });
-
-      console.log("Fetched appointments:", res.data);
-
-      if (res.data && Array.isArray(res.data)) {
-        const today = new Date();
-        const tomorrow = new Date(today);
-        const dayAfterTomorrow = new Date(today);
-
-        tomorrow.setDate(today.getDate() + 1);
-        dayAfterTomorrow.setDate(today.getDate() + 2);
-
-        const formatDate = (date) => date.toISOString().split("T")[0];
-
-        console.log("Today:", formatDate(today));
-        console.log(
-          "Checking for:",
-          formatDate(tomorrow),
-          "and",
-          formatDate(dayAfterTomorrow)
+  const handleStaffAction = useCallback(
+    async (action, staffData) => {
+      try {
+        await axios.post(
+          `${API_BASE_URL}/api/manage-record`,
+          {
+            table: "accounts",
+            id: staffData.id,
+            action,
+            data: action === "edit" ? staffData : undefined
+          },
+          { withCredentials: true }
         );
 
-        const filtered = res.data.filter((entry) => {
-          // Ensure date_of_session exists and is a string
-          if (
-            !entry.date_of_session ||
-            typeof entry.date_of_session !== "string"
-          ) {
-            console.warn("Invalid date format for entry:", entry);
-            return false;
-          }
-
-          const sessionDate = entry.date_of_session.slice(0, 10);
-
-          return (
-            sessionDate === formatDate(today) ||
-            sessionDate === formatDate(tomorrow) ||
-            sessionDate === formatDate(dayAfterTomorrow)
-          );
-        });
-
-        console.log("Filtered reminders:", filtered);
-        setReminders(filtered);
-      } else {
-        console.warn("Invalid appointments data:", res.data);
-        setReminders([]);
+        closeModal();
+        fetchStaff();
+        showAlert(`Staff successfully ${action}ed`, "success");
+      } catch (error) {
+        console.error(`Error ${action}ing staff:`, error);
+        showAlert(`Failed to ${action} staff member`, "destructive");
       }
+    },
+    [closeModal, fetchStaff, showAlert]
+  );
+
+  // Appointment Functions
+  const fetchAppointments = useCallback(async () => {
+    try {
+      setLoadingAppointments(true);
+
+      const [stagedRes, appointmentsRes] = await Promise.all([
+        axios.get(`${API_BASE_URL}/api/staged-appointments/unconfirmed`, {
+          withCredentials: true
+        }),
+        axios.get(`${API_BASE_URL}/api/appointments`, {
+          withCredentials: true
+        })
+      ]);
+
+      setStagedAppointments(stagedRes.data || []);
+      setReminders(appointmentsRes.data || []);
+      setAppointmentError(null);
     } catch (error) {
-      console.error("Error fetching reminders:", error);
+      console.error("Error fetching appointments:", error);
       setAppointmentError("Failed to load appointments");
     } finally {
       setLoadingAppointments(false);
     }
-  };
-
-  useEffect(() => {
-    fetchStaff();
-    fetchReminders();
-    fetchStagedAppointments(); // Fetch staged appointments
   }, []);
 
-  const throwExampleAlert = () => {
-    displayAlert(
-      "Heads up!",
-      "You can add components to your app using the CLI.",
-      15000
-    );
-  };
+  // Add this before handleConfirmAppointment and handleRejectAppointment
+  const handleAppointmentAction = useCallback(
+    async (id, action) => {
+      try {
+        setLoadingAppointments(true);
+        await axios.post(
+          `${API_BASE_URL}/api/staged-appointments/${id}/${action}`,
+          {},
+          { withCredentials: true }
+        );
 
-  const handlePrevious = () => {
-    if (view === "monthly") {
-      setCurrentDate(new Date(year, month - 1, 1));
-    } else {
-      const newDate = new Date(currentDate);
-      newDate.setDate(currentDate.getDate() - 7);
-      setCurrentDate(newDate);
-    }
-  };
+        showAlert(
+          `Appointment ${
+            action === "confirm" ? "confirmed" : "rejected"
+          } successfully`,
+          "success"
+        );
+        setShowAppointmentModal(false);
+        fetchAppointments();
+      } catch (error) {
+        console.error(`Error ${action}ing appointment:`, error);
+        showAlert(`Failed to ${action} appointment`, "destructive");
+      } finally {
+        setLoadingAppointments(false);
+      }
+    },
+    [API_BASE_URL, fetchAppointments, showAlert]
+  );
 
-  const handleNext = () => {
-    if (view === "monthly") {
-      setCurrentDate(new Date(year, month + 1, 1));
-    } else {
-      const newDate = new Date(currentDate);
-      newDate.setDate(currentDate.getDate() + 7);
-      setCurrentDate(newDate);
-    }
-  };
+  // Update the dependency arrays for these functions
+  const handleConfirmAppointment = useCallback(
+    (id) => {
+      handleAppointmentAction(id, "confirm");
+    },
+    [handleAppointmentAction]
+  );
+
+  const handleEvaluateAppointment = useCallback((appointment) => {
+    setSelectedAppointment(appointment);
+    setShowAppointmentModal(true);
+  }, []);
+
+  const handleRejectAppointment = useCallback(
+    (id) => {
+      handleAppointmentAction(id, "reject");
+    },
+    [handleAppointmentAction]
+  );
+
+  // Add this useEffect for initial data loading
+  useEffect(() => {
+    const fetchData = async () => {
+      await Promise.all([fetchStaff(), fetchAppointments()]);
+    };
+    fetchData();
+
+    // Set up polling for appointments
+    const pollingInterval = setInterval(fetchAppointments, 300000); // 5 minutes
+
+    return () => clearInterval(pollingInterval);
+  }, [fetchStaff, fetchAppointments]);
 
   const chartData = [
     { day: "Mon", currentWeek: 1300, previousWeek: 1100 },
@@ -491,6 +357,8 @@ function AdministratorDashboard() {
     }
   };
 
+  // For logic in Reminders Table
+
   const generateStaffListReport = (staffData = []) => {
     const doc = new jsPDF({
       orientation: "portrait",
@@ -581,17 +449,24 @@ function AdministratorDashboard() {
       className="flex flex-col lg:flex-row items-start gap-6 justify-center w-full p-3 sm:p-4 md:p-6 lg:w-[90%] mx-auto"
       data-cy="admin-dashboard-container"
     >
-      {showAlert && (
-        <AlertContainer className="w-full" data-cy="alert-container">
+      {alert.visible && (
+        <AlertContainer
+          variant={alert.variant}
+          className="w-full"
+          data-cy="alert-container"
+        >
           <AlertText>
-            <AlertTitle data-cy="alert-title">{alertTitle}</AlertTitle>
+            <AlertTitle data-cy="alert-title">
+              {alert.variant === "destructive" ? "Error" : "Notice"}
+            </AlertTitle>
             <AlertDescription data-cy="alert-description">
-              {alertMessage}
+              {alert.message}
             </AlertDescription>
           </AlertText>
-          <CloseAlert onClick={handleCloseAlert} data-cy="close-alert">
-            &times;
-          </CloseAlert>
+          <CloseAlert
+            onClick={() => setAlert((prev) => ({ ...prev, visible: false }))}
+            data-cy="close-alert"
+          />
         </AlertContainer>
       )}
       {/* Left Section */}
@@ -624,175 +499,13 @@ function AdministratorDashboard() {
           className="overflow-x-auto overflow-y-hidden"
           data-cy="reminders-table-container"
         >
-          <Table className="min-w-full" data-cy="reminders-table">
-            <TableHeader data-cy="reminders-header">
-              <TableRow>
-                <TableHead
-                  className="text-left py-8 flex items-center justify-between"
-                  data-cy="reminders-title"
-                >
-                  <div className="flex flex-row text-xl items-center gap-2">
-                    REMINDERS
-                    {(stagedAppointments.length > 0 ||
-                      reminders.length > 0) && (
-                      <span className="text-xs bg-lavender-300 text-white rounded-full px-2 py-0.5">
-                        {stagedAppointments.length + reminders.length}
-                      </span>
-                    )}
-                  </div>
-                  <button
-                    onClick={toggleReminders}
-                    className="flex flex-row gap-2 items-center justify-center rounded-lg focus:outline-none text-sm transition-transform duration-200 border-2 border-customNeutral-100 p-1 pl-3"
-                    aria-label={
-                      remindersExpanded
-                        ? "Collapse reminders"
-                        : "Expand reminders"
-                    }
-                    data-cy="toggle-reminders"
-                  >
-                    VIEW ALL
-                    <ChevronDownIcon
-                      className={`transform ${
-                        remindersExpanded ? "rotate-180" : "rotate-0"
-                      }`}
-                    />
-                  </button>
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-
-            {remindersExpanded ? (
-              <TableBody data-cy="reminders-body">
-                {loadingAppointments ? (
-                  <TableRow>
-                    <TableCell>Loading appointments...</TableCell>
-                  </TableRow>
-                ) : appointmentError ? (
-                  <TableRow>
-                    <TableCell className="text-error-400">
-                      {appointmentError}
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  <>
-                    {/* Display any pending appointment confirmations */}
-                    {stagedAppointments.length > 0
-                      ? stagedAppointments.map((item, index) => (
-                          <TableRow key={`staged-${index}`}>
-                            <TableCell className="flex items-center gap-2 sm:gap-4 text-sm sm:text-base [&_svg]:shrink-0 ">
-                              <CalendarIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-                              <span>
-                                <strong>{item.full_name}</strong> has scheduled
-                                an appointment on{" "}
-                                <strong>
-                                  {formatSafeDate(
-                                    item.date_of_session,
-                                    "MMMM dd, yyyy"
-                                  )}
-                                </strong>{" "}
-                                at{" "}
-                                <strong>
-                                  {formatSafeTime(item.time_of_session)}
-                                </strong>
-                              </span>
-                              <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-lavender-300 text-white font-semibold">
-                                Needs Confirmation
-                              </span>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="ml-auto"
-                                onClick={() => viewAppointmentDetails(item)}
-                              >
-                                EVALUATE
-                                <EvaluateIcon />
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        ))
-                      : null}
-
-                    {/* Display existing reminders for confirmed appointments */}
-                    {reminders.length > 0
-                      ? reminders.map((item, index) => (
-                          <TableRow key={`reminder-${index}`}>
-                            <TableCell className="flex items-center gap-2 sm:gap-4 text-sm sm:text-base [&_svg]:shrink-0">
-                              <CalendarIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-                              <span>
-                                {item.full_name} has an appointment on{" "}
-                                <strong>
-                                  {formatSafeDate(
-                                    item.date_of_session,
-                                    "MMMM dd, yyyy"
-                                  )}
-                                </strong>{" "}
-                                at{" "}
-                                <strong>
-                                  {formatSafeTime(item.time_of_session)}
-                                </strong>
-                              </span>
-                              {getReminderLabel(item.date_of_session) && (
-                                <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-lavender-300 text-white font-semibold">
-                                  {getReminderLabel(item.date_of_session)}
-                                </span>
-                              )}
-                            </TableCell>
-                          </TableRow>
-                        ))
-                      : !stagedAppointments.length && (
-                          <TableRow>
-                            <TableCell className="text-sm sm:text-base">
-                              No recent appointments needing reminders.
-                            </TableCell>
-                          </TableRow>
-                        )}
-                  </>
-                )}
-              </TableBody>
-            ) : (
-              <TableBody data-cy="reminders-summary">
-                <TableRow>
-                  <TableCell className="text-sm sm:text-base py-2">
-                    {loadingAppointments ? (
-                      "Loading appointments..."
-                    ) : appointmentError ? (
-                      <span className="text-error-400">{appointmentError}</span>
-                    ) : stagedAppointments.length > 0 ||
-                      reminders.length > 0 ? (
-                      <div className="flex items-center justify-between">
-                        <span>
-                          {stagedAppointments.length > 0 ? (
-                            <span className="font-medium">
-                              {stagedAppointments.length} pending{" "}
-                              {stagedAppointments.length === 1
-                                ? "confirmation"
-                                : "confirmations"}
-                            </span>
-                          ) : null}
-                          {stagedAppointments.length > 0 && reminders.length > 0
-                            ? " • "
-                            : ""}
-                          {reminders.length > 0 ? (
-                            <span>
-                              {reminders.length} upcoming{" "}
-                              {reminders.length === 1
-                                ? "appointment"
-                                : "appointments"}
-                            </span>
-                          ) : null}
-                        </span>
-                        <span className="text-xs text-gray-500">
-                          Click arrow to view details
-                        </span>
-                      </div>
-                    ) : (
-                      "No upcoming appointments"
-                    )}
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            )}
-          </Table>
+          <RemindersTable
+            stagedAppointments={stagedAppointments}
+            reminders={reminders}
+            isLoading={loadingAppointments} // Changed from isLoading to loadingAppointments
+            error={appointmentError} // Changed from error to appointmentError
+            onEvaluateAppointment={handleEvaluateAppointment}
+          />
         </div>
         <div data-cy="sales-chart-container">
           <SalesChart

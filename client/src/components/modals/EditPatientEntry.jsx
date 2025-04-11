@@ -240,14 +240,8 @@ function EditPatientContactInfo({ isOpen, onClose, entryData, onSubmit }) {
               onClick={handleSubmit}
               disabled={isSubmitting}
             >
-              {isSubmitting ? (
-                "UPDATING..."
-              ) : (
-                <>
-                  <EditIcon />
-                  UPDATE CONTACT INFO
-                </>
-              )}
+              <EditIcon />
+              EDIT CONTACT INFO
             </Button>
           </div>
         </form>

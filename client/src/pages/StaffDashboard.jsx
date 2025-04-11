@@ -1,12 +1,14 @@
 import React from "react";
 import "../App.css";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { format } from "date-fns";
+import { useModal } from "@/hooks/useModal";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 import { Loader } from "@/components/ui/Loader";
+import RemindersTable from "@/components/RemindersTable";
 import UserIcon from "../assets/icons/UserIcon";
 import { cn } from "@/lib/utils";
 
@@ -30,25 +32,73 @@ function StaffDashboard() {
   const [userName, setUserName] = useState(
     localStorage.getItem("username") || ""
   );
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const [view, setView] = useState("monthly");
-  const [packagesData, setPackagesData] = useState([]);
-  const [treatmentsData, setTreatmentsData] = useState([]);
-  const [reminders, setReminders] = useState([]);
+  const { currentModal, openModal, closeModal } = useModal();
+
+  // Alert State
+  const [alert, setAlert] = useState({
+    visible: false,
+    message: "",
+    variant: "default"
+  });
+
+  // Staff State
   const [staffList, setStaffList] = useState([]);
+  const [selectedStaff, setSelectedStaff] = useState(null);
   const [loadingStaff, setLoadingStaff] = useState(true);
   const [errorStaff, setErrorStaff] = useState(null);
 
-  // Fetch Staff from API
-  const fetchStaff = async () => {
+  // Appointments State
+  const [stagedAppointments, setStagedAppointments] = useState([]);
+  const [reminders, setReminders] = useState([]);
+  const [loadingAppointments, setLoadingAppointments] = useState(true);
+  const [appointmentError, setAppointmentError] = useState(null);
+  const [selectedAppointment, setSelectedAppointment] = useState(null);
+  const [showAppointmentModal, setShowAppointmentModal] = useState(false);
+
+  const [treatmentsData, setTreatmentsData] = useState([]);
+  const [packagesData, setPackagesData] = useState([]);
+  const [loadingTreatments, setLoadingTreatments] = useState(true);
+  const [errorTreatments, setErrorTreatments] = useState(null);
+
+  // Add this new fetch function
+  const fetchTreatments = useCallback(async () => {
+    try {
+      setLoadingTreatments(true);
+      const [treatmentsRes, packagesRes] = await Promise.all([
+        axios.get(`${API_BASE_URL}/api/treatments`, {
+          withCredentials: true
+        }),
+        axios.get(`${API_BASE_URL}/api/packages`, {
+          withCredentials: true
+        })
+      ]);
+
+      setTreatmentsData(treatmentsRes.data || []);
+      setPackagesData(packagesRes.data || []);
+      setErrorTreatments(null);
+    } catch (error) {
+      console.error("Error fetching treatments:", error);
+      setErrorTreatments("Failed to load treatments");
+    } finally {
+      setLoadingTreatments(false);
+    }
+  }, []);
+
+  // Alert Functions
+  const showAlert = useCallback((message, variant = "default") => {
+    setAlert({ visible: true, message, variant });
+    setTimeout(() => setAlert((prev) => ({ ...prev, visible: false })), 3000);
+  }, []);
+
+  // Staff Functions
+  const fetchStaff = useCallback(async () => {
     try {
       setLoadingStaff(true);
       const response = await axios.get(`${API_BASE_URL}/getusers`, {
         withCredentials: true
       });
 
-      const data = response.data;
-      const filteredStaff = data.filter(
+      const filteredStaff = response.data.filter(
         (user) =>
           (user.role === "receptionist" || user.role === "aesthetician") &&
           !user.archived
@@ -58,160 +108,160 @@ function StaffDashboard() {
       setErrorStaff(null);
     } catch (error) {
       console.error("Error fetching staff:", error);
-      if (error.response && error.response.status === 401) {
-        setErrorStaff("Session expired. Please log in again.");
-      } else {
-        setErrorStaff(error.message);
-      }
+      setErrorStaff(
+        error.response?.status === 401
+          ? "Session expired. Please log in again."
+          : error.message
+      );
     } finally {
       setLoadingStaff(false);
     }
-  };
+  }, []);
 
-  // Fetch Packages data from API
-  const fetchPackages = async () => {
+  // Appointment Functions
+  const fetchAppointments = useCallback(async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/api/packages`, {
-        withCredentials: true
-      });
-      setPackagesData(response.data.filter((item) => !item.archived));
+      setLoadingAppointments(true);
+
+      const [stagedRes, appointmentsRes] = await Promise.all([
+        axios.get(`${API_BASE_URL}/api/staged-appointments/unconfirmed`, {
+          withCredentials: true
+        }),
+        axios.get(`${API_BASE_URL}/api/appointments`, {
+          withCredentials: true
+        })
+      ]);
+
+      setStagedAppointments(stagedRes.data || []);
+      setReminders(appointmentsRes.data || []);
+      setAppointmentError(null);
     } catch (error) {
-      console.error("Error fetching packages:", error);
+      console.error("Error fetching appointments:", error);
+      setAppointmentError("Failed to load appointments");
+    } finally {
+      setLoadingAppointments(false);
     }
-  };
+  }, []);
 
-  // Fetch Treatments data from API
-  const fetchTreatments = async () => {
-    try {
-      const response = await axios.get(`${API_BASE_URL}/api/treatments`, {
-        withCredentials: true
-      });
-      setTreatmentsData(response.data.filter((item) => !item.archived));
-    } catch (error) {
-      console.error("Error fetching treatments:", error);
-    }
-  };
-
-  // Fetch Reminders (upcoming appointments) from API
-  const fetchReminders = async () => {
-    const today = new Date();
-    const tomorrow = new Date(today);
-    const dayAfterTomorrow = new Date(today);
-
-    tomorrow.setDate(today.getDate() + 1);
-    dayAfterTomorrow.setDate(today.getDate() + 2);
-
-    const formatDate = (date) => date.toISOString().split("T")[0];
-
-    try {
-      const res = await axios.get(`${API_BASE_URL}/api/appointments`, {
-        withCredentials: true
-      });
-      const data = res.data || [];
-
-      const filtered = data.filter((entry) => {
-        const sessionDate = entry.date_of_session.slice(0, 10);
-        return (
-          sessionDate === formatDate(today) ||
-          sessionDate === formatDate(tomorrow) ||
-          sessionDate === formatDate(dayAfterTomorrow)
+  const handleAppointmentAction = useCallback(
+    async (id, action) => {
+      try {
+        setLoadingAppointments(true);
+        await axios.post(
+          `${API_BASE_URL}/api/staged-appointments/${id}/${action}`,
+          {},
+          { withCredentials: true }
         );
-      });
 
-      setReminders(filtered);
-    } catch (error) {
-      console.error("Error fetching reminders:", error);
-    }
-  };
+        showAlert(
+          `Appointment ${
+            action === "confirm" ? "confirmed" : "rejected"
+          } successfully`,
+          "success"
+        );
+        setShowAppointmentModal(false);
+        fetchAppointments();
+      } catch (error) {
+        console.error(`Error ${action}ing appointment:`, error);
+        showAlert(`Failed to ${action} appointment`, "destructive");
+      } finally {
+        setLoadingAppointments(false);
+      }
+    },
+    [API_BASE_URL, fetchAppointments, showAlert]
+  );
 
-  // Helper function to get reminder label
-  const getReminderLabel = (sessionDateStr) => {
-    const today = new Date();
-    const tomorrow = new Date();
-    const dayAfterTomorrow = new Date();
+  const handleConfirmAppointment = useCallback(
+    (id) => {
+      handleAppointmentAction(id, "confirm");
+    },
+    [handleAppointmentAction]
+  );
 
-    tomorrow.setDate(today.getDate() + 1);
-    dayAfterTomorrow.setDate(today.getDate() + 2);
+  const handleEvaluateAppointment = useCallback((appointment) => {
+    setSelectedAppointment(appointment);
+    setShowAppointmentModal(true);
+  }, []);
 
-    const format = (date) => date.toISOString().split("T")[0];
-    const sessionDate = sessionDateStr.slice(0, 10);
-
-    if (sessionDate === format(today)) return "Today";
-    if (sessionDate === format(tomorrow)) return "Tomorrow";
-    if (sessionDate === format(dayAfterTomorrow)) return "Day After Tomorrow";
-    return null;
-  };
+  const handleRejectAppointment = useCallback(
+    (id) => {
+      handleAppointmentAction(id, "reject");
+    },
+    [handleAppointmentAction]
+  );
 
   // Load data on component mount
   useEffect(() => {
-    fetchPackages();
-    fetchTreatments();
-    fetchReminders();
-    fetchStaff();
-  }, []);
+    const fetchData = async () => {
+      await Promise.all([fetchStaff(), fetchAppointments(), fetchTreatments()]);
+    };
+    fetchData();
 
-  const month = currentDate.getMonth();
-  const year = currentDate.getFullYear();
+    const pollingInterval = setInterval(fetchAppointments, 300000);
+    return () => clearInterval(pollingInterval);
+  }, [fetchStaff, fetchAppointments, fetchTreatments]);
 
-  const getStartOfWeek = (date) => {
-    const startDate = date.getDate() - date.getDay();
-    return new Date(date.setDate(startDate));
-  };
-
-  const firstDayOfMonth = new Date(year, month, 1);
-  const lastDayOfMonth = new Date(year, month + 1, 0);
-
-  const startDate = new Date(firstDayOfMonth);
-  startDate.setDate(firstDayOfMonth.getDate() - firstDayOfMonth.getDay());
-
-  const calendar = [];
-  let currentWeek = [];
-
-  for (let i = startDate; i <= lastDayOfMonth; i.setDate(i.getDate() + 1)) {
-    const currentDate = new Date(i);
-    if (currentDate.getMonth() === month) {
-      currentWeek.push(currentDate);
-    } else {
-      currentWeek.push(null);
-    }
-
-    if (currentWeek.length === 7) {
-      calendar.push(currentWeek);
-      currentWeek = [];
-    }
-  }
-
-  if (currentWeek.length > 0) {
-    calendar.push(currentWeek);
-  }
-
-  const handlePrevious = () => {
-    if (view === "monthly") {
-      setCurrentDate(new Date(year, month - 1, 1));
-    } else {
-      const newDate = new Date(currentDate);
-      newDate.setDate(currentDate.getDate() - 7);
-      setCurrentDate(newDate);
+  // Helper Functions
+  const formatSafeDate = (dateString, formatStr) => {
+    try {
+      if (!dateString) return "Unknown Date";
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) {
+        console.warn("Invalid date:", dateString);
+        return "Invalid Date";
+      }
+      return format(date, formatStr);
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return "Date Error";
     }
   };
 
-  const handleNext = () => {
-    if (view === "monthly") {
-      setCurrentDate(new Date(year, month + 1, 1));
-    } else {
-      const newDate = new Date(currentDate);
-      newDate.setDate(currentDate.getDate() + 7);
-      setCurrentDate(newDate);
+  const formatSafeTime = (timeString) => {
+    try {
+      if (!timeString) return "Unknown Time";
+      const date = new Date(`1970-01-01T${timeString}`);
+      if (isNaN(date.getTime())) {
+        console.warn("Invalid time:", timeString);
+        return "Invalid Time";
+      }
+      return format(date, "hh:mm a");
+    } catch (error) {
+      console.error("Error formatting time:", error);
+      return "Time Error";
     }
   };
 
-  const [showAlert, setShowAlert] = useState(false);
+  const getReminderLabel = (sessionDateStr) => {
+    if (!sessionDateStr || typeof sessionDateStr !== "string") {
+      console.warn("Invalid date format:", sessionDateStr);
+      return null;
+    }
 
-  const throwAlert = () => {
-    setShowAlert(true);
-    setTimeout(() => {
-      setShowAlert(false);
-    }, 15000);
+    try {
+      const sessionDate = new Date(sessionDateStr);
+      if (isNaN(sessionDate.getTime())) {
+        console.warn("Invalid session date:", sessionDateStr);
+        return null;
+      }
+
+      const today = new Date();
+      const tomorrow = new Date(today);
+      tomorrow.setDate(today.getDate() + 1);
+      const dayAfter = new Date(today);
+      dayAfter.setDate(today.getDate() + 2);
+
+      if (sessionDate.toDateString() === today.toDateString()) return "Today";
+      if (sessionDate.toDateString() === tomorrow.toDateString())
+        return "Tomorrow";
+      if (sessionDate.toDateString() === dayAfter.toDateString())
+        return "Day After Tomorrow";
+
+      return null;
+    } catch (error) {
+      console.error("Error in getReminderLabel:", error);
+      return null;
+    }
   };
 
   return (
@@ -225,6 +275,19 @@ function StaffDashboard() {
           <h2 className="text-lg sm:text-xl md:text-2xl lg:text-[2rem] leading-tight sm:leading-[2.8rem] font-semibold bg-gradient-to-r from-lavender-300 to-reflexBlue-400 text-transparent bg-clip-text">
             WELCOME BACK, {userName.toUpperCase()}
           </h2>
+        </div>
+
+        <div
+          className="overflow-x-auto overflow-y-hidden"
+          data-cy="reminders-table-container"
+        >
+          <RemindersTable
+            stagedAppointments={stagedAppointments}
+            reminders={reminders}
+            isLoading={loadingAppointments}
+            error={appointmentError}
+            onEvaluateAppointment={handleEvaluateAppointment}
+          />
         </div>
 
         {/* Treatments Table */}
