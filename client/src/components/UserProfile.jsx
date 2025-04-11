@@ -71,15 +71,14 @@ const UserProfile = () => {
   return (
     <div className="flex items-center justify-end gap-2 p-3 bg-transparent">
       <div className="text-right">
-        <h6 className="text-base font-semibold dark:text-customNeutral-100">
+        <h6 className="text-base font-semibold text-purple-900 dark:text-customNeutral-100">
           {userName.toUpperCase()}
         </h6>
-        <p className="text-xs text-gray-600 dark:text-gray-300">{userRole?.toUpperCase()}</p>      </div>
+        <p className="text-xs text-purple-900 dark:text-gray-300">{userRole?.toUpperCase()}</p>      </div>
       {isIconVisible && (
         <UserIcon
           size={36}
-          className={`h-full ${currentTheme === "dark" ? "text-customNeutral-100" : ""
-            }`}
+          className={`h-full ${currentTheme === "dark" ? "text-customNeutral-100" : "text-purple-900"}`}
         />
       )}
     </div>
