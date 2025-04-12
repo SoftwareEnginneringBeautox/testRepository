@@ -152,6 +152,7 @@ function EditCategory({ isOpen, onClose, category, onEditSuccess }) {
                   type="text"
                   id="categoryName"
                   placeholder="Set the name of the category"
+                  maxLength={50} // Add maximum length
                   value={categoryName}
                   onChange={(e) => setCategoryName(e.target.value)}
                   required

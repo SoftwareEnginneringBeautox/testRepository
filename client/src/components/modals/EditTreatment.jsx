@@ -98,6 +98,8 @@ function EditTreatment({ isOpen, onClose, entryData, onSubmit }) {
                   onChange={(e) =>
                     setFormData({ ...formData, treatment_name: e.target.value })
                   }
+                  maxLength={100} // Add maximum length
+                  required
                 />
               </InputTextField>
             </InputContainer>

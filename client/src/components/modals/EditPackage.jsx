@@ -148,6 +148,7 @@ function EditPackage({ isOpen, onClose, entryData, onSubmit }) {
                   onChange={(e) =>
                     setFormData({ ...formData, package_name: e.target.value })
                   }
+                  maxLength={100} // Add maximum length
                 />
               </InputTextField>
             </InputContainer>

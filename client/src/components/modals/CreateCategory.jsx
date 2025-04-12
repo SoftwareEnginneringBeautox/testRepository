@@ -140,6 +140,7 @@ function CreateCategory({ isOpen, onClose, onCreateSuccess, categories = [] }) {
                   id="categoryName"
                   placeholder="Set the name of the category"
                   value={categoryName}
+                  maxLength={50} // Add maximum length
                   onChange={(e) => setCategoryName(e.target.value)}
                   required
                 />

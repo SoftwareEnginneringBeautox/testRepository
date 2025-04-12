@@ -282,11 +282,12 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
               </InputIcon>
               <Input
                 className="text-xs h-8"
-                data-cy="schedule-fullname-input"
+                data-cy="schedule-name-input"
                 type="text"
-                placeholder="Full name"
+                placeholder="Full Name"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
+                maxLength={100} // Add maximum length
                 required
               />
             </InputTextField>
@@ -303,13 +304,14 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
                 className="text-xs h-8"
                 data-cy="schedule-contact-input"
                 type="tel"
-                placeholder="Contact Number"
+                placeholder="09XXXXXXXXX"
                 value={contactNumber}
                 onChange={(e) => {
                   setContactNumber(e.target.value);
                   validatePhone(e.target.value);
                 }}
                 onBlur={(e) => validatePhone(e.target.value)}
+                maxLength={11} // Maximum 11 digits
                 required
               />
             </InputTextField>
@@ -368,6 +370,7 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
                   validateEmail(e.target.value);
                 }}
                 onBlur={(e) => validateEmail(e.target.value)}
+                maxLength={100} // Add maximum length
                 required
               />
             </InputTextField>

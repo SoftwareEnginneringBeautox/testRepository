@@ -245,6 +245,7 @@ function EditPatientContactInfo({ isOpen, onClose, entryData, onSubmit }) {
                   data-cy="contact-number-input"
                   placeholder="e.g. 09XXXXXXXXX"
                   value={formData.contact_number ?? ""}
+                  maxLength={11}
                   onChange={(e) =>
                     setFormData({ ...formData, contact_number: e.target.value })
                   }
@@ -297,6 +298,7 @@ function EditPatientContactInfo({ isOpen, onClose, entryData, onSubmit }) {
                   type="email"
                   placeholder="example@email.com"
                   value={formData.email ?? ""}
+                  maxLength={100}
                   onChange={(e) =>
                     setFormData({ ...formData, email: e.target.value })
                   }

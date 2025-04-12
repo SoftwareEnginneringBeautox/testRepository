@@ -258,6 +258,8 @@ function CreateStaff({ isOpen, onClose }) {
                   }}
                   onBlur={(e) => validateUsername(e.target.value)}
                   className={nameError ? "border-red-500" : ""}
+                  maxLength={100} // Add maximum length
+                  required
                 />
               </InputTextField>
               {nameError && <p className="text-red-500 text-sm mt-1">{nameError}</p>}
@@ -280,6 +282,7 @@ function CreateStaff({ isOpen, onClose }) {
                   }}
                   onBlur={(e) => validateEmailWithServer(e.target.value)}
                   className={emailError ? "border-red-500" : ""}
+                  maxLength={100} // Add maximum length
                   required
                 />
               </InputTextField>
@@ -328,6 +331,7 @@ function CreateStaff({ isOpen, onClose }) {
                   placeholder="Password of the Staff"
                   value={staffPassword}
                   onChange={(e) => setStaffPassword(e.target.value)}
+                  maxLength={50} // Add maximum length
                 />
               </InputTextField>
             </InputContainer>

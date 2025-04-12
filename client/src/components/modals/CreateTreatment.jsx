@@ -135,6 +135,7 @@ function CreateTreatment({ isOpen, onClose }) {
                   placeholder="e.g. Diamond Peel Facial"
                   value={treatmentName}
                   onChange={(e) => setTreatmentName(e.target.value)}
+                  maxLength={100} // Add maximum length
                   required
                 />
               </InputTextField>

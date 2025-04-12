@@ -100,12 +100,14 @@ const ModifyStaff = ({ isOpen, onClose, entryData, onSubmit }) => {
                   <UserIcon />
                 </InputIcon>
                 <Input
-                  data-cy="edit-staff-name"
-                  placeholder="New Name of the Staff"
+                  data-cy="staff-name"
+                  placeholder="Name of the Staff"
                   value={formData.username}
                   onChange={(e) =>
                     setFormData({ ...formData, username: e.target.value })
                   }
+                  maxLength={100} // Add maximum length
+                  required
                 />
               </InputTextField>
             </InputContainer>
@@ -117,13 +119,15 @@ const ModifyStaff = ({ isOpen, onClose, entryData, onSubmit }) => {
                   <EmailIcon />
                 </InputIcon>
                 <Input
-                  data-cy="edit-staff-email"
+                  data-cy="staff-email"
                   placeholder="Email of the Staff"
                   type="email"
                   value={formData.email}
                   onChange={(e) =>
                     setFormData({ ...formData, email: e.target.value })
                   }
+                  maxLength={100} // Add maximum length
+                  required
                 />
               </InputTextField>
             </InputContainer>

@@ -180,6 +180,7 @@ function CreatePackage({ isOpen, onClose }) {
                   placeholder="e.g. Brazilian Package"
                   value={packageName}
                   onChange={(e) => setPackageName(e.target.value)}
+                  maxLength={100} // Add maximum length
                   required
                 />
               </InputTextField>

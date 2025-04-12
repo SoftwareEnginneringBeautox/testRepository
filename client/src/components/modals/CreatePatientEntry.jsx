@@ -460,6 +460,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
                   placeholder="Full name of the patient"
                   value={patientName}
                   onChange={(e) => setPatientName(e.target.value)}
+                  maxLength={100} // Limit to 50 characters
                   required
                 />
               </InputTextField>
@@ -477,6 +478,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
                   placeholder="e.g. 09XXXXXXXXX"
                   value={contactNumber}
                   onChange={(e) => setContactNumber(e.target.value)}
+                  maxLength={11} // Limit to 11 characters
                   className={` ${
                     formSubmitAttempted && formErrors.contactNumber
                       ? "border-red-500"
@@ -531,6 +533,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
                   placeholder="example@email.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  maxLength={100} // Limit to 100 characters
                   className={` ${
                     formSubmitAttempted && formErrors.email
                       ? "border-red-500"
