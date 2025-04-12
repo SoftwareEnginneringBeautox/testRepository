@@ -140,7 +140,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
           (user) =>
             user.role &&
             user.role.toLowerCase() === "aesthetician" &&
-            !user.archived // assuming 'archived' is a boolean field
+            !user.archived // filtering out archived aestheticians
         );
 
         setAestheticianList(aestheticians);
@@ -161,7 +161,9 @@ function CreatePatientEntry({ isOpen, onClose }) {
             withCredentials: true
           }
         );
-        setPackagesList(response.data);
+        // Additional frontend filter to ensure no archived packages are shown
+        const activePackages = response.data.filter(pkg => pkg.archived === false);
+        setPackagesList(activePackages);
       } catch (error) {
         console.error("Error fetching packages:", error);
       }
@@ -179,7 +181,9 @@ function CreatePatientEntry({ isOpen, onClose }) {
           }
         );
         const data = await res.json();
-        setTreatmentsList(data);
+        // Additional frontend filter to ensure no archived treatments are shown
+        const activeTreatments = data.filter(treatment => treatment.archived === false);
+        setTreatmentsList(activeTreatments);
       } catch (err) {
         console.error("Error fetching treatments:", err);
       }
@@ -748,45 +752,45 @@ function CreatePatientEntry({ isOpen, onClose }) {
               </InputTextField>
             </InputContainer>
             
-                      {/* PAYMENT METHOD RADIO */}
-          <div className="flex flex-col gap-2 mt-4">
-            <InputContainer>
-              <InputLabel>PAYMENT METHOD</InputLabel>
+            {/* PAYMENT METHOD RADIO */}
+            <div className="flex flex-col gap-2 mt-4">
+              <InputContainer>
+                <InputLabel>PAYMENT METHOD</InputLabel>
 
-              <RadioGroup
-                value={paymentMethod}
-                onValueChange={(val) => {
-                  setPaymentMethod(val);
-                  if (val === "full-payment") {
-                    setAmountPaid(totalAmount);
-                  } else {
-                    setAmountPaid(""); // reset if switching to installment
-                  }
-                }}
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem
-                    data-cy="payment-method-radio-full-payment"
-                    value="full-payment"
-                    id="full-payment"
-                  />
-                  <label htmlFor="full-payment" className="text-sm">
-                    FULL PAYMENT
-                  </label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem
-                    data-cy="payment-method-radio-installment"
-                    value="installment"
-                    id="installment"
-                  />
-                  <label htmlFor="installment" className="text-sm">
-                    INSTALLMENT
-                  </label>
-                </div>
-              </RadioGroup>
-            </InputContainer>
-          </div>
+                <RadioGroup
+                  value={paymentMethod}
+                  onValueChange={(val) => {
+                    setPaymentMethod(val);
+                    if (val === "full-payment") {
+                      setAmountPaid(totalAmount);
+                    } else {
+                      setAmountPaid(""); // reset if switching to installment
+                    }
+                  }}
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem
+                      data-cy="payment-method-radio-full-payment"
+                      value="full-payment"
+                      id="full-payment"
+                    />
+                    <label htmlFor="full-payment" className="text-sm">
+                      FULL PAYMENT
+                    </label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem
+                      data-cy="payment-method-radio-installment"
+                      value="installment"
+                      id="installment"
+                    />
+                    <label htmlFor="installment" className="text-sm">
+                      INSTALLMENT
+                    </label>
+                  </div>
+                </RadioGroup>
+              </InputContainer>
+            </div>
 
             <InputContainer>
               <InputLabel>AMOUNT PAID</InputLabel>
