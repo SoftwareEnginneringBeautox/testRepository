@@ -734,7 +734,7 @@ app.post('/api/staged-appointments/:id/confirm', async (req, res) => {
   }
 });
 
-// Fixed reject endpoint
+// Update the rejection endpoint
 app.post('/api/staged-appointments/:id/reject', async (req, res) => {
   try {
     const { id } = req.params;
@@ -755,12 +755,13 @@ app.post('/api/staged-appointments/:id/reject', async (req, res) => {
     
     const appointment = stagedResult.rows[0];
     
-    // Update the patient_confirmed status to 'no'
+    // Update status to 'rejected' instead of 'yes'
     const result = await pool.query(
       'UPDATE staged_appointments SET patient_confirmed = $1 WHERE id = $2 RETURNING *',
-      ['yes', id]
+      ['rejected', id] // FIXED: Use 'rejected' instead of 'yes'
     );
     
+    // Rest of email sending code and response handling
     // Send rejection email
     if (appointment.email) {
       try {
