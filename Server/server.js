@@ -758,7 +758,7 @@ app.post('/api/staged-appointments/:id/reject', async (req, res) => {
     // Update status to 'rejected' instead of 'yes'
     const result = await pool.query(
       'UPDATE staged_appointments SET patient_confirmed = $1 WHERE id = $2 RETURNING *',
-      ['no', id] // FIXED: Use 'rejected' instead of 'yes'
+      ['yes', id] // FIXED: Use 'rejected' instead of 'yes'
     );
     
     // Rest of email sending code and response handling
