@@ -730,7 +730,7 @@ function AdministratorDashboard() {
           <ArchiveStaff
             isOpen={true}
             onClose={closeModal}
-            onArchive={handleArchiveStaff}
+            onArchive={() => handleArchiveStaff(selectedStaff)} // Wrap in arrow function to pass selectedStaff
             data-cy="archive-staff-modal"
           />
         )}
