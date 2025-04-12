@@ -63,12 +63,8 @@ const calculatePercentageChange = (salesData) => {
 
 const SalesChart = ({
   chartConfig,
-  financialData = {
-    totalSales: 0,
-    totalExpenses: 0,
-    netIncome: 0
-  },
-  isFinancialOverview = false // New prop to check if the component is used in FinancialOverview
+  financialData: externalFinancialData,
+  isFinancialOverview = false // Prop to check if the component is used in FinancialOverview
 }) => {
   const { theme } = useTheme();
 
@@ -90,6 +86,54 @@ const SalesChart = ({
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  
+  // State for financial data if not provided externally
+  const [financialData, setFinancialData] = useState({
+    totalSales: 0,
+    totalExpenses: 0,
+    netIncome: 0
+  });
+  const [financialLoading, setFinancialLoading] = useState(!externalFinancialData);
+  const [financialError, setFinancialError] = useState(null);
+
+  // If external financial data is provided, use it
+  useEffect(() => {
+    if (externalFinancialData) {
+      setFinancialData(externalFinancialData);
+      setFinancialLoading(false);
+    }
+  }, [externalFinancialData]);
+
+  // Fetch financial data if none is provided and we're showing the financial footer
+  useEffect(() => {
+    if (!externalFinancialData && !isFinancialOverview) {
+      const fetchFinancialData = async () => {
+        setFinancialLoading(true);
+        setFinancialError(null);
+        try {
+          const response = await fetch(
+            "http://localhost:4000/financial-overview"
+          );
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+          const data = await response.json();
+          setFinancialData({
+            totalSales: data.totalSales || 0,
+            totalExpenses: data.totalExpenses || 0,
+            netIncome: data.netIncome || 0
+          });
+        } catch (error) {
+          console.error("Error fetching financial data:", error);
+          setFinancialError(error.message);
+        } finally {
+          setFinancialLoading(false);
+        }
+      };
+
+      fetchFinancialData();
+    }
+  }, [externalFinancialData, isFinancialOverview]);
 
   const fetchSalesData = async (start, end) => {
     setLoading(true);
@@ -326,7 +370,6 @@ const SalesChart = ({
           </div>
         </ChartContainer>
       </CardContent>
-      {/* Only render the financial summary in CardFooter if isFinancialOverview is true */}
       <CardFooter data-cy="card-footer" className="flex flex-col gap-4">
         <div
           className="flex flex-col w-full items-start gap-2 text-sm"
@@ -371,62 +414,74 @@ const SalesChart = ({
             className="w-full flex flex-row items-center justify-around gap-4 mt-3"
             data-cy="total-profit-container"
           >
-            <div
-              className="h-full flex-1 w-1/3 flex flex-col p-4 py-5 gap-2 bg-ash-200/50 dark:bg-customNeutral-400 rounded-lg"
-              data-cy="total-sales"
-            >
-              <span className="font-semibold text-xs text-customNeutral-400 dark:text-customNeutral-200">
-                TOTAL SALES
-              </span>
-              <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-semibold dark:text-customNeutral-100">
-                {new Intl.NumberFormat("en-PH", {
-                  style: "currency",
-                  currency: "PHP"
-                }).format(financialData.totalSales)}
-              </p>
-            </div>
-            <div
-              className="h-full flex-1 w-1/3 flex flex-col p-4 py-5 gap-2 bg-ash-200/50 dark:bg-customNeutral-400 rounded-lg"
-              data-cy="total-expenses"
-            >
-              <span className="font-semibold text-xs text-customNeutral-400 dark:text-customNeutral-200">
-                TOTAL EXPENSES
-              </span>
-              <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-semibold dark:text-customNeutral-100">
-                {new Intl.NumberFormat("en-PH", {
-                  style: "currency",
-                  currency: "PHP"
-                }).format(financialData.totalExpenses)}
-              </p>
-            </div>
-            <div
-              className="h-full flex-1 w-1/3 flex flex-col p-4 py-5 gap-2 bg-ash-200/50 dark:bg-customNeutral-400 rounded-lg"
-              data-cy="total-profit-loss"
-            >
-              <span className="font-semibold text-xs text-customNeutral-400 dark:text-customNeutral-200">
-                {financialData.netIncome >= 0 ? "TOTAL PROFIT" : "TOTAL LOSS"}
-              </span>
-              <div className="flex items-center gap-2">
-                <p
-                  className={cn(
-                    "text-lg sm:text-xl md:text-2xl lg:text-3xl font-semibold",
-                    financialData.netIncome >= 0
-                      ? "text-success-500 dark:text-success-400"
-                      : "text-error-500 dark:text-error-400"
-                  )}
-                >
-                  {new Intl.NumberFormat("en-PH", {
-                    style: "currency",
-                    currency: "PHP"
-                  }).format(Math.abs(financialData.netIncome))}
-                </p>
-                {financialData.netIncome >= 0 ? (
-                  <TrendUpIcon className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-success-500 dark:text-success-400" />
-                ) : (
-                  <TrendDownIcon className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-error-500 dark:text-error-400" />
-                )}
+            {financialLoading ? (
+              <div className="w-full flex justify-center py-6">
+                <Loader />
               </div>
-            </div>
+            ) : financialError ? (
+              <div className="w-full p-2 bg-red-100 text-error-400 rounded">
+                Error loading financial data: {financialError}
+              </div>
+            ) : (
+              <>
+                <div
+                  className="h-full flex-1 w-1/3 flex flex-col p-4 py-5 gap-2 bg-ash-200/50 dark:bg-customNeutral-400 rounded-lg"
+                  data-cy="total-sales"
+                >
+                  <span className="font-semibold text-xs text-customNeutral-400 dark:text-customNeutral-200">
+                    TOTAL SALES
+                  </span>
+                  <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-semibold dark:text-customNeutral-100">
+                    {new Intl.NumberFormat("en-PH", {
+                      style: "currency",
+                      currency: "PHP"
+                    }).format(financialData.totalSales)}
+                  </p>
+                </div>
+                <div
+                  className="h-full flex-1 w-1/3 flex flex-col p-4 py-5 gap-2 bg-ash-200/50 dark:bg-customNeutral-400 rounded-lg"
+                  data-cy="total-expenses"
+                >
+                  <span className="font-semibold text-xs text-customNeutral-400 dark:text-customNeutral-200">
+                    TOTAL EXPENSES
+                  </span>
+                  <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-semibold dark:text-customNeutral-100">
+                    {new Intl.NumberFormat("en-PH", {
+                      style: "currency",
+                      currency: "PHP"
+                    }).format(financialData.totalExpenses)}
+                  </p>
+                </div>
+                <div
+                  className="h-full flex-1 w-1/3 flex flex-col p-4 py-5 gap-2 bg-ash-200/50 dark:bg-customNeutral-400 rounded-lg"
+                  data-cy="total-profit-loss"
+                >
+                  <span className="font-semibold text-xs text-customNeutral-400 dark:text-customNeutral-200">
+                    {financialData.netIncome >= 0 ? "TOTAL PROFIT" : "TOTAL LOSS"}
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <p
+                      className={cn(
+                        "text-lg sm:text-xl md:text-2xl lg:text-3xl font-semibold",
+                        financialData.netIncome >= 0
+                          ? "text-success-500 dark:text-success-400"
+                          : "text-error-500 dark:text-error-400"
+                      )}
+                    >
+                      {new Intl.NumberFormat("en-PH", {
+                        style: "currency",
+                        currency: "PHP"
+                      }).format(Math.abs(financialData.netIncome))}
+                    </p>
+                    {financialData.netIncome >= 0 ? (
+                      <TrendUpIcon className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-success-500 dark:text-success-400" />
+                    ) : (
+                      <TrendDownIcon className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-error-500 dark:text-error-400" />
+                    )}
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         )}
       </CardFooter>
