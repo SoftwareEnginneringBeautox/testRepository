@@ -908,7 +908,43 @@ app.get('/api/treatments', async (req, res) => {
 /* --------------------------------------------
    PACKAGES ENDPOINTS
 --------------------------------------------- */
+// Add this endpoint to your server.js file
 
+// Endpoint to check for duplicate username or email
+app.get('/check-duplicate', async (req, res) => {
+  try {
+    const { field, value } = req.query;
+    
+    // Validate inputs
+    if (!field || !value || !['username', 'email'].includes(field)) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "Invalid request parameters" 
+      });
+    }
+    
+    // Sanitize the field name to prevent SQL injection
+    const sanitizedField = field === 'username' ? 'username' : 'email';
+    
+    // Query the database to check if the value exists
+    const query = `SELECT COUNT(*) as count FROM accounts WHERE ${sanitizedField} = $1`;
+    const result = await pool.query(query, [value]);
+    
+    // Check if any records were found
+    const exists = parseInt(result.rows[0].count) > 0;
+    
+    res.json({
+      success: true,
+      exists
+    });
+  } catch (error) {
+    console.error(`Error checking for duplicate ${req.query.field}:`, error);
+    res.status(500).json({ 
+      success: false, 
+      message: "Server error while checking for duplicates"
+    });
+  }
+});
 // Create a new package
 app.post('/api/packages', async (req, res) => {
   try {
