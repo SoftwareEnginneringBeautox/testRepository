@@ -264,7 +264,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
       if (isNaN(ageNum) || ageNum < 18) {
         errors.age = "Patients must be at least 18 years old";
       } else if (ageNum > 120) {
-        errors.age = "Age must be less than 120";
+        errors.age = "Age must be 120 or less";
       }
     }
 
@@ -502,6 +502,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
                   data-cy="age-input"
                   type="number"
                   min="18"
+                  max="120" // Add maximum age
                   placeholder="Age"
                   value={age}
                   onChange={(e) => setAge(e.target.value)}
@@ -717,8 +718,9 @@ function CreatePatientEntry({ isOpen, onClose }) {
                   placeholder="0%"
                   decimalsLimit={2}
                   allowNegativeValue={false}
+                  max={100} // Maximum 100% discount
                   value={packageDiscount}
-                  onValueChange={(value) => setPackageDiscount(value || "")}
+                  onValueChange={(value) => setPackageDiscount(value || "0")}
                 />
               </InputTextField>
             </InputContainer>

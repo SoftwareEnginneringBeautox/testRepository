@@ -102,7 +102,7 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
   // Add validation handlers for each field
   const validateAge = (value) => {
     const ageValue = parseInt(value, 10);
-    if (value && (isNaN(ageValue) || ageValue < 18)) {
+    if (value && (isNaN(ageValue) || ageValue < 18 || ageValue > 120)) {
       setAgeError(true);
       return false;
     } else {
@@ -331,6 +331,8 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
                 className="text-xs h-8"
                 data-cy="schedule-age-input"
                 type="number"
+                min="18"
+                max="120" // Add maximum age
                 placeholder="Age"
                 value={age}
                 onChange={(e) => {
@@ -343,7 +345,7 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
             </InputTextField>
             {ageError && (
               <p className="text-red-500 text-[10px] mt-0.5">
-                You must be at least 18 years old
+                You must be at least 18 years old and not older than 120 years old
               </p>
             )}
           </InputContainer>

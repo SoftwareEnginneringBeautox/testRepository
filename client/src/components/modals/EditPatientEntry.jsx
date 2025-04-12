@@ -269,6 +269,7 @@ function EditPatientContactInfo({ isOpen, onClose, entryData, onSubmit }) {
                   data-cy="age-input"
                   type="number"
                   min="18"
+                  max="120"
                   placeholder="Age"
                   value={formData.age ?? ""}
                   onChange={(e) =>

@@ -369,6 +369,16 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
         "Please enter a valid amount paid (greater than 0 and not exceeding the total)";
     }
 
+    // In CreatePatientEntry.jsx and UpdatePatientEntry.jsx - update the validation logic
+    if (formData.age) {
+      const ageNum = parseInt(formData.age);
+      if (isNaN(ageNum) || ageNum < 18) {
+        errors.age = "Patients must be at least 18 years old";
+      } else if (ageNum > 120) {
+        errors.age = "Age must be 120 or less";
+      }
+    }
+
     return errors;
   };
 
@@ -839,10 +849,9 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
                           placeholder="0%"
                           decimalsLimit={2}
                           allowNegativeValue={false}
+                          max={100} // Maximum 100% discount
                           value={packageDiscount}
-                          onValueChange={(value) =>
-                            setPackageDiscount(value || "0")
-                          }
+                          onValueChange={(value) => setPackageDiscount(value || "0")}
                         />
                       </InputTextField>
                     </InputContainer>
