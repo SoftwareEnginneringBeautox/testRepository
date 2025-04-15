@@ -350,25 +350,45 @@ function PatientRecordsDatabase() {
     }
   };
 
+  // for limiting the amount of months to print
+  const isWithinMonthRange = (date, monthLimit) => {
+    const limitDate = new Date();
+    limitDate.setMonth(limitDate.getMonth() - monthLimit);
+    return new Date(date) >= limitDate;
+  };
+
   // Generate PDF report function
-  const generatePRDReport = (patientRecords) => {
+  const generatePRDReport = (patientRecords, monthLimit = 6) => {
     if (!patientRecords || patientRecords.length === 0) {
       console.error("No records available to generate PDF.");
       return;
     }
 
-    // Implementation for PDF generation (unchanged)
-    const tempDoc = new jsPDF({
+    // Filter records within month limit
+    const filteredRecords = patientRecords.filter((record) => {
+      const recordDate = new Date(
+        record.dateTransacted || record.date_of_session
+      );
+      return isWithinMonthRange(recordDate, monthLimit);
+    });
+
+    if (filteredRecords.length === 0) {
+      console.error(
+        `No records available within the last ${monthLimit} months.`
+      );
+      return;
+    }
+
+    const doc = new jsPDF({
       orientation: "landscape",
       unit: "pt",
       format: "a4"
     });
 
-    const pageWidth = tempDoc.internal.pageSize.width;
-    const pageHeight = tempDoc.internal.pageSize.height;
+    const pageWidth = doc.internal.pageSize.width;
+    const pageHeight = doc.internal.pageSize.height;
     const margin = 40;
     const availableWidth = pageWidth - margin * 2;
-    const availableHeight = pageHeight - margin * 2;
 
     // Define base column configuration
     const baseColumns = [
@@ -390,10 +410,8 @@ function PatientRecordsDatabase() {
       { header: "REF#", width: 70 }
     ];
 
-    // Calculate total natural width
+    // Calculate scaling factor
     const naturalWidth = baseColumns.reduce((sum, col) => sum + col.width, 0);
-
-    // Calculate scaling factor to fit available width
     const scaleFactor = availableWidth / naturalWidth;
 
     // Scale column widths
@@ -412,18 +430,10 @@ function PatientRecordsDatabase() {
       return format(dateObj, "hh:mm a").toUpperCase();
     };
 
-    // Manual currency formatting function
     const formatCurrency = (amount) => {
-      // Handle zero, null, undefined, or NaN explicitly
       if (!amount || isNaN(amount) || parseFloat(amount) === 0) return "P0";
-
-      // Convert to absolute number and round to remove decimals
       const num = Math.abs(Math.round(parseFloat(amount)));
-
-      // Convert to string and add thousand separators
-      const formatted = num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-
-      return `P${formatted}`;
+      return `P${num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`;
     };
 
     const formatPaymentMethod = (method) => {
@@ -431,33 +441,46 @@ function PatientRecordsDatabase() {
       return method.toLowerCase().includes("full") ? "FULL" : "INSTALL";
     };
 
-    // Create the actual document
-    const doc = new jsPDF({
-      orientation: "landscape",
-      unit: "pt",
-      format: "a4"
-    });
-
-    // Format current date
+    // Add title and date range
     const currentDate = new Date();
+    const limitDate = new Date();
+    limitDate.setMonth(currentDate.getMonth() - monthLimit);
+
     const formattedCurrentDate = format(
       currentDate,
       "MMMM dd, yyyy"
     ).toUpperCase();
+    const formattedLimitDate = format(limitDate, "MMMM dd, yyyy").toUpperCase();
     const formattedDateForFilename = format(currentDate, "MMMM_dd_yyyy");
 
-    // Add title
+    // Set up document title
     doc.setFont("helvetica", "bold");
     doc.setFontSize(16);
+    doc.text("BEAUTOX PATIENT RECORDS REPORT", pageWidth / 2, margin + 10, {
+      align: "center"
+    });
+
+    // Add date range
+    doc.setFontSize(12);
     doc.text(
-      `BEAUTOX PATIENT RECORDS REPORT AS OF ${formattedCurrentDate}`,
+      `${formattedLimitDate} - ${formattedCurrentDate}`,
       pageWidth / 2,
-      margin + 10,
+      margin + 30,
       { align: "center" }
     );
 
+    // Add timestamp
+    const currentTimestamp = format(
+      new Date(),
+      "MMMM dd, yyyy 'at' hh:mm a"
+    ).toUpperCase();
+    doc.setFontSize(10);
+    doc.text(`AS OF ${currentTimestamp}`, pageWidth / 2, margin + 50, {
+      align: "center"
+    });
+
     // Prepare table data
-    const tableData = patientRecords.map((record) => {
+    const tableData = filteredRecords.map((record) => {
       const total = parseFloat(record.total_amount ?? "0");
       const paid = parseFloat(record.amount_paid || "0");
       const remaining = total - paid;
@@ -475,7 +498,7 @@ function PatientRecordsDatabase() {
         Array.isArray(record.treatment_ids)
           ? getTreatmentNames(record.treatment_ids).join(", ").toUpperCase()
           : record.treatment?.toUpperCase() || "N/A",
-        record.sessions_left || "N/A", // Display sessions left
+        record.sessions_left || "N/A",
         record.consent_form_signed ? "Y" : "N",
         formatPaymentMethod(record.paymentMethod || record.payment_method),
         formatCurrency(total),
@@ -485,11 +508,11 @@ function PatientRecordsDatabase() {
       ];
     });
 
-    // Configure and draw the table
+    // Generate table
     autoTable(doc, {
       head: [headers.map((h) => h.header)],
       body: tableData,
-      startY: margin + 30,
+      startY: margin + 70,
       margin: { top: margin, right: margin, bottom: margin, left: margin },
       columnStyles: {
         ...headers.reduce((acc, col, index) => {
@@ -501,13 +524,12 @@ function PatientRecordsDatabase() {
           };
           return acc;
         }, {}),
-        // Special handling for specific columns
-        4: { halign: "center" }, // Age column centered
-        9: { halign: "center" }, // Sessions left centered
-        10: { halign: "center" }, // CS (Consent) column centered
-        12: { halign: "right", cellPadding: { right: 5 } }, // Total
-        13: { halign: "right", cellPadding: { right: 5 } }, // Paid
-        14: { halign: "right", cellPadding: { right: 5 } } // Balance
+        4: { halign: "center" },
+        9: { halign: "center" },
+        10: { halign: "center" },
+        12: { halign: "right", cellPadding: { right: 5 } },
+        13: { halign: "right", cellPadding: { right: 5 } },
+        14: { halign: "right", cellPadding: { right: 5 } }
       },
       styles: {
         font: "helvetica",
@@ -539,7 +561,6 @@ function PatientRecordsDatabase() {
         );
       },
       willDrawCell: function (data) {
-        // Handle text overflow except for age and currency columns
         if (
           data.cell.text &&
           typeof data.cell.text === "string" &&
@@ -615,10 +636,10 @@ function PatientRecordsDatabase() {
           <div className="flex flex-col gap-1">
             {record.treatment_ids.map((id) => {
               // Add safety check to ensure treatmentsList is an array
-              const treatment = Array.isArray(treatmentsList) 
+              const treatment = Array.isArray(treatmentsList)
                 ? treatmentsList.find((t) => t.id === id)
                 : null;
-              
+
               return treatment ? (
                 <Badge
                   key={treatment.id}
@@ -628,7 +649,9 @@ function PatientRecordsDatabase() {
                   + {treatment.treatment_name.toUpperCase()}
                 </Badge>
               ) : (
-                <Badge key={id} variant="outline">+ Unknown Treatment ({id})</Badge>
+                <Badge key={id} variant="outline">
+                  + Unknown Treatment ({id})
+                </Badge>
               );
             })}
           </div>
@@ -867,7 +890,7 @@ function PatientRecordsDatabase() {
         </Button>
         <Button
           variant="callToAction"
-          onClick={() => generatePRDReport(records)}
+          onClick={() => generatePRDReport(records, 6)}
           className="w-full md:w-auto"
           data-cy="download-records-button"
         >

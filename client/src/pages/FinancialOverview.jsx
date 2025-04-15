@@ -345,6 +345,18 @@ function FinancialOverview() {
       { align: "center" }
     );
 
+    // Add timestamp line
+    const currentTimestamp = format(new Date(), "hh:mm a").toUpperCase();
+    doc.text(
+      `AS OF ${currentTimestamp}`,
+      pageWidth / 2,
+      margin + 50, // Position it 20 points below the title
+      { align: "center" }
+    );
+
+    // Reset font size for rest of document
+    doc.setFontSize(16);
+
     // Define base column configuration (adjusted for portrait layout)
     const baseColumns = [
       { header: "CLIENT", width: 80 },
@@ -505,16 +517,19 @@ function FinancialOverview() {
       );
       return;
     }
-    
+
     // Get current month and year
     const currentDate = new Date();
     const currentMonth = currentDate.getMonth();
     const currentYear = currentDate.getFullYear();
-    
+
     // Filter sales data to only show current month
-    const currentMonthSales = salesData.filter(sale => {
+    const currentMonthSales = salesData.filter((sale) => {
       const saleDate = new Date(sale.date_transacted);
-      return saleDate.getMonth() === currentMonth && saleDate.getFullYear() === currentYear;
+      return (
+        saleDate.getMonth() === currentMonth &&
+        saleDate.getFullYear() === currentYear
+      );
     });
 
     const doc = new jsPDF({
@@ -534,7 +549,10 @@ function FinancialOverview() {
     const availableWidth = pageWidth - margin * 2;
 
     // Format current date
-    const formattedCurrentDate = format(currentDate, "MMMM dd, yyyy").toUpperCase();
+    const formattedCurrentDate = format(
+      currentDate,
+      "MMMM dd, yyyy"
+    ).toUpperCase();
     const formattedDateForFilename = format(currentDate, "MMMM_dd_yyyy");
 
     // Add title
@@ -546,6 +564,18 @@ function FinancialOverview() {
       { align: "center" }
     );
 
+    // Add timestamp line
+    const currentTimestamp = format(new Date(), "hh:mm a").toUpperCase();
+    doc.text(
+      `AS OF ${currentTimestamp}`,
+      pageWidth / 2,
+      margin + 50, // Position it 20 points below the title
+      { align: "center" }
+    );
+
+    // Reset font size for rest of document
+    doc.setFontSize(16);
+
     // Manual currency formatting function
     const formatCurrency = (amount) => {
       if (!amount || isNaN(amount) || parseFloat(amount) === 0) return "P0";
@@ -553,7 +583,7 @@ function FinancialOverview() {
       const formatted = num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
       return `P${formatted}`;
     };
-    
+
     // Format payment method - match weekly report format
     const formatPaymentMethod = (method) => {
       if (!method) return "N/A";
@@ -563,7 +593,7 @@ function FinancialOverview() {
     // 1. FIRST ADD SALES TABLE - List all sales for the current month
     doc.setFontSize(14);
     doc.text("MONTHLY SALES", pageWidth / 2, margin + 70, { align: "center" });
-    
+
     // Define base column configuration (matching weekly report)
     const baseColumns = [
       { header: "CLIENT", width: 80 },
@@ -578,10 +608,10 @@ function FinancialOverview() {
 
     // Calculate total natural width
     const naturalWidth = baseColumns.reduce((sum, col) => sum + col.width, 0);
-    
+
     // Calculate scaling factor to fit available width
     const scaleFactor = availableWidth / naturalWidth;
-    
+
     // Scale column widths
     const headers = baseColumns.map((col) => ({
       header: col.header,
@@ -589,7 +619,7 @@ function FinancialOverview() {
     }));
 
     // Sales table data - formatted like weekly report
-    const salesTableData = currentMonthSales.map(sale => [
+    const salesTableData = currentMonthSales.map((sale) => [
       (sale.client || "N/A").toUpperCase(),
       (sale.person_in_charge || "N/A").toUpperCase(),
       sale.date_transacted
@@ -685,10 +715,12 @@ function FinancialOverview() {
 
     // Get the Y position after the sales table
     const salesTableEndY = doc.lastAutoTable.finalY + 20;
-    
+
     // Add expenses title
     doc.setFontSize(14);
-    doc.text("MONTHLY EXPENSES", pageWidth / 2, salesTableEndY, { align: "center" });
+    doc.text("MONTHLY EXPENSES", pageWidth / 2, salesTableEndY, {
+      align: "center"
+    });
 
     // Prepare expenses data
     const expenseCategoryTotals = computeExpenseCategoryTotals();
@@ -706,16 +738,16 @@ function FinancialOverview() {
       startY: salesTableEndY + 20,
       margin: { top: margin, right: margin, bottom: margin, left: margin },
       columnStyles: {
-        0: { 
+        0: {
           cellWidth: availableWidth * 0.7,
           halign: "left",
           fontSize: 8,
           fontStyle: "normal"
         },
-        1: { 
+        1: {
           cellWidth: availableWidth * 0.3,
           halign: "right",
-          fontSize: 8, 
+          fontSize: 8,
           fontStyle: "normal"
         }
       },
@@ -744,7 +776,8 @@ function FinancialOverview() {
     // Compute total sales and expenses
     const computeTotalSales = () => {
       return salesData.reduce((sum, sale) => {
-        const rawPayment = sale.payment || sale.totalAmount || sale.total_amount;
+        const rawPayment =
+          sale.payment || sale.totalAmount || sale.total_amount;
         const numericPayment = parseFloat(rawPayment);
         return sum + (isNaN(numericPayment) ? 0 : numericPayment);
       }, 0);
@@ -752,7 +785,8 @@ function FinancialOverview() {
 
     const totalSales = computeTotalSales();
     const monthlyExpenses = Object.values(expenseCategoryTotals).reduce(
-      (total, val) => total + val, 0
+      (total, val) => total + val,
+      0
     );
     const totalProfit = totalSales - monthlyExpenses;
 
@@ -1045,17 +1079,14 @@ function FinancialOverview() {
   // 2. Add a function to refresh the BeautoxPieChart
   const refreshPieChart = () => {
     // Create and dispatch a custom event that BeautoxPieChart will listen for
-    const refreshEvent = new CustomEvent('refresh-pie-chart');
+    const refreshEvent = new CustomEvent("refresh-pie-chart");
     window.dispatchEvent(refreshEvent);
   };
 
   // 3. Create a comprehensive refresh function that updates all necessary data
   const refreshAllFinancialData = async () => {
     try {
-      await Promise.all([
-        refreshExpensesData(),
-        refreshFinancialData()
-      ]);
+      await Promise.all([refreshExpensesData(), refreshFinancialData()]);
       refreshPieChart();
     } catch (error) {
       console.error("Error refreshing data:", error);

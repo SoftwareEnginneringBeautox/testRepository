@@ -81,7 +81,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
   const [treatmentsList, setTreatmentsList] = useState([]);
 
   const [contactNumber, setContactNumber] = useState("");
-  const [age, setAge] = useState("");
+  const [birthDate, setBirthDate] = useState("");
   const [email, setEmail] = useState("");
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -162,7 +162,9 @@ function CreatePatientEntry({ isOpen, onClose }) {
           }
         );
         // Additional frontend filter to ensure no archived packages are shown
-        const activePackages = response.data.filter(pkg => pkg.archived === false);
+        const activePackages = response.data.filter(
+          (pkg) => pkg.archived === false
+        );
         setPackagesList(activePackages);
       } catch (error) {
         console.error("Error fetching packages:", error);
@@ -182,7 +184,9 @@ function CreatePatientEntry({ isOpen, onClose }) {
         );
         const data = await res.json();
         // Additional frontend filter to ensure no archived treatments are shown
-        const activeTreatments = data.filter(treatment => treatment.archived === false);
+        const activeTreatments = data.filter(
+          (treatment) => treatment.archived === false
+        );
         setTreatmentsList(activeTreatments);
       } catch (err) {
         console.error("Error fetching treatments:", err);
@@ -211,68 +215,75 @@ function CreatePatientEntry({ isOpen, onClose }) {
     treatment
   });
 
+  const calculateAge = (birthDate) => {
+    if (!birthDate) return null;
+
+    const today = new Date();
+    const birth = new Date(birthDate);
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birth.getDate())
+    ) {
+      age--;
+    }
+
+    return age;
+  };
+
+  // Update birthdate validation
+  const validateBirthDate = (value) => {
+    if (!value) {
+      return "Birth date is required";
+    }
+
+    const age = calculateAge(value);
+    if (age < 18) {
+      return "Patient must be at least 18 years old";
+    }
+    if (age > 120) {
+      return "Invalid birth date";
+    }
+
+    return "";
+  };
+
   // Handle form submission, sending new patient record to the server
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (isSubmitting) return; // Prevent double submission
+    if (isSubmitting) return;
     setIsSubmitting(true);
     setFormSubmitAttempted(true);
 
     const errors = {};
-    if (!personInCharge) {
-      errors.personInCharge = "Person in charge is required";
-    }
 
-    // Validate date - ensure it's not in the past
-    if (dateOfSession) {
-      const selectedDate = new Date(dateOfSession);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0); // Reset time part for comparison
-      
-      if (selectedDate < today) {
-        errors.dateOfSession = "Session date cannot be in the past";
-      }
-    }
+    // Basic field validations
+    if (!patientName) errors.patientName = "Patient name is required";
+    if (!personInCharge) errors.personInCharge = "Person in charge is required";
 
-    // Validate time - ensure it's within business hours (9am-6pm)
-    if (timeOfSession) {
-      const [hours, minutes] = timeOfSession.split(':').map(Number);
-      const startHour = 12; // 12pm
-      const endHour = 21; // 9pm
-      
-      if (hours < startHour || hours > endHour || (hours === endHour && minutes > 0)) {
-        errors.timeOfSession = "Session time must be between 12:00 PM and 9:00 PM";
-      }
-    }
-
-    if (!packageName && (!treatment || treatment.length === 0)) {
-      errors.packageOrTreatment =
-        "Select either a package or at least one treatment";
-    }
-
-    // Contact number validation - make required
+    // Contact number validation
     if (!contactNumber) {
       errors.contactNumber = "Contact number is required";
     } else {
-      const phoneRegex = /^09\d{9}$/; // Philippine format: 09XXXXXXXXX
+      const phoneRegex = /^09\d{9}$/;
       if (!phoneRegex.test(contactNumber)) {
         errors.contactNumber = "Contact number should be in 09XXXXXXXXX format";
       }
     }
 
-    // Age validation - make required
-    if (!age) {
-      errors.age = "Age is required";
+    // Birth date validation
+    if (!birthDate) {
+      errors.birthDate = "Birth date is required";
     } else {
-      const ageNum = parseInt(age);
-      if (isNaN(ageNum) || ageNum < 18) {
-        errors.age = "Patients must be at least 18 years old";
-      } else if (ageNum > 120) {
-        errors.age = "Age must be 120 or less";
+      const birthDateError = validateBirthDate(birthDate);
+      if (birthDateError) {
+        errors.birthDate = birthDateError;
       }
     }
 
-    // Email validation - make required
+    // Email validation
     if (!email) {
       errors.email = "Email is required";
     } else {
@@ -282,23 +293,54 @@ function CreatePatientEntry({ isOpen, onClose }) {
       }
     }
 
-    if (packageName && dateOfSession) {
-      const selectedPackage = packagesList.find(
-        (p) => p.package_name === packageName
-      );
-      const weeks = selectedPackage?.expiration;
+    // Package/Treatment validation
+    if (!packageName && (!treatment || treatment.length === 0)) {
+      errors.packageOrTreatment =
+        "Select either a package or at least one treatment";
+    }
 
-      if (weeks && !isNaN(weeks)) {
-        const createdAt = new Date(); // form creation time
-        const sessionDate = new Date(dateOfSession);
-        const expirationLimit = new Date(createdAt);
-        expirationLimit.setDate(expirationLimit.getDate() + weeks * 7); // add weeks
+    // Session date validation
+    if (dateOfSession) {
+      const selectedDate = new Date(dateOfSession);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
 
-        if (sessionDate > expirationLimit) {
-          errors.dateOfSession = `Session date exceeds package expiration limit of ${weeks} week(s) from today (${expirationLimit
-            .toISOString()
-            .slice(0, 10)})`;
+      if (selectedDate < today) {
+        errors.dateOfSession = "Session date cannot be in the past";
+      }
+
+      // Package expiration validation
+      if (packageName) {
+        const selectedPackage = packagesList.find(
+          (p) => p.package_name === packageName
+        );
+        const weeks = selectedPackage?.expiration;
+
+        if (weeks && !isNaN(weeks)) {
+          const createdAt = new Date();
+          const expirationLimit = new Date(createdAt);
+          expirationLimit.setDate(expirationLimit.getDate() + weeks * 7);
+
+          if (selectedDate > expirationLimit) {
+            errors.dateOfSession = `Session date exceeds package expiration limit of ${weeks} week(s) from today`;
+          }
         }
+      }
+    }
+
+    // Session time validation
+    if (timeOfSession) {
+      const [hours, minutes] = timeOfSession.split(":").map(Number);
+      const startHour = 12; // 12pm
+      const endHour = 21; // 9pm
+
+      if (
+        hours < startHour ||
+        hours > endHour ||
+        (hours === endHour && minutes > 0)
+      ) {
+        errors.timeOfSession =
+          "Session time must be between 12:00 PM and 9:00 PM";
       }
     }
 
@@ -308,26 +350,28 @@ function CreatePatientEntry({ isOpen, onClose }) {
       return;
     }
 
+    // Calculate financial values
     const numericTotal = parseFloat(totalAmount) || 0;
     const numericDiscount = parseFloat(packageDiscount) || 0;
     const numericAmount = parseFloat(amount) || 0;
     const numericAmountPaid = parseFloat(amountPaid) || 0;
     const remainingBalance = numericTotal - numericAmountPaid;
+    const calculatedAge = calculateAge(birthDate);
 
+    // Prepare treatment data
     const selectedTreatmentIds = Array.isArray(treatment)
       ? treatment.map(Number)
       : [];
-
     const selectedTreatmentNames = treatmentsList
       .filter((t) => selectedTreatmentIds.includes(t.id))
       .map((t) => t.treatment_name);
-
 
     // Patient Records Payload
     const patientPayload = {
       patient_name: patientName,
       contact_number: contactNumber,
-      age: age ? parseInt(age) : null,
+      birth_date: birthDate,
+      age: calculatedAge,
       email,
       person_in_charge: personInCharge,
       package_name: packageName,
@@ -343,8 +387,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
       consent_form_signed: consentFormSigned,
       reference_number: referenceNumber,
       remaining_balance: remainingBalance,
-      sessions_left: sessionsLeft,
-
+      sessions_left: sessionsLeft
     };
 
     try {
@@ -366,7 +409,8 @@ function CreatePatientEntry({ isOpen, onClose }) {
             patient_record_id: patientId,
             full_name: patientName,
             contact_number: contactNumber,
-            age: age ? parseInt(age) : null,
+            birth_date: birthDate,
+            age: calculatedAge,
             email,
             date_of_session: dateOfSession,
             time_of_session: timeOfSession,
@@ -384,10 +428,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
           );
 
           if (!appointmentRes.ok) {
-            const errText = await appointmentRes.text();
-            console.error("❌ Failed to insert appointment:", errText);
-          } else {
-            console.log("✅ Appointment successfully inserted");
+            throw new Error(await appointmentRes.text());
           }
         } catch (err) {
           console.error("❌ Error inserting into appointments:", err);
@@ -399,13 +440,16 @@ function CreatePatientEntry({ isOpen, onClose }) {
             const salesPayload = {
               client: patientName,
               person_in_charge: personInCharge,
-              date_transacted: new Date().toISOString().split('T')[0],
-              payment_method: paymentMethod === "full-payment" ? "Full Payment" : "Installment",
+              date_transacted: new Date().toISOString().split("T")[0],
+              payment_method:
+                paymentMethod === "full-payment"
+                  ? "Full Payment"
+                  : "Installment",
               packages: packageName,
               treatment: selectedTreatmentNames.join(", "),
               payment: numericAmountPaid,
               reference_no: referenceNumber,
-              patient_record_id: patientId // Add this line to link to patient record
+              patient_record_id: patientId
             };
 
             const salesRes = await fetch(`${API_BASE_URL}/sales`, {
@@ -416,10 +460,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
             });
 
             if (!salesRes.ok) {
-              const errText = await salesRes.text();
-              console.error("❌ Failed to insert sales record:", errText);
-            } else {
-              console.log("✅ Sales record successfully inserted");
+              throw new Error(await salesRes.text());
             }
           } catch (err) {
             console.error("❌ Error inserting into sales:", err);
@@ -428,12 +469,12 @@ function CreatePatientEntry({ isOpen, onClose }) {
 
         onClose();
       } else {
-        const errorText = await response.text();
-        console.error("Submission failed:", errorText);
+        throw new Error(await response.text());
       }
     } catch (error) {
       console.error("Error submitting form:", error);
-      setIsSubmitting(false); // Re-enable the button on error
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -497,30 +538,37 @@ function CreatePatientEntry({ isOpen, onClose }) {
               )}
             </InputContainer>
 
-            {/* AGE */}
+            {/* BIRTH DATE */}
             <InputContainer>
-              <InputLabel>AGE</InputLabel>
+              <InputLabel>BIRTH DATE</InputLabel>
               <InputTextField>
                 <InputIcon>
-                  <AgeIcon />
+                  <CalendarIcon />
                 </InputIcon>
                 <Input
-                  data-cy="age-input"
-                  type="number"
-                  min="18"
-                  max="120" // Add maximum age
-                  placeholder="Age"
-                  value={age}
-                  onChange={(e) => setAge(e.target.value)}
-                  className={` ${
-                    formSubmitAttempted && formErrors.age
+                  data-cy="birth-date-input"
+                  type="date"
+                  placeholder="Birth Date"
+                  value={birthDate}
+                  onChange={(e) => setBirthDate(e.target.value)}
+                  max={new Date().toISOString().split("T")[0]} // Prevents future dates
+                  className={`${
+                    formSubmitAttempted && formErrors.birthDate
                       ? "border-red-500"
                       : ""
                   }`}
+                  required
                 />
               </InputTextField>
-              {formSubmitAttempted && formErrors.age && (
-                <p className="text-red-500 text-sm mt-1">{formErrors.age}</p>
+              {formSubmitAttempted && formErrors.birthDate && (
+                <p className="text-red-500 text-sm mt-1">
+                  {formErrors.birthDate}
+                </p>
+              )}
+              {birthDate && !formErrors.birthDate && (
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                  Age: {calculateAge(birthDate)} years old
+                </p>
               )}
             </InputContainer>
 
@@ -625,7 +673,8 @@ function CreatePatientEntry({ isOpen, onClose }) {
                       key={pkg.id}
                       value={pkg.package_name}
                     >
-                      {pkg.package_name} - ₱{pkg.price} - {pkg.sessions} sessions
+                      {pkg.package_name} - ₱{pkg.price} - {pkg.sessions}{" "}
+                      sessions
                     </SelectItem>
                   ))}
                 </ModalSelectContent>
@@ -685,7 +734,9 @@ function CreatePatientEntry({ isOpen, onClose }) {
                   type="number"
                   min="0"
                   value={sessionsLeft}
-                  onChange={(e) => setSessionsLeft(parseInt(e.target.value) || 0)}
+                  onChange={(e) =>
+                    setSessionsLeft(parseInt(e.target.value) || 0)
+                  }
                   readOnly
                 />
               </InputTextField>
@@ -751,7 +802,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
                 />
               </InputTextField>
             </InputContainer>
-            
+
             {/* PAYMENT METHOD RADIO */}
             <div className="flex flex-col gap-2 mt-4">
               <InputContainer>
@@ -833,7 +884,6 @@ function CreatePatientEntry({ isOpen, onClose }) {
               </InputTextField>
             </InputContainer>
           </div>
-
 
           {/* DATE AND TIME OF SESSION */}
           <div className="flex flex-row w-full gap-4 mt-4">
@@ -924,11 +974,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
               <ChevronLeftIcon />
               CANCEL AND RETURN
             </Button>
-            <Button 
-              type="submit" 
-              className="md:w-1/2"
-              disabled={isSubmitting}
-            >
+            <Button type="submit" className="md:w-1/2" disabled={isSubmitting}>
               <PlusIcon />
               {isSubmitting ? "ADDING..." : "ADD ENTRY"}
             </Button>

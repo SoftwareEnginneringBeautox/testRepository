@@ -26,7 +26,7 @@ import CircleUserIcon from "@/assets/icons/CircleUserIcon";
 import UserIcon from "@/assets/icons/UserIcon";
 import EmailIcon from "@/assets/icons/EmailIcon";
 import EditIcon from "@/assets/icons/EditIcon";
-import AgeIcon from "@/assets/icons/AgeIcon";
+import CalendarIcon from "@/assets/icons/CalendarIcon";
 import PhoneIcon from "@/assets/icons/PhoneIcon";
 
 function EditPatientContactInfo({ isOpen, onClose, entryData, onSubmit }) {
@@ -42,7 +42,7 @@ function EditPatientContactInfo({ isOpen, onClose, entryData, onSubmit }) {
       const initial = {
         ...entryData,
         contact_number: entryData.contact_number || "",
-        age: entryData.age || "",
+        birth_date: entryData?.birth_date || "",
         email: entryData.email || ""
       };
 
@@ -69,135 +69,150 @@ function EditPatientContactInfo({ isOpen, onClose, entryData, onSubmit }) {
 
     // Phone number validation
     if (formData.contact_number && !/^09\d{9}$/.test(formData.contact_number)) {
-      errors.contact_number = "Please enter a valid phone number (format: 09XXXXXXXXX)";
+      errors.contact_number =
+        "Please enter a valid phone number (format: 09XXXXXXXXX)";
     }
 
-    // Age validation
-    if (formData.age) {
-      const ageNum = parseInt(formData.age);
-      if (isNaN(ageNum) || ageNum < 18) {
-        errors.age = "Patients must be at least 18 years old";
-      } else if (ageNum > 120) {
-        errors.age = "Age must be less than 120";
+    // Birth date validation
+    if (formData.birth_date) {
+      const age = calculateAge(formData.birth_date);
+      if (age < 18) {
+        errors.birth_date = "Patient must be at least 18 years old";
+      } else if (age > 120) {
+        errors.birth_date = "Invalid birth date";
       }
     }
 
     return errors;
   };
 
+  // Add calculateAge helper function
+  const calculateAge = (birthDate) => {
+    if (!birthDate) return null;
+
+    const today = new Date();
+    const birth = new Date(birthDate);
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birth.getDate())
+    ) {
+      age--;
+    }
+
+    return age;
+  };
+
   // New function to update appointment records with new contact information
   const updateAppointmentRecords = async (patientData) => {
     try {
-      // Fetch appointments with this patient_record_id
       const response = await axios.get(`${API_BASE_URL}/api/appointments`, {
         withCredentials: true
       });
-      
+
       const patientAppointments = response.data.filter(
-        appointment => appointment.patient_record_id === patientData.id
+        (appointment) => appointment.patient_record_id === patientData.id
       );
-      
-      // If no appointments exist, we're done
+
       if (patientAppointments.length === 0) {
         console.log("No appointments found for this patient record");
         return;
       }
-      
-      // For each appointment, update the contact information while preserving scheduling data
+
       for (const appointment of patientAppointments) {
-        // Prepare appointment update payload
         const appointmentPayload = {
-          table: 'appointments',
+          table: "appointments",
           id: appointment.id,
-          action: 'edit',
+          action: "edit",
           data: {
-            full_name: entryData.patient_name, // Keep original patient name
+            full_name: entryData.patient_name,
             contact_number: patientData.contact_number,
+            birth_date: patientData.birth_date,
             age: patientData.age,
             email: patientData.email,
             patient_record_id: patientData.id
-            // Intentionally not including date_of_session and time_of_session to preserve them
           }
         };
-        
-        // Update the appointment record
+
         await axios.post(
-          `${API_BASE_URL}/api/manage-record`, 
+          `${API_BASE_URL}/api/manage-record`,
           appointmentPayload,
           { withCredentials: true }
         );
-        
-        console.log(`✅ Updated appointment ID ${appointment.id} with new contact info`);
+
+        console.log(
+          `✅ Updated appointment ID ${appointment.id} with new contact info`
+        );
       }
-      
+
       return patientAppointments.length;
     } catch (error) {
       console.error("Error updating appointment records:", error);
-      throw error; // Re-throw for handling in the main submission function
+      throw error;
     }
   };
 
   const handleSubmit = async () => {
-    // Check both state AND ref to prevent race conditions
     if (isSubmitting || submitInProgressRef.current) {
       console.log("Submission already in progress");
       return;
     }
-    
+
     submitInProgressRef.current = true;
     setFormSubmitAttempted(true);
     setIsSubmitting(true);
-    
+
     const errors = validateForm();
     setFormErrors(errors);
-    
+
     if (Object.keys(errors).length > 0) {
       setIsSubmitting(false);
       submitInProgressRef.current = false;
       return;
     }
-    
+
     // Check if any changes were made
     if (
       formData.contact_number === originalData.contact_number &&
-      formData.age === originalData.age &&
+      formData.birth_date === originalData.birth_date &&
       formData.email === originalData.email
     ) {
-      // No changes made, close modal
       setIsSubmitting(false);
       submitInProgressRef.current = false;
       onClose();
       return;
     }
 
-    // Only submit the contact information fields
+    // Prepare contact data with calculated age
     const contactData = {
       id: entryData.id,
       contact_number: formData.contact_number || null,
-      age: formData.age ? parseInt(formData.age) : null,
+      birth_date: formData.birth_date || null,
+      age: formData.birth_date ? calculateAge(formData.birth_date) : null,
       email: formData.email || null
     };
 
     try {
-      // First, update the patient record
+      // Update patient record
       await onSubmit(contactData);
-      
-      // Second, update any associated appointment records
+
+      // Update appointment records
       const updatedAppointments = await updateAppointmentRecords(contactData);
-      
-      // Log success if appointments were updated
+
       if (updatedAppointments) {
-        console.log(`Successfully updated ${updatedAppointments} appointment records`);
+        console.log(
+          `Successfully updated ${updatedAppointments} appointment records`
+        );
       }
-      
+
       setIsSubmitting(false);
       submitInProgressRef.current = false;
-      // Success - modal will be closed by parent component
     } catch (error) {
       console.error("Error updating contact info:", error);
       setIsSubmitting(false);
       submitInProgressRef.current = false;
-      // Could add error handling here
     }
   };
 
@@ -261,27 +276,31 @@ function EditPatientContactInfo({ isOpen, onClose, entryData, onSubmit }) {
 
             {/* AGE - Editable */}
             <InputContainer>
-              <InputLabel>AGE</InputLabel>
+              <InputLabel>BIRTH DATE</InputLabel>
               <InputTextField>
                 <InputIcon>
-                  <AgeIcon />
+                  <CalendarIcon />
                 </InputIcon>
                 <Input
-                  data-cy="age-input"
-                  type="number"
-                  min="18"
-                  max="120"
-                  placeholder="Age"
-                  value={formData.age ?? ""}
+                  data-cy="birth-date-input"
+                  type="date"
+                  placeholder="Birth Date"
+                  value={formData.birth_date ?? ""}
                   onChange={(e) =>
-                    setFormData({ ...formData, age: e.target.value })
+                    setFormData({ ...formData, birth_date: e.target.value })
                   }
-                  className={formErrors.age ? "border-red-500" : ""}
+                  max={new Date().toISOString().split("T")[0]}
+                  className={formErrors.birth_date ? "border-red-500" : ""}
                 />
               </InputTextField>
-              {formSubmitAttempted && formErrors.age && (
+              {formSubmitAttempted && formErrors.birth_date && (
                 <p className="text-red-500 text-sm mt-1">
-                  {formErrors.age}
+                  {formErrors.birth_date}
+                </p>
+              )}
+              {formData.birth_date && !formErrors.birth_date && (
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                  Age: {calculateAge(formData.birth_date)} years old
                 </p>
               )}
             </InputContainer>
@@ -306,9 +325,7 @@ function EditPatientContactInfo({ isOpen, onClose, entryData, onSubmit }) {
                 />
               </InputTextField>
               {formSubmitAttempted && formErrors.email && (
-                <p className="text-red-500 text-sm mt-1">
-                  {formErrors.email}
-                </p>
+                <p className="text-red-500 text-sm mt-1">{formErrors.email}</p>
               )}
             </InputContainer>
           </div>

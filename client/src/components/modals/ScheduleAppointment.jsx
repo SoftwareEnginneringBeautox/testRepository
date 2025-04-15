@@ -37,7 +37,7 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
   // Track input values
   const [fullName, setFullName] = useState("");
   const [contactNumber, setContactNumber] = useState("");
-  const [age, setAge] = useState("");
+  const [birthDate, setBirthDate] = useState("");
   const [email, setEmail] = useState("");
   const [dateOfSession, setDateOfSession] = useState("");
   const [timeOfSession, setTimeOfSession] = useState("");
@@ -54,7 +54,7 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
   // Add these state variables
   const [isSubmitting, setIsSubmitting] = useState(false);
   const submitInProgressRef = useRef(false);
-  
+
   // IMPORTANT: Move useEffect here, before any conditional returns
   useEffect(() => {
     return () => {
@@ -66,15 +66,14 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
   // Now it's safe to have an early return
   if (!isOpen) return null;
 
-  // Function to check if time is within business hours (12pm - 9pm)
+  // Function to check if time is within business hours (12pm - 8pm)
   const isWithinBusinessHours = (time) => {
     if (!time) return false;
 
     const [hours, minutes] = time.split(":").map(Number);
 
     // Convert to 24-hour format for comparison
-    // Business hours: 12:00 (12pm) to 21:00 (9pm)
-    return (hours >= 12 && hours < 21) || (hours === 21 && minutes === 0);
+    return (hours >= 12 && hours < 20) || (hours === 20 && minutes === 0);
   };
 
   // Function to validate phone number (Philippine format)
@@ -141,25 +140,58 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
     }
   };
 
+  const calculateAge = (birthDate) => {
+    const today = new Date();
+    const birth = new Date(birthDate);
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birth.getDate())
+    ) {
+      age--;
+    }
+
+    return age;
+  };
+
+  // Update the age validation function
+  const validateBirthDate = (value) => {
+    if (!value) {
+      setAgeError(true);
+      return false;
+    }
+
+    const age = calculateAge(value);
+    if (age < 18 || age > 120) {
+      setAgeError(true);
+      return false;
+    }
+
+    setAgeError(false);
+    return true;
+  };
+
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Prevent duplicate submissions
     if (isSubmitting || submitInProgressRef.current) {
       console.log("Submission already in progress");
       return;
     }
-    
+
     submitInProgressRef.current = true;
     setIsSubmitting(true);
-    
+
     // Reset alert
     setAlertTitle("");
     setAlertMessage("");
 
     // Run all validations
-    const isAgeValid = validateAge(age);
+    const isBirthDateValid = validateBirthDate(birthDate);
     const isPhoneValid = validatePhone(contactNumber);
     const isDateValid = validateDate(dateOfSession);
     const isTimeValid = isWithinBusinessHours(timeOfSession);
@@ -167,7 +199,7 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
 
     // If any validation fails, prevent form submission
     if (
-      !isAgeValid ||
+      !isBirthDateValid ||
       !isPhoneValid ||
       !isDateValid ||
       !isTimeValid ||
@@ -179,6 +211,9 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
     }
 
     try {
+      // Calculate age from birthdate
+      const calculatedAge = calculateAge(birthDate);
+
       const response = await fetch(`${API_BASE_URL}/api/staged-appointments`, {
         method: "POST",
         headers: {
@@ -187,7 +222,8 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
         body: JSON.stringify({
           full_name: fullName,
           contact_number: contactNumber,
-          age: parseInt(age, 10),
+          birth_date: birthDate,
+          age: calculatedAge, // Send calculated age as a number
           email: email,
           date_of_session: dateOfSession,
           time_of_session: timeOfSession
@@ -199,7 +235,7 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
         // Reset all form fields
         setFullName("");
         setContactNumber("");
-        setAge("");
+        setBirthDate("");
         setEmail("");
         setDateOfSession("");
         setTimeOfSession("");
@@ -216,7 +252,6 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
           "Appointment scheduled successfully! Kindly await for confirmation."
         );
         setShowAlert(true);
-        
       } else {
         // Handle a failed response
         setAlertTitle("Error");
@@ -247,7 +282,10 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
   };
 
   return (
-    <ModalContainer className="max-w-sm w-[80%] mx-auto" data-cy="schedule-appointment-modal">
+    <ModalContainer
+      className="max-w-sm w-[80%] mx-auto"
+      data-cy="schedule-appointment-modal"
+    >
       {showAlert && (
         <AlertContainer>
           <AlertText>
@@ -265,7 +303,6 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
           SCHEDULE APPOINTMENT
         </ModalTitle>
       </ModalHeader>
-
 
       <ModalBody className="py-2">
         <form
@@ -324,30 +361,29 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
 
           {/* AGE */}
           <InputContainer>
-            <InputLabel className="text-xs mb-0.5">AGE</InputLabel>
+            <InputLabel className="text-xs mb-0.5">BIRTH DATE</InputLabel>
             <InputTextField className="h-10">
               <InputIcon className="w-7">
-                <AgeIcon className="w-3.5 h-3.5" />
+                <CalendarIcon className="w-3.5 h-3.5" />
               </InputIcon>
               <Input
                 className="text-xs h-8"
-                data-cy="schedule-age-input"
-                type="number"
-                min="18"
-                max="120" // Add maximum age
-                placeholder="Age"
-                value={age}
+                data-cy="schedule-birthdate-input"
+                type="date"
+                value={birthDate}
                 onChange={(e) => {
-                  setAge(e.target.value);
-                  validateAge(e.target.value);
+                  setBirthDate(e.target.value);
+                  validateBirthDate(e.target.value);
                 }}
-                onBlur={(e) => validateAge(e.target.value)}
+                onBlur={(e) => validateBirthDate(e.target.value)}
+                max={new Date().toISOString().split("T")[0]} // Prevents future dates
                 required
               />
             </InputTextField>
             {ageError && (
               <p className="text-red-500 text-[10px] mt-0.5">
-                You must be at least 18 years old and not older than 120 years old
+                You must be at least 18 years old and not older than 120 years
+                old
               </p>
             )}
           </InputContainer>
@@ -384,7 +420,9 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
           {/* DATE & TIME OF SESSION */}
           <div className="flex flex-row w-full gap-2">
             <InputContainer className="flex-1">
-              <InputLabel className="text-xs mb-0.5">DATE OF SESSION</InputLabel>
+              <InputLabel className="text-xs mb-0.5">
+                DATE OF SESSION
+              </InputLabel>
               <InputTextField className="h-10">
                 <InputIcon className="w-7">
                   <CalendarIcon className="w-3.5 h-3.5" />
@@ -411,7 +449,9 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
             </InputContainer>
 
             <InputContainer className="flex-1">
-              <InputLabel className="text-xs mb-0.5">TIME OF SESSION</InputLabel>
+              <InputLabel className="text-xs mb-0.5">
+                TIME OF SESSION
+              </InputLabel>
               <InputTextField className="h-10">
                 <InputIcon className="w-7">
                   <ClockIcon className="w-3.5 h-3.5" />
@@ -431,7 +471,7 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
               </InputTextField>
               {!isWithinBusinessHours(timeOfSession) && timeOfSession && (
                 <p className="text-red-500 text-[10px] mt-0.5">
-                  Select time between 12:00 PM - 9:00 PM
+                  Select time between 12:00 PM - 8:00 PM
                 </p>
               )}
             </InputContainer>
