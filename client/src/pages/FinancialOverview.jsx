@@ -4,6 +4,8 @@ import "../App.css";
 import { useModal } from "@/hooks/useModal";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
+import * as XLSX from "xlsx";
+
 import TrendDownIcon from "@/assets/icons/TrendDownIcon";
 import TrendUpIcon from "@/assets/icons/TrendDownIcon";
 
@@ -286,7 +288,7 @@ function FinancialOverview() {
   );
 
   // REPORT GENERATING FUNCTIONS
-  const generateWeeklySalesReport = (salesData) => {
+  const generateWeeklyPDFReport = (salesData) => {
     if (!salesData || salesData.length === 0) {
       console.error("No sales data available to generate PDF.");
       showAlert("No sales data available to generate PDF.", "destructive");
@@ -508,7 +510,138 @@ function FinancialOverview() {
     );
   };
 
-  const generateMonthlySalesReport = (salesData, expensesData) => {
+  const generateWeeklyExcelReport = (salesData) => {
+    if (!salesData || salesData.length === 0) {
+      showAlert(
+        "No sales data available to generate Excel file.",
+        "destructive"
+      );
+      return;
+    }
+
+    // Filter data for the past week
+    const today = new Date();
+    const oneWeekAgo = new Date(today);
+    oneWeekAgo.setDate(today.getDate() - 7);
+
+    const weekSalesData = salesData.filter((sale) => {
+      const saleDate = new Date(sale.date_transacted);
+      return saleDate >= oneWeekAgo && saleDate <= today;
+    });
+
+    if (weekSalesData.length === 0) {
+      showAlert("No sales data available for the past week.", "destructive");
+      return;
+    }
+
+    // Create workbook
+    const wb = XLSX.utils.book_new();
+
+    // Format timestamp and dates for title
+    const currentTimestamp = format(
+      new Date(),
+      "MMMM dd, yyyy 'at' hh:mm a"
+    ).toUpperCase();
+    const startDateFormatted = format(oneWeekAgo, "MMMM dd").toUpperCase();
+    const endDateFormatted = format(today, "MMMM dd, yyyy").toUpperCase();
+
+    // Format currency function
+    const formatCurrency = (amount) => {
+      if (!amount || isNaN(amount)) return 0;
+      return parseFloat(amount);
+    };
+
+    // Sales Sheet with title and data
+    const titleRow = [
+      `BEAUTOX WEEKLY SALES REPORT (${startDateFormatted} - ${endDateFormatted})`
+    ];
+    const timestampRow = [`AS OF ${currentTimestamp}`];
+    const emptyRow = [""];
+    const headerRow = [
+      "Client",
+      "Person In Charge",
+      "Date",
+      "Payment Method",
+      "Package",
+      "Treatment",
+      "Payment",
+      "Reference #"
+    ];
+
+    const salesSheetData = [
+      titleRow,
+      timestampRow,
+      emptyRow,
+      headerRow,
+      ...weekSalesData.map((sale) => [
+        (sale.client || "N/A").toUpperCase(),
+        (sale.person_in_charge || "N/A").toUpperCase(),
+        format(new Date(sale.date_transacted), "MM/dd/yyyy"),
+        (sale.payment_method || "N/A").toUpperCase(),
+        (sale.packages || "N/A").toUpperCase(),
+        (sale.treatment || "N/A").toUpperCase(),
+        formatCurrency(sale.payment),
+        (sale.reference_no || "N/A").toUpperCase()
+      ])
+    ];
+
+    const ws_sales = XLSX.utils.aoa_to_sheet(salesSheetData);
+
+    // Set column widths
+    ws_sales["!cols"] = [
+      { wch: 25 }, // Client
+      { wch: 20 }, // Person In Charge
+      { wch: 12 }, // Date
+      { wch: 15 }, // Payment Method
+      { wch: 20 }, // Package
+      { wch: 25 }, // Treatment
+      { wch: 15 }, // Payment
+      { wch: 15 } // Reference #
+    ];
+
+    // Style the title (merge cells for title)
+    ws_sales["!merges"] = [
+      { s: { r: 0, c: 0 }, e: { r: 0, c: 7 } }, // Merge cells for title
+      { s: { r: 1, c: 0 }, e: { r: 1, c: 7 } } // Merge cells for timestamp
+    ];
+
+    // Add Summary section
+    const totalAmount = weekSalesData.reduce(
+      (sum, sale) => sum + formatCurrency(sale.payment),
+      0
+    );
+
+    const summaryData = [
+      [],
+      ["Weekly Sales Summary"],
+      [],
+      ["Total Weekly Sales", totalAmount],
+      ["Date Range", `${startDateFormatted} - ${endDateFormatted}`],
+      ["Report Generated", currentTimestamp]
+    ];
+
+    const ws_summary = XLSX.utils.aoa_to_sheet(summaryData);
+
+    // Set column widths for summary
+    ws_summary["!cols"] = [
+      { wch: 20 }, // Labels
+      { wch: 30 } // Values
+    ];
+
+    // Add sheets to workbook
+    XLSX.utils.book_append_sheet(wb, ws_sales, "Weekly Sales");
+    XLSX.utils.book_append_sheet(wb, ws_summary, "Summary");
+
+    // Generate filename
+    const startDateFilename = format(oneWeekAgo, "MMdd");
+    const endDateFilename = format(today, "MMdd");
+    const fileName = `Beautox_WeeklySalesReport_${startDateFilename}_${endDateFilename}.xlsx`;
+
+    // Save the file
+    XLSX.writeFile(wb, fileName);
+  };
+
+  const generateMonthlyPDFReport = (salesData, expensesData) => {
     if (!salesData || salesData.length === 0) {
       console.error("No sales data available to generate Monthly Report.");
       showAlert(
@@ -831,6 +964,144 @@ function FinancialOverview() {
     doc.save(`Beautox_MonthlySalesReport_${formattedDateForFilename}.pdf`);
   };
 
+  const generateMonthlyExcelReport = (salesData, expensesData) => {
+    if (!salesData || salesData.length === 0) {
+      showAlert(
+        "No sales data available to generate Excel file.",
+        "destructive"
+      );
+      return;
+    }
+
+    // Get current month and year
+    const currentDate = new Date();
+    const currentMonth = currentDate.getMonth();
+    const currentYear = currentDate.getFullYear();
+
+    // Format timestamp for title
+    const currentTimestamp = format(
+      new Date(),
+      "MMMM dd, yyyy 'at' hh:mm a"
+    ).toUpperCase();
+
+    // Filter sales data for current month
+    const currentMonthSales = salesData.filter((sale) => {
+      const saleDate = new Date(sale.date_transacted);
+      return (
+        saleDate.getMonth() === currentMonth &&
+        saleDate.getFullYear() === currentYear
+      );
+    });
+
+    // Create workbook
+    const wb = XLSX.utils.book_new();
+
+    // Format currency function
+    const formatCurrency = (amount) => {
+      if (!amount || isNaN(amount)) return 0;
+      return parseFloat(amount);
+    };
+
+    // 1. Sales Sheet with title
+    const titleRow = [`BEAUTOX MONTHLY DATA AS OF ${currentTimestamp}`];
+    const emptyRow = [""];
+    const headerRow = [
+      "Client",
+      "Person In Charge",
+      "Date",
+      "Payment Method",
+      "Package",
+      "Treatment",
+      "Payment",
+      "Reference #"
+    ];
+
+    const salesSheetData = [
+      titleRow,
+      emptyRow,
+      headerRow,
+      ...currentMonthSales.map((sale) => [
+        (sale.client || "N/A").toUpperCase(),
+        (sale.person_in_charge || "N/A").toUpperCase(),
+        format(new Date(sale.date_transacted), "MM/dd/yyyy"),
+        (sale.payment_method || "N/A").toUpperCase(),
+        (sale.packages || "N/A").toUpperCase(),
+        (sale.treatment || "N/A").toUpperCase(),
+        formatCurrency(sale.payment),
+        (sale.reference_no || "N/A").toUpperCase()
+      ])
+    ];
+
+    const ws_sales = XLSX.utils.aoa_to_sheet(salesSheetData);
+
+    // Set column widths for sales sheet
+    ws_sales["!cols"] = [
+      { wch: 25 }, // Client
+      { wch: 20 }, // Person In Charge
+      { wch: 12 }, // Date
+      { wch: 15 }, // Payment Method
+      { wch: 20 }, // Package
+      { wch: 25 }, // Treatment
+      { wch: 15 }, // Payment
+      { wch: 15 } // Reference #
+    ];
+
+    // 2. Expenses Sheet
+    const expenseSheetData = expensesData.map((expense) => ({
+      Date: format(new Date(expense.date), "MM/dd/yyyy"),
+      Category: (expense.category || "N/A").toUpperCase(),
+      Amount: formatCurrency(expense.expense)
+    }));
+
+    const ws_expenses = XLSX.utils.json_to_sheet(expenseSheetData);
+
+    // Set column widths for expenses sheet
+    ws_expenses["!cols"] = [
+      { wch: 12 }, // Date
+      { wch: 20 }, // Category
+      { wch: 15 } // Amount
+    ];
+
+    // 3. Summary Sheet
+    const totalSales = currentMonthSales.reduce(
+      (sum, sale) => sum + formatCurrency(sale.payment),
+      0
+    );
+
+    const totalExpenses = expensesData.reduce(
+      (sum, expense) => sum + formatCurrency(expense.expense),
+      0
+    );
+
+    const summaryData = [
+      ["Monthly Financial Summary"],
+      [],
+      ["Total Sales", totalSales],
+      ["Total Expenses", totalExpenses],
+      ["Net Income", totalSales - totalExpenses]
+    ];
+
+    const ws_summary = XLSX.utils.aoa_to_sheet(summaryData);
+
+    // Set column widths for summary sheet
+    ws_summary["!cols"] = [
+      { wch: 20 }, // Labels
+      { wch: 15 } // Values
+    ];
+
+    // Add sheets to workbook
+    XLSX.utils.book_append_sheet(wb, ws_sales, "Sales");
+    XLSX.utils.book_append_sheet(wb, ws_expenses, "Expenses");
+    XLSX.utils.book_append_sheet(wb, ws_summary, "Summary");
+
+    // Generate filename with current date
+    const dateStr = format(currentDate, "MMM_dd_yyyy").toUpperCase();
+    const fileName = `Beautox_MonthlyReport_${dateStr}.xlsx`;
+
+    // Save the file
+    XLSX.writeFile(wb, fileName);
+  };
+
   // Category management functions
   const refreshCategories = async () => {
     try {
@@ -1114,7 +1385,6 @@ function FinancialOverview() {
           Summary of finances within Beautox
         </p>
       </div>
-
       {/* Sales Tracker Section - Updated with isFinancialOverview prop */}
       <div data-cy="sales-chart-container" className="flex flex-col gap-4">
         <h2
@@ -1130,7 +1400,6 @@ function FinancialOverview() {
           data-cy="sales-chart"
         />
       </div>
-
       <div className="flex justify-end gap-4" data-cy="filter-controls">
         <Select
           value={filterType}
@@ -1173,7 +1442,6 @@ function FinancialOverview() {
           data-cy="column-filter"
         />
       </div>
-
       <div
         className="w-full overflow-x-auto overflow-y-hidden"
         data-cy="sales-table-container"
@@ -1251,20 +1519,34 @@ function FinancialOverview() {
           </TableBody>
         </Table>
       </div>
-
-      <div className="w-full flex justify-end gap-4" data-cy="sales-actions">
-        <Button
-          variant="callToAction"
-          onClick={() => generateWeeklySalesReport(salesData)}
-          className="text-sm md:text-base"
-          data-cy="download-weekly-report-btn"
+      <div className="w-full flex justify-end" data-cy="sales-actions">
+        <div
+          className="inline-flex rounded-lg overflow-hidden"
+          data-cy="report-buttons"
         >
-          <DownloadIcon />
-          <span className="hidden md:inline">DOWNLOAD WEEKLY SALES REPORT</span>
-          <span className="md:hidden">WEEKLY REPORT</span>
-        </Button>
+          <Button
+            className="rounded-none border-r border-customNeutral-300 first:rounded-l-lg text-sm md:text-base"
+            data-cy="download-weekly-sales-btn"
+            onClick={() => generateWeeklyExcelReport(salesData)}
+          >
+            <DownloadIcon />
+            <span className="hidden md:inline">DOWNLOAD WEEKLY SALES DATA</span>
+            <span className="md:hidden">WEEKLY DATA</span>
+          </Button>
+          <Button
+            variant="callToAction"
+            onClick={() => generateWeeklyPDFReport(salesData)}
+            className="rounded-none last:rounded-r-lg text-sm md:text-base"
+            data-cy="download-weekly-report-btn"
+          >
+            <DownloadIcon />
+            <span className="hidden md:inline">
+              DOWNLOAD WEEKLY SALES REPORT
+            </span>
+            <span className="md:hidden">WEEKLY REPORT</span>
+          </Button>
+        </div>
       </div>
-
       {/* Monthly Expenses Tracker Section */}
       <h2
         className="font-bold text-xl md:text-[2rem] dark:text-customNeutral-100"
@@ -1377,7 +1659,6 @@ function FinancialOverview() {
             </Button>
           </div>
         </div>
-
         <div
           className="w-full overflow-x-auto overflow-y-hidden"
           data-cy="expenses-table-container"
@@ -1504,7 +1785,6 @@ function FinancialOverview() {
             </TableBody>
           </Table>
         </div>
-
         <div
           className="w-full flex flex-row items-center justify-around gap-4 mt-3"
           data-cy="total-profit-container"
@@ -1567,7 +1847,7 @@ function FinancialOverview() {
           </div>
         </div>
         <div
-          className="w-full flex flex-col md:flex-row justify-end gap-4 pb-10"
+          className="flex flex-col md:flex-row justify-end gap-4 pb-10"
           data-cy="bottom-actions"
         >
           <Button
@@ -1578,20 +1858,37 @@ function FinancialOverview() {
             <PlusIcon />
             ADD ADDITIONAL EXPENSES
           </Button>
-          <Button
-            onClick={() => generateMonthlySalesReport(salesData, expensesData)}
-            className="w-full md:w-auto"
-            data-cy="download-monthly-report-btn"
+
+          {/* Updated button group with unified rounded corners */}
+          <div
+            className="inline-flex rounded-lg overflow-hidden"
+            data-cy="report-buttons"
           >
-            <DownloadIcon />
-            <span className="hidden md:inline">
-              DOWNLOAD MONTHLY PROFIT REPORT
-            </span>
-            <span className="md:hidden">MONTHLY REPORT</span>
-          </Button>
+            <Button
+              data-cy="download-monthly-sales-btn"
+              className="rounded-none border-r border-customNeutral-300 first:rounded-l-lg"
+              onClick={() =>
+                generateMonthlyExcelReport(salesData, expensesData)
+              }
+            >
+              <DownloadIcon />
+              <span className="hidden md:inline">DOWNLOAD PROFIT DATA</span>
+              <span className="md:hidden">PROFIT DATA</span>
+            </Button>
+            <Button
+              onClick={() => generateMonthlyPDFReport(salesData, expensesData)}
+              className="rounded-none last:rounded-r-lg"
+              data-cy="download-monthly-report-btn"
+            >
+              <DownloadIcon />
+              <span className="hidden md:inline">
+                DOWNLOAD MONTHLY PROFIT REPORT
+              </span>
+              <span className="md:hidden">MONTHLY REPORT</span>
+            </Button>
+          </div>
         </div>
       </div>
-
       {currentModal === "createMonthlyExpense" && (
         <CreateMonthlyExpense
           isOpen={true}
@@ -1601,7 +1898,6 @@ function FinancialOverview() {
           data-cy="create-monthly-expense-modal"
         />
       )}
-
       {currentModal === "editMonthlyExpense" && expenseToEdit && (
         <EditMonthlyExpense
           isOpen={true}
@@ -1616,7 +1912,6 @@ function FinancialOverview() {
           data-cy="edit-monthly-expense-modal"
         />
       )}
-
       {currentModal === "archiveMonthlyExpense" && selectedExpense && (
         <ArchiveMonthlyExpense
           isOpen={true}
@@ -1625,7 +1920,6 @@ function FinancialOverview() {
           data-cy="delete-monthly-expense-modal"
         />
       )}
-
       {currentModal === "createCategory" && (
         <CreateCategory
           isOpen={true}
@@ -1635,7 +1929,6 @@ function FinancialOverview() {
           data-cy="create-category-modal"
         />
       )}
-
       {currentModal === "editCategory" && (
         <EditCategory
           isOpen={true}
@@ -1645,7 +1938,6 @@ function FinancialOverview() {
           data-cy="edit-category-modal"
         />
       )}
-
       {currentModal === "archiveCategory" && (
         <ArchiveCategory
           isOpen={true}
@@ -1655,7 +1947,6 @@ function FinancialOverview() {
           data-cy="archive-category-modal"
         />
       )}
-
       {alert.visible && (
         <AlertContainer variant={alert.variant}>
           <AlertText>
