@@ -135,6 +135,20 @@ function FinancialOverview() {
   const [filteredSalesData, setFilteredSalesData] = useState([]);
 
   useEffect(() => {
+    const fetchSalesData = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/sales`);
+        const data = await response.json();
+        setSalesData(data); // Set the fetched sales data
+      } catch (error) {
+        console.error("Error fetching sales data:", error);
+      }
+    };
+
+    fetchSalesData();
+  }, []);
+
+  useEffect(() => {
     if (filterType === "all" || !salesData) {
       setFilteredSalesData(salesData);
       return;
@@ -178,7 +192,7 @@ function FinancialOverview() {
 
   // Update the initial setting of filteredSalesData when salesData changes
   useEffect(() => {
-    setFilteredSalesData(salesData);
+    setFilteredSalesData(salesData.filter((sale) => !sale.archived));
   }, [salesData]);
 
   // Fetch data from endpoints
@@ -289,24 +303,32 @@ function FinancialOverview() {
 
   // REPORT GENERATING FUNCTIONS
   const generateWeeklyPDFReport = (salesData) => {
-    if (!salesData || salesData.length === 0) {
-      console.error("No sales data available to generate PDF.");
+    if (!salesData || !Array.isArray(salesData) || salesData.length === 0) {
       showAlert("No sales data available to generate PDF.", "destructive");
       return;
     }
 
-    // Filter data to only include sales from the past week
+    // Improve weekly date filtering
     const today = new Date();
     const oneWeekAgo = new Date(today);
     oneWeekAgo.setDate(today.getDate() - 7);
 
     const weekSalesData = salesData.filter((sale) => {
-      const saleDate = new Date(sale.date_transacted);
-      return saleDate >= oneWeekAgo && saleDate <= today;
+      try {
+        const saleDate = new Date(sale.date_transacted);
+        // Set hours to midnight for consistent comparison
+        saleDate.setHours(0, 0, 0, 0);
+        oneWeekAgo.setHours(0, 0, 0, 0);
+        today.setHours(23, 59, 59, 999);
+
+        return saleDate >= oneWeekAgo && saleDate <= today;
+      } catch (error) {
+        console.error("Date parsing error:", error);
+        return false;
+      }
     });
 
     if (weekSalesData.length === 0) {
-      console.error("No sales data available for the past week.");
       showAlert("No sales data available for the past week.", "destructive");
       return;
     }
@@ -317,17 +339,14 @@ function FinancialOverview() {
       format: "a4"
     });
 
-    // Set document properties
     doc.setFont("helvetica");
     doc.setFontSize(16);
 
-    // Page dimensions
     const pageWidth = doc.internal.pageSize.width;
     const pageHeight = doc.internal.pageSize.height;
     const margin = 40;
     const availableWidth = pageWidth - margin * 2;
 
-    // Format current date
     const currentDate = new Date();
     const formattedCurrentDate = format(
       currentDate,
@@ -335,7 +354,6 @@ function FinancialOverview() {
     ).toUpperCase();
     const formattedDateForFilename = format(currentDate, "MMMM_dd_yyyy");
 
-    // Add title with date range
     const startDateFormatted = format(oneWeekAgo, "MMMM dd").toUpperCase();
     const endDateFormatted = format(today, "MMMM dd, yyyy").toUpperCase();
 
@@ -347,19 +365,13 @@ function FinancialOverview() {
       { align: "center" }
     );
 
-    // Add timestamp line
     const currentTimestamp = format(new Date(), "hh:mm a").toUpperCase();
-    doc.text(
-      `AS OF ${currentTimestamp}`,
-      pageWidth / 2,
-      margin + 50, // Position it 20 points below the title
-      { align: "center" }
-    );
+    doc.text(`AS OF ${currentTimestamp}`, pageWidth / 2, margin + 50, {
+      align: "center"
+    });
 
-    // Reset font size for rest of document
     doc.setFontSize(16);
 
-    // Define base column configuration (adjusted for portrait layout)
     const baseColumns = [
       { header: "CLIENT", width: 80 },
       { header: "PIC", width: 60 },
@@ -371,19 +383,14 @@ function FinancialOverview() {
       { header: "REF#", width: 70 }
     ];
 
-    // Calculate total natural width
     const naturalWidth = baseColumns.reduce((sum, col) => sum + col.width, 0);
-
-    // Calculate scaling factor to fit available width
     const scaleFactor = availableWidth / naturalWidth;
 
-    // Scale column widths
     const headers = baseColumns.map((col) => ({
       header: col.header,
       width: col.width * scaleFactor
     }));
 
-    // Manual currency formatting function
     const formatCurrency = (amount) => {
       if (!amount || isNaN(amount) || parseFloat(amount) === 0) return "P0";
       const num = Math.abs(Math.round(parseFloat(amount)));
@@ -391,13 +398,11 @@ function FinancialOverview() {
       return `P${formatted}`;
     };
 
-    // Format payment method
     const formatPaymentMethod = (method) => {
       if (!method) return "N/A";
-      return method.toLowerCase().includes("full") ? "FULL" : "INST"; // Shortened "INSTALL" to "INST"
+      return method.toLowerCase().includes("full") ? "FULL" : "INST";
     };
 
-    // Prepare table data with shorter formats for portrait layout - using weekSalesData
     const tableData = weekSalesData.map((sale) => [
       (sale.client || "N/A").toUpperCase(),
       (sale.person_in_charge || "N/A").toUpperCase(),
@@ -411,11 +416,10 @@ function FinancialOverview() {
       (sale.reference_no || "N/A").toUpperCase()
     ]);
 
-    // Configure and draw the table
     autoTable(doc, {
       head: [headers.map((h) => h.header)],
       body: tableData,
-      startY: margin + 70, // Adjusted starting position for portrait layout
+      startY: margin + 70,
       margin: { top: margin, right: margin, bottom: margin, left: margin },
       columnStyles: {
         ...headers.reduce((acc, col, index) => {
@@ -427,7 +431,7 @@ function FinancialOverview() {
           };
           return acc;
         }, {}),
-        6: { halign: "right", cellPadding: { right: 5 } } // Total amount column
+        6: { halign: "right", cellPadding: { right: 5 } }
       },
       styles: {
         font: "helvetica",
@@ -445,7 +449,7 @@ function FinancialOverview() {
         fontStyle: "bold",
         halign: "center",
         valign: "middle",
-        lineWidth: 0 // Remove header borders
+        lineWidth: 0
       },
       alternateRowStyles: {
         fillColor: "#F8F8F8"
@@ -481,28 +485,22 @@ function FinancialOverview() {
       }
     });
 
-    // Calculate total amount from the week's data
     const totalAmount = weekSalesData.reduce((sum, sale) => {
       const amount = parseFloat(sale.payment) || 0;
       return sum + amount;
     }, 0);
 
-    // Add weekly total section after the sales table
     const finalY = doc.lastAutoTable.finalY + 20;
     doc.setFont("helvetica", "bold");
     doc.setFontSize(10);
-
-    // Add total weekly sales
     doc.text("TOTAL WEEKLY SALES:", margin, finalY);
     doc.text(formatCurrency(totalAmount), pageWidth - margin, finalY, {
       align: "right"
     });
 
-    // Add separator line
     doc.setLineWidth(0.5);
     doc.line(margin, finalY + 10, pageWidth - margin, finalY + 10);
 
-    // Save the PDF with week dates in filename
     const startDateFilename = format(oneWeekAgo, "MMdd");
     const endDateFilename = format(today, "MMdd");
     doc.save(
@@ -511,7 +509,7 @@ function FinancialOverview() {
   };
 
   const generateWeeklyExcelReport = (salesData) => {
-    if (!salesData || salesData.length === 0) {
+    if (!salesData || !Array.isArray(salesData) || salesData.length === 0) {
       showAlert(
         "No sales data available to generate Excel file.",
         "destructive"
@@ -519,14 +517,24 @@ function FinancialOverview() {
       return;
     }
 
-    // Filter data for the past week
+    // Use the same improved date filtering
     const today = new Date();
     const oneWeekAgo = new Date(today);
     oneWeekAgo.setDate(today.getDate() - 7);
 
     const weekSalesData = salesData.filter((sale) => {
-      const saleDate = new Date(sale.date_transacted);
-      return saleDate >= oneWeekAgo && saleDate <= today;
+      try {
+        const saleDate = new Date(sale.date_transacted);
+        // Set hours to midnight for consistent comparison
+        saleDate.setHours(0, 0, 0, 0);
+        oneWeekAgo.setHours(0, 0, 0, 0);
+        today.setHours(23, 59, 59, 999);
+
+        return saleDate >= oneWeekAgo && saleDate <= today;
+      } catch (error) {
+        console.error("Date parsing error:", error);
+        return false;
+      }
     });
 
     if (weekSalesData.length === 0) {
@@ -1527,7 +1535,7 @@ function FinancialOverview() {
           <Button
             className="rounded-none border-r border-customNeutral-300 first:rounded-l-lg text-sm md:text-base"
             data-cy="download-weekly-sales-btn"
-            onClick={() => generateWeeklyExcelReport(salesData)}
+            onClick={() => generateWeeklyExcelReport(salesData, expensesData)}
           >
             <DownloadIcon />
             <span className="hidden md:inline">DOWNLOAD WEEKLY SALES DATA</span>
@@ -1535,7 +1543,7 @@ function FinancialOverview() {
           </Button>
           <Button
             variant="callToAction"
-            onClick={() => generateWeeklyPDFReport(salesData)}
+            onClick={() => generateWeeklyExcelReport(salesData, expensesData)}
             className="rounded-none last:rounded-r-lg text-sm md:text-base"
             data-cy="download-weekly-report-btn"
           >

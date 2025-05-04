@@ -38,26 +38,32 @@ import {
 
 import CalendarIcon from "@/assets/icons/CalendarIcon";
 
+const API_BASE_URL = import.meta.env.VITE_API_URL;
+
 // Calculate percentage change between current and previous week values
 const calculatePercentageChange = (salesData) => {
-  if (!salesData || !Array.isArray(salesData) || salesData.length === 0) {
-    console.error("salesData is missing or not an array", salesData);
+  // Add better validation
+  if (!salesData || !Array.isArray(salesData)) {
+    console.warn("Invalid sales data provided to calculatePercentageChange");
     return 0;
   }
 
-  // Calculate totals
+  // Ensure we have data to calculate
+  if (salesData.length === 0) {
+    console.warn("Empty sales data array");
+    return 0;
+  }
+
   const totalCurrent = salesData.reduce(
-    (sum, entry) => sum + (entry.currentWeek || 0),
+    (sum, entry) => sum + (Number(entry.currentWeek) || 0),
     0
   );
   const totalPrevious = salesData.reduce(
-    (sum, entry) => sum + (entry.previousWeek || 0),
+    (sum, entry) => sum + (Number(entry.previousWeek) || 0),
     0
   );
 
-  // Avoid division by zero
   if (totalPrevious === 0) return 0;
-
   return (((totalCurrent - totalPrevious) / totalPrevious) * 100).toFixed(2);
 };
 
@@ -67,18 +73,11 @@ const SalesChart = ({
   isFinancialOverview = false // Prop to check if the component is used in FinancialOverview
 }) => {
   const { theme } = useTheme();
-
-  // Initialize with default chart config if not provided
-  const config = chartConfig || {
-    currentWeek: { color: "#4CAF50" },
-    previousWeek: { color: theme === "dark" ? "#F0D6F6" : "#FF9800" }
-  };
-
-  // State for sales data and date filtering
+  // Move state declarations to the top
   const [salesData, setSalesData] = useState([]);
   const [startDate, setStartDate] = useState(() => {
     const date = new Date();
-    date.setDate(date.getDate() - 6); // Default to last 7 days
+    date.setDate(date.getDate() - 6);
     return date.toISOString().split("T")[0];
   });
   const [endDate, setEndDate] = useState(() => {
@@ -86,14 +85,51 @@ const SalesChart = ({
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
-  // State for financial data if not provided externally
   const [financialData, setFinancialData] = useState({
     totalSales: 0,
     totalExpenses: 0,
     netIncome: 0
   });
-  const [financialLoading, setFinancialLoading] = useState(!externalFinancialData);
+  const [financialLoading, setFinancialLoading] = useState(
+    !externalFinancialData
+  );
+
+  useEffect(() => {
+    const fetchSalesData = async (start, end) => {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await fetch(
+          `${API_BASE_URL}/sales?startDate=${start}&endDate=${end}`
+        );
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const data = await response.json();
+        if (!Array.isArray(data)) {
+          throw new Error("Invalid data format received");
+        }
+        setSalesData(data);
+      } catch (error) {
+        console.error("Error fetching sales data:", error);
+        setError(error.message);
+        setSalesData([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (startDate && endDate) {
+      fetchSalesData(startDate, endDate);
+    }
+  }, [startDate, endDate]);
+
+  // Initialize with default chart config if not provided
+  const config = chartConfig || {
+    currentWeek: { color: "#4CAF50" },
+    previousWeek: { color: theme === "dark" ? "#F0D6F6" : "#FF9800" }
+  };
+
   const [financialError, setFinancialError] = useState(null);
 
   // If external financial data is provided, use it
@@ -111,9 +147,7 @@ const SalesChart = ({
         setFinancialLoading(true);
         setFinancialError(null);
         try {
-          const response = await fetch(
-            "http://localhost:4000/financial-overview"
-          );
+          const response = await fetch(`${API_BASE_URL}/financial-overview`);
           if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
           }
@@ -457,7 +491,9 @@ const SalesChart = ({
                   data-cy="total-profit-loss"
                 >
                   <span className="font-semibold text-xs text-customNeutral-400 dark:text-customNeutral-200">
-                    {financialData.netIncome >= 0 ? "TOTAL PROFIT" : "TOTAL LOSS"}
+                    {financialData.netIncome >= 0
+                      ? "TOTAL PROFIT"
+                      : "TOTAL LOSS"}
                   </span>
                   <div className="flex items-center gap-2">
                     <p
