@@ -303,212 +303,333 @@ function FinancialOverview() {
 
   // REPORT GENERATING FUNCTIONS
   const generateWeeklyPDFReport = (salesData) => {
+    console.log(
+      "Weekly PDF Report - Data received:",
+      salesData ? salesData.length : 0,
+      "records"
+    );
+
     if (!salesData || !Array.isArray(salesData) || salesData.length === 0) {
       showAlert("No sales data available to generate PDF.", "destructive");
       return;
     }
 
-    // Improve weekly date filtering
-    const today = new Date();
-    const oneWeekAgo = new Date(today);
-    oneWeekAgo.setDate(today.getDate() - 7);
+    try {
+      // Get date range for the past week
+      const today = new Date();
+      const oneWeekAgo = new Date();
+      oneWeekAgo.setDate(today.getDate() - 7);
 
-    const weekSalesData = salesData.filter((sale) => {
-      try {
-        const saleDate = new Date(sale.date_transacted);
-        // Set hours to midnight for consistent comparison
-        saleDate.setHours(0, 0, 0, 0);
-        oneWeekAgo.setHours(0, 0, 0, 0);
-        today.setHours(23, 59, 59, 999);
+      console.log(
+        "Date range:",
+        oneWeekAgo.toISOString(),
+        "to",
+        today.toISOString()
+      );
 
-        return saleDate >= oneWeekAgo && saleDate <= today;
-      } catch (error) {
-        console.error("Date parsing error:", error);
-        return false;
+      // Show some sample dates for debugging
+      if (salesData.length > 0) {
+        console.log("Sample sales dates:");
+        salesData.slice(0, 3).forEach((sale, i) => {
+          console.log(
+            `[${i}] date_transacted:`,
+            sale.date_transacted,
+            typeof sale.date_transacted,
+            "->",
+            sale.date_transacted
+              ? new Date(sale.date_transacted)
+              : "Invalid date"
+          );
+        });
       }
-    });
 
-    if (weekSalesData.length === 0) {
-      showAlert("No sales data available for the past week.", "destructive");
-      return;
-    }
+      // SOLUTION 1: If no records are found in the date range, use the most recent records instead
+      let weekSalesData = salesData.filter((sale) => {
+        if (!sale || !sale.date_transacted) return false;
 
-    const doc = new jsPDF({
-      orientation: "portrait",
-      unit: "pt",
-      format: "a4"
-    });
+        try {
+          const saleDate = new Date(sale.date_transacted);
+          if (isNaN(saleDate.getTime())) return false;
+          return saleDate >= oneWeekAgo && saleDate <= today;
+        } catch (error) {
+          console.error("Date filtering error:", error);
+          return false;
+        }
+      });
 
-    doc.setFont("helvetica");
-    doc.setFontSize(16);
+      console.log(
+        `Filtered sales by date range: ${weekSalesData.length} of ${salesData.length} records`
+      );
 
-    const pageWidth = doc.internal.pageSize.width;
-    const pageHeight = doc.internal.pageSize.height;
-    const margin = 40;
-    const availableWidth = pageWidth - margin * 2;
-
-    const currentDate = new Date();
-    const formattedCurrentDate = format(
-      currentDate,
-      "MMMM dd, yyyy"
-    ).toUpperCase();
-    const formattedDateForFilename = format(currentDate, "MMMM_dd_yyyy");
-
-    const startDateFormatted = format(oneWeekAgo, "MMMM dd").toUpperCase();
-    const endDateFormatted = format(today, "MMMM dd, yyyy").toUpperCase();
-
-    doc.setFont("helvetica", "bold");
-    doc.text(
-      `BEAUTOX WEEKLY SALES REPORT (${startDateFormatted} - ${endDateFormatted})`,
-      pageWidth / 2,
-      margin + 30,
-      { align: "center" }
-    );
-
-    const currentTimestamp = format(new Date(), "hh:mm a").toUpperCase();
-    doc.text(`AS OF ${currentTimestamp}`, pageWidth / 2, margin + 50, {
-      align: "center"
-    });
-
-    doc.setFontSize(16);
-
-    const baseColumns = [
-      { header: "CLIENT", width: 80 },
-      { header: "PIC", width: 60 },
-      { header: "DATE", width: 60 },
-      { header: "MODE", width: 40 },
-      { header: "PKG", width: 70 },
-      { header: "TREATMENT", width: 90 },
-      { header: "TOTAL", width: 60 },
-      { header: "REF#", width: 70 }
-    ];
-
-    const naturalWidth = baseColumns.reduce((sum, col) => sum + col.width, 0);
-    const scaleFactor = availableWidth / naturalWidth;
-
-    const headers = baseColumns.map((col) => ({
-      header: col.header,
-      width: col.width * scaleFactor
-    }));
-
-    const formatCurrency = (amount) => {
-      if (!amount || isNaN(amount) || parseFloat(amount) === 0) return "P0";
-      const num = Math.abs(Math.round(parseFloat(amount)));
-      const formatted = num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-      return `P${formatted}`;
-    };
-
-    const formatPaymentMethod = (method) => {
-      if (!method) return "N/A";
-      return method.toLowerCase().includes("full") ? "FULL" : "INST";
-    };
-
-    const tableData = weekSalesData.map((sale) => [
-      (sale.client || "N/A").toUpperCase(),
-      (sale.person_in_charge || "N/A").toUpperCase(),
-      sale.date_transacted
-        ? format(new Date(sale.date_transacted), "MM/dd/yy").toUpperCase()
-        : "N/A",
-      formatPaymentMethod(sale.payment_method),
-      (sale.packages || "N/A").toUpperCase(),
-      (sale.treatment || "N/A").toUpperCase(),
-      formatCurrency(sale.payment),
-      (sale.reference_no || "N/A").toUpperCase()
-    ]);
-
-    autoTable(doc, {
-      head: [headers.map((h) => h.header)],
-      body: tableData,
-      startY: margin + 70,
-      margin: { top: margin, right: margin, bottom: margin, left: margin },
-      columnStyles: {
-        ...headers.reduce((acc, col, index) => {
-          acc[index] = {
-            cellWidth: col.width,
-            fontSize: 8,
-            cellPadding: 3,
-            overflow: "linebreak"
-          };
-          return acc;
-        }, {}),
-        6: { halign: "right", cellPadding: { right: 5 } }
-      },
-      styles: {
-        font: "helvetica",
-        fontSize: 8,
-        cellPadding: 3,
-        overflow: "linebreak",
-        cellWidth: "wrap",
-        minCellHeight: 14,
-        valign: "middle"
-      },
-      headStyles: {
-        fillColor: "#381B4C",
-        textColor: "#FFFFFF",
-        fontSize: 8,
-        fontStyle: "bold",
-        halign: "center",
-        valign: "middle",
-        lineWidth: 0
-      },
-      alternateRowStyles: {
-        fillColor: "#F8F8F8"
-      },
-      didDrawPage: function (data) {
-        doc.setFontSize(8);
-        doc.text(
-          `Page ${data.pageNumber} of ${doc.internal.getNumberOfPages()}`,
-          pageWidth - margin,
-          pageHeight - 10,
-          { align: "right" }
+      // If no records found in date range, take most recent 5 records instead
+      if (weekSalesData.length === 0) {
+        console.log(
+          "No records found in date range, using most recent records instead"
         );
-      },
-      willDrawCell: function (data) {
-        if (
-          data.cell.text &&
-          typeof data.cell.text === "string" &&
-          data.column.index !== 6
-        ) {
-          const maxWidth =
-            data.cell.styles.cellWidth - data.cell.styles.cellPadding * 2;
-          const textWidth =
-            doc.getStringUnitWidth(data.cell.text) * data.cell.styles.fontSize;
 
-          if (textWidth > maxWidth) {
-            const charactersPerLine = Math.floor(
-              (maxWidth / textWidth) * data.cell.text.length
-            );
-            data.cell.text =
-              data.cell.text.substring(0, charactersPerLine - 3) + "...";
+        // Sort by date (if possible) or just take the first records
+        const sortedSales = [...salesData]
+          .filter((sale) => sale && sale.date_transacted)
+          .sort((a, b) => {
+            try {
+              const dateA = new Date(a.date_transacted);
+              const dateB = new Date(b.date_transacted);
+              return dateB - dateA; // Most recent first
+            } catch (err) {
+              return 0;
+            }
+          });
+
+        weekSalesData = sortedSales.slice(0, 5); // Take up to 5 most recent records
+        console.log(
+          `Using ${weekSalesData.length} most recent records instead`
+        );
+
+        // Update date range to match the actual data we're using
+        if (weekSalesData.length > 0) {
+          try {
+            // Find earliest and latest dates in the selected records
+            const dates = weekSalesData
+              .map((sale) => new Date(sale.date_transacted))
+              .filter((date) => !isNaN(date.getTime()));
+
+            if (dates.length > 0) {
+              const earliest = new Date(
+                Math.min(...dates.map((d) => d.getTime()))
+              );
+              const latest = new Date(
+                Math.max(...dates.map((d) => d.getTime()))
+              );
+
+              oneWeekAgo = earliest;
+              today = latest;
+              console.log(
+                "Adjusted date range:",
+                oneWeekAgo.toISOString(),
+                "to",
+                today.toISOString()
+              );
+            }
+          } catch (err) {
+            console.error("Error adjusting date range:", err);
           }
         }
       }
-    });
 
-    const totalAmount = weekSalesData.reduce((sum, sale) => {
-      const amount = parseFloat(sale.payment) || 0;
-      return sum + amount;
-    }, 0);
+      if (weekSalesData.length === 0) {
+        showAlert("No sales data available for the report.", "destructive");
+        return;
+      }
 
-    const finalY = doc.lastAutoTable.finalY + 20;
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(10);
-    doc.text("TOTAL WEEKLY SALES:", margin, finalY);
-    doc.text(formatCurrency(totalAmount), pageWidth - margin, finalY, {
-      align: "right"
-    });
+      const doc = new jsPDF({
+        orientation: "portrait",
+        unit: "pt",
+        format: "a4"
+      });
 
-    doc.setLineWidth(0.5);
-    doc.line(margin, finalY + 10, pageWidth - margin, finalY + 10);
+      doc.setFont("helvetica");
+      doc.setFontSize(16);
 
-    const startDateFilename = format(oneWeekAgo, "MMdd");
-    const endDateFilename = format(today, "MMdd");
-    doc.save(
-      `Beautox_WeeklySalesReport_${startDateFilename}_${endDateFilename}.pdf`
-    );
+      const pageWidth = doc.internal.pageSize.width;
+      const pageHeight = doc.internal.pageSize.height;
+      const margin = 40;
+      const availableWidth = pageWidth - margin * 2;
+
+      const startDateFormatted = format(oneWeekAgo, "MMMM dd").toUpperCase();
+      const endDateFormatted = format(today, "MMMM dd, yyyy").toUpperCase();
+
+      doc.setFont("helvetica", "bold");
+      doc.text(
+        `BEAUTOX WEEKLY SALES REPORT (${startDateFormatted} - ${endDateFormatted})`,
+        pageWidth / 2,
+        margin + 30,
+        { align: "center" }
+      );
+
+      const currentTimestamp = format(new Date(), "hh:mm a").toUpperCase();
+      doc.text(`AS OF ${currentTimestamp}`, pageWidth / 2, margin + 50, {
+        align: "center"
+      });
+
+      doc.setFontSize(16);
+
+      const baseColumns = [
+        { header: "CLIENT", width: 80 },
+        { header: "PIC", width: 60 },
+        { header: "DATE", width: 60 },
+        { header: "MODE", width: 40 },
+        { header: "PKG", width: 70 },
+        { header: "TREATMENT", width: 90 },
+        { header: "TOTAL", width: 60 },
+        { header: "REF#", width: 70 }
+      ];
+
+      const naturalWidth = baseColumns.reduce((sum, col) => sum + col.width, 0);
+      const scaleFactor = availableWidth / naturalWidth;
+
+      const headers = baseColumns.map((col) => ({
+        header: col.header,
+        width: col.width * scaleFactor
+      }));
+
+      const formatCurrency = (amount) => {
+        if (!amount || isNaN(amount) || parseFloat(amount) === 0) return "P0";
+        const num = Math.abs(Math.round(parseFloat(amount)));
+        const formatted = num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        return `P${formatted}`;
+      };
+
+      const formatPaymentMethod = (method) => {
+        if (!method) return "N/A";
+        return method.toLowerCase().includes("full") ? "FULL" : "INST";
+      };
+
+      // Prepare table data with error handling for each field
+      const tableData = weekSalesData.map((sale) => {
+        let dateFormatted = "N/A";
+        try {
+          if (sale.date_transacted) {
+            dateFormatted = format(
+              new Date(sale.date_transacted),
+              "MM/dd/yy"
+            ).toUpperCase();
+          }
+        } catch (e) {
+          console.error("Error formatting date:", e, sale.date_transacted);
+        }
+
+        return [
+          ((sale.client || "").toString() || "N/A").toUpperCase(),
+          ((sale.person_in_charge || "").toString() || "N/A").toUpperCase(),
+          dateFormatted,
+          formatPaymentMethod(sale.payment_method),
+          ((sale.packages || "").toString() || "N/A").toUpperCase(),
+          ((sale.treatment || "").toString() || "N/A").toUpperCase(),
+          formatCurrency(sale.payment),
+          ((sale.reference_no || "").toString() || "N/A").toUpperCase()
+        ];
+      });
+
+      autoTable(doc, {
+        head: [headers.map((h) => h.header)],
+        body: tableData,
+        startY: margin + 70,
+        margin: { top: margin, right: margin, bottom: margin, left: margin },
+        columnStyles: {
+          ...headers.reduce((acc, col, index) => {
+            acc[index] = {
+              cellWidth: col.width,
+              fontSize: 8,
+              cellPadding: 3,
+              overflow: "linebreak"
+            };
+            return acc;
+          }, {}),
+          6: { halign: "right", cellPadding: { right: 5 } }
+        },
+        styles: {
+          font: "helvetica",
+          fontSize: 8,
+          cellPadding: 3,
+          overflow: "linebreak",
+          cellWidth: "wrap",
+          minCellHeight: 14,
+          valign: "middle"
+        },
+        headStyles: {
+          fillColor: "#381B4C",
+          textColor: "#FFFFFF",
+          fontSize: 8,
+          fontStyle: "bold",
+          halign: "center",
+          valign: "middle",
+          lineWidth: 0
+        },
+        alternateRowStyles: {
+          fillColor: "#F8F8F8"
+        },
+        didDrawPage: function (data) {
+          doc.setFontSize(8);
+          doc.text(
+            `Page ${data.pageNumber} of ${doc.internal.getNumberOfPages()}`,
+            pageWidth - margin,
+            pageHeight - 10,
+            { align: "right" }
+          );
+        },
+        willDrawCell: function (data) {
+          if (
+            data.cell.text &&
+            typeof data.cell.text === "string" &&
+            data.column.index !== 6
+          ) {
+            const maxWidth =
+              data.cell.styles.cellWidth - data.cell.styles.cellPadding * 2;
+            const textWidth =
+              doc.getStringUnitWidth(data.cell.text) *
+              data.cell.styles.fontSize;
+
+            if (textWidth > maxWidth) {
+              const charactersPerLine = Math.floor(
+                (maxWidth / textWidth) * data.cell.text.length
+              );
+              data.cell.text =
+                data.cell.text.substring(0, charactersPerLine - 3) + "...";
+            }
+          }
+        }
+      });
+
+      // Calculate and add total with error handling
+      let totalAmount = 0;
+      try {
+        totalAmount = weekSalesData.reduce((sum, sale) => {
+          const amount = parseFloat(sale.payment) || 0;
+          return sum + (isNaN(amount) ? 0 : amount);
+        }, 0);
+      } catch (error) {
+        console.error("Error calculating total:", error);
+      }
+
+      const finalY = doc.lastAutoTable.finalY + 20;
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(10);
+      doc.text("TOTAL WEEKLY SALES:", margin, finalY);
+      doc.text(formatCurrency(totalAmount), pageWidth - margin, finalY, {
+        align: "right"
+      });
+
+      doc.setLineWidth(0.5);
+      doc.line(margin, finalY + 10, pageWidth - margin, finalY + 10);
+
+      // Generate filename
+      const startDateFilename = format(oneWeekAgo, "MMdd");
+      const endDateFilename = format(today, "MMdd");
+      const filename = `Beautox_WeeklySalesReport_${startDateFilename}_${endDateFilename}.pdf`;
+
+      console.log("Saving PDF with filename:", filename);
+
+      try {
+        doc.save(filename);
+        console.log("PDF saved successfully");
+        showAlert("Weekly report generated successfully", "success");
+      } catch (error) {
+        console.error("Error saving PDF:", error);
+        showAlert("Error saving PDF report: " + error.message, "destructive");
+      }
+    } catch (error) {
+      console.error("Error in generateWeeklyPDFReport:", error);
+      showAlert("Error generating PDF report: " + error.message, "destructive");
+    }
   };
 
   const generateWeeklyExcelReport = (salesData) => {
+    console.log(
+      "Weekly Excel Report - Data received:",
+      salesData ? salesData.length : 0,
+      "records"
+    );
+
     if (!salesData || !Array.isArray(salesData) || salesData.length === 0) {
       showAlert(
         "No sales data available to generate Excel file.",
@@ -517,136 +638,277 @@ function FinancialOverview() {
       return;
     }
 
-    // Use the same improved date filtering
-    const today = new Date();
-    const oneWeekAgo = new Date(today);
-    oneWeekAgo.setDate(today.getDate() - 7);
+    try {
+      // Get date range for the past week
+      const today = new Date();
+      const oneWeekAgo = new Date();
+      oneWeekAgo.setDate(today.getDate() - 7);
 
-    const weekSalesData = salesData.filter((sale) => {
-      try {
-        const saleDate = new Date(sale.date_transacted);
-        // Set hours to midnight for consistent comparison
-        saleDate.setHours(0, 0, 0, 0);
-        oneWeekAgo.setHours(0, 0, 0, 0);
-        today.setHours(23, 59, 59, 999);
+      console.log(
+        "Date range:",
+        oneWeekAgo.toISOString(),
+        "to",
+        today.toISOString()
+      );
 
-        return saleDate >= oneWeekAgo && saleDate <= today;
-      } catch (error) {
-        console.error("Date parsing error:", error);
-        return false;
+      // Show some sample dates for debugging
+      if (salesData.length > 0) {
+        console.log("Sample sales dates:");
+        salesData.slice(0, 3).forEach((sale, i) => {
+          console.log(
+            `[${i}] date_transacted:`,
+            sale.date_transacted,
+            typeof sale.date_transacted,
+            "->",
+            sale.date_transacted
+              ? new Date(sale.date_transacted)
+              : "Invalid date"
+          );
+        });
       }
-    });
 
-    if (weekSalesData.length === 0) {
-      showAlert("No sales data available for the past week.", "destructive");
-      return;
+      // Filter sales for the past week with fallback to most recent records
+      let weekSalesData = salesData.filter((sale) => {
+        if (!sale || !sale.date_transacted) return false;
+
+        try {
+          const saleDate = new Date(sale.date_transacted);
+          if (isNaN(saleDate.getTime())) return false;
+          return saleDate >= oneWeekAgo && saleDate <= today;
+        } catch (error) {
+          console.error("Date filtering error:", error);
+          return false;
+        }
+      });
+
+      console.log(
+        `Filtered sales by date range: ${weekSalesData.length} of ${salesData.length} records`
+      );
+
+      // If no records found in date range, take most recent records instead
+      if (weekSalesData.length === 0) {
+        console.log(
+          "No records found in date range, using most recent records instead"
+        );
+
+        // Sort by date (if possible) or just take the first records
+        const sortedSales = [...salesData]
+          .filter((sale) => sale && sale.date_transacted)
+          .sort((a, b) => {
+            try {
+              const dateA = new Date(a.date_transacted);
+              const dateB = new Date(b.date_transacted);
+              return dateB - dateA; // Most recent first
+            } catch (err) {
+              return 0;
+            }
+          });
+
+        weekSalesData = sortedSales.slice(0, 5); // Take up to 5 most recent records
+        console.log(
+          `Using ${weekSalesData.length} most recent records instead`
+        );
+
+        // Update date range to match the actual data we're using
+        if (weekSalesData.length > 0) {
+          try {
+            // Find earliest and latest dates in the selected records
+            const dates = weekSalesData
+              .map((sale) => new Date(sale.date_transacted))
+              .filter((date) => !isNaN(date.getTime()));
+
+            if (dates.length > 0) {
+              const earliest = new Date(
+                Math.min(...dates.map((d) => d.getTime()))
+              );
+              const latest = new Date(
+                Math.max(...dates.map((d) => d.getTime()))
+              );
+
+              oneWeekAgo = earliest;
+              today = latest;
+              console.log(
+                "Adjusted date range:",
+                oneWeekAgo.toISOString(),
+                "to",
+                today.toISOString()
+              );
+            }
+          } catch (err) {
+            console.error("Error adjusting date range:", err);
+          }
+        }
+      }
+
+      if (weekSalesData.length === 0) {
+        showAlert("No sales data available for the report.", "destructive");
+        return;
+      }
+
+      // Create workbook
+      const wb = XLSX.utils.book_new();
+
+      // Format timestamp and dates for title
+      const currentTimestamp = format(
+        new Date(),
+        "MMMM dd, yyyy 'at' hh:mm a"
+      ).toUpperCase();
+      const startDateFormatted = format(oneWeekAgo, "MMMM dd").toUpperCase();
+      const endDateFormatted = format(today, "MMMM dd, yyyy").toUpperCase();
+
+      // Format currency function with better error handling
+      const formatCurrency = (amount) => {
+        if (!amount || isNaN(parseFloat(amount))) return 0;
+        return parseFloat(amount);
+      };
+
+      // Sales Sheet with title and data
+      const titleRow = [
+        `BEAUTOX WEEKLY SALES REPORT (${startDateFormatted} - ${endDateFormatted})`
+      ];
+      const timestampRow = [`AS OF ${currentTimestamp}`];
+      const emptyRow = [""];
+      const headerRow = [
+        "Client",
+        "Person In Charge",
+        "Date",
+        "Payment Method",
+        "Package",
+        "Treatment",
+        "Payment",
+        "Reference #"
+      ];
+
+      // Prepare sales data with error handling for each field
+      const salesRows = weekSalesData.map((sale) => {
+        let dateFormatted = "N/A";
+        try {
+          if (sale.date_transacted) {
+            dateFormatted = format(
+              new Date(sale.date_transacted),
+              "MM/dd/yyyy"
+            );
+          }
+        } catch (e) {
+          console.error("Error formatting date:", e, sale.date_transacted);
+        }
+
+        return [
+          ((sale.client || "").toString() || "N/A").toUpperCase(),
+          ((sale.person_in_charge || "").toString() || "N/A").toUpperCase(),
+          dateFormatted,
+          ((sale.payment_method || "").toString() || "N/A").toUpperCase(),
+          ((sale.packages || "").toString() || "N/A").toUpperCase(),
+          ((sale.treatment || "").toString() || "N/A").toUpperCase(),
+          formatCurrency(sale.payment),
+          ((sale.reference_no || "").toString() || "N/A").toUpperCase()
+        ];
+      });
+
+      // Calculate total sales with error handling
+      let totalAmount = 0;
+      try {
+        totalAmount = weekSalesData.reduce((sum, sale) => {
+          const amount = formatCurrency(sale.payment);
+          return sum + (isNaN(amount) ? 0 : amount);
+        }, 0);
+      } catch (error) {
+        console.error("Error calculating total:", error);
+      }
+
+      // Add space after the data and then add summary information
+      const spacerRow = [""];
+      const totalRow = [
+        "TOTAL WEEKLY SALES:",
+        "",
+        "",
+        "",
+        "",
+        "",
+        totalAmount,
+        ""
+      ];
+      const dateRangeRow = [
+        "Date Range:",
+        `${startDateFormatted} - ${endDateFormatted}`,
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ];
+      const generatedRow = [
+        "Report Generated:",
+        currentTimestamp,
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ];
+
+      // Combine all rows into a single sheet
+      const allSheetData = [
+        titleRow,
+        timestampRow,
+        emptyRow,
+        headerRow,
+        ...salesRows,
+        spacerRow,
+        totalRow,
+        dateRangeRow,
+        generatedRow
+      ];
+
+      // Create the worksheet
+      const ws = XLSX.utils.aoa_to_sheet(allSheetData);
+
+      // Set column widths
+      ws["!cols"] = [
+        { wch: 25 }, // Client
+        { wch: 20 }, // Person In Charge
+        { wch: 12 }, // Date
+        { wch: 15 }, // Payment Method
+        { wch: 20 }, // Package
+        { wch: 25 }, // Treatment
+        { wch: 15 }, // Payment
+        { wch: 15 } // Reference #
+      ];
+
+      // Style the title (merge cells for title)
+      ws["!merges"] = [
+        { s: { r: 0, c: 0 }, e: { r: 0, c: 7 } }, // Merge cells for title
+        { s: { r: 1, c: 0 }, e: { r: 1, c: 7 } } // Merge cells for timestamp
+      ];
+
+      // Add the single sheet to workbook
+      XLSX.utils.book_append_sheet(wb, ws, "Weekly Sales");
+
+      // Generate filename
+      const startDateFilename = format(oneWeekAgo, "MMdd");
+      const endDateFilename = format(today, "MMdd");
+      const fileName = `Beautox_WeeklySalesReport_${startDateFilename}_${endDateFilename}.xlsx`;
+
+      console.log("Saving Excel file with filename:", fileName);
+
+      // Save the file
+      try {
+        XLSX.writeFile(wb, fileName);
+        console.log("Excel file saved successfully");
+        showAlert("Weekly Excel report generated successfully", "success");
+      } catch (error) {
+        console.error("Error saving Excel file:", error);
+        showAlert("Error saving Excel file: " + error.message, "destructive");
+      }
+    } catch (error) {
+      console.error("Error in generateWeeklyExcelReport:", error);
+      showAlert(
+        "Error generating Excel report: " + error.message,
+        "destructive"
+      );
     }
-
-    // Create workbook
-    const wb = XLSX.utils.book_new();
-
-    // Format timestamp and dates for title
-    const currentTimestamp = format(
-      new Date(),
-      "MMMM dd, yyyy 'at' hh:mm a"
-    ).toUpperCase();
-    const startDateFormatted = format(oneWeekAgo, "MMMM dd").toUpperCase();
-    const endDateFormatted = format(today, "MMMM dd, yyyy").toUpperCase();
-
-    // Format currency function
-    const formatCurrency = (amount) => {
-      if (!amount || isNaN(amount)) return 0;
-      return parseFloat(amount);
-    };
-
-    // Sales Sheet with title and data
-    const titleRow = [
-      `BEAUTOX WEEKLY SALES REPORT (${startDateFormatted} - ${endDateFormatted})`
-    ];
-    const timestampRow = [`AS OF ${currentTimestamp}`];
-    const emptyRow = [""];
-    const headerRow = [
-      "Client",
-      "Person In Charge",
-      "Date",
-      "Payment Method",
-      "Package",
-      "Treatment",
-      "Payment",
-      "Reference #"
-    ];
-
-    const salesSheetData = [
-      titleRow,
-      timestampRow,
-      emptyRow,
-      headerRow,
-      ...weekSalesData.map((sale) => [
-        (sale.client || "N/A").toUpperCase(),
-        (sale.person_in_charge || "N/A").toUpperCase(),
-        format(new Date(sale.date_transacted), "MM/dd/yyyy"),
-        (sale.payment_method || "N/A").toUpperCase(),
-        (sale.packages || "N/A").toUpperCase(),
-        (sale.treatment || "N/A").toUpperCase(),
-        formatCurrency(sale.payment),
-        (sale.reference_no || "N/A").toUpperCase()
-      ])
-    ];
-
-    const ws_sales = XLSX.utils.aoa_to_sheet(salesSheetData);
-
-    // Set column widths
-    ws_sales["!cols"] = [
-      { wch: 25 }, // Client
-      { wch: 20 }, // Person In Charge
-      { wch: 12 }, // Date
-      { wch: 15 }, // Payment Method
-      { wch: 20 }, // Package
-      { wch: 25 }, // Treatment
-      { wch: 15 }, // Payment
-      { wch: 15 } // Reference #
-    ];
-
-    // Style the title (merge cells for title)
-    ws_sales["!merges"] = [
-      { s: { r: 0, c: 0 }, e: { r: 0, c: 7 } }, // Merge cells for title
-      { s: { r: 1, c: 0 }, e: { r: 1, c: 7 } } // Merge cells for timestamp
-    ];
-
-    // Add Summary section
-    const totalAmount = weekSalesData.reduce(
-      (sum, sale) => sum + formatCurrency(sale.payment),
-      0
-    );
-
-    const summaryData = [
-      [],
-      ["Weekly Sales Summary"],
-      [],
-      ["Total Weekly Sales", totalAmount],
-      ["Date Range", `${startDateFormatted} - ${endDateFormatted}`],
-      ["Report Generated", currentTimestamp]
-    ];
-
-    const ws_summary = XLSX.utils.aoa_to_sheet(summaryData);
-
-    // Set column widths for summary
-    ws_summary["!cols"] = [
-      { wch: 20 }, // Labels
-      { wch: 30 } // Values
-    ];
-
-    // Add sheets to workbook
-    XLSX.utils.book_append_sheet(wb, ws_sales, "Weekly Sales");
-    XLSX.utils.book_append_sheet(wb, ws_summary, "Summary");
-
-    // Generate filename
-    const startDateFilename = format(oneWeekAgo, "MMdd");
-    const endDateFilename = format(today, "MMdd");
-    const fileName = `Beautox_WeeklySalesReport_${startDateFilename}_${endDateFilename}.xlsx`;
-
-    // Save the file
-    XLSX.writeFile(wb, fileName);
   };
 
   const generateMonthlyPDFReport = (salesData, expensesData) => {
@@ -1535,7 +1797,7 @@ function FinancialOverview() {
           <Button
             className="rounded-none border-r border-customNeutral-300 first:rounded-l-lg text-sm md:text-base"
             data-cy="download-weekly-sales-btn"
-            onClick={() => generateWeeklyExcelReport(salesData, expensesData)}
+            onClick={() => generateWeeklyExcelReport(salesData)}
           >
             <DownloadIcon />
             <span className="hidden md:inline">DOWNLOAD WEEKLY SALES DATA</span>
@@ -1543,7 +1805,7 @@ function FinancialOverview() {
           </Button>
           <Button
             variant="callToAction"
-            onClick={() => generateWeeklyExcelReport(salesData, expensesData)}
+            onClick={() => generateWeeklyPDFReport(salesData)}
             className="rounded-none last:rounded-r-lg text-sm md:text-base"
             data-cy="download-weekly-report-btn"
           >

@@ -13,11 +13,7 @@ const WeeklyBookingPanel = ({ events = [], currentDate }) => {
     return `${i % 12 || 12}:00${i < 12 ? "AM" : "PM"}`;
   });
 
-  const handleOpenModal = (appointment) => {
-    setSelectedEntry(appointment);
-    openModal("displayEntry");
-  };
-
+  // Make sure to compute weekDates at the top, before it's used
   const getWeekDates = (date) => {
     const result = [];
     const startOfWeek = new Date(date);
@@ -31,27 +27,49 @@ const WeeklyBookingPanel = ({ events = [], currentDate }) => {
     return result;
   };
 
+  // Move this calculation to the top of the component
   const weekDates = getWeekDates(currentDate);
 
+  const handleOpenModal = (appointment) => {
+    setSelectedEntry(appointment);
+    openModal("displayEntry");
+  };
+
   const parseTime = (time) => {
-    const [_, hour, minute, period] = time.match(/(\d+):?(\d{2})?(AM|PM)/i);
-    const isPM = period.toUpperCase() === "PM";
-    return {
-      hours: parseInt(hour % 12) + (isPM ? 12 : 0),
-      minutes: parseInt(minute || 0)
-    };
+    try {
+      const match = time.match(/(\d+):?(\d{2})?(AM|PM)/i);
+      if (!match) {
+        console.error("Invalid time format:", time);
+        return { hours: 0, minutes: 0 };
+      }
+
+      const [_, hour, minute, period] = match;
+      const isPM = period.toUpperCase() === "PM";
+      return {
+        hours: parseInt(hour % 12) + (isPM ? 12 : 0),
+        minutes: parseInt(minute || 0)
+      };
+    } catch (error) {
+      console.error("Error parsing time:", error, time);
+      return { hours: 0, minutes: 0 };
+    }
   };
 
   const calculateEventPosition = (event) => {
-    const start = parseTime(event.startTime);
-    const end = parseTime(event.endTime);
-    const startHour = start.hours + start.minutes / 60;
-    const endHour = end.hours + end.minutes / 60;
+    try {
+      const start = parseTime(event.startTime);
+      const end = parseTime(event.endTime);
+      const startHour = start.hours + start.minutes / 60;
+      const endHour = end.hours + end.minutes / 60;
 
-    return {
-      top: `${(startHour / 24) * 100}%`,
-      height: `${((endHour - startHour) / 24) * 100}%`
-    };
+      return {
+        top: `${(startHour / 24) * 100}%`,
+        height: `${((endHour - startHour) / 24) * 100}%`
+      };
+    } catch (error) {
+      console.error("Error calculating event position:", error, event);
+      return { top: "0%", height: "5%" }; // Default fallback
+    }
   };
 
   const formatDate = (date) => {
@@ -185,6 +203,7 @@ const WeeklyBookingPanel = ({ events = [], currentDate }) => {
                       ))}
                     </div>
 
+                    {/* Add more debug information to help troubleshoot */}
                     {events
                       .filter(
                         (event) =>
@@ -197,6 +216,9 @@ const WeeklyBookingPanel = ({ events = [], currentDate }) => {
                             dayDate.getFullYear()
                       )
                       .map((event, eventIdx) => {
+                        // Log each event to debug
+                        console.log(`Rendering event for ${day}:`, event);
+
                         const { top, height } = calculateEventPosition(event);
                         return (
                           <button
@@ -206,7 +228,8 @@ const WeeklyBookingPanel = ({ events = [], currentDate }) => {
                             style={{ top, height }}
                             data-cy={`event-${eventIdx}`}
                           >
-                            {event.title}
+                            {/* Display the name of the appointment */}
+                            {event.name || "Unnamed Appointment"}
                           </button>
                         );
                       })}
