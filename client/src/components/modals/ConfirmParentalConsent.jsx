@@ -20,8 +20,9 @@ function ConfirmParentalConsent({ isOpen, onClose, onConfirm }) {
       </div>
       <ModalTitle className="text-center">ALLOW PARENTAL CONSENT?</ModalTitle>
       <p className="dark:text-customNeutral-100">
-        Patient is below 18 years old. Is this a parental consent provided for
-        treatment?
+        Submitted age is below 18. Is parental consent provided for treatment?
+        Kindly ensure it is prepared and signed as it will be shown to allow the
+        procedure.
       </p>
       <div className="flex sm:flex-row flex-col gap-4 w-full">
         <Button
