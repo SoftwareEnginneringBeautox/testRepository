@@ -13,6 +13,7 @@ import {
   AlertDescription,
   CloseAlert
 } from "@/components/ui/Alert";
+import ConfirmParentalConsent from "./ConfirmParentalConsent";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -44,6 +45,8 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
   const [alertMessage, setAlertMessage] = useState("");
   const [alertTitle, setAlertTitle] = useState("");
   const [showAlert, setShowAlert] = useState(false);
+  const [showParentalConsentModal, setShowParentalConsentModal] =
+    useState(false);
 
   // Add validation error states
   const [ageError, setAgeError] = useState(false);
@@ -164,52 +167,17 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
     }
 
     const age = calculateAge(value);
-    if (age < 18 || age > 120) {
+    if (age > 120) {
       setAgeError(true);
       return false;
     }
 
+    // Age is valid or underage (we'll handle underage separately)
     setAgeError(false);
     return true;
   };
 
-  // Handle form submission
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    // Prevent duplicate submissions
-    if (isSubmitting || submitInProgressRef.current) {
-      console.log("Submission already in progress");
-      return;
-    }
-
-    submitInProgressRef.current = true;
-    setIsSubmitting(true);
-
-    // Reset alert
-    setAlertTitle("");
-    setAlertMessage("");
-
-    // Run all validations
-    const isBirthDateValid = validateBirthDate(birthDate);
-    const isPhoneValid = validatePhone(contactNumber);
-    const isDateValid = validateDate(dateOfSession);
-    const isTimeValid = isWithinBusinessHours(timeOfSession);
-    const isEmailValid = validateEmail(email);
-
-    // If any validation fails, prevent form submission
-    if (
-      !isBirthDateValid ||
-      !isPhoneValid ||
-      !isDateValid ||
-      !isTimeValid ||
-      !isEmailValid
-    ) {
-      setIsSubmitting(false);
-      submitInProgressRef.current = false;
-      return;
-    }
-
+  const submitAppointmentForm = async () => {
     try {
       // Calculate age from birthdate
       const calculatedAge = calculateAge(birthDate);
@@ -269,6 +237,56 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
       setIsSubmitting(false);
       submitInProgressRef.current = false;
     }
+  };
+
+  const handleParentalConsentConfirm = () => {
+    setShowParentalConsentModal(false);
+    // Proceed with form submission
+    submitAppointmentForm();
+  };
+
+  // Handle form submission
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // Prevent duplicate submissions
+    if (isSubmitting || submitInProgressRef.current) {
+      console.log("Submission already in progress");
+      return;
+    }
+
+    submitInProgressRef.current = true;
+    setIsSubmitting(true);
+
+    // Reset alert
+    setAlertTitle("");
+    setAlertMessage("");
+
+    // Check if underage - calculate age directly here
+    const age = calculateAge(birthDate);
+    if (age < 18) {
+      // Show parental consent modal instead of error
+      setShowParentalConsentModal(true);
+      setIsSubmitting(false);
+      submitInProgressRef.current = false;
+      return;
+    }
+
+    // Run all other validations
+    const isPhoneValid = validatePhone(contactNumber);
+    const isDateValid = validateDate(dateOfSession);
+    const isTimeValid = isWithinBusinessHours(timeOfSession);
+    const isEmailValid = validateEmail(email);
+
+    // If any validation fails, prevent form submission
+    if (!isPhoneValid || !isDateValid || !isTimeValid || !isEmailValid) {
+      setIsSubmitting(false);
+      submitInProgressRef.current = false;
+      return;
+    }
+
+    // If all validations pass, submit the form
+    await submitAppointmentForm();
   };
 
   // Handle alert dismissal
@@ -504,6 +522,12 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
           </div>
         </form>
       </ModalBody>
+
+      <ConfirmParentalConsent
+        isOpen={showParentalConsentModal}
+        onClose={() => setShowParentalConsentModal(false)}
+        onConfirm={handleParentalConsentConfirm}
+      />
     </ModalContainer>
   );
 }

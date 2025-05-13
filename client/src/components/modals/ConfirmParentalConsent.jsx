@@ -7,7 +7,7 @@ import { Button } from "../ui/Button";
 import WarningIcon from "@/assets/icons/WarningIcon";
 import ChevronLeftIcon from "@/assets/icons/ChevronLeftIcon";
 
-function ConfirmParentalConsent({ isOpen, onClose }) {
+function ConfirmParentalConsent({ isOpen, onClose, onConfirm }) {
   if (!isOpen) return null;
 
   return (
@@ -33,7 +33,11 @@ function ConfirmParentalConsent({ isOpen, onClose }) {
           <ChevronLeftIcon />
           CANCEL AND RETURN
         </Button>
-        <Button data-cy="confirm-consent-btn" className="md:w-1/2 truncate">
+        <Button
+          data-cy="confirm-consent-btn"
+          className="md:w-1/2 truncate"
+          onClick={onConfirm}
+        >
           CONFIRM AND ALLOW
         </Button>
       </div>
