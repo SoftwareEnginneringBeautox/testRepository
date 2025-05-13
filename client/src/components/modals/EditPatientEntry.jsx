@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
+import ConfirmParentalConsent from "./ConfirmParentalConsent";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -36,6 +37,8 @@ function EditPatientContactInfo({ isOpen, onClose, entryData, onSubmit }) {
   const [formSubmitAttempted, setFormSubmitAttempted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const submitInProgressRef = useRef(false);
+  const [showParentalConsentModal, setShowParentalConsentModal] =
+    useState(false);
 
   useEffect(() => {
     if (entryData) {
@@ -76,11 +79,13 @@ function EditPatientContactInfo({ isOpen, onClose, entryData, onSubmit }) {
     // Birth date validation
     if (formData.birth_date) {
       const age = calculateAge(formData.birth_date);
-      if (age < 18) {
-        errors.birth_date = "Patient must be at least 18 years old";
+      // Age 12 and below not allowed
+      if (age <= 12) {
+        errors.birth_date = "Patient must be over 12 years old";
       } else if (age > 120) {
         errors.birth_date = "Invalid birth date";
       }
+      // Ages 13-17 will need parental consent (handled separately)
     }
 
     return errors;
@@ -154,6 +159,47 @@ function EditPatientContactInfo({ isOpen, onClose, entryData, onSubmit }) {
     }
   };
 
+  // Main submission function
+  const submitForm = async () => {
+    // Prepare contact data with calculated age
+    const contactData = {
+      id: entryData.id,
+      contact_number: formData.contact_number || null,
+      birth_date: formData.birth_date || null,
+      age: formData.birth_date ? calculateAge(formData.birth_date) : null,
+      email: formData.email || null
+    };
+
+    try {
+      // Update patient record
+      await onSubmit(contactData);
+
+      // Update appointment records
+      const updatedAppointments = await updateAppointmentRecords(contactData);
+
+      if (updatedAppointments) {
+        console.log(
+          `Successfully updated ${updatedAppointments} appointment records`
+        );
+      }
+
+      setIsSubmitting(false);
+      submitInProgressRef.current = false;
+      onClose();
+    } catch (error) {
+      console.error("Error updating contact info:", error);
+      setIsSubmitting(false);
+      submitInProgressRef.current = false;
+    }
+  };
+
+  // Handle parental consent confirmation
+  const handleParentalConsentConfirm = () => {
+    setShowParentalConsentModal(false);
+    // Proceed with form submission
+    submitForm();
+  };
+
   const handleSubmit = async () => {
     if (isSubmitting || submitInProgressRef.current) {
       console.log("Submission already in progress");
@@ -185,35 +231,20 @@ function EditPatientContactInfo({ isOpen, onClose, entryData, onSubmit }) {
       return;
     }
 
-    // Prepare contact data with calculated age
-    const contactData = {
-      id: entryData.id,
-      contact_number: formData.contact_number || null,
-      birth_date: formData.birth_date || null,
-      age: formData.birth_date ? calculateAge(formData.birth_date) : null,
-      email: formData.email || null
-    };
-
-    try {
-      // Update patient record
-      await onSubmit(contactData);
-
-      // Update appointment records
-      const updatedAppointments = await updateAppointmentRecords(contactData);
-
-      if (updatedAppointments) {
-        console.log(
-          `Successfully updated ${updatedAppointments} appointment records`
-        );
+    // Check for underage patients (13-17)
+    if (formData.birth_date) {
+      const age = calculateAge(formData.birth_date);
+      if (age >= 13 && age < 18) {
+        // Show parental consent modal instead of proceeding
+        setShowParentalConsentModal(true);
+        setIsSubmitting(false);
+        submitInProgressRef.current = false;
+        return;
       }
-
-      setIsSubmitting(false);
-      submitInProgressRef.current = false;
-    } catch (error) {
-      console.error("Error updating contact info:", error);
-      setIsSubmitting(false);
-      submitInProgressRef.current = false;
     }
+
+    // If no issues, proceed with form submission
+    await submitForm();
   };
 
   if (!isOpen) return null;
@@ -353,6 +384,13 @@ function EditPatientContactInfo({ isOpen, onClose, entryData, onSubmit }) {
           </div>
         </form>
       </ModalBody>
+
+      {/* Parental Consent Modal */}
+      <ConfirmParentalConsent
+        isOpen={showParentalConsentModal}
+        onClose={() => setShowParentalConsentModal(false)}
+        onConfirm={handleParentalConsentConfirm}
+      />
     </ModalContainer>
   );
 }

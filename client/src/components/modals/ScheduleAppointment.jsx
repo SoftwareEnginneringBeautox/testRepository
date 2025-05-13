@@ -1,3 +1,4 @@
+// ScheduleAppointment.jsx
 import React, { useState, useRef, useEffect } from "react";
 import {
   ModalContainer,
@@ -101,18 +102,49 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
     return emailRegex.test(email);
   };
 
-  // Add validation handlers for each field
-  const validateAge = (value) => {
-    const ageValue = parseInt(value, 10);
-    if (value && (isNaN(ageValue) || ageValue < 18 || ageValue > 120)) {
-      setAgeError(true);
-      return false;
-    } else {
-      setAgeError(false);
-      return true;
+  const calculateAge = (birthDate) => {
+    const today = new Date();
+    const birth = new Date(birthDate);
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birth.getDate())
+    ) {
+      age--;
     }
+
+    return age;
   };
 
+  // Update the age validation function
+  const validateBirthDate = (value) => {
+    if (!value) {
+      setAgeError(true);
+      return false;
+    }
+
+    const age = calculateAge(value);
+
+    // Children 12 and below are not allowed
+    if (age <= 12) {
+      setAgeError(true);
+      return false;
+    }
+
+    // Patients over 120 are not allowed (likely an error)
+    if (age > 120) {
+      setAgeError(true);
+      return false;
+    }
+
+    // Age is valid (either 13-17 requiring consent, or 18+ which is fine)
+    setAgeError(false);
+    return true;
+  };
+
+  // Add validation handlers for each field
   const validatePhone = (value) => {
     if (value && !isValidPhoneNumber(value)) {
       setPhoneError(true);
@@ -141,40 +173,6 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
       setEmailError(false);
       return true;
     }
-  };
-
-  const calculateAge = (birthDate) => {
-    const today = new Date();
-    const birth = new Date(birthDate);
-    let age = today.getFullYear() - birth.getFullYear();
-    const monthDiff = today.getMonth() - birth.getMonth();
-
-    if (
-      monthDiff < 0 ||
-      (monthDiff === 0 && today.getDate() < birth.getDate())
-    ) {
-      age--;
-    }
-
-    return age;
-  };
-
-  // Update the age validation function
-  const validateBirthDate = (value) => {
-    if (!value) {
-      setAgeError(true);
-      return false;
-    }
-
-    const age = calculateAge(value);
-    if (age > 120) {
-      setAgeError(true);
-      return false;
-    }
-
-    // Age is valid or underage (we'll handle underage separately)
-    setAgeError(false);
-    return true;
   };
 
   const submitAppointmentForm = async () => {
@@ -262,10 +260,18 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
     setAlertTitle("");
     setAlertMessage("");
 
-    // Check if underage - calculate age directly here
+    // First validate the birthdate
+    if (!validateBirthDate(birthDate)) {
+      setIsSubmitting(false);
+      submitInProgressRef.current = false;
+      return;
+    }
+
+    // Calculate age to determine workflow
     const age = calculateAge(birthDate);
-    if (age < 18) {
-      // Show parental consent modal instead of error
+
+    // If minor (13-17), show parental consent modal
+    if (age >= 13 && age < 18) {
       setShowParentalConsentModal(true);
       setIsSubmitting(false);
       submitInProgressRef.current = false;
@@ -400,8 +406,7 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
             </InputTextField>
             {ageError && (
               <p className="text-red-500 text-[10px] mt-0.5">
-                You must be at least 18 years old and not older than 120 years
-                old
+                Patient must be over 12 years old
               </p>
             )}
           </InputContainer>

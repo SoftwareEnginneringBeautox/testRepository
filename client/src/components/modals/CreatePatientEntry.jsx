@@ -3,6 +3,7 @@ import CurrencyInput from "react-currency-input-field";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/RadioGroup";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { TreatmentMultiSelect } from "@/components/ui/TreatmentMultiSelect";
+import ConfirmParentalConsent from "./ConfirmParentalConsent";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -85,6 +86,10 @@ function CreatePatientEntry({ isOpen, onClose }) {
   const [email, setEmail] = useState("");
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // State for parental consent modal
+  const [showParentalConsentModal, setShowParentalConsentModal] =
+    useState(false);
 
   // Effect for setting amount based on package or treatments
   useEffect(() => {
@@ -240,9 +245,15 @@ function CreatePatientEntry({ isOpen, onClose }) {
     }
 
     const age = calculateAge(value);
-    if (age < 18) {
-      return "Patient must be at least 18 years old";
+
+    // Children 12 and below are not allowed
+    if (age <= 12) {
+      return "Patient must be over 12 years old";
     }
+
+    // Ages 13-17 will need parental consent (handled separately)
+
+    // Patients over 120 are not allowed (likely an error)
     if (age > 120) {
       return "Invalid birth date";
     }
@@ -250,7 +261,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
     return "";
   };
 
-  // Handle form submission, sending new patient record to the server
+  // Handle form submission with parental consent check
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (isSubmitting) return;
@@ -350,47 +361,71 @@ function CreatePatientEntry({ isOpen, onClose }) {
       return;
     }
 
-    // Calculate financial values
-    const numericTotal = parseFloat(totalAmount) || 0;
-    const numericDiscount = parseFloat(packageDiscount) || 0;
-    const numericAmount = parseFloat(amount) || 0;
-    const numericAmountPaid = parseFloat(amountPaid) || 0;
-    const remainingBalance = numericTotal - numericAmountPaid;
-    const calculatedAge = calculateAge(birthDate);
+    // Check for underage patients (13-17)
+    const age = calculateAge(birthDate);
+    if (age >= 13 && age < 18) {
+      // Show parental consent modal instead of proceeding
+      setShowParentalConsentModal(true);
+      setIsSubmitting(false);
+      return;
+    }
 
-    // Prepare treatment data
-    const selectedTreatmentIds = Array.isArray(treatment)
-      ? treatment.map(Number)
-      : [];
-    const selectedTreatmentNames = treatmentsList
-      .filter((t) => selectedTreatmentIds.includes(t.id))
-      .map((t) => t.treatment_name);
+    // If adult or consent confirmed, proceed with form submission
+    await submitPatientForm();
+  };
 
-    // Patient Records Payload
-    const patientPayload = {
-      patient_name: patientName,
-      contact_number: contactNumber,
-      birth_date: birthDate,
-      age: calculatedAge,
-      email,
-      person_in_charge: personInCharge,
-      package_name: packageName,
-      treatments: selectedTreatmentNames,
-      treatment_ids: selectedTreatmentIds,
-      amount: numericAmount,
-      amount_paid: numericAmountPaid,
-      package_discount: numericDiscount,
-      total_amount: numericTotal,
-      payment_method: paymentMethod,
-      date_of_session: dateOfSession,
-      time_of_session: timeOfSession,
-      consent_form_signed: consentFormSigned,
-      reference_number: referenceNumber,
-      remaining_balance: remainingBalance,
-      sessions_left: sessionsLeft
-    };
+  // Handle parental consent confirmation
+  const handleParentalConsentConfirm = () => {
+    setShowParentalConsentModal(false);
+    // Proceed with form submission
+    submitPatientForm();
+  };
+
+  // Actual form submission logic (separated to be reused)
+  const submitPatientForm = async () => {
+    setIsSubmitting(true);
 
     try {
+      // Calculate financial values
+      const numericTotal = parseFloat(totalAmount) || 0;
+      const numericDiscount = parseFloat(packageDiscount) || 0;
+      const numericAmount = parseFloat(amount) || 0;
+      const numericAmountPaid = parseFloat(amountPaid) || 0;
+      const remainingBalance = numericTotal - numericAmountPaid;
+      const calculatedAge = calculateAge(birthDate);
+
+      // Prepare treatment data
+      const selectedTreatmentIds = Array.isArray(treatment)
+        ? treatment.map(Number)
+        : [];
+      const selectedTreatmentNames = treatmentsList
+        .filter((t) => selectedTreatmentIds.includes(t.id))
+        .map((t) => t.treatment_name);
+
+      // Patient Records Payload
+      const patientPayload = {
+        patient_name: patientName,
+        contact_number: contactNumber,
+        birth_date: birthDate,
+        age: calculatedAge,
+        email,
+        person_in_charge: personInCharge,
+        package_name: packageName,
+        treatments: selectedTreatmentNames,
+        treatment_ids: selectedTreatmentIds,
+        amount: numericAmount,
+        amount_paid: numericAmountPaid,
+        package_discount: numericDiscount,
+        total_amount: numericTotal,
+        payment_method: paymentMethod,
+        date_of_session: dateOfSession,
+        time_of_session: timeOfSession,
+        consent_form_signed: consentFormSigned,
+        reference_number: referenceNumber,
+        remaining_balance: remainingBalance,
+        sessions_left: sessionsLeft
+      };
+
       // Submit to patient records
       const response = await fetch(`${API_BASE_URL}/api/patients`, {
         method: "POST",
@@ -475,6 +510,16 @@ function CreatePatientEntry({ isOpen, onClose }) {
       console.error("Error submitting form:", error);
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  // Handle alert dismissal
+  const handleAlertClose = () => {
+    setShowAlert(false);
+
+    // If it was a success alert, also close the modal
+    if (alertTitle === "Success") {
+      onClose();
     }
   };
 
@@ -981,6 +1026,13 @@ function CreatePatientEntry({ isOpen, onClose }) {
           </div>
         </form>
       </ModalBody>
+
+      {/* Parental Consent Modal */}
+      <ConfirmParentalConsent
+        isOpen={showParentalConsentModal}
+        onClose={() => setShowParentalConsentModal(false)}
+        onConfirm={handleParentalConsentConfirm}
+      />
     </ModalContainer>
   );
 }
