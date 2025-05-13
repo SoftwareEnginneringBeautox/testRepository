@@ -421,6 +421,15 @@ function FinancialOverview() {
         return;
       }
 
+      // Calculate total unique patients
+      const uniquePatients = new Set();
+      weekSalesData.forEach((sale) => {
+        if (sale.client) {
+          uniquePatients.add(sale.client.toString().toLowerCase().trim());
+        }
+      });
+      const totalUniquePatients = uniquePatients.size;
+
       const doc = new jsPDF({
         orientation: "portrait",
         unit: "pt",
@@ -599,13 +608,23 @@ function FinancialOverview() {
         align: "right"
       });
 
-      doc.setLineWidth(0.5);
-      doc.line(margin, finalY + 10, pageWidth - margin, finalY + 10);
+      // Add total patients count
+      doc.text("TOTAL PATIENTS SERVED:", margin, finalY + 20);
+      doc.text(
+        totalUniquePatients.toString(),
+        pageWidth - margin,
+        finalY + 20,
+        {
+          align: "right"
+        }
+      );
 
-      // Generate filename
-      const startDateFilename = format(oneWeekAgo, "MMdd");
-      const endDateFilename = format(today, "MMdd");
-      const filename = `Beautox_WeeklySalesReport_${startDateFilename}_${endDateFilename}.pdf`;
+      doc.setLineWidth(0.5);
+      doc.line(margin, finalY + 30, pageWidth - margin, finalY + 30);
+
+      // Generate filename with Month_Day_Year format
+      const formattedDateForFilename = format(today, "MMMM_dd_yyyy");
+      const filename = `Beautox_WeeklySalesReport_${formattedDateForFilename}.pdf`;
 
       console.log("Saving PDF with filename:", filename);
 
@@ -745,6 +764,15 @@ function FinancialOverview() {
         return;
       }
 
+      // Calculate total unique patients
+      const uniquePatients = new Set();
+      weekSalesData.forEach((sale) => {
+        if (sale.client) {
+          uniquePatients.add(sale.client.toString().toLowerCase().trim());
+        }
+      });
+      const totalUniquePatients = uniquePatients.size;
+
       // Create workbook
       const wb = XLSX.utils.book_new();
 
@@ -828,6 +856,16 @@ function FinancialOverview() {
         totalAmount,
         ""
       ];
+      const patientsRow = [
+        "TOTAL PATIENTS SERVED:",
+        "",
+        "",
+        "",
+        "",
+        "",
+        totalUniquePatients,
+        ""
+      ];
       const dateRangeRow = [
         "Date Range:",
         `${startDateFormatted} - ${endDateFormatted}`,
@@ -858,6 +896,7 @@ function FinancialOverview() {
         ...salesRows,
         spacerRow,
         totalRow,
+        patientsRow,
         dateRangeRow,
         generatedRow
       ];
@@ -886,10 +925,9 @@ function FinancialOverview() {
       // Add the single sheet to workbook
       XLSX.utils.book_append_sheet(wb, ws, "Weekly Sales");
 
-      // Generate filename
-      const startDateFilename = format(oneWeekAgo, "MMdd");
-      const endDateFilename = format(today, "MMdd");
-      const fileName = `Beautox_WeeklySalesReport_${startDateFilename}_${endDateFilename}.xlsx`;
+      // Generate filename with Month_Day_Year format
+      const formattedDateForFilename = format(today, "MMMM_dd_yyyy");
+      const fileName = `Beautox_WeeklySalesReport_${formattedDateForFilename}.xlsx`;
 
       console.log("Saving Excel file with filename:", fileName);
 
@@ -934,6 +972,15 @@ function FinancialOverview() {
         saleDate.getFullYear() === currentYear
       );
     });
+
+    // Calculate total unique patients for the month
+    const uniquePatients = new Set();
+    currentMonthSales.forEach((sale) => {
+      if (sale.client) {
+        uniquePatients.add(sale.client.toString().toLowerCase().trim());
+      }
+    });
+    const totalUniquePatients = uniquePatients.size;
 
     const doc = new jsPDF({
       orientation: "portrait",
@@ -994,8 +1041,9 @@ function FinancialOverview() {
     };
 
     // 1. FIRST ADD SALES TABLE - List all sales for the current month
+    const salesY = margin + 90;
     doc.setFontSize(14);
-    doc.text("MONTHLY SALES", pageWidth / 2, margin + 70, { align: "center" });
+    doc.text("MONTHLY SALES", pageWidth / 2, salesY - 20, { align: "center" });
 
     // Define base column configuration (matching weekly report)
     const baseColumns = [
@@ -1039,7 +1087,7 @@ function FinancialOverview() {
     autoTable(doc, {
       head: [headers.map((h) => h.header)],
       body: salesTableData,
-      startY: margin + 90,
+      startY: salesY,
       margin: { top: margin, right: margin, bottom: margin, left: margin },
       columnStyles: {
         ...headers.reduce((acc, col, index) => {
@@ -1138,7 +1186,7 @@ function FinancialOverview() {
     autoTable(doc, {
       head: [["CATEGORY", "AMOUNT"]],
       body: expensesTableData,
-      startY: salesTableEndY + 20,
+      startY: salesTableEndY + 20, // Make sure the table starts after the title
       margin: { top: margin, right: margin, bottom: margin, left: margin },
       columnStyles: {
         0: {
@@ -1210,27 +1258,33 @@ function FinancialOverview() {
       align: "right"
     });
 
+    // Add total patients
+    doc.text("TOTAL PATIENTS SERVED:", margin, finalY + 40);
+    doc.text(totalUniquePatients.toString(), pageWidth - margin, finalY + 40, {
+      align: "right"
+    });
+
     // Add separator line
     doc.setLineWidth(0.5);
-    doc.line(margin, finalY + 30, pageWidth - margin, finalY + 30);
+    doc.line(margin, finalY + 50, pageWidth - margin, finalY + 50);
 
     // Add final total
     doc.setFontSize(12);
     doc.text(
       totalProfit < 0 ? "TOTAL LOSS:" : "TOTAL PROFIT:",
       margin,
-      finalY + 50
+      finalY + 70
     );
     doc.text(
       formatCurrency(Math.abs(totalProfit)),
       pageWidth - margin,
-      finalY + 50,
+      finalY + 70,
       {
         align: "right"
       }
     );
 
-    // Save the PDF
+    // Save the PDF with consistent naming format
     doc.save(`Beautox_MonthlySalesReport_${formattedDateForFilename}.pdf`);
   };
 
@@ -1262,6 +1316,15 @@ function FinancialOverview() {
         saleDate.getFullYear() === currentYear
       );
     });
+
+    // Calculate total unique patients for the month
+    const uniquePatients = new Set();
+    currentMonthSales.forEach((sale) => {
+      if (sale.client) {
+        uniquePatients.add(sale.client.toString().toLowerCase().trim());
+      }
+    });
+    const totalUniquePatients = uniquePatients.size;
 
     // Create workbook
     const wb = XLSX.utils.book_new();
@@ -1348,6 +1411,7 @@ function FinancialOverview() {
       [],
       ["Total Sales", totalSales],
       ["Total Expenses", totalExpenses],
+      ["Total Patients Served", totalUniquePatients],
       ["Net Income", totalSales - totalExpenses]
     ];
 
@@ -1364,9 +1428,9 @@ function FinancialOverview() {
     XLSX.utils.book_append_sheet(wb, ws_expenses, "Expenses");
     XLSX.utils.book_append_sheet(wb, ws_summary, "Summary");
 
-    // Generate filename with current date
-    const dateStr = format(currentDate, "MMM_dd_yyyy").toUpperCase();
-    const fileName = `Beautox_MonthlyReport_${dateStr}.xlsx`;
+    // Generate filename with consistent format
+    const formattedDateForFilename = format(currentDate, "MMMM_dd_yyyy");
+    const fileName = `Beautox_MonthlySalesReport_${formattedDateForFilename}.xlsx`;
 
     // Save the file
     XLSX.writeFile(wb, fileName);
