@@ -328,6 +328,24 @@ function PatientRecordsDatabase() {
         const dateB = new Date(b.dateTransacted || b.date_of_session);
         return dateB - dateA; // Most recent first
       }
+      if (sortOption === "payment") {
+        // Get payment methods with fallbacks
+        const paymentA = a.paymentMethod || a.payment_method || "";
+        const paymentB = b.paymentMethod || b.payment_method || "";
+
+        // Check if either payment is "Full Payment" or contains "full"
+        const isFullPaymentA = paymentA.toLowerCase().includes("full");
+        const isFullPaymentB = paymentB.toLowerCase().includes("full");
+
+        // Sort full payments first, then installments
+        if (isFullPaymentA && !isFullPaymentB) return -1;
+        if (!isFullPaymentA && isFullPaymentB) return 1;
+
+        // If both are the same payment type, sort alphabetically by name as secondary sort
+        const nameA = (a.client || a.patient_name || "").toLowerCase();
+        const nameB = (b.client || b.patient_name || "").toLowerCase();
+        return nameA.localeCompare(nameB);
+      }
       return 0;
     });
 
@@ -748,6 +766,7 @@ function PatientRecordsDatabase() {
             <SelectContent>
               <SelectItem value="alphabetical">ALPHABETICAL</SelectItem>
               <SelectItem value="date">DATE</SelectItem>
+              <SelectItem value="payment">PAYMENT METHOD</SelectItem>
             </SelectContent>
           </Select>
 
