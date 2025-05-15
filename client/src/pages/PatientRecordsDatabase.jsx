@@ -3,6 +3,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { useModal } from "@/hooks/useModal";
 import { calculateAge } from "@/lib/ageCalculator";
+
 import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/Button";
@@ -80,6 +81,8 @@ function PatientRecordsDatabase() {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortOption, setSortOption] = useState("");
   const [loading, setLoading] = useState(true);
+  const [midnightRefresh, setMidnightRefresh] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   // Define the column configuration
   const columnConfig = [
@@ -126,6 +129,22 @@ function PatientRecordsDatabase() {
   const [currentPage, setCurrentPage] = useState(1);
   const recordsPerPage = 10;
 
+  useEffect(() => {
+    console.log("DEBUGGING MIGUEL'S AGE:");
+    const miguelBirthDate = "2000-05-16"; // Replace with actual value from your DB
+
+    // Create the same Date object in different ways
+    const date1 = new Date(miguelBirthDate);
+    const date2 = new Date(miguelBirthDate + "T00:00:00");
+    const [year, month, day] = miguelBirthDate.split("-").map(Number);
+    const date3 = new Date(year, month - 1, day);
+
+    console.log("Method 1:", calculateAge(date1));
+    console.log("Method 2:", calculateAge(date2));
+    console.log("Method 3:", calculateAge(date3));
+    console.log("Direct string:", calculateAge(miguelBirthDate));
+  }, []);
+
   // Initialize selectedColumns with ALL columns (not just mandatory)
   useEffect(() => {
     // Select all columns by default
@@ -141,6 +160,26 @@ function PatientRecordsDatabase() {
   useEffect(() => {
     console.log("Selected columns updated:", selectedColumns);
   }, [selectedColumns]);
+
+  // midnight refresh function
+  useEffect(() => {
+    // Calculate time until midnight
+    const now = new Date();
+    const tomorrow = new Date(now);
+    tomorrow.setDate(now.getDate() + 1);
+    tomorrow.setHours(0, 0, 0, 0);
+    const msUntilMidnight = tomorrow - now;
+
+    console.log(`Will refresh ages at midnight in ${msUntilMidnight}ms`);
+
+    // Set timeout to trigger at midnight
+    const midnightTimeout = setTimeout(() => {
+      console.log("Midnight passed - refreshing ages");
+      setMidnightRefresh((prev) => !prev);
+    }, msUntilMidnight);
+
+    return () => clearTimeout(midnightTimeout);
+  }, [midnightRefresh]);
 
   // Fetch patient records from the API
   const fetchRecords = async () => {
@@ -186,6 +225,17 @@ function PatientRecordsDatabase() {
     };
 
     fetchTreatments();
+  }, []);
+
+  useEffect(() => {
+    // Increment trigger on mount to force recalculation
+    setRefreshTrigger((prev) => prev + 1);
+  }, []);
+
+  // Create a memoized refresh function
+  const refreshAges = useCallback(() => {
+    console.log("Manually refreshing ages...");
+    setRefreshTrigger((prev) => prev + 1);
   }, []);
 
   const getTreatmentNames = (ids) => {
@@ -404,7 +454,6 @@ function PatientRecordsDatabase() {
     return new Date(date) >= limitDate;
   };
 
-  // Generate PDF report function
   // Generate PDF report function
   const generatePRDReport = (patientRecords, monthLimit = 6) => {
     if (!patientRecords || patientRecords.length === 0) {
