@@ -1,6 +1,8 @@
 // ScheduleAppointment.jsx
 import React, { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { isHoliday, getHolidayName } from "@/utils/holidays";
+import { calculateAge } from "@/lib/ageCalculator";
 import {
   ModalContainer,
   ModalHeader,
@@ -17,10 +19,7 @@ import {
 } from "@/components/ui/Alert";
 
 import { RadioGroup, RadioGroupItem } from "@/components/ui/RadioGroup";
-import PesoIcon from "@/assets/icons/PesoIcon";
-
 import ConfirmParentalConsent from "./ConfirmParentalConsent";
-import { calculateAge } from "@/lib/ageCalculator";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -29,7 +28,6 @@ import EmailIcon from "@/assets/icons/EmailIcon";
 import UserIDIcon from "@/assets/icons/UserIDIcon";
 import CalendarIcon from "@/assets/icons/CalendarIcon";
 import ClockIcon from "@/assets/icons/ClockIcon";
-import AgeIcon from "@/assets/icons/AgeIcon";
 import ArrowNorthEastIcon from "@/assets/icons/ArrowNorthEastIcon";
 import ChevronLeftIcon from "@/assets/icons/ChevronLeftIcon";
 
@@ -65,61 +63,18 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const submitInProgressRef = useRef(false);
 
+  // Payment method state
   const [paymentMethod, setPaymentMethod] = useState("full-payment");
-  const [totalAmount, setTotalAmount] = useState("");
-  const [amountPaid, setAmountPaid] = useState("");
-  const [remainingBalance, setRemainingBalance] = useState(0);
-  const [referenceNumber, setReferenceNumber] = useState("");
 
+  // Cleanup effect
   useEffect(() => {
     return () => {
       submitInProgressRef.current = false;
       setIsSubmitting(false);
     };
-  }, []);
-
-  useEffect(() => {
-    if (isOpen) {
-      const now = new Date();
-      const ref = now
-        .toISOString()
-        .replace(/[-:.TZ]/g, "")
-        .slice(0, 17); // YYYYMMDDHHMMSSmmm
-      setReferenceNumber(`SCH${ref}`);
-    }
   }, [isOpen]);
 
-  // Calculate remaining balance whenever totalAmount or amountPaid changes
-  useEffect(() => {
-    const numericTotal = parseFloat(totalAmount) || 0;
-    const numericPaid = parseFloat(amountPaid) || 0;
-    setRemainingBalance(numericTotal - numericPaid);
-  }, [totalAmount, amountPaid]);
-
-  // Set amountPaid to equal totalAmount when payment method is full-payment
-  useEffect(() => {
-    if (paymentMethod === "full-payment" && totalAmount) {
-      setAmountPaid(totalAmount);
-    }
-  }, [paymentMethod, totalAmount]);
-
-  // Add this validation to your form validation
-  const validatePayment = () => {
-    if (!totalAmount) {
-      return false;
-    }
-
-    if (
-      paymentMethod === "installment" &&
-      (!amountPaid || parseFloat(amountPaid) <= 0)
-    ) {
-      return false;
-    }
-
-    return true;
-  };
-
-  // Now it's safe to have an early return
+  // Early return if modal is closed
   if (!isOpen) return null;
 
   // Function to check if time is within business hours (12pm - 6pm)
@@ -213,7 +168,7 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
 
   // Add validation handlers for each field
   const validatePhone = (value) => {
-    if (value && !isValidPhoneNumber(value)) {
+    if (!value || !isValidPhoneNumber(value)) {
       setPhoneError(true);
       return false;
     } else {
@@ -223,7 +178,7 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
   };
 
   const validateDate = (value) => {
-    if (value && !isValidDate(value)) {
+    if (!value || !isValidDate(value)) {
       setDateError(true);
       return false;
     } else {
@@ -233,13 +188,18 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
   };
 
   const validateEmail = (value) => {
-    if (value && !isValidEmail(value)) {
+    if (!value || !isValidEmail(value)) {
       setEmailError(true);
       return false;
     } else {
       setEmailError(false);
       return true;
     }
+  };
+
+  // Add payment validation
+  const validatePayment = () => {
+    return paymentMethod === "full-payment" || paymentMethod === "installment";
   };
 
   const submitAppointmentForm = async () => {
@@ -314,7 +274,7 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
     submitAppointmentForm();
   };
 
-  // Handle form submission
+  // FIXED: Complete handleSubmit function
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -331,17 +291,61 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
     setAlertTitle("");
     setAlertMessage("");
 
-    // Existing validations...
-
-    // Add payment validation
-    const isPaymentValid = validatePayment();
-    if (!isPaymentValid) {
+    // First validate the birthdate
+    if (!validateBirthDate(birthDate)) {
       setIsSubmitting(false);
       submitInProgressRef.current = false;
       return;
     }
 
-    // Rest of your existing handleSubmit function...
+    // Calculate age to determine workflow
+    const age = calculateAge(birthDate);
+
+    // Check if selected date is a holiday
+    if (dateOfSession) {
+      const holidayName = getHolidayDetails(dateOfSession);
+      if (holidayName) {
+        setAlertTitle("Error");
+        setAlertMessage(
+          `The selected date (${holidayName}) is a holiday. Please choose another date.`
+        );
+        setShowAlert(true);
+        setIsSubmitting(false);
+        submitInProgressRef.current = false;
+        return;
+      }
+    }
+
+    // If minor (13-17), show parental consent modal
+    if (age >= 13 && age < 18) {
+      setShowParentalConsentModal(true);
+      setIsSubmitting(false);
+      submitInProgressRef.current = false;
+      return;
+    }
+
+    // Run all other validations
+    const isPhoneValid = validatePhone(contactNumber);
+    const isDateValid = validateDate(dateOfSession);
+    const isTimeValid = isWithinBusinessHours(timeOfSession);
+    const isEmailValid = validateEmail(email);
+    const isPaymentValid = validatePayment();
+
+    // If any validation fails, prevent form submission
+    if (
+      !isPhoneValid ||
+      !isDateValid ||
+      !isTimeValid ||
+      !isEmailValid ||
+      !isPaymentValid
+    ) {
+      setIsSubmitting(false);
+      submitInProgressRef.current = false;
+      return;
+    }
+
+    // If all validations pass, submit the form
+    await submitAppointmentForm();
   };
 
   // Handle alert dismissal
@@ -368,7 +372,7 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
           <CloseAlert onClick={handleAlertClose} />
         </AlertContainer>
       )}
-      <ModalHeader className=" flex justify-center">
+      <ModalHeader className="flex justify-center">
         <ModalTitle
           className="text-xl text-center text-lavender-400"
           data-cy="schedule-appointment-title"
@@ -491,62 +495,66 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
 
           {/* DATE & TIME OF SESSION */}
           <div className="flex flex-row w-full gap-2">
-            <InputContainer className="flex-1">
-              <InputLabel className="text-xs mb-0.5">
-                DATE OF SESSION
-              </InputLabel>
-              <InputTextField className="h-10">
-                <InputIcon className="w-7">
-                  <CalendarIcon className="w-3.5 h-3.5" />
-                </InputIcon>
-                <Input
-                  className="text-xs h-8"
-                  data-cy="schedule-date-input"
-                  type="date"
-                  placeholder="Date of Session"
-                  value={dateOfSession}
-                  onChange={(e) => {
-                    setDateOfSession(e.target.value);
-                    validateDate(e.target.value);
-                  }}
-                  onBlur={(e) => validateDate(e.target.value)}
-                  required
-                />
-              </InputTextField>
+            <div className="flex-1 min-w-0">
+              <InputContainer>
+                <InputLabel className="text-xs mb-0.5">
+                  DATE OF SESSION
+                </InputLabel>
+                <InputTextField className="h-10">
+                  <InputIcon className="w-7">
+                    <CalendarIcon className="w-3.5 h-3.5" />
+                  </InputIcon>
+                  <Input
+                    className="text-xs h-8"
+                    data-cy="schedule-date-input"
+                    type="date"
+                    placeholder="Date of Session"
+                    value={dateOfSession}
+                    onChange={(e) => {
+                      setDateOfSession(e.target.value);
+                      validateDate(e.target.value);
+                    }}
+                    onBlur={(e) => validateDate(e.target.value)}
+                    required
+                  />
+                </InputTextField>
+              </InputContainer>
               {dateError && (
-                <p className="text-red-500 text-[10px] mt-0.5">
+                <p className="text-red-500 text-[10px] mt-0.5 break-words">
                   Please select a future date
                 </p>
               )}
-            </InputContainer>
+            </div>
 
-            <InputContainer className="flex-1">
-              <InputLabel className="text-xs mb-0.5">
-                TIME OF SESSION
-              </InputLabel>
-              <InputTextField className="h-10">
-                <InputIcon className="w-7">
-                  <ClockIcon className="w-3.5 h-3.5" />
-                </InputIcon>
-                <Input
-                  className="text-xs h-8"
-                  data-cy="schedule-time-input"
-                  type="time"
-                  placeholder="Time of Session"
-                  value={timeOfSession}
-                  onChange={(e) => {
-                    setTimeOfSession(e.target.value);
-                    if (showAlert) setShowAlert(false);
-                  }}
-                  required
-                />
-              </InputTextField>
+            <div className="flex-1 min-w-0">
+              <InputContainer>
+                <InputLabel className="text-xs mb-0.5">
+                  TIME OF SESSION
+                </InputLabel>
+                <InputTextField className="h-10">
+                  <InputIcon className="w-7">
+                    <ClockIcon className="w-3.5 h-3.5" />
+                  </InputIcon>
+                  <Input
+                    className="text-xs h-8"
+                    data-cy="schedule-time-input"
+                    type="time"
+                    placeholder="Time of Session"
+                    value={timeOfSession}
+                    onChange={(e) => {
+                      setTimeOfSession(e.target.value);
+                      if (showAlert) setShowAlert(false);
+                    }}
+                    required
+                  />
+                </InputTextField>
+              </InputContainer>
               {!isWithinBusinessHours(timeOfSession) && timeOfSession && (
-                <p className="text-red-500 text-[10px] mt-0.5">
+                <p className="text-red-500 text-[10px] mt-0.5 break-words">
                   Select time between 12:00 PM - 6:00 PM
                 </p>
               )}
-            </InputContainer>
+            </div>
           </div>
 
           <div className="border-t border-gray-200 dark:border-gray-700 pt-2 mt-2">

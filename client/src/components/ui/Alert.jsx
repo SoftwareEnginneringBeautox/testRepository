@@ -1,6 +1,6 @@
 import * as React from "react";
 import { cva } from "class-variance-authority";
-
+import { createPortal } from "react-dom"; // Add this import
 import { cn } from "@/lib/utils";
 import CloseIcon from "@/assets/icons/CloseIcon";
 
