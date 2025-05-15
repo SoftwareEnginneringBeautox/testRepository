@@ -53,27 +53,27 @@ function CreateStaff({ isOpen, onClose }) {
 
   const validateEmail = (email) => {
     if (!email) return "Email is required";
-    
+
     // Basic email format validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return "Please enter a valid email address";
     }
-    
+
     return ""; // Empty string means no error
   };
 
   // Check if username or email already exists
   const checkDuplicate = async (field, value) => {
     if (!value) return false;
-    
+
     setValidating(true);
     try {
       const response = await axios.get(`${API_BASE_URL}/check-duplicate`, {
         params: { field, value },
         withCredentials: true
       });
-      
+
       return response.data.exists;
     } catch (err) {
       console.error(`Error checking duplicate ${field}:`, err);
@@ -89,9 +89,9 @@ function CreateStaff({ isOpen, onClose }) {
       setNameError("Username is required");
       return;
     }
-    
+
     try {
-      const isDuplicate = await checkDuplicate('username', name);
+      const isDuplicate = await checkDuplicate("username", name);
       if (isDuplicate) {
         setNameError("This username is already taken");
       } else {
@@ -109,9 +109,9 @@ function CreateStaff({ isOpen, onClose }) {
       setEmailError(formatError);
       return;
     }
-    
+
     try {
-      const isDuplicate = await checkDuplicate('email', email);
+      const isDuplicate = await checkDuplicate("email", email);
       if (isDuplicate) {
         setEmailError("This email is already in use");
       } else {
@@ -124,13 +124,15 @@ function CreateStaff({ isOpen, onClose }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Prevent duplicate submissions
     if (loading || validating) {
-      console.log("Staff creation already in progress or validation in progress");
+      console.log(
+        "Staff creation already in progress or validation in progress"
+      );
       return;
     }
-    
+
     setLoading(true);
     setError("");
 
@@ -140,7 +142,7 @@ function CreateStaff({ isOpen, onClose }) {
       setLoading(false);
       return;
     }
-    
+
     // Validate email specifically
     const emailError = validateEmail(staffEmail);
     if (emailError) {
@@ -152,16 +154,16 @@ function CreateStaff({ isOpen, onClose }) {
     // Check for duplicate username and email before submission
     try {
       const [isDuplicateUsername, isDuplicateEmail] = await Promise.all([
-        checkDuplicate('username', staffName),
-        checkDuplicate('email', staffEmail)
+        checkDuplicate("username", staffName),
+        checkDuplicate("email", staffEmail)
       ]);
-      
+
       if (isDuplicateUsername) {
         setNameError("This username is already taken");
         setLoading(false);
         return;
       }
-      
+
       if (isDuplicateEmail) {
         setEmailError("This email is already in use");
         setLoading(false);
@@ -177,7 +179,7 @@ function CreateStaff({ isOpen, onClose }) {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 15000);
-      
+
       const response = await axios.post(
         `${API_BASE_URL}/adduser`,
         {
@@ -187,12 +189,12 @@ function CreateStaff({ isOpen, onClose }) {
           role: staffRole,
           dayoff: dayOff
         },
-        { 
+        {
           withCredentials: true,
           signal: controller.signal
         }
       );
-      
+
       clearTimeout(timeoutId);
 
       if (response.data.success) {
@@ -201,29 +203,38 @@ function CreateStaff({ isOpen, onClose }) {
       } else {
         // Handle specific error messages from server
         if (response.data.message?.toLowerCase().includes("email")) {
-          setEmailError(response.data.message || "Email error. The email may already be in use.");
+          setEmailError(
+            response.data.message ||
+              "Email error. The email may already be in use."
+          );
         } else if (response.data.message?.toLowerCase().includes("username")) {
-          setNameError(response.data.message || "This username is already taken.");
+          setNameError(
+            response.data.message || "This username is already taken."
+          );
         } else {
           setError(response.data.message || "Failed to create staff.");
         }
       }
     } catch (err) {
       console.error("Error creating staff:", err);
-      
+
       // Handle specific error types
       if (err.response?.data?.message) {
         if (err.response.data.message.toLowerCase().includes("email")) {
           setEmailError("Invalid email or email already in use");
-        } else if (err.response.data.message.toLowerCase().includes("username")) {
+        } else if (
+          err.response.data.message.toLowerCase().includes("username")
+        ) {
           setNameError("Username already exists");
         } else {
           setError(err.response.data.message);
         }
       } else {
-        setError(err.name === 'AbortError' 
-          ? "Request timed out. Please try again."
-          : "An error occurred while creating staff.");
+        setError(
+          err.name === "AbortError"
+            ? "Request timed out. Please try again."
+            : "An error occurred while creating staff."
+        );
       }
     } finally {
       setLoading(false);
@@ -262,7 +273,9 @@ function CreateStaff({ isOpen, onClose }) {
                   required
                 />
               </InputTextField>
-              {nameError && <p className="text-red-500 text-sm mt-1">{nameError}</p>}
+              {nameError && (
+                <p className="text-red-500 text-sm mt-1">{nameError}</p>
+              )}
             </InputContainer>
 
             <InputContainer>
@@ -286,7 +299,9 @@ function CreateStaff({ isOpen, onClose }) {
                   required
                 />
               </InputTextField>
-              {emailError && <p className="text-red-500 text-sm mt-1">{emailError}</p>}
+              {emailError && (
+                <p className="text-red-500 text-sm mt-1">{emailError}</p>
+              )}
             </InputContainer>
 
             {/* STAFF ROLE */}
@@ -383,7 +398,11 @@ function CreateStaff({ isOpen, onClose }) {
               disabled={loading || validating || nameError || emailError}
             >
               <PlusIcon />
-              {loading ? "CREATING..." : validating ? "VALIDATING..." : "CREATE STAFF"}
+              {loading
+                ? "CREATING..."
+                : validating
+                ? "VALIDATING..."
+                : "CREATE STAFF"}
             </Button>
           </div>
         </form>

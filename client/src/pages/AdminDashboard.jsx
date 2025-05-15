@@ -180,17 +180,17 @@ function AdministratorDashboard() {
       try {
         // Prevent duplicate API calls
         setLoadingAppointments(true);
-        
+
         // Include patientId in request body if provided
         const requestBody = patientId ? { patient_record_id: patientId } : {};
-        
+
         // Single API call with proper payload
         const response = await axios.post(
           `${API_BASE_URL}/api/staged-appointments/${id}/${action}`,
           requestBody,
           { withCredentials: true }
         );
-  
+
         // Check response for success
         if (response.data?.success) {
           showAlert(

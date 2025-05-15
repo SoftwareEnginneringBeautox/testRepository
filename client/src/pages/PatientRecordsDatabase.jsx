@@ -59,6 +59,7 @@ import CreatePatientEntry from "@/components/modals/CreatePatientEntry";
 import EditPatientEntry from "@/components/modals/EditPatientEntry";
 import UpdatePatientEntry from "@/components/modals/UpdatePatientEntry";
 import ArchivePatientEntry from "@/components/modals/ArchivePatientEntry";
+import DateRangePatientRecordDatabase from "@/components/modals/DateRangePatientRecordDatabase";
 
 // Import date-fns for date formatting
 import { format } from "date-fns";
@@ -312,6 +313,33 @@ function PatientRecordsDatabase() {
     }
   };
 
+  const handleOpenDateRangeModal = () => {
+    openModal("dateRangeModal");
+  };
+
+  const handleDateRangeSubmit = (startDate, endDate) => {
+    // Convert dates to Date objects
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    end.setHours(23, 59, 59, 999); // Set to end of day
+
+    // Filter records within the specified date range
+    const filteredRecords = records.filter((record) => {
+      const recordDate = new Date(
+        record.dateTransacted || record.date_of_session
+      );
+      return recordDate >= start && recordDate <= end;
+    });
+
+    // Generate the report with the filtered records
+    if (filteredRecords.length > 0) {
+      generatePRDReport(filteredRecords, null); // Pass null for monthLimit to skip that filter
+    } else {
+      console.error("No records available within the selected date range.");
+      // You may want to show an alert here
+    }
+  };
+
   const filteredRecords = [...records]
     .filter((record) => {
       const name = record.client || record.patient_name || "";
@@ -376,23 +404,29 @@ function PatientRecordsDatabase() {
   };
 
   // Generate PDF report function
+  // Generate PDF report function
   const generatePRDReport = (patientRecords, monthLimit = 6) => {
     if (!patientRecords || patientRecords.length === 0) {
       console.error("No records available to generate PDF.");
       return;
     }
 
-    // Filter records within month limit
-    const filteredRecords = patientRecords.filter((record) => {
-      const recordDate = new Date(
-        record.dateTransacted || record.date_of_session
-      );
-      return isWithinMonthRange(recordDate, monthLimit);
-    });
+    // Only apply the month filter if monthLimit is provided
+    let filteredRecords = patientRecords;
+    if (monthLimit !== null) {
+      filteredRecords = patientRecords.filter((record) => {
+        const recordDate = new Date(
+          record.dateTransacted || record.date_of_session
+        );
+        return isWithinMonthRange(recordDate, monthLimit);
+      });
+    }
 
     if (filteredRecords.length === 0) {
       console.error(
-        `No records available within the last ${monthLimit} months.`
+        monthLimit
+          ? `No records available within the last ${monthLimit} months.`
+          : "No records available within the selected date range."
       );
       return;
     }
@@ -461,14 +495,36 @@ function PatientRecordsDatabase() {
 
     // Add title and date range
     const currentDate = new Date();
-    const limitDate = new Date();
-    limitDate.setMonth(currentDate.getMonth() - monthLimit);
 
-    const formattedCurrentDate = format(
-      currentDate,
-      "MMMM dd, yyyy"
-    ).toUpperCase();
-    const formattedLimitDate = format(limitDate, "MMMM dd, yyyy").toUpperCase();
+    // Determine date range for report title
+    let startDate, endDate;
+    if (monthLimit !== null) {
+      // If using month limit, calculate from current date
+      startDate = new Date();
+      startDate.setMonth(currentDate.getMonth() - monthLimit);
+      endDate = currentDate;
+    } else {
+      // If we're using custom dates, find min and max dates in filtered records
+      startDate = new Date(
+        Math.min(
+          ...filteredRecords.map(
+            (record) =>
+              new Date(record.dateTransacted || record.date_of_session)
+          )
+        )
+      );
+      endDate = new Date(
+        Math.max(
+          ...filteredRecords.map(
+            (record) =>
+              new Date(record.dateTransacted || record.date_of_session)
+          )
+        )
+      );
+    }
+
+    const formattedStartDate = format(startDate, "MMMM dd, yyyy").toUpperCase();
+    const formattedEndDate = format(endDate, "MMMM dd, yyyy").toUpperCase();
     const formattedDateForFilename = format(currentDate, "MMMM_dd_yyyy");
 
     // Set up document title
@@ -481,7 +537,7 @@ function PatientRecordsDatabase() {
     // Add date range
     doc.setFontSize(12);
     doc.text(
-      `${formattedLimitDate} - ${formattedCurrentDate}`,
+      `${formattedStartDate} - ${formattedEndDate}`,
       pageWidth / 2,
       margin + 30,
       { align: "center" }
@@ -496,6 +552,15 @@ function PatientRecordsDatabase() {
     doc.text(`AS OF ${currentTimestamp}`, pageWidth / 2, margin + 50, {
       align: "center"
     });
+
+    // Add patient count
+    doc.setFontSize(10);
+    doc.text(
+      `TOTAL PATIENTS: ${filteredRecords.length}`,
+      pageWidth / 2,
+      margin + 65,
+      { align: "center" }
+    );
 
     // Prepare table data
     const tableData = filteredRecords.map((record) => {
@@ -530,7 +595,7 @@ function PatientRecordsDatabase() {
     autoTable(doc, {
       head: [headers.map((h) => h.header)],
       body: tableData,
-      startY: margin + 70,
+      startY: margin + 80, // Adjusted for the patient count line
       margin: { top: margin, right: margin, bottom: margin, left: margin },
       columnStyles: {
         ...headers.reduce((acc, col, index) => {
@@ -600,8 +665,20 @@ function PatientRecordsDatabase() {
       }
     });
 
+    // Create a more descriptive filename if using custom date range
+    let filename;
+    if (monthLimit === null) {
+      // For custom date range
+      const startFilename = format(startDate, "MMddyyyy");
+      const endFilename = format(endDate, "MMddyyyy");
+      filename = `Beautox_PatientRecords_${startFilename}_to_${endFilename}.pdf`;
+    } else {
+      // For standard month limit
+      filename = `Beautox_PatientRecords_${formattedDateForFilename}.pdf`;
+    }
+
     // Save the PDF
-    doc.save(`Beautox_PatientRecords_${formattedDateForFilename}.pdf`);
+    doc.save(filename);
   };
 
   // Add this function before the return statement
@@ -909,7 +986,7 @@ function PatientRecordsDatabase() {
         </Button>
         <Button
           variant="callToAction"
-          onClick={() => generatePRDReport(records, 6)}
+          onClick={handleOpenDateRangeModal}
           className="w-full md:w-auto"
           data-cy="download-records-button"
         >
@@ -951,6 +1028,14 @@ function PatientRecordsDatabase() {
           entryData={selectedEntry}
           onArchive={handleArchive}
           data-cy="archive-patient-entry-modal"
+        />
+      )}
+      {currentModal === "dateRangeModal" && (
+        <DateRangePatientRecordDatabase
+          isOpen={true}
+          onClose={closeModal}
+          onSubmit={handleDateRangeSubmit}
+          data-cy="date-range-modal"
         />
       )}
     </div>
