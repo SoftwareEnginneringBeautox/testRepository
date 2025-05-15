@@ -58,6 +58,9 @@ function SetMonthlyRange({ isOpen, onClose, onConfirm, reportType }) {
   const [monthOptions] = useState(generateMonthOptions);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Get file extension based on report type
+  const fileFormat = reportType === "pdf" ? "PDF" : "EXCEL";
+
   // Set default selected month to the current month
   useEffect(() => {
     if (monthOptions.length > 0) {
@@ -109,8 +112,9 @@ function SetMonthlyRange({ isOpen, onClose, onConfirm, reportType }) {
       </ModalHeader>
       <ModalBody className="mt-0">
         <p className="dark:text-customNeutral-100">
-          Kindly confirm the range of records you want to download. By default
-          it is set to download the current month's records.
+          Kindly confirm the range of records you want to download as{" "}
+          {fileFormat}. By default it is set to download the current month's
+          records.
         </p>
         <div className="flex flex-row w-full gap-4 my-4">
           <InputContainer className="flex-1">
@@ -158,7 +162,7 @@ function SetMonthlyRange({ isOpen, onClose, onConfirm, reportType }) {
             onClick={handleConfirm}
             disabled={isSubmitting}
           >
-            {isSubmitting ? "PROCESSING..." : "CONFIRM"}
+            {isSubmitting ? "PROCESSING..." : `CONFIRM ${fileFormat}`}
             <ChevronRightIcon />
           </Button>
         </div>

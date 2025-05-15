@@ -59,6 +59,9 @@ function SetWeeklyRange({ isOpen, onClose, onConfirm, reportType }) {
   const [weekOptions] = useState(generateWeekOptions);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Get file extension based on report type
+  const fileFormat = reportType === "pdf" ? "PDF" : "Excel";
+
   // Set default selected week to the most recent week
   useEffect(() => {
     if (weekOptions.length > 0) {
@@ -110,8 +113,9 @@ function SetWeeklyRange({ isOpen, onClose, onConfirm, reportType }) {
       </ModalHeader>
       <ModalBody className="mt-0">
         <p className="dark:text-customNeutral-100">
-          Kindly confirm the range of records you want to download. By default
-          it is set to download the most recent week's records.
+          Kindly confirm the range of records you want to download as{" "}
+          {fileFormat}. By default it is set to download the most recent week's
+          records.
         </p>
         <div className="flex flex-row w-full gap-4 my-4">
           <InputContainer className="flex-1">
@@ -158,7 +162,9 @@ function SetWeeklyRange({ isOpen, onClose, onConfirm, reportType }) {
             onClick={handleConfirm}
             disabled={isSubmitting}
           >
-            {isSubmitting ? "PROCESSING..." : "CONFIRM"}
+            {isSubmitting
+              ? "PROCESSING..."
+              : `GENERATE ${fileFormat.toLocaleUpperCase()}`}
             <ChevronRightIcon />
           </Button>
         </div>
