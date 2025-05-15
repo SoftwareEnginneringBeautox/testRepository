@@ -20,16 +20,20 @@ const alertVariants = cva(
 );
 
 const AlertContainer = React.forwardRef(
-  ({ className, variant, children, ...props }, ref) => (
-    <div
-      ref={ref}
-      role="alert"
-      className={cn(alertVariants({ variant }), className)}
-      {...props}
-    >
-      {children}
-    </div>
-  )
+  ({ className, variant, children, ...props }, ref) => {
+    // Create a portal to render the alert at the document root level
+    return createPortal(
+      <div
+        ref={ref}
+        role="alert"
+        className={cn(alertVariants({ variant }), className)}
+        {...props}
+      >
+        {children}
+      </div>,
+      document.body
+    );
+  }
 );
 AlertContainer.displayName = "AlertContainer";
 

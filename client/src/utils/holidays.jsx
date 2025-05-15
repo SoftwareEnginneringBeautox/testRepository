@@ -23,7 +23,7 @@ function getEasterSunday(year) {
 const STATIC_HOLIDAYS = [
   { date: "01-01", name: "New Year's Day" },
   { date: "12-25", name: "Christmas Day" },
-  { date: "12-30", name: "New Year's Eve" }
+  { date: "12-31", name: "New Year's Eve" }
 ];
 
 // Add Holy Week (dynamic) holidays for the given year

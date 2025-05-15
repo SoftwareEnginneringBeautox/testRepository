@@ -13,7 +13,9 @@ const ModalContainer = React.forwardRef(
 
       <div
         className={cn(
-          "relative z-50 bg-ash-100 dark:bg-customNeutral-400 p-8 rounded-lg shadow-lg min-w-[40%] max-h-[90vh] overflow-y-auto",
+          "relative z-50 bg-ash-100 dark:bg-customNeutral-400 p-8 rounded-lg shadow-lg min-w-[40%] max-w-[90%] max-h-[90vh] overflow-y-auto flex flex-col",
+          // Added width constraints and flex column
+          "w-full sm:w-auto",
           // Scrollbar-specific styling
           "[&::-webkit-scrollbar]:w-2",
           "[&::-webkit-scrollbar-thumb]:bg-gray-400",

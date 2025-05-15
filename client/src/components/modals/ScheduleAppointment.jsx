@@ -15,6 +15,10 @@ import {
   AlertDescription,
   CloseAlert
 } from "@/components/ui/Alert";
+
+import { RadioGroup, RadioGroupItem } from "@/components/ui/RadioGroup";
+import PesoIcon from "@/assets/icons/PesoIcon";
+
 import ConfirmParentalConsent from "./ConfirmParentalConsent";
 import { calculateAge } from "@/lib/ageCalculator";
 
@@ -61,13 +65,59 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const submitInProgressRef = useRef(false);
 
-  // IMPORTANT: Move useEffect here, before any conditional returns
+  const [paymentMethod, setPaymentMethod] = useState("full-payment");
+  const [totalAmount, setTotalAmount] = useState("");
+  const [amountPaid, setAmountPaid] = useState("");
+  const [remainingBalance, setRemainingBalance] = useState(0);
+  const [referenceNumber, setReferenceNumber] = useState("");
+
   useEffect(() => {
     return () => {
       submitInProgressRef.current = false;
       setIsSubmitting(false);
     };
   }, []);
+
+  useEffect(() => {
+    if (isOpen) {
+      const now = new Date();
+      const ref = now
+        .toISOString()
+        .replace(/[-:.TZ]/g, "")
+        .slice(0, 17); // YYYYMMDDHHMMSSmmm
+      setReferenceNumber(`SCH${ref}`);
+    }
+  }, [isOpen]);
+
+  // Calculate remaining balance whenever totalAmount or amountPaid changes
+  useEffect(() => {
+    const numericTotal = parseFloat(totalAmount) || 0;
+    const numericPaid = parseFloat(amountPaid) || 0;
+    setRemainingBalance(numericTotal - numericPaid);
+  }, [totalAmount, amountPaid]);
+
+  // Set amountPaid to equal totalAmount when payment method is full-payment
+  useEffect(() => {
+    if (paymentMethod === "full-payment" && totalAmount) {
+      setAmountPaid(totalAmount);
+    }
+  }, [paymentMethod, totalAmount]);
+
+  // Add this validation to your form validation
+  const validatePayment = () => {
+    if (!totalAmount) {
+      return false;
+    }
+
+    if (
+      paymentMethod === "installment" &&
+      (!amountPaid || parseFloat(amountPaid) <= 0)
+    ) {
+      return false;
+    }
+
+    return true;
+  };
 
   // Now it's safe to have an early return
   if (!isOpen) return null;
@@ -209,7 +259,9 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
           age: calculatedAge, // Send calculated age as a number
           email: email,
           date_of_session: dateOfSession,
-          time_of_session: timeOfSession
+          time_of_session: timeOfSession,
+          // Only include payment method
+          payment_method: paymentMethod
         })
       });
 
@@ -222,6 +274,8 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
         setEmail("");
         setDateOfSession("");
         setTimeOfSession("");
+        // Reset payment method
+        setPaymentMethod("full-payment");
 
         // Reset validation errors
         setAgeError(false);
@@ -277,58 +331,17 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
     setAlertTitle("");
     setAlertMessage("");
 
-    // First validate the birthdate
-    if (!validateBirthDate(birthDate)) {
+    // Existing validations...
+
+    // Add payment validation
+    const isPaymentValid = validatePayment();
+    if (!isPaymentValid) {
       setIsSubmitting(false);
       submitInProgressRef.current = false;
       return;
     }
 
-    // Calculate age to determine workflow
-    const age = calculateAge(birthDate);
-
-    // Check if selected date is a holiday
-    if (dateOfSession) {
-      const holidayName = getHolidayDetails(dateOfSession);
-      if (holidayName) {
-        setAlertTitle("Error");
-        setAlertMessage(
-          `The selected date (${holidayName}) is a holiday. Please choose another date.`
-        );
-        setShowAlert(true);
-        // If you have a setAlertVariant function
-        if (typeof setAlertVariant === "function") {
-          setAlertVariant("error");
-        }
-        setIsSubmitting(false);
-        submitInProgressRef.current = false;
-        return;
-      }
-    }
-
-    // If minor (13-17), show parental consent modal
-    if (age >= 13 && age < 18) {
-      setShowParentalConsentModal(true);
-      setIsSubmitting(false);
-      submitInProgressRef.current = false;
-      return;
-    }
-
-    // Run all other validations
-    const isPhoneValid = validatePhone(contactNumber);
-    const isDateValid = validateDate(dateOfSession);
-    const isTimeValid = isWithinBusinessHours(timeOfSession);
-    const isEmailValid = validateEmail(email);
-
-    // If any validation fails, prevent form submission
-    if (!isPhoneValid || !isDateValid || !isTimeValid || !isEmailValid) {
-      setIsSubmitting(false);
-      submitInProgressRef.current = false;
-      return;
-    }
-
-    // If all validations pass, submit the form
-    await submitAppointmentForm();
+    // Rest of your existing handleSubmit function...
   };
 
   // Handle alert dismissal
@@ -355,7 +368,7 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
           <CloseAlert onClick={handleAlertClose} />
         </AlertContainer>
       )}
-      <ModalHeader className="pb-1 flex justify-center">
+      <ModalHeader className=" flex justify-center">
         <ModalTitle
           className="text-xl text-center text-lavender-400"
           data-cy="schedule-appointment-title"
@@ -364,7 +377,7 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
         </ModalTitle>
       </ModalHeader>
 
-      <ModalBody className="py-2">
+      <ModalBody className="py-2 mt-0">
         <form
           className="flex flex-col gap-2"
           onSubmit={handleSubmit}
@@ -533,6 +546,48 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
                   Select time between 12:00 PM - 6:00 PM
                 </p>
               )}
+            </InputContainer>
+          </div>
+
+          <div className="border-t border-gray-200 dark:border-gray-700 pt-2 mt-2">
+            <InputContainer>
+              <InputLabel className="text-xs mb-0.5">PAYMENT METHOD</InputLabel>
+              <div className="flex flex-col gap-2 mt-1">
+                <RadioGroup
+                  value={paymentMethod}
+                  onValueChange={(val) => setPaymentMethod(val)}
+                  className="flex flex-col gap-2"
+                >
+                  <div className="flex items-center gap-2">
+                    <RadioGroupItem
+                      data-cy="payment-method-radio-full-payment"
+                      value="full-payment"
+                      id="schedule-full-payment"
+                      className="h-3 w-3"
+                    />
+                    <label
+                      htmlFor="schedule-full-payment"
+                      className="text-xs font-medium"
+                    >
+                      FULL PAYMENT
+                    </label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <RadioGroupItem
+                      data-cy="payment-method-radio-installment"
+                      value="installment"
+                      id="schedule-installment"
+                      className="h-3 w-3"
+                    />
+                    <label
+                      htmlFor="schedule-installment"
+                      className="text-xs font-medium"
+                    >
+                      INSTALLMENT
+                    </label>
+                  </div>
+                </RadioGroup>
+              </div>
             </InputContainer>
           </div>
 

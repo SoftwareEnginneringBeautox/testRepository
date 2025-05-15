@@ -351,12 +351,12 @@ function CreatePatientEntry({ isOpen, onClose }) {
       // Holiday check
       const holidayName = getHolidayDetails(dateOfSession);
       if (holidayName) {
-        errors.dateOfSession = `The selected date (${holidayName}) is a holiday. Please choose another date.`;
+        errors.dateOfSession = `The selected date (${holidayName}) is a holiday. The store will be closed.`;
 
         // Also show an alert
         setAlertTitle("Error");
         setAlertMessage(
-          `The selected date (${holidayName}) is a holiday. Please choose another date.`
+          `The selected date (${holidayName}) is a holiday. The store will be closed.`
         );
         setAlertVariant("error");
         setShowAlert(true);
