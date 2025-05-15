@@ -5,13 +5,12 @@ import { cn } from "@/lib/utils";
 import CloseIcon from "@/assets/icons/CloseIcon";
 
 const alertVariants = cva(
-  "fixed flex items-center top-10 left-1/2 -translate-x-1/2 min-w-1/6 rounded-lg border border-lavender-400 p-4 gap-4 z-[999]",
+  "fixed flex items-center top-10 left-1/2 -translate-x-1/2 min-w-1/6 rounded-lg border p-4 gap-4 z-[999]",
   {
     variants: {
       variant: {
-        default: "bg-customNeutral-100 text-foreground",
-        destructive:
-          "border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive"
+        default: "bg-customNeutral-100 text-foreground border-lavender-400",
+        error: "bg-error-400 text-white border-error-500 [&>svg]:text-white"
       }
     },
     defaultVariants: {

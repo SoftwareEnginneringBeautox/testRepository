@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { useModal } from "@/hooks/useModal";
+import { calculateAge } from "@/lib/ageCalculator";
 import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/Button";
@@ -711,7 +712,9 @@ function PatientRecordsDatabase() {
         return record.contact_number || "N/A";
 
       case "age":
-        return record.age || "N/A";
+        return record.birth_date
+          ? calculateAge(record.birth_date)
+          : record.age || "N/A";
 
       case "email":
         return record.email || "N/A";

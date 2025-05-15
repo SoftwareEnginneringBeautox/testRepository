@@ -3,6 +3,8 @@ import { format } from "date-fns";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/RadioGroup";
 import CurrencyInput from "react-currency-input-field";
+import { isHoliday, getHolidayName } from "@/utils/holidays";
+import { calculateAge } from "@/lib/ageCalculator";
 
 import {
   ModalContainer,
@@ -31,6 +33,14 @@ import {
 
 import { TreatmentMultiSelect } from "@/components/ui/TreatmentMultiSelect";
 
+import {
+  AlertContainer,
+  AlertText,
+  AlertTitle,
+  AlertDescription,
+  CloseAlert
+} from "@/components/ui/Alert";
+
 import PesoIcon from "@/assets/icons/PesoIcon";
 import ClockIcon from "@/assets/icons/ClockIcon";
 import ChevronLeftIcon from "@/assets/icons/ChevronLeftIcon";
@@ -54,7 +64,12 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
   const [treatmentsList, setTreatmentsList] = useState([]);
   const [aestheticianList, setAestheticianList] = useState([]);
   const [personInCharge, setPersonInCharge] = useState("");
-  
+
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertTitle, setAlertTitle] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertVariant, setAlertVariant] = useState("error");
+
   // Add reference ID state
   const [additionalPaymentRefId, setAdditionalPaymentRefId] = useState("");
   const [newServiceRefId, setNewServiceRefId] = useState("");
@@ -74,7 +89,9 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
   // Generate a new reference ID with prefix and timestamp
   const generateReferenceId = (prefix = "REF") => {
     const timestamp = new Date().getTime();
-    const randomDigits = Math.floor(Math.random() * 1000).toString().padStart(3, "0");
+    const randomDigits = Math.floor(Math.random() * 1000)
+      .toString()
+      .padStart(3, "0");
     return `${prefix}${timestamp}${randomDigits}`;
   };
 
@@ -91,19 +108,19 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
       // First, ensure we properly parse the sessions_left value
       // Handle different data types that might come from the API
       let sessionsLeftFromData = 0;
-      
-      if (typeof entryData.sessions_left === 'number') {
+
+      if (typeof entryData.sessions_left === "number") {
         sessionsLeftFromData = entryData.sessions_left;
-      } else if (typeof entryData.sessions_left === 'string') {
+      } else if (typeof entryData.sessions_left === "string") {
         sessionsLeftFromData = parseInt(entryData.sessions_left, 10) || 0;
       } else if (entryData.sessions_left) {
         // Handle any other non-null case
         sessionsLeftFromData = Number(entryData.sessions_left) || 0;
       }
-      
+
       console.log("Original sessions from API:", entryData.sessions_left);
       console.log("Parsed sessions value:", sessionsLeftFromData);
-      
+
       const initialData = {
         ...entryData,
         package_name: entryData.package_name || "",
@@ -118,7 +135,7 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
 
       setOriginalData(initialData);
       setOriginalSessionsLeft(sessionsLeftFromData);
-      
+
       // Set form fields that the user can edit
       setFormData({
         date_of_session: initialData.date_of_session,
@@ -129,13 +146,15 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
 
       // Initialize person in charge
       setPersonInCharge(initialData.person_in_charge || "");
-      
+
       // IMPORTANT FIX: Calculate what will remain AFTER this visit
       // But don't automatically subtract 1 - that will happen when the form is submitted
       // This ensures the UI correctly shows sessions remaining
       setSessionsLeft(sessionsLeftFromData);
-      
-      console.log(`Will display: Originally ${sessionsLeftFromData}, ${sessionsLeftFromData} remaining`);
+
+      console.log(
+        `Will display: Originally ${sessionsLeftFromData}, ${sessionsLeftFromData} remaining`
+      );
     }
 
     const fetchAestheticians = async () => {
@@ -175,7 +194,7 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
         });
         const data = await res.json();
         // Additional client-side filtering as a safeguard
-        setPackagesList(data.filter(pkg => !pkg.archived));
+        setPackagesList(data.filter((pkg) => !pkg.archived));
       } catch (err) {
         console.error("Failed to fetch packages:", err);
       }
@@ -191,7 +210,7 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
         );
         const data = await res.json();
         // Additional client-side filtering as a safeguard
-        setTreatmentsList(data.filter(treatment => !treatment.archived));
+        setTreatmentsList(data.filter((treatment) => !treatment.archived));
       } catch (err) {
         console.error("Failed to fetch treatments:", err);
       }
@@ -227,7 +246,10 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
 
   // Generate a new reference ID when a new package or treatment is selected
   useEffect(() => {
-    if ((selectedPackage || selectedTreatments.length > 0) && newServiceRefId === "") {
+    if (
+      (selectedPackage || selectedTreatments.length > 0) &&
+      newServiceRefId === ""
+    ) {
       setNewServiceRefId(generateReferenceId("SRV"));
     }
   }, [selectedPackage, selectedTreatments, newServiceRefId]);
@@ -263,7 +285,7 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
     }
 
     setNewAmount(calculatedAmount.toFixed(2));
-    
+
     // Only update sessionsLeft if we're adding a new package/treatments
     if (selectedPackage || selectedTreatments.length > 0) {
       setSessionsLeft(calculatedSessions);
@@ -321,15 +343,44 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
       errors.date_of_session = "Next session date cannot be in the past";
     }
 
-    // Validate time is within business hours (9 AM to 6 PM)
+    // Add holiday check
+    if (formData.date_of_session) {
+      try {
+        const date = new Date(formData.date_of_session);
+        if (!isNaN(date.getTime())) {
+          if (isHoliday(date)) {
+            const holidayName = getHolidayName(date);
+            if (holidayName) {
+              errors.date_of_session = `The selected date (${holidayName}) is a holiday. Please choose another date.`;
+
+              // Also show an alert
+              setAlertTitle("Error");
+              setAlertMessage(
+                `The selected date (${holidayName}) is a holiday. Please choose another date.`
+              );
+              setAlertVariant("error");
+              setShowAlert(true);
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Error checking holiday:", error);
+      }
+    }
+
+    // Validate time is within business hours (12 PM to 6 PM)
     if (formData.time_of_session) {
-      const [hours, minutes] = formData.time_of_session.split(':').map(Number);
+      const [hours, minutes] = formData.time_of_session.split(":").map(Number);
       const startBusinessHour = 12; // 12 PM
-      const endBusinessHour = 21;  // 9 PM
-      
-      if (hours < startBusinessHour || hours > endBusinessHour || 
-          (hours === endBusinessHour && minutes > 0)) {
-        errors.time_of_session = "Session time must be between 12:00 PM and 9:00 PM";
+      const endBusinessHour = 18;
+
+      if (
+        hours < startBusinessHour ||
+        hours > endBusinessHour ||
+        (hours === endBusinessHour && minutes > 0)
+      ) {
+        errors.time_of_session =
+          "Session time must be between 12:00 PM and 6:00 PM";
       }
     }
 
@@ -370,11 +421,11 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
     }
 
     // In CreatePatientEntry.jsx and UpdatePatientEntry.jsx - update the validation logic
-    if (formData.age) {
-      const ageNum = parseInt(formData.age);
-      if (isNaN(ageNum) || ageNum < 18) {
+    if (formData.birth_date) {
+      const age = calculateAge(formData.birth_date);
+      if (age < 18) {
         errors.age = "Patients must be at least 18 years old";
-      } else if (ageNum > 120) {
+      } else if (age > 120) {
         errors.age = "Age must be 120 or less";
       }
     }
@@ -382,13 +433,17 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
     return errors;
   };
 
+  const handleAlertClose = () => {
+    setShowAlert(false);
+  };
+
   const handleSubmit = async () => {
     setFormSubmitAttempted(true);
     setIsSubmitting(true);
-    
+
     const errors = validateForm();
     setFormErrors(errors);
-    
+
     if (Object.keys(errors).length > 0) {
       setIsSubmitting(false);
       return;
@@ -397,7 +452,7 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
     // IMPORTANT FIX: When submitting, we need to decrease the sessions by 1
     // This ensures we're tracking the sessions correctly
     const updatedSessionsLeft = Math.max(0, sessionsLeft - 1);
-    
+
     console.log("Original sessions:", sessionsLeft);
     console.log("Sessions after this visit:", updatedSessionsLeft);
 
@@ -460,7 +515,7 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
                   .join(", ")
               : "",
             payment: additionalPayment,
-            reference_no: additionalPaymentRefId ,// Use the generated reference ID
+            reference_no: additionalPaymentRefId, // Use the generated reference ID
             patient_record_id: entryData.id
           };
 
@@ -516,7 +571,9 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
             patient_record_id: entryData.id,
             full_name: entryData.patient_name,
             contact_number: entryData.contact_number,
-            age: entryData.age ? parseInt(entryData.age) : null,
+            age: entryData.birth_date
+              ? calculateAge(entryData.birth_date)
+              : null,
             email: entryData.email,
             date_of_session: formData.date_of_session,
             time_of_session: formData.time_of_session,
@@ -533,7 +590,7 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
           console.error("Error creating next appointment:", err);
         }
       }
-      
+
       setIsSubmitting(false);
       onClose();
     } catch (error) {
@@ -544,6 +601,15 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
 
   return (
     <ModalContainer data-cy="update-patient-entry-modal">
+      {showAlert && (
+        <AlertContainer variant={alertVariant}>
+          <AlertText>
+            <AlertTitle>{alertTitle}</AlertTitle>
+            <AlertDescription>{alertMessage}</AlertDescription>
+          </AlertText>
+          <CloseAlert onClick={handleAlertClose} />
+        </AlertContainer>
+      )}
       <ModalHeader>
         <ModalIcon>
           <CircleUserIcon />
@@ -647,13 +713,13 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
               <p className="text-sm text-gray-500 mt-1">
                 {sessionsLeft > 0 && (
                   <>
-                    Current sessions: <strong>{sessionsLeft}</strong>, 
-                    <strong> {sessionsAfterVisit}</strong> will remain after this visit
+                    Current sessions: <strong>{sessionsLeft}</strong>,
+                    <strong> {sessionsAfterVisit}</strong> will remain after
+                    this visit
                   </>
                 )}
-                {sessionsLeft <= 0 && (
-                  "No sessions left. Consider adding a new package or treatment."
-                )}
+                {sessionsLeft <= 0 &&
+                  "No sessions left. Consider adding a new package or treatment."}
               </p>
             </InputContainer>
 
@@ -834,7 +900,7 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
                       <InputLabel>REFERENCE NUMBER</InputLabel>
                       <p data-cy="new-service-reference">{newServiceRefId}</p>
                     </InputContainer>
-                    
+
                     {/* PACKAGE DISCOUNT */}
                     <InputContainer>
                       <InputLabel>PACKAGE DISCOUNT</InputLabel>
@@ -851,7 +917,9 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
                           allowNegativeValue={false}
                           max={100} // Maximum 100% discount
                           value={packageDiscount}
-                          onValueChange={(value) => setPackageDiscount(value || "0")}
+                          onValueChange={(value) =>
+                            setPackageDiscount(value || "0")
+                          }
                         />
                       </InputTextField>
                     </InputContainer>
@@ -1006,7 +1074,11 @@ function UpdatePatientEntry({ isOpen, onClose, entryData, onSubmit }) {
                 <Input
                   data-cy="next-time-of-session-input"
                   type="time"
-                  className={`text-input ${formSubmitAttempted && formErrors.time_of_session ? "border-red-500" : ""}`}
+                  className={`text-input ${
+                    formSubmitAttempted && formErrors.time_of_session
+                      ? "border-red-500"
+                      : ""
+                  }`}
                   required
                   value={formData.time_of_session || ""}
                   onChange={(e) =>

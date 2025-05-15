@@ -1,5 +1,6 @@
 // ScheduleAppointment.jsx
 import React, { useState, useRef, useEffect } from "react";
+import { isHoliday, getHolidayName } from "@/utils/holidays";
 import {
   ModalContainer,
   ModalHeader,
@@ -15,6 +16,7 @@ import {
   CloseAlert
 } from "@/components/ui/Alert";
 import ConfirmParentalConsent from "./ConfirmParentalConsent";
+import { calculateAge } from "@/lib/ageCalculator";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -70,14 +72,14 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
   // Now it's safe to have an early return
   if (!isOpen) return null;
 
-  // Function to check if time is within business hours (12pm - 8pm)
+  // Function to check if time is within business hours (12pm - 6pm)
   const isWithinBusinessHours = (time) => {
     if (!time) return false;
 
     const [hours, minutes] = time.split(":").map(Number);
 
     // Convert to 24-hour format for comparison
-    return (hours >= 12 && hours < 20) || (hours === 20 && minutes === 0);
+    return (hours >= 12 && hours < 18) || (hours === 18 && minutes === 0);
   };
 
   // Function to validate phone number (Philippine format)
@@ -95,27 +97,42 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
     return selectedDate >= today;
   };
 
+  // Function to check if date is a holiday
+  const checkIfHoliday = (dateString) => {
+    if (!dateString) return false;
+
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return false;
+
+      return isHoliday(date);
+    } catch (error) {
+      console.error("Error checking holiday:", error);
+      return false;
+    }
+  };
+
+  // To get holiday name for more specific error messages
+  const getHolidayDetails = (dateString) => {
+    if (!dateString) return null;
+
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return null;
+
+      const holidayName = getHolidayName(date);
+      return holidayName;
+    } catch (error) {
+      console.error("Error getting holiday details:", error);
+      return null;
+    }
+  };
+
   // Function to validate email
   const isValidEmail = (email) => {
     // Regular expression for basic email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
-  };
-
-  const calculateAge = (birthDate) => {
-    const today = new Date();
-    const birth = new Date(birthDate);
-    let age = today.getFullYear() - birth.getFullYear();
-    const monthDiff = today.getMonth() - birth.getMonth();
-
-    if (
-      monthDiff < 0 ||
-      (monthDiff === 0 && today.getDate() < birth.getDate())
-    ) {
-      age--;
-    }
-
-    return age;
   };
 
   // Update the age validation function
@@ -269,6 +286,25 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
 
     // Calculate age to determine workflow
     const age = calculateAge(birthDate);
+
+    // Check if selected date is a holiday
+    if (dateOfSession) {
+      const holidayName = getHolidayDetails(dateOfSession);
+      if (holidayName) {
+        setAlertTitle("Error");
+        setAlertMessage(
+          `The selected date (${holidayName}) is a holiday. Please choose another date.`
+        );
+        setShowAlert(true);
+        // If you have a setAlertVariant function
+        if (typeof setAlertVariant === "function") {
+          setAlertVariant("error");
+        }
+        setIsSubmitting(false);
+        submitInProgressRef.current = false;
+        return;
+      }
+    }
 
     // If minor (13-17), show parental consent modal
     if (age >= 13 && age < 18) {
@@ -494,7 +530,7 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
               </InputTextField>
               {!isWithinBusinessHours(timeOfSession) && timeOfSession && (
                 <p className="text-red-500 text-[10px] mt-0.5">
-                  Select time between 12:00 PM - 8:00 PM
+                  Select time between 12:00 PM - 6:00 PM
                 </p>
               )}
             </InputContainer>

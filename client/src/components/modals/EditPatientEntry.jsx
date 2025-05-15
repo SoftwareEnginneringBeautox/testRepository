@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import ConfirmParentalConsent from "./ConfirmParentalConsent";
+import { calculateAge } from "@/lib/ageCalculator";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -19,6 +20,14 @@ import {
   InputIcon,
   Input
 } from "@/components/ui/Input";
+
+import {
+  AlertContainer,
+  AlertText,
+  AlertTitle,
+  AlertDescription,
+  CloseAlert
+} from "@/components/ui/Alert";
 
 import { Button } from "../ui/Button";
 
@@ -39,6 +48,11 @@ function EditPatientContactInfo({ isOpen, onClose, entryData, onSubmit }) {
   const submitInProgressRef = useRef(false);
   const [showParentalConsentModal, setShowParentalConsentModal] =
     useState(false);
+
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertTitle, setAlertTitle] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertVariant, setAlertVariant] = useState("error");
 
   useEffect(() => {
     if (entryData) {
@@ -86,28 +100,36 @@ function EditPatientContactInfo({ isOpen, onClose, entryData, onSubmit }) {
         errors.birth_date = "Invalid birth date";
       }
       // Ages 13-17 will need parental consent (handled separately)
+
+      // Add holiday check for birth date
+      try {
+        const date = new Date(formData.birth_date);
+        if (!isNaN(date.getTime())) {
+          if (isHoliday(date)) {
+            const holidayName = getHolidayName(date);
+            if (holidayName) {
+              errors.birth_date = `The selected date (${holidayName}) is a holiday. Please choose another date.`;
+
+              // Also show an alert
+              setAlertTitle("Error");
+              setAlertMessage(
+                `The selected date (${holidayName}) is a holiday. Please choose another date.`
+              );
+              setAlertVariant("error");
+              setShowAlert(true);
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Error checking holiday:", error);
+      }
     }
 
     return errors;
   };
 
-  // Add calculateAge helper function
-  const calculateAge = (birthDate) => {
-    if (!birthDate) return null;
-
-    const today = new Date();
-    const birth = new Date(birthDate);
-    let age = today.getFullYear() - birth.getFullYear();
-    const monthDiff = today.getMonth() - birth.getMonth();
-
-    if (
-      monthDiff < 0 ||
-      (monthDiff === 0 && today.getDate() < birth.getDate())
-    ) {
-      age--;
-    }
-
-    return age;
+  const handleAlertClose = () => {
+    setShowAlert(false);
   };
 
   // New function to update appointment records with new contact information
@@ -251,6 +273,15 @@ function EditPatientContactInfo({ isOpen, onClose, entryData, onSubmit }) {
 
   return (
     <ModalContainer data-cy="edit-patient-contact-info-modal">
+      {showAlert && (
+        <AlertContainer variant={alertVariant}>
+          <AlertText>
+            <AlertTitle>{alertTitle}</AlertTitle>
+            <AlertDescription>{alertMessage}</AlertDescription>
+          </AlertText>
+          <CloseAlert onClick={handleAlertClose} />
+        </AlertContainer>
+      )}
       <ModalHeader>
         <ModalIcon>
           <CircleUserIcon />

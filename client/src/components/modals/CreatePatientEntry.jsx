@@ -4,6 +4,8 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/RadioGroup";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { TreatmentMultiSelect } from "@/components/ui/TreatmentMultiSelect";
 import ConfirmParentalConsent from "./ConfirmParentalConsent";
+import { isHoliday, getHolidayName } from "@/utils/holidays";
+import { calculateAge } from "@/lib/ageCalculator";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -31,6 +33,14 @@ import {
 } from "@/components/ui/Select";
 
 import { Button } from "../ui/Button";
+
+import {
+  AlertContainer,
+  AlertText,
+  AlertTitle,
+  AlertDescription,
+  CloseAlert
+} from "@/components/ui/Alert";
 
 import PesoIcon from "@/assets/icons/PesoIcon";
 import ClockIcon from "@/assets/icons/ClockIcon";
@@ -90,6 +100,11 @@ function CreatePatientEntry({ isOpen, onClose }) {
   // State for parental consent modal
   const [showParentalConsentModal, setShowParentalConsentModal] =
     useState(false);
+
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertTitle, setAlertTitle] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertVariant, setAlertVariant] = useState("error");
 
   // Effect for setting amount based on package or treatments
   useEffect(() => {
@@ -220,22 +235,35 @@ function CreatePatientEntry({ isOpen, onClose }) {
     treatment
   });
 
-  const calculateAge = (birthDate) => {
-    if (!birthDate) return null;
+  // Function to check if date is a holiday
+  const checkIfHoliday = (dateString) => {
+    if (!dateString) return false;
 
-    const today = new Date();
-    const birth = new Date(birthDate);
-    let age = today.getFullYear() - birth.getFullYear();
-    const monthDiff = today.getMonth() - birth.getMonth();
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return false;
 
-    if (
-      monthDiff < 0 ||
-      (monthDiff === 0 && today.getDate() < birth.getDate())
-    ) {
-      age--;
+      return isHoliday(date);
+    } catch (error) {
+      console.error("Error checking holiday:", error);
+      return false;
     }
+  };
 
-    return age;
+  // To get holiday name for more specific error messages
+  const getHolidayDetails = (dateString) => {
+    if (!dateString) return null;
+
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return null;
+
+      const holidayName = getHolidayName(date);
+      return holidayName;
+    } catch (error) {
+      console.error("Error getting holiday details:", error);
+      return null;
+    }
   };
 
   // Update birthdate validation
@@ -320,6 +348,20 @@ function CreatePatientEntry({ isOpen, onClose }) {
         errors.dateOfSession = "Session date cannot be in the past";
       }
 
+      // Holiday check
+      const holidayName = getHolidayDetails(dateOfSession);
+      if (holidayName) {
+        errors.dateOfSession = `The selected date (${holidayName}) is a holiday. Please choose another date.`;
+
+        // Also show an alert
+        setAlertTitle("Error");
+        setAlertMessage(
+          `The selected date (${holidayName}) is a holiday. Please choose another date.`
+        );
+        setAlertVariant("error");
+        setShowAlert(true);
+      }
+
       // Package expiration validation
       if (packageName) {
         const selectedPackage = packagesList.find(
@@ -338,12 +380,11 @@ function CreatePatientEntry({ isOpen, onClose }) {
         }
       }
     }
-
     // Session time validation
     if (timeOfSession) {
       const [hours, minutes] = timeOfSession.split(":").map(Number);
       const startHour = 12; // 12pm
-      const endHour = 21; // 9pm
+      const endHour = 18; // 6pm (changed from 21)
 
       if (
         hours < startHour ||
@@ -351,7 +392,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
         (hours === endHour && minutes > 0)
       ) {
         errors.timeOfSession =
-          "Session time must be between 12:00 PM and 9:00 PM";
+          "Session time must be between 12:00 PM and 6:00 PM";
       }
     }
 
@@ -516,11 +557,6 @@ function CreatePatientEntry({ isOpen, onClose }) {
   // Handle alert dismissal
   const handleAlertClose = () => {
     setShowAlert(false);
-
-    // If it was a success alert, also close the modal
-    if (alertTitle === "Success") {
-      onClose();
-    }
   };
 
   const numericTotalAmount = parseFloat(totalAmount) || 0;
@@ -529,6 +565,15 @@ function CreatePatientEntry({ isOpen, onClose }) {
 
   return (
     <ModalContainer data-cy="create-patient-entry-modal">
+      {showAlert && (
+        <AlertContainer variant={alertVariant}>
+          <AlertText>
+            <AlertTitle>{alertTitle}</AlertTitle>
+            <AlertDescription>{alertMessage}</AlertDescription>
+          </AlertText>
+          <CloseAlert onClick={handleAlertClose} />
+        </AlertContainer>
+      )}
       <ModalHeader>
         <ModalIcon>
           <UserIcon />
