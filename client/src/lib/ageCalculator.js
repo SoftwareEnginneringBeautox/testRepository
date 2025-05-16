@@ -1,38 +1,35 @@
 export const calculateAge = (birthDateInput) => {
     if (!birthDateInput) return null;
 
-    // Parse the birth date
-    let birthDate;
     try {
-        // Handle string input
+        let birthDate;
+
         if (typeof birthDateInput === 'string') {
-            birthDate = new Date(birthDateInput);
+            // Split manually to avoid time zone issues
+            const [year, month, day] = birthDateInput.split('-').map(Number);
+            birthDate = new Date(year, month - 1, day); // month is 0-based
         } else if (birthDateInput instanceof Date) {
-            birthDate = new Date(birthDateInput);
+            birthDate = new Date(
+                birthDateInput.getFullYear(),
+                birthDateInput.getMonth(),
+                birthDateInput.getDate()
+            );
         } else {
             console.error("Unsupported birth date format:", birthDateInput);
             return null;
         }
 
-        // Validate the date
-        if (isNaN(birthDate.getTime())) {
-            console.error("Invalid birth date:", birthDateInput);
-            return null;
-        }
-
         const today = new Date();
+        const currentDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
 
-        // Get raw difference in years
-        let age = today.getFullYear() - birthDate.getFullYear();
+        let age = currentDate.getFullYear() - birthDate.getFullYear();
 
-        // The correct logic: Subtract a year only if birthday hasn't occurred yet this year
         if (
-            today.getMonth() < birthDate.getMonth() ||
-            (today.getMonth() === birthDate.getMonth() && today.getDate() < birthDate.getDate())
+            currentDate.getMonth() < birthDate.getMonth() ||
+            (currentDate.getMonth() === birthDate.getMonth() && currentDate.getDate() < birthDate.getDate())
         ) {
             age--;
         }
-
 
         return age;
     } catch (error) {

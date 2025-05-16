@@ -26,6 +26,8 @@ import {
   TableRow
 } from "@/components/ui/Table";
 
+import DateRangeFilter from "@/components/DateRangeFilter";
+
 import { InputTextField, Input } from "@/components/ui/Input";
 
 import {
@@ -45,17 +47,6 @@ import {
 } from "@/components/ui/Select";
 
 import MultiSelectFilter from "@/components/ui/MultiSelectFilter";
-
-// Import Pagination components from shadcn
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious
-} from "@/components/ui/Pagination";
 
 import CreatePatientEntry from "@/components/modals/CreatePatientEntry";
 import EditPatientEntry from "@/components/modals/EditPatientEntry";
@@ -83,6 +74,9 @@ function PatientRecordsDatabase() {
   const [loading, setLoading] = useState(true);
   const [midnightRefresh, setMidnightRefresh] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [dateFilterStart, setDateFilterStart] = useState(null);
+  const [dateFilterEnd, setDateFilterEnd] = useState(null);
+  const [isDateFilterActive, setIsDateFilterActive] = useState(false);
 
   // Define the column configuration
   const columnConfig = [
@@ -116,13 +110,18 @@ function PatientRecordsDatabase() {
     .filter((col) => col.mandatory)
     .map((col) => col.value);
 
-  // State to manage column visibility - initialize with all columns visible
-  //
-
   const [selectedColumns, setSelectedColumns] = useState([]);
   // Define isColumnVisible here, before it's used
   const isColumnVisible = (columnValue) => {
     return selectedColumns.includes(columnValue);
+  };
+
+  const handleDateFilterChange = (startDate, endDate, isActive) => {
+    console.log("Date filter changed:", { startDate, endDate, isActive });
+    setDateFilterStart(startDate);
+    setDateFilterEnd(endDate);
+    setIsDateFilterActive(isActive);
+    setCurrentPage(1); // Reset to first page when filter changes
   };
 
   // Pagination states
@@ -375,20 +374,71 @@ function PatientRecordsDatabase() {
     end.setHours(23, 59, 59, 999); // Set to end of day
 
     // Filter records within the specified date range
-    const filteredRecords = records.filter((record) => {
-      const recordDate = new Date(
-        record.dateTransacted || record.date_of_session
-      );
-      return recordDate >= start && recordDate <= end;
-    });
+    const filteredRecords = [...records]
+      .filter((record) => {
+        // Name filter
+        const name = record.client || record.patient_name || "";
+        const nameMatches = name
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase());
 
-    // Generate the report with the filtered records
-    if (filteredRecords.length > 0) {
-      generatePRDReport(filteredRecords, null); // Pass null for monthLimit to skip that filter
-    } else {
-      console.error("No records available within the selected date range.");
-      // You may want to show an alert here
-    }
+        // Date filter
+        let dateMatches = true;
+        if (isDateFilterActive && (dateFilterStart || dateFilterEnd)) {
+          const recordDate = new Date(
+            record.dateTransacted || record.date_of_session
+          );
+
+          if (dateFilterStart && dateFilterEnd) {
+            const startDate = new Date(dateFilterStart);
+            const endDate = new Date(dateFilterEnd);
+            // Set end date to end of day
+            endDate.setHours(23, 59, 59, 999);
+
+            dateMatches = recordDate >= startDate && recordDate <= endDate;
+          } else if (dateFilterStart) {
+            const startDate = new Date(dateFilterStart);
+            dateMatches = recordDate >= startDate;
+          } else if (dateFilterEnd) {
+            const endDate = new Date(dateFilterEnd);
+            endDate.setHours(23, 59, 59, 999);
+            dateMatches = recordDate <= endDate;
+          }
+        }
+
+        return nameMatches && dateMatches;
+      })
+      .sort((a, b) => {
+        if (sortOption === "alphabetical") {
+          const nameA = (a.client || a.patient_name || "").toLowerCase();
+          const nameB = (b.client || b.patient_name || "").toLowerCase();
+          return nameA.localeCompare(nameB);
+        }
+        if (sortOption === "date") {
+          const dateA = new Date(a.dateTransacted || a.date_of_session);
+          const dateB = new Date(b.dateTransacted || b.date_of_session);
+          return dateB - dateA; // Most recent first
+        }
+        if (sortOption === "payment") {
+          // Get payment methods with fallbacks
+          const paymentA = a.paymentMethod || a.payment_method || "";
+          const paymentB = b.paymentMethod || b.payment_method || "";
+
+          // Check if either payment is "Full Payment" or contains "full"
+          const isFullPaymentA = paymentA.toLowerCase().includes("full");
+          const isFullPaymentB = paymentB.toLowerCase().includes("full");
+
+          // Sort full payments first, then installments
+          if (isFullPaymentA && !isFullPaymentB) return -1;
+          if (!isFullPaymentA && isFullPaymentB) return 1;
+
+          // If both are the same payment type, sort alphabetically by name as secondary sort
+          const nameA = (a.client || a.patient_name || "").toLowerCase();
+          const nameB = (b.client || b.patient_name || "").toLowerCase();
+          return nameA.localeCompare(nameB);
+        }
+        return 0;
+      });
   };
 
   const filteredRecords = [...records]
@@ -870,8 +920,14 @@ function PatientRecordsDatabase() {
           data-cy="patient-records-title"
         >
           PATIENT RECORDS
+          {isDateFilterActive && (
+            <span className="text-xs text-lavender-400 dark:text-lavender-100 font-medium ml-2">
+              (Date Filtered)
+            </span>
+          )}
         </h4>
         <div className="flex flex-col md:flex-row items-start md:items-center justify-center gap-4 w-full md:w-auto">
+          {/* Search Box */}
           <InputTextField className="w-full md:w-auto">
             <Input
               type="text"
@@ -884,6 +940,13 @@ function PatientRecordsDatabase() {
             <MagnifyingGlassIcon className="dark:text-customNeutral-100" />
           </InputTextField>
 
+          {/* Date Filter Button - Added between search and sort */}
+          <DateRangeFilter
+            onFilterChange={handleDateFilterChange}
+            className="w-full md:w-auto cursor-pointer"
+          />
+
+          {/* Sort Dropdown */}
           <Select onValueChange={setSortOption} className="w-full md:w-auto">
             <SelectTrigger
               placeholder="SORT BY"
@@ -899,6 +962,7 @@ function PatientRecordsDatabase() {
             </SelectContent>
           </Select>
 
+          {/* Filter Columns Dropdown */}
           <MultiSelectFilter
             options={columnConfig}
             selectedValues={selectedColumns}
