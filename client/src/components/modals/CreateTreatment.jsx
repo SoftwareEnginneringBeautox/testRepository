@@ -135,6 +135,7 @@ function CreateTreatment({ isOpen, onClose }) {
                   placeholder="e.g. Diamond Peel Facial"
                   value={treatmentName}
                   onChange={(e) => setTreatmentName(e.target.value)}
+                  maxLength={100} // Add maximum length
                   required
                 />
               </InputTextField>
@@ -172,7 +173,8 @@ function CreateTreatment({ isOpen, onClose }) {
                   data-cy="treatment-expiration"
                   placeholder="e.g. 12"
                   type="number"
-                  min="0"
+                  min="1"
+                  max="52" // Maximum 52 weeks (1 year)
                   step="1"
                   value={expiration}
                   onChange={(e) => setExpiration(e.target.value)}

@@ -98,6 +98,8 @@ function EditTreatment({ isOpen, onClose, entryData, onSubmit }) {
                   onChange={(e) =>
                     setFormData({ ...formData, treatment_name: e.target.value })
                   }
+                  maxLength={100} // Add maximum length
+                  required
                 />
               </InputTextField>
             </InputContainer>
@@ -132,7 +134,8 @@ function EditTreatment({ isOpen, onClose, entryData, onSubmit }) {
                   data-cy="treatment-expiration"
                   placeholder="e.g. 12"
                   type="number"
-                  min="0"
+                  min="1"
+                  max="52" // Maximum 52 weeks (1 year)
                   step="1"
                   value={formData.expiration}
                   onChange={(e) =>

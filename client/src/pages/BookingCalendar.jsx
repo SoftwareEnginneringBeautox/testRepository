@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useReducer, useRef, useCallback } from "react";
+import React, {
+  useState,
+  useEffect,
+  useReducer,
+  useRef,
+  useCallback
+} from "react";
 import axios from "axios";
 import { useModal } from "@/hooks/useModal";
 
@@ -33,7 +39,7 @@ function BookingCalendar() {
 
   // Force update mechanism
   const [renderKey, setRenderKey] = useState(0);
-  const forceRender = () => setRenderKey(prev => prev + 1);
+  const forceRender = () => setRenderKey((prev) => prev + 1);
 
   const month = currentDate.getMonth();
   const year = currentDate.getFullYear();
@@ -62,12 +68,9 @@ function BookingCalendar() {
   useEffect(() => {
     const fetchPatientRecords = async () => {
       try {
-        const response = await axios.get(
-          `${API_BASE_URL}/api/patients`,
-          {
-            withCredentials: true
-          }
-        );
+        const response = await axios.get(`${API_BASE_URL}/api/patients`, {
+          withCredentials: true
+        });
         setPatientRecords(response.data);
       } catch (error) {
         console.error("Error fetching patient records:", error);
@@ -83,7 +86,9 @@ function BookingCalendar() {
       try {
         setIsLoading(true);
         // Add archived=false query parameter to exclude archived appointments
-        const response = await axios.get(`${API_BASE_URL}/api/appointments?archived=false`);
+        const response = await axios.get(
+          `${API_BASE_URL}/api/appointments?archived=false`
+        );
         setAppointments(response.data);
         setIsLoading(false);
       } catch (error) {
@@ -98,7 +103,7 @@ function BookingCalendar() {
   // Process appointments into events for the calendar
   const processAppointments = useCallback(() => {
     return appointments
-      .filter(appointment => !appointment.archived) // Filter out archived appointments
+      .filter((appointment) => !appointment.archived) // Filter out archived appointments
       .map((appointment) => {
         // Get date object from the appointment
         const appointmentDate = new Date(appointment.date_of_session);
@@ -293,63 +298,82 @@ function BookingCalendar() {
   };
 
   // Filter appointments and update displayed appointments
-  const updateDisplayedAppointments = useCallback((staffToFilter) => {
-    console.log("Updating displayed appointments with staff filter:", staffToFilter);
-
-    const events = processAppointments();
-
-    // First filter by date range according to view
-    let dateFilteredEvents = events;
-
-    if (view === "monthly") {
-      // For monthly view, filter to current month
-      dateFilteredEvents = events.filter((event) => {
-        const eventDate = new Date(event.rawDate);
-        return (
-          eventDate.getMonth() === month && eventDate.getFullYear() === year
-        );
-      });
-    } else {
-      // For weekly view, filter to current week
-      const weekStart = getStartOfWeek(currentDate);
-      const weekEnd = new Date(weekStart);
-      weekEnd.setDate(weekEnd.getDate() + 7);
-
-      dateFilteredEvents = events.filter((event) => {
-        const eventDate = new Date(event.rawDate);
-        return eventDate >= weekStart && eventDate < weekEnd;
-      });
-    }
-
-    // Then filter by selected staff if any are selected
-    if (
-      staffToFilter.length > 0 &&
-      staffToFilter.length < getUniquePersonsInCharge().length
-    ) {
-      console.log("Filtering by specific staff:", staffToFilter);
-
-      // Normalize staff values to handle both string and object formats
-      const selectedValues = staffToFilter.map(item =>
-        typeof item === 'object' && item !== null && item.value ? item.value : item
+  const updateDisplayedAppointments = useCallback(
+    (staffToFilter) => {
+      console.log(
+        "Updating displayed appointments with staff filter:",
+        staffToFilter
       );
 
-      console.log("Normalized staff values:", selectedValues);
+      const events = processAppointments();
 
-      const filtered = dateFilteredEvents.filter((event) => {
-        const result = selectedValues.includes(event.personInCharge);
-        console.log(`Event ${event.id}, person: "${event.personInCharge}", included? ${result}`);
-        return result;
-      });
+      // First filter by date range according to view
+      let dateFilteredEvents = events;
 
-      console.log(`Filtered from ${dateFilteredEvents.length} to ${filtered.length} appointments`);
-      setDisplayedAppointments(filtered);
-    } else {
-      setDisplayedAppointments(dateFilteredEvents);
-    }
+      if (view === "monthly") {
+        // For monthly view, filter to current month
+        dateFilteredEvents = events.filter((event) => {
+          const eventDate = new Date(event.rawDate);
+          return (
+            eventDate.getMonth() === month && eventDate.getFullYear() === year
+          );
+        });
+      } else {
+        // For weekly view, filter to current week
+        const weekStart = getStartOfWeek(currentDate);
+        const weekEnd = new Date(weekStart);
+        weekEnd.setDate(weekEnd.getDate() + 7);
 
-    // Force a re-render
-    forceRender();
-  }, [processAppointments, view, month, year, currentDate, getUniquePersonsInCharge]);
+        dateFilteredEvents = events.filter((event) => {
+          const eventDate = new Date(event.rawDate);
+          return eventDate >= weekStart && eventDate < weekEnd;
+        });
+      }
+
+      // Then filter by selected staff if any are selected
+      if (
+        staffToFilter.length > 0 &&
+        staffToFilter.length < getUniquePersonsInCharge().length
+      ) {
+        console.log("Filtering by specific staff:", staffToFilter);
+
+        // Normalize staff values to handle both string and object formats
+        const selectedValues = staffToFilter.map((item) =>
+          typeof item === "object" && item !== null && item.value
+            ? item.value
+            : item
+        );
+
+        console.log("Normalized staff values:", selectedValues);
+
+        const filtered = dateFilteredEvents.filter((event) => {
+          const result = selectedValues.includes(event.personInCharge);
+          console.log(
+            `Event ${event.id}, person: "${event.personInCharge}", included? ${result}`
+          );
+          return result;
+        });
+
+        console.log(
+          `Filtered from ${dateFilteredEvents.length} to ${filtered.length} appointments`
+        );
+        setDisplayedAppointments(filtered);
+      } else {
+        setDisplayedAppointments(dateFilteredEvents);
+      }
+
+      // Force a re-render
+      forceRender();
+    },
+    [
+      processAppointments,
+      view,
+      month,
+      year,
+      currentDate,
+      getUniquePersonsInCharge
+    ]
+  );
 
   // Update displayed appointments when view or date changes
   useEffect(() => {
@@ -388,7 +412,10 @@ function BookingCalendar() {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center w-full gap-1.5 sm:gap-2 md:gap-3">
           <div className="w-full sm:w-auto">
             <div className="flex flex-row justify-between sm:justify-start items-center gap-2 sm:gap-4">
-              <div className="flex flex-row items-center gap-0.5 sm:gap-1" data-cy="calendar-navigation">
+              <div
+                className="flex flex-row items-center gap-0.5 sm:gap-1"
+                data-cy="calendar-navigation"
+              >
                 <button
                   data-cy="previous-month-btn"
                   className="border border-transparent p-0.5 sm:p-1 rounded hover:border-lavender-400 text-lavender-400 dark:hover:border-lavender-100 dark:text-lavender-100"
@@ -404,7 +431,8 @@ function BookingCalendar() {
                   data-cy="calendar-month-label"
                   className="text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl font-semibold dark:text-customNeutral-100"
                 >
-                  {currentDate.toLocaleString("default", { month: "long" })} {year}
+                  {currentDate.toLocaleString("default", { month: "long" })}{" "}
+                  {year}
                 </h2>
                 <button
                   data-cy="next-month-btn"
@@ -440,8 +468,9 @@ function BookingCalendar() {
                     MONTHLY
                   </span>
                   <span
-                    className={`absolute left-0 bottom-0 block h-0.5 bg-lavender-400 transition-all duration-300 ${view === "monthly" ? "w-full" : "w-0 group-hover:w-full"
-                      }`}
+                    className={`absolute left-0 bottom-0 block h-0.5 bg-lavender-400 transition-all duration-300 ${
+                      view === "monthly" ? "w-full" : "w-0 group-hover:w-full"
+                    }`}
                     data-cy="monthly-view-indicator"
                   ></span>
                 </button>
@@ -465,8 +494,9 @@ function BookingCalendar() {
                     WEEKLY
                   </span>
                   <span
-                    className={`absolute left-0 bottom-0 block h-0.5 bg-lavender-400 transition-all duration-300 ${view === "weekly" ? "w-full" : "w-0 group-hover:w-full"
-                      }`}
+                    className={`absolute left-0 bottom-0 block h-0.5 bg-lavender-400 transition-all duration-300 ${
+                      view === "weekly" ? "w-full" : "w-0 group-hover:w-full"
+                    }`}
                     data-cy="weekly-view-indicator"
                   ></span>
                 </button>

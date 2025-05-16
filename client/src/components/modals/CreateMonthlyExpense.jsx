@@ -108,27 +108,27 @@ function CreateMonthlyExpense({
         date: formData.date
       };
 
-      console.log(`Submitting expense data at ${new Date().toISOString()}:`, formattedData);
+      console.log(
+        `Submitting expense data at ${new Date().toISOString()}:`,
+        formattedData
+      );
 
       // Add timeout with Promise.race to prevent hanging submissions
-      const timeoutPromise = new Promise((_, reject) => 
+      const timeoutPromise = new Promise((_, reject) =>
         setTimeout(() => reject(new Error("Request timed out")), 10000)
       );
-      
-      await Promise.race([
-        onCreateSuccess(formattedData),
-        timeoutPromise
-      ]);
+
+      await Promise.race([onCreateSuccess(formattedData), timeoutPromise]);
 
       console.log(`Expense creation completed in ${Date.now() - submitTime}ms`);
-      
+
       // Close the modal
       onClose();
     } catch (error) {
       console.error("Error creating expense:", error);
       setAlertTitle("Error");
       setAlertMessage(
-        error.message === "Request timed out" 
+        error.message === "Request timed out"
           ? "The request took too long. Please try again."
           : "An error occurred while creating the expense. Please try again."
       );
@@ -180,7 +180,8 @@ function CreateMonthlyExpense({
                         value={category.name || `category-${category.id}`}
                         data-cy={`expense-type-option-${category.id}`}
                       >
-                        {category.name.toUpperCase() || `Category ${category.id}`}
+                        {category.name.toUpperCase() ||
+                          `Category ${category.id}`}
                       </SelectItem>
                     ))
                   ) : (

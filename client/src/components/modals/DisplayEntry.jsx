@@ -32,10 +32,10 @@ function DisplayEntry({ isOpen, onClose, entryData }) {
           {[
             { label: "PERSON IN CHARGE", value: entryData.personInCharge },
             {
-              label: "DATE OF INITIAL SESSION",
+              label: "DATE OF SESSION",
               value: entryData.day
             },
-            { label: "TIME OF NEXT SESSION", value: entryData.startTime },
+            { label: "TIME OF SESSION", value: entryData.startTime },
             { label: "PACKAGE", value: entryData.packageName },
             { 
               label: "TREATMENT", 

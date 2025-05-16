@@ -1,6 +1,8 @@
 import React from "react";
 import { useState } from "react";
 import { useModal } from "@/hooks/useModal";
+import { isHoliday, getHolidayName } from "@/utils/holidays";
+import { cn } from "@/lib/utils";
 import DisplayEntry from "@/components/modals/DisplayEntry";
 
 const WeeklyBookingPanel = ({ events = [], currentDate }) => {
@@ -11,11 +13,7 @@ const WeeklyBookingPanel = ({ events = [], currentDate }) => {
     return `${i % 12 || 12}:00${i < 12 ? "AM" : "PM"}`;
   });
 
-  const handleOpenModal = (appointment) => {
-    setSelectedEntry(appointment);
-    openModal("displayEntry");
-  };
-
+  // Make sure to compute weekDates at the top, before it's used
   const getWeekDates = (date) => {
     const result = [];
     const startOfWeek = new Date(date);
@@ -26,31 +24,52 @@ const WeeklyBookingPanel = ({ events = [], currentDate }) => {
       day.setDate(startOfWeek.getDate() + i);
       result.push(day);
     }
-
     return result;
   };
 
+  // Move this calculation to the top of the component
   const weekDates = getWeekDates(currentDate);
 
+  const handleOpenModal = (appointment) => {
+    setSelectedEntry(appointment);
+    openModal("displayEntry");
+  };
+
   const parseTime = (time) => {
-    const [_, hour, minute, period] = time.match(/(\d+):?(\d{2})?(AM|PM)/i);
-    const isPM = period.toUpperCase() === "PM";
-    return {
-      hours: parseInt(hour % 12) + (isPM ? 12 : 0),
-      minutes: parseInt(minute || 0)
-    };
+    try {
+      const match = time.match(/(\d+):?(\d{2})?(AM|PM)/i);
+      if (!match) {
+        console.error("Invalid time format:", time);
+        return { hours: 0, minutes: 0 };
+      }
+
+      const [_, hour, minute, period] = match;
+      const isPM = period.toUpperCase() === "PM";
+      return {
+        hours: parseInt(hour % 12) + (isPM ? 12 : 0),
+        minutes: parseInt(minute || 0)
+      };
+    } catch (error) {
+      console.error("Error parsing time:", error, time);
+      return { hours: 0, minutes: 0 };
+    }
   };
 
   const calculateEventPosition = (event) => {
-    const start = parseTime(event.startTime);
-    const end = parseTime(event.endTime);
-    const startHour = start.hours + start.minutes / 60;
-    const endHour = end.hours + end.minutes / 60;
+    try {
+      const start = parseTime(event.startTime);
+      const end = parseTime(event.endTime);
+      const startHour = start.hours + start.minutes / 60;
+      const endHour = end.hours + end.minutes / 60;
 
-    return {
-      top: `${(startHour / 24) * 100}%`,
-      height: `${((endHour - startHour) / 24) * 100}%`
-    };
+      return {
+        top: `${(startHour / 24) * 100}%`,
+        height: `${((endHour - startHour) / 24) * 100}%`
+      };
+    } catch (error) {
+      console.error("Error calculating event position:", error, event);
+      return { top: "0%", height: "5%" }; // Default fallback
+    }
   };
 
   const formatDate = (date) => {
@@ -81,32 +100,51 @@ const WeeklyBookingPanel = ({ events = [], currentDate }) => {
               className="w-12 sm:w-16 md:w-20 bg-ash-100 dark:bg-customNeutral-500"
               data-cy="time-column-header"
             ></th>
-            {days.map((day, idx) => (
-              <th
-                key={idx}
-                className={`p-0.5 sm:p-1 ${
-                  idx === 0 ? "rounded-l-[0.5rem]" : ""
-                } ${idx === days.length - 1 ? "rounded-r-[0.5rem]" : ""}`}
-                data-cy={`day-column-header-${day.toLowerCase()}`}
-              >
-                <div
-                  className="text-[8px] sm:text-[10px] md:text-xs lg:text-sm"
-                  data-cy={`day-name-${day.toLowerCase()}`}
+            {days.map((day, idx) => {
+              const dayDate = weekDates[idx];
+              const isHolidayDate = isHoliday(dayDate);
+
+              return (
+                <th
+                  key={idx}
+                  className={cn(
+                    "p-0.5 sm:p-1",
+                    idx === 0 ? "rounded-l-[0.5rem]" : "",
+                    idx === days.length - 1 ? "rounded-r-[0.5rem]" : "",
+                    isHolidayDate ? "bg-error-100 dark:bg-error-900/40" : ""
+                  )}
+                  data-cy={`day-column-header-${day.toLowerCase()}`}
                 >
-                  {day}
-                </div>
-                <div
-                  className={`text-[8px] sm:text-[10px] md:text-xs ${
-                    isToday(weekDates[idx])
-                      ? "bg-white text-lavender-400 rounded-full inline-block px-0.5 sm:px-1"
-                      : ""
-                  }`}
-                  data-cy={`day-date-${day.toLowerCase()}`}
-                >
-                  {formatDate(weekDates[idx])}
-                </div>
-              </th>
-            ))}
+                  <div
+                    className={cn(
+                      "text-[8px] sm:text-[10px] md:text-xs lg:text-sm",
+                      isHolidayDate ? "text-error-500 dark:text-error-400" : ""
+                    )}
+                    data-cy={`day-name-${day.toLowerCase()}`}
+                  >
+                    {day}
+                  </div>
+                  <div
+                    className={cn(
+                      "text-[8px] sm:text-[10px] md:text-xs",
+                      isToday(dayDate)
+                        ? "bg-white text-lavender-400 rounded-full inline-block px-0.5 sm:px-1"
+                        : isHolidayDate
+                        ? "text-error-500 dark:text-error-400"
+                        : ""
+                    )}
+                    data-cy={`day-date-${day.toLowerCase()}`}
+                  >
+                    {formatDate(dayDate)}
+                  </div>
+                  {isHolidayDate && (
+                    <div className="text-[8px] md:text-xs text-error-400 dark:text-error-300">
+                      {getHolidayName(dayDate)}
+                    </div>
+                  )}
+                </th>
+              );
+            })}
           </tr>
         </thead>
       </table>
@@ -131,64 +169,75 @@ const WeeklyBookingPanel = ({ events = [], currentDate }) => {
         </div>
 
         <div className="flex-1 flex" data-cy="days-columns">
-          {days.map((_, dayIdx) => (
-            <div
-              key={dayIdx}
-              className="flex-1 relative"
-              data-cy={`day-column-${days[dayIdx].toLowerCase()}`}
-            >
-              <div
-                className="absolute inset-0 flex flex-col"
-                data-cy="hour-slots"
-              >
-                {[...Array(24)].map((_, timeIdx) => (
-                  <div
-                    key={timeIdx}
-                    className="h-8 sm:h-10 md:h-12 border-b border-gray-300"
-                    data-cy={`hour-slot-${timeIdx}`}
-                  ></div>
-                ))}
-              </div>
+          {days.map((day, idx) => {
+            const dayDate = weekDates[idx];
+            const isHolidayDate = isHoliday(dayDate);
 
-              {events
-                .filter((event) => {
-                  return (
-                    event.day === days[dayIdx] &&
-                    new Date(event.rawDate).getDate() ===
-                      weekDates[dayIdx].getDate() &&
-                    new Date(event.rawDate).getMonth() ===
-                      weekDates[dayIdx].getMonth() &&
-                    new Date(event.rawDate).getFullYear() ===
-                      weekDates[dayIdx].getFullYear()
-                  );
-                })
-                .map((event, idx) => {
-                  const { top, height } = calculateEventPosition(event);
-                  return (
-                    <button
-                      key={idx}
-                      className="absolute shadow-custom left-0.5 right-0.5 bg-lavender-400 text-white rounded-md p-0.5 sm:p-1 md:p-1.5 focus:outline-none text-left flex flex-col justify-end"
-                      style={{ top, height }}
-                      onClick={() => handleOpenModal(event)}
-                      data-cy={`event-${event.id}`}
-                    >
-                      <strong
-                        className="block text-[8px] sm:text-[10px] md:text-xs truncate"
-                        data-cy="event-name"
-                      >
-                        {event.name}
-                      </strong>
-                      <p
-                        className="text-[6px] sm:text-[8px] md:text-[10px] truncate"
-                        data-cy="event-time"
-                      >
-                        {event.startTime} - {event.endTime}
-                      </p>
-                    </button>
-                  );
-                })}
-            </div>
-          ))}
+            return (
+              <div
+                key={idx}
+                className={cn(
+                  "flex-1 relative",
+                  isHolidayDate ? "bg-error-50 dark:bg-error-900/20" : ""
+                )}
+                data-cy={`day-column-${day.toLowerCase()}`}
+              >
+                {isHolidayDate ? (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+                    <span className="transform -rotate-45 text-error-500 dark:text-error-400 font-semibold text-xs md:text-sm">
+                      HOLIDAY
+                    </span>
+                    <span className="text-[8px] md:text-xs text-error-400 dark:text-error-300">
+                      {getHolidayName(dayDate)}
+                    </span>
+                  </div>
+                ) : (
+                  <>
+                    <div className="absolute inset-0 flex flex-col">
+                      {[...Array(24)].map((_, timeIdx) => (
+                        <div
+                          key={timeIdx}
+                          className="h-8 sm:h-10 md:h-12 border-b border-customNeutral-200 dark:border-customNeutral-600"
+                          data-cy={`hour-slot-${timeIdx}`}
+                        />
+                      ))}
+                    </div>
+
+                    {/* Add more debug information to help troubleshoot */}
+                    {events
+                      .filter(
+                        (event) =>
+                          event.day === day &&
+                          new Date(event.rawDate).getDate() ===
+                            dayDate.getDate() &&
+                          new Date(event.rawDate).getMonth() ===
+                            dayDate.getMonth() &&
+                          new Date(event.rawDate).getFullYear() ===
+                            dayDate.getFullYear()
+                      )
+                      .map((event, eventIdx) => {
+                        // Log each event to debug
+                        console.log(`Rendering event for ${day}:`, event);
+
+                        const { top, height } = calculateEventPosition(event);
+                        return (
+                          <button
+                            key={eventIdx}
+                            onClick={() => handleOpenModal(event)}
+                            className="absolute w-[90%] left-[5%] bg-lavender-400 dark:bg-lavender-500 text-white rounded px-1 overflow-hidden text-ellipsis whitespace-nowrap text-[8px] sm:text-[10px] md:text-xs"
+                            style={{ top, height }}
+                            data-cy={`event-${eventIdx}`}
+                          >
+                            {/* Display the name of the appointment */}
+                            {event.name || "Unnamed Appointment"}
+                          </button>
+                        );
+                      })}
+                  </>
+                )}
+              </div>
+            );
+          })}
         </div>
         {currentModal === "displayEntry" && selectedEntry && (
           <DisplayEntry

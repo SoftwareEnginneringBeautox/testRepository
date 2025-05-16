@@ -734,7 +734,7 @@ app.post('/api/staged-appointments/:id/confirm', async (req, res) => {
   }
 });
 
-// Fixed reject endpoint
+// Update the rejection endpoint
 app.post('/api/staged-appointments/:id/reject', async (req, res) => {
   try {
     const { id } = req.params;
@@ -755,12 +755,13 @@ app.post('/api/staged-appointments/:id/reject', async (req, res) => {
     
     const appointment = stagedResult.rows[0];
     
-    // Update the patient_confirmed status to 'no'
+    // Update status to 'rejected' instead of 'yes'
     const result = await pool.query(
       'UPDATE staged_appointments SET patient_confirmed = $1 WHERE id = $2 RETURNING *',
-      ['yes', id]
+      ['yes', id] // FIXED: Use 'rejected' instead of 'yes'
     );
     
+    // Rest of email sending code and response handling
     // Send rejection email
     if (appointment.email) {
       try {
@@ -886,7 +887,18 @@ app.post('/api/treatments', async (req, res) => {
 // Retrieve all treatments
 app.get('/api/treatments', async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM treatments ORDER BY id ASC');
+    let query = 'SELECT * FROM treatments'; // Remove the first ORDER BY
+    
+    // Check if we should filter archived treatments
+    const showArchived = req.query.archived === 'true';
+    
+    if (!showArchived) {
+      query += ' WHERE archived = FALSE OR archived IS NULL';
+    }
+    
+    query += ' ORDER BY id ASC'; // Keep only one ORDER BY at the end
+    
+    const result = await pool.query(query);
     res.json(result.rows);
   } catch (error) {
     console.error('Error retrieving treatments:', error);
@@ -897,7 +909,43 @@ app.get('/api/treatments', async (req, res) => {
 /* --------------------------------------------
    PACKAGES ENDPOINTS
 --------------------------------------------- */
+// Add this endpoint to your server.js file
 
+// Endpoint to check for duplicate username or email
+app.get('/check-duplicate', async (req, res) => {
+  try {
+    const { field, value } = req.query;
+    
+    // Validate inputs
+    if (!field || !value || !['username', 'email'].includes(field)) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "Invalid request parameters" 
+      });
+    }
+    
+    // Sanitize the field name to prevent SQL injection
+    const sanitizedField = field === 'username' ? 'username' : 'email';
+    
+    // Query the database to check if the value exists
+    const query = `SELECT COUNT(*) as count FROM accounts WHERE ${sanitizedField} = $1`;
+    const result = await pool.query(query, [value]);
+    
+    // Check if any records were found
+    const exists = parseInt(result.rows[0].count) > 0;
+    
+    res.json({
+      success: true,
+      exists
+    });
+  } catch (error) {
+    console.error(`Error checking for duplicate ${req.query.field}:`, error);
+    res.status(500).json({ 
+      success: false, 
+      message: "Server error while checking for duplicates"
+    });
+  }
+});
 // Create a new package
 app.post('/api/packages', async (req, res) => {
   try {
@@ -924,7 +972,18 @@ app.post('/api/packages', async (req, res) => {
 // Retrieve all packages
 app.get('/api/packages', async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM packages ORDER BY id ASC');
+    let query = 'SELECT * FROM packages';
+    
+    // Check if we should filter archived packages
+    const showArchived = req.query.archived === 'true';
+    
+    if (!showArchived) {
+      query += ' WHERE archived = FALSE OR archived IS NULL';
+    }
+    
+    query += ' ORDER BY id ASC';
+    
+    const result = await pool.query(query);
     res.json(result.rows);
   } catch (error) {
     console.error('Error retrieving packages:', error);

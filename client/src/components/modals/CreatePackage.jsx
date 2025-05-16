@@ -180,6 +180,7 @@ function CreatePackage({ isOpen, onClose }) {
                   placeholder="e.g. Brazilian Package"
                   value={packageName}
                   onChange={(e) => setPackageName(e.target.value)}
+                  maxLength={100} // Add maximum length
                   required
                 />
               </InputTextField>
@@ -206,7 +207,8 @@ function CreatePackage({ isOpen, onClose }) {
                   data-cy="package-sessions"
                   placeholder="e.g. 5 sessions"
                   type="number"
-                  min="0"
+                  min="0" 
+                  max="100" // Maximum 100 sessions
                   step="1"
                   value={numberOfTreatments}
                   onChange={(e) => setNumberOfTreatments(e.target.value)}
@@ -243,6 +245,7 @@ function CreatePackage({ isOpen, onClose }) {
                 <Input
                   type="number"
                   min="1"
+                  max="52" // Maximum 52 weeks (1 year)
                   placeholder="e.g. 12 weeks"
                   value={expiration}
                   onChange={(e) => setExpiration(e.target.value)}

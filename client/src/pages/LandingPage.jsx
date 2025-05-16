@@ -776,13 +776,13 @@ function LandingPage() {
                   data-cy="clinic-contact-info"
                 >
                   <p>
-                    Landline:{" "}
+                    Mobile:{" "}
                     <span className="text-gray-700" data-cy="clinic-phone">
-                      0917-895-8825
+                    0922-882-1189
                     </span>
                   </p>
                   <p>
-                    Mobile:{" "}
+                    Email:{" "}
                     <span className="text-gray-700" data-cy="clinic-email">
                       beautoxph@gmail.com
                     </span>
@@ -1113,7 +1113,7 @@ function LandingPage() {
                   <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-md">
                     <PhoneIcon className="w-4 h-4 text-purple-950" />
                   </div>
-                  0917-895-8825
+                  0922-882-1189
                 </li>
                 <li className="flex items-center gap-4 text-white text-base">
                   <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-md">

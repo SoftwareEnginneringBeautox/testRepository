@@ -45,30 +45,94 @@ function CreateStaff({ isOpen, onClose }) {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [validating, setValidating] = useState(false);
+  const [nameError, setNameError] = useState("");
+  const [emailError, setEmailError] = useState("");
 
   if (!isOpen) return null;
 
   const validateEmail = (email) => {
     if (!email) return "Email is required";
-    
+
     // Basic email format validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return "Please enter a valid email address";
     }
-    
+
     return ""; // Empty string means no error
+  };
+
+  // Check if username or email already exists
+  const checkDuplicate = async (field, value) => {
+    if (!value) return false;
+
+    setValidating(true);
+    try {
+      const response = await axios.get(`${API_BASE_URL}/check-duplicate`, {
+        params: { field, value },
+        withCredentials: true
+      });
+
+      return response.data.exists;
+    } catch (err) {
+      console.error(`Error checking duplicate ${field}:`, err);
+      return false; // Assume no duplicate if the check fails
+    } finally {
+      setValidating(false);
+    }
+  };
+
+  // Validate username when user finishes typing
+  const validateUsername = async (name) => {
+    if (!name) {
+      setNameError("Username is required");
+      return;
+    }
+
+    try {
+      const isDuplicate = await checkDuplicate("username", name);
+      if (isDuplicate) {
+        setNameError("This username is already taken");
+      } else {
+        setNameError("");
+      }
+    } catch (err) {
+      console.error("Error validating username:", err);
+    }
+  };
+
+  // Validate email when user finishes typing
+  const validateEmailWithServer = async (email) => {
+    const formatError = validateEmail(email);
+    if (formatError) {
+      setEmailError(formatError);
+      return;
+    }
+
+    try {
+      const isDuplicate = await checkDuplicate("email", email);
+      if (isDuplicate) {
+        setEmailError("This email is already in use");
+      } else {
+        setEmailError("");
+      }
+    } catch (err) {
+      console.error("Error validating email:", err);
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Prevent duplicate submissions
-    if (loading) {
-      console.log("Staff creation already in progress");
+    if (loading || validating) {
+      console.log(
+        "Staff creation already in progress or validation in progress"
+      );
       return;
     }
-    
+
     setLoading(true);
     setError("");
 
@@ -78,13 +142,36 @@ function CreateStaff({ isOpen, onClose }) {
       setLoading(false);
       return;
     }
-    
+
     // Validate email specifically
     const emailError = validateEmail(staffEmail);
     if (emailError) {
-      setError(emailError);
+      setEmailError(emailError);
       setLoading(false);
       return;
+    }
+
+    // Check for duplicate username and email before submission
+    try {
+      const [isDuplicateUsername, isDuplicateEmail] = await Promise.all([
+        checkDuplicate("username", staffName),
+        checkDuplicate("email", staffEmail)
+      ]);
+
+      if (isDuplicateUsername) {
+        setNameError("This username is already taken");
+        setLoading(false);
+        return;
+      }
+
+      if (isDuplicateEmail) {
+        setEmailError("This email is already in use");
+        setLoading(false);
+        return;
+      }
+    } catch (err) {
+      console.error("Error checking duplicates:", err);
+      // Continue with submission if duplicate checks fail
     }
 
     console.log("Submitting staff creation request");
@@ -92,7 +179,7 @@ function CreateStaff({ isOpen, onClose }) {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 15000);
-      
+
       const response = await axios.post(
         `${API_BASE_URL}/adduser`,
         {
@@ -102,36 +189,52 @@ function CreateStaff({ isOpen, onClose }) {
           role: staffRole,
           dayoff: dayOff
         },
-        { 
+        {
           withCredentials: true,
           signal: controller.signal
         }
       );
-      
+
       clearTimeout(timeoutId);
 
       if (response.data.success) {
         console.log("Staff created successfully");
         onClose();
       } else {
-        // Handle specific email errors from server
+        // Handle specific error messages from server
         if (response.data.message?.toLowerCase().includes("email")) {
-          setError(response.data.message || "Email error. The email may already be in use.");
+          setEmailError(
+            response.data.message ||
+              "Email error. The email may already be in use."
+          );
+        } else if (response.data.message?.toLowerCase().includes("username")) {
+          setNameError(
+            response.data.message || "This username is already taken."
+          );
         } else {
           setError(response.data.message || "Failed to create staff.");
         }
       }
     } catch (err) {
       console.error("Error creating staff:", err);
-      
-      // Handle email-specific errors
-      if (err.response?.data?.message?.toLowerCase().includes("email") || 
-          err.message?.toLowerCase().includes("email")) {
-        setError("Invalid email or email already in use");
+
+      // Handle specific error types
+      if (err.response?.data?.message) {
+        if (err.response.data.message.toLowerCase().includes("email")) {
+          setEmailError("Invalid email or email already in use");
+        } else if (
+          err.response.data.message.toLowerCase().includes("username")
+        ) {
+          setNameError("Username already exists");
+        } else {
+          setError(err.response.data.message);
+        }
       } else {
-        setError(err.name === 'AbortError' 
-          ? "Request timed out. Please try again."
-          : "An error occurred while creating staff.");
+        setError(
+          err.name === "AbortError"
+            ? "Request timed out. Please try again."
+            : "An error occurred while creating staff."
+        );
       }
     } finally {
       setLoading(false);
@@ -160,9 +263,19 @@ function CreateStaff({ isOpen, onClose }) {
                   data-cy="staff-name"
                   placeholder="Name of the Staff"
                   value={staffName}
-                  onChange={(e) => setStaffName(e.target.value)}
+                  onChange={(e) => {
+                    setStaffName(e.target.value);
+                    if (nameError) setNameError("");
+                  }}
+                  onBlur={(e) => validateUsername(e.target.value)}
+                  className={nameError ? "border-red-500" : ""}
+                  maxLength={100} // Add maximum length
+                  required
                 />
               </InputTextField>
+              {nameError && (
+                <p className="text-red-500 text-sm mt-1">{nameError}</p>
+              )}
             </InputContainer>
 
             <InputContainer>
@@ -178,17 +291,16 @@ function CreateStaff({ isOpen, onClose }) {
                   value={staffEmail}
                   onChange={(e) => {
                     setStaffEmail(e.target.value);
-                    // Clear error if they're fixing their email
-                    if (error && error.toLowerCase().includes("email")) {
-                      setError("");
-                    }
+                    if (emailError) setEmailError("");
                   }}
-                  className={error && error.toLowerCase().includes("email") ? "border-red-500" : ""}
+                  onBlur={(e) => validateEmailWithServer(e.target.value)}
+                  className={emailError ? "border-red-500" : ""}
+                  maxLength={100} // Add maximum length
                   required
                 />
               </InputTextField>
-              {error && error.toLowerCase().includes("email") && (
-                <p className="text-red-500 text-sm mt-1">{error}</p>
+              {emailError && (
+                <p className="text-red-500 text-sm mt-1">{emailError}</p>
               )}
             </InputContainer>
 
@@ -234,6 +346,7 @@ function CreateStaff({ isOpen, onClose }) {
                   placeholder="Password of the Staff"
                   value={staffPassword}
                   onChange={(e) => setStaffPassword(e.target.value)}
+                  maxLength={50} // Add maximum length
                 />
               </InputTextField>
             </InputContainer>
@@ -265,7 +378,7 @@ function CreateStaff({ isOpen, onClose }) {
               </Select>
             </InputContainer>
 
-            {error && !error.toLowerCase().includes("email") && <p className="text-red-500">{error}</p>}
+            {error && <p className="text-red-500">{error}</p>}
           </div>
 
           <div className="flex sm:flex-row flex-col gap-4 mt-6 w-full">
@@ -282,10 +395,14 @@ function CreateStaff({ isOpen, onClose }) {
               data-cy="submit-create-staff"
               type="submit"
               className="md:w-1/2"
-              disabled={loading}
+              disabled={loading || validating || nameError || emailError}
             >
               <PlusIcon />
-              {loading ? "CREATING..." : "CREATE STAFF"}
+              {loading
+                ? "CREATING..."
+                : validating
+                ? "VALIDATING..."
+                : "CREATE STAFF"}
             </Button>
           </div>
         </form>

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useModal } from "@/hooks/useModal";
 import DisplayEntry from "@/components/modals/DisplayEntry";
+import { isHoliday, getHolidayName } from "@/utils/holidays";
+import { cn } from "@/lib/utils";
 
 const MonthlyBookingPanel = ({
   calendarDays = [],
@@ -15,7 +17,9 @@ const MonthlyBookingPanel = ({
   useEffect(() => {
     const fetchTreatments = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/treatments`);
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/treatments`
+        );
         const data = await response.json();
         setTreatmentsList(data || []);
       } catch (error) {
@@ -33,7 +37,7 @@ const MonthlyBookingPanel = ({
 
   // Helper to check if an appointment is on a specific date
   const getAppointmentsForDate = (date) => {
-    if (!date) return [];
+    if (!date || isHoliday(date)) return [];
 
     return appointments.filter((appointment) => {
       const appDate = new Date(appointment.rawDate);
@@ -120,31 +124,50 @@ const MonthlyBookingPanel = ({
                               TODAY
                             </span>
                           )}
-                          <span className="text-right font-semibold text-xs sm:text-sm dark:text-white">
+                          <span
+                            className={cn(
+                              "text-right font-semibold text-xs sm:text-sm",
+                              isHoliday(day)
+                                ? "text-error-500 dark:text-error-400"
+                                : "dark:text-white"
+                            )}
+                          >
                             {day.getDate()}
                           </span>
                         </div>
 
-                        {/* Appointments Wrapper */}
-                        <div className="mt-1 sm:mt-2 space-y-0.5 sm:space-y-1 flex-1 flex flex-col">
-                          {dayAppointments.map((appointment, idx) => (
-                            <div
-                              key={idx}
-                              className="text-[10px] sm:text-xs p-0.5 sm:p-1 bg-lavender-400 text-white rounded truncate cursor-pointer"
-                              title={`${appointment.name} - ${formatTimeDisplay(
-                                appointment.rawTime
-                              )}`}
-                              onClick={() => handleOpenModal(appointment)}
-                            >
-                              <div className="font-semibold truncate">
-                                {appointment.name}
+                        {/* Holiday indicator */}
+                        {isHoliday(day) ? (
+                          <div className="flex-1 flex flex-col items-center justify-center gap-1">
+                            <span className="text-[10px] sm:text-xs p-0.5 sm:p-1 bg-error-100 dark:bg-error-900/40 text-error-500 dark:text-error-400 rounded">
+                              {getHolidayName(day)}
+                            </span>
+                            <span className="text-[8px] sm:text-xs text-error-400 dark:text-error-300">
+                              OFF DAY
+                            </span>
+                          </div>
+                        ) : (
+                          /* Appointments Wrapper */
+                          <div className="mt-1 sm:mt-2 space-y-0.5 sm:space-y-1 flex-1 flex flex-col">
+                            {dayAppointments.map((appointment, idx) => (
+                              <div
+                                key={idx}
+                                className="text-[10px] sm:text-xs p-0.5 sm:p-1 bg-lavender-400 text-white rounded truncate cursor-pointer"
+                                title={`${
+                                  appointment.name
+                                } - ${formatTimeDisplay(appointment.rawTime)}`}
+                                onClick={() => handleOpenModal(appointment)}
+                              >
+                                <div className="font-semibold truncate">
+                                  {appointment.name}
+                                </div>
+                                <div className="truncate">
+                                  {formatTimeDisplay(appointment.rawTime)}
+                                </div>
                               </div>
-                              <div className="truncate">
-                                {formatTimeDisplay(appointment.rawTime)}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     )}
                   </td>
@@ -156,18 +179,20 @@ const MonthlyBookingPanel = ({
       </table>
 
       {currentModal === "displayEntry" && selectedEntry && (
-        <DisplayEntry 
-          isOpen={true} 
-          onClose={closeModal} 
+        <DisplayEntry
+          isOpen={true}
+          onClose={closeModal}
           entryData={{
             ...selectedEntry,
-            treatmentNames: Array.isArray(selectedEntry.treatmentIds) 
-              ? selectedEntry.treatmentIds.map(id => {
-                  const treatment = treatmentsList.find(t => t.id === id);
-                  return treatment ? treatment.treatment_name : id;
-                }).join(", ")
+            treatmentNames: Array.isArray(selectedEntry.treatmentIds)
+              ? selectedEntry.treatmentIds
+                  .map((id) => {
+                    const treatment = treatmentsList.find((t) => t.id === id);
+                    return treatment ? treatment.treatment_name : id;
+                  })
+                  .join(", ")
               : selectedEntry.treatment || "N/A"
-          }} 
+          }}
         />
       )}
     </div>

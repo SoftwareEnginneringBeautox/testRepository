@@ -148,6 +148,7 @@ function EditPackage({ isOpen, onClose, entryData, onSubmit }) {
                   onChange={(e) =>
                     setFormData({ ...formData, package_name: e.target.value })
                   }
+                  maxLength={100} // Add maximum length
                 />
               </InputTextField>
             </InputContainer>
@@ -179,6 +180,8 @@ function EditPackage({ isOpen, onClose, entryData, onSubmit }) {
                   data-cy="package-sessions"
                   placeholder="e.g. 3 sessions"
                   type="number"
+                  min="1"
+                  max="100" // Maximum 100 sessions
                   value={formData.sessions}
                   onChange={(e) =>
                     setFormData({ ...formData, sessions: e.target.value })
@@ -215,6 +218,7 @@ function EditPackage({ isOpen, onClose, entryData, onSubmit }) {
                 <Input
                   type="number"
                   min="1"
+                  max="52" // Maximum 52 weeks (1 year)
                   placeholder="e.g. 12 weeks"
                   value={formData.expiration}
                   onChange={(e) =>

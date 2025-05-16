@@ -3,6 +3,9 @@ import CurrencyInput from "react-currency-input-field";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/RadioGroup";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { TreatmentMultiSelect } from "@/components/ui/TreatmentMultiSelect";
+import ConfirmParentalConsent from "./ConfirmParentalConsent";
+import { isHoliday, getHolidayName } from "@/utils/holidays";
+import { calculateAge } from "@/lib/ageCalculator";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -30,6 +33,14 @@ import {
 } from "@/components/ui/Select";
 
 import { Button } from "../ui/Button";
+
+import {
+  AlertContainer,
+  AlertText,
+  AlertTitle,
+  AlertDescription,
+  CloseAlert
+} from "@/components/ui/Alert";
 
 import PesoIcon from "@/assets/icons/PesoIcon";
 import ClockIcon from "@/assets/icons/ClockIcon";
@@ -81,10 +92,19 @@ function CreatePatientEntry({ isOpen, onClose }) {
   const [treatmentsList, setTreatmentsList] = useState([]);
 
   const [contactNumber, setContactNumber] = useState("");
-  const [age, setAge] = useState("");
+  const [birthDate, setBirthDate] = useState("");
   const [email, setEmail] = useState("");
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // State for parental consent modal
+  const [showParentalConsentModal, setShowParentalConsentModal] =
+    useState(false);
+
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertTitle, setAlertTitle] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertVariant, setAlertVariant] = useState("error");
 
   // Effect for setting amount based on package or treatments
   useEffect(() => {
@@ -140,7 +160,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
           (user) =>
             user.role &&
             user.role.toLowerCase() === "aesthetician" &&
-            !user.archived // assuming 'archived' is a boolean field
+            !user.archived // filtering out archived aestheticians
         );
 
         setAestheticianList(aestheticians);
@@ -161,7 +181,11 @@ function CreatePatientEntry({ isOpen, onClose }) {
             withCredentials: true
           }
         );
-        setPackagesList(response.data);
+        // Additional frontend filter to ensure no archived packages are shown
+        const activePackages = response.data.filter(
+          (pkg) => pkg.archived === false
+        );
+        setPackagesList(activePackages);
       } catch (error) {
         console.error("Error fetching packages:", error);
       }
@@ -179,7 +203,11 @@ function CreatePatientEntry({ isOpen, onClose }) {
           }
         );
         const data = await res.json();
-        setTreatmentsList(data);
+        // Additional frontend filter to ensure no archived treatments are shown
+        const activeTreatments = data.filter(
+          (treatment) => treatment.archived === false
+        );
+        setTreatmentsList(activeTreatments);
       } catch (err) {
         console.error("Error fetching treatments:", err);
       }
@@ -207,68 +235,94 @@ function CreatePatientEntry({ isOpen, onClose }) {
     treatment
   });
 
-  // Handle form submission, sending new patient record to the server
+  // Function to check if date is a holiday
+  const checkIfHoliday = (dateString) => {
+    if (!dateString) return false;
+
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return false;
+
+      return isHoliday(date);
+    } catch (error) {
+      console.error("Error checking holiday:", error);
+      return false;
+    }
+  };
+
+  // To get holiday name for more specific error messages
+  const getHolidayDetails = (dateString) => {
+    if (!dateString) return null;
+
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return null;
+
+      const holidayName = getHolidayName(date);
+      return holidayName;
+    } catch (error) {
+      console.error("Error getting holiday details:", error);
+      return null;
+    }
+  };
+
+  // Update birthdate validation
+  const validateBirthDate = (value) => {
+    if (!value) {
+      return "Birth date is required";
+    }
+
+    const age = calculateAge(value);
+
+    // Children 12 and below are not allowed
+    if (age <= 12) {
+      return "Patient must be over 12 years old";
+    }
+
+    // Ages 13-17 will need parental consent (handled separately)
+
+    // Patients over 120 are not allowed (likely an error)
+    if (age > 120) {
+      return "Invalid birth date";
+    }
+
+    return "";
+  };
+
+  // Handle form submission with parental consent check
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (isSubmitting) return; // Prevent double submission
+    if (isSubmitting) return;
     setIsSubmitting(true);
     setFormSubmitAttempted(true);
 
     const errors = {};
-    if (!personInCharge) {
-      errors.personInCharge = "Person in charge is required";
-    }
 
-    // Validate date - ensure it's not in the past
-    if (dateOfSession) {
-      const selectedDate = new Date(dateOfSession);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0); // Reset time part for comparison
-      
-      if (selectedDate < today) {
-        errors.dateOfSession = "Session date cannot be in the past";
-      }
-    }
+    // Basic field validations
+    if (!patientName) errors.patientName = "Patient name is required";
+    if (!personInCharge) errors.personInCharge = "Person in charge is required";
 
-    // Validate time - ensure it's within business hours (9am-6pm)
-    if (timeOfSession) {
-      const [hours, minutes] = timeOfSession.split(':').map(Number);
-      const startHour = 12; // 12pm
-      const endHour = 21; // 9pm
-      
-      if (hours < startHour || hours > endHour || (hours === endHour && minutes > 0)) {
-        errors.timeOfSession = "Session time must be between 12:00 PM and 9:00 PM";
-      }
-    }
-
-    if (!packageName && (!treatment || treatment.length === 0)) {
-      errors.packageOrTreatment =
-        "Select either a package or at least one treatment";
-    }
-
-    // Contact number validation - make required
+    // Contact number validation
     if (!contactNumber) {
       errors.contactNumber = "Contact number is required";
     } else {
-      const phoneRegex = /^09\d{9}$/; // Philippine format: 09XXXXXXXXX
+      const phoneRegex = /^09\d{9}$/;
       if (!phoneRegex.test(contactNumber)) {
         errors.contactNumber = "Contact number should be in 09XXXXXXXXX format";
       }
     }
 
-    // Age validation - make required
-    if (!age) {
-      errors.age = "Age is required";
+    // Birth date validation
+    if (!birthDate) {
+      errors.birthDate = "Birth date is required";
     } else {
-      const ageNum = parseInt(age);
-      if (isNaN(ageNum) || ageNum < 18) {
-        errors.age = "Patients must be at least 18 years old";
-      } else if (ageNum > 120) {
-        errors.age = "Age must be less than 120";
+      const birthDateError = validateBirthDate(birthDate);
+      if (birthDateError) {
+        errors.birthDate = birthDateError;
       }
     }
 
-    // Email validation - make required
+    // Email validation
     if (!email) {
       errors.email = "Email is required";
     } else {
@@ -278,23 +332,67 @@ function CreatePatientEntry({ isOpen, onClose }) {
       }
     }
 
-    if (packageName && dateOfSession) {
-      const selectedPackage = packagesList.find(
-        (p) => p.package_name === packageName
-      );
-      const weeks = selectedPackage?.expiration;
+    // Package/Treatment validation
+    if (!packageName && (!treatment || treatment.length === 0)) {
+      errors.packageOrTreatment =
+        "Select either a package or at least one treatment";
+    }
 
-      if (weeks && !isNaN(weeks)) {
-        const createdAt = new Date(); // form creation time
-        const sessionDate = new Date(dateOfSession);
-        const expirationLimit = new Date(createdAt);
-        expirationLimit.setDate(expirationLimit.getDate() + weeks * 7); // add weeks
+    // Session date validation
+    if (dateOfSession) {
+      const selectedDate = new Date(dateOfSession);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
 
-        if (sessionDate > expirationLimit) {
-          errors.dateOfSession = `Session date exceeds package expiration limit of ${weeks} week(s) from today (${expirationLimit
-            .toISOString()
-            .slice(0, 10)})`;
+      if (selectedDate < today) {
+        errors.dateOfSession = "Session date cannot be in the past";
+      }
+
+      // Holiday check
+      const holidayName = getHolidayDetails(dateOfSession);
+      if (holidayName) {
+        errors.dateOfSession = `The selected date (${holidayName}) is a holiday. The store will be closed.`;
+
+        // Also show an alert
+        setAlertTitle("Error");
+        setAlertMessage(
+          `The selected date (${holidayName}) is a holiday. The store will be closed.`
+        );
+        setAlertVariant("error");
+        setShowAlert(true);
+      }
+
+      // Package expiration validation
+      if (packageName) {
+        const selectedPackage = packagesList.find(
+          (p) => p.package_name === packageName
+        );
+        const weeks = selectedPackage?.expiration;
+
+        if (weeks && !isNaN(weeks)) {
+          const createdAt = new Date();
+          const expirationLimit = new Date(createdAt);
+          expirationLimit.setDate(expirationLimit.getDate() + weeks * 7);
+
+          if (selectedDate > expirationLimit) {
+            errors.dateOfSession = `Session date exceeds package expiration limit of ${weeks} week(s) from today`;
+          }
         }
+      }
+    }
+    // Session time validation
+    if (timeOfSession) {
+      const [hours, minutes] = timeOfSession.split(":").map(Number);
+      const startHour = 12; // 12pm
+      const endHour = 18; // 6pm (changed from 21)
+
+      if (
+        hours < startHour ||
+        hours > endHour ||
+        (hours === endHour && minutes > 0)
+      ) {
+        errors.timeOfSession =
+          "Session time must be between 12:00 PM and 6:00 PM";
       }
     }
 
@@ -304,46 +402,71 @@ function CreatePatientEntry({ isOpen, onClose }) {
       return;
     }
 
-    const numericTotal = parseFloat(totalAmount) || 0;
-    const numericDiscount = parseFloat(packageDiscount) || 0;
-    const numericAmount = parseFloat(amount) || 0;
-    const numericAmountPaid = parseFloat(amountPaid) || 0;
-    const remainingBalance = numericTotal - numericAmountPaid;
+    // Check for underage patients (13-17)
+    const age = calculateAge(birthDate);
+    if (age >= 13 && age < 18) {
+      // Show parental consent modal instead of proceeding
+      setShowParentalConsentModal(true);
+      setIsSubmitting(false);
+      return;
+    }
 
-    const selectedTreatmentIds = Array.isArray(treatment)
-      ? treatment.map(Number)
-      : [];
+    // If adult or consent confirmed, proceed with form submission
+    await submitPatientForm();
+  };
 
-    const selectedTreatmentNames = treatmentsList
-      .filter((t) => selectedTreatmentIds.includes(t.id))
-      .map((t) => t.treatment_name);
+  // Handle parental consent confirmation
+  const handleParentalConsentConfirm = () => {
+    setShowParentalConsentModal(false);
+    // Proceed with form submission
+    submitPatientForm();
+  };
 
-
-    // Patient Records Payload
-    const patientPayload = {
-      patient_name: patientName,
-      contact_number: contactNumber,
-      age: age ? parseInt(age) : null,
-      email,
-      person_in_charge: personInCharge,
-      package_name: packageName,
-      treatments: selectedTreatmentNames,
-      treatment_ids: selectedTreatmentIds,
-      amount: numericAmount,
-      amount_paid: numericAmountPaid,
-      package_discount: numericDiscount,
-      total_amount: numericTotal,
-      payment_method: paymentMethod,
-      date_of_session: dateOfSession,
-      time_of_session: timeOfSession,
-      consent_form_signed: consentFormSigned,
-      reference_number: referenceNumber,
-      remaining_balance: remainingBalance,
-      sessions_left: sessionsLeft,
-
-    };
+  // Actual form submission logic (separated to be reused)
+  const submitPatientForm = async () => {
+    setIsSubmitting(true);
 
     try {
+      // Calculate financial values
+      const numericTotal = parseFloat(totalAmount) || 0;
+      const numericDiscount = parseFloat(packageDiscount) || 0;
+      const numericAmount = parseFloat(amount) || 0;
+      const numericAmountPaid = parseFloat(amountPaid) || 0;
+      const remainingBalance = numericTotal - numericAmountPaid;
+      const calculatedAge = calculateAge(birthDate);
+
+      // Prepare treatment data
+      const selectedTreatmentIds = Array.isArray(treatment)
+        ? treatment.map(Number)
+        : [];
+      const selectedTreatmentNames = treatmentsList
+        .filter((t) => selectedTreatmentIds.includes(t.id))
+        .map((t) => t.treatment_name);
+
+      // Patient Records Payload
+      const patientPayload = {
+        patient_name: patientName,
+        contact_number: contactNumber,
+        birth_date: birthDate,
+        age: calculatedAge,
+        email,
+        person_in_charge: personInCharge,
+        package_name: packageName,
+        treatments: selectedTreatmentNames,
+        treatment_ids: selectedTreatmentIds,
+        amount: numericAmount,
+        amount_paid: numericAmountPaid,
+        package_discount: numericDiscount,
+        total_amount: numericTotal,
+        payment_method: paymentMethod,
+        date_of_session: dateOfSession,
+        time_of_session: timeOfSession,
+        consent_form_signed: consentFormSigned,
+        reference_number: referenceNumber,
+        remaining_balance: remainingBalance,
+        sessions_left: sessionsLeft
+      };
+
       // Submit to patient records
       const response = await fetch(`${API_BASE_URL}/api/patients`, {
         method: "POST",
@@ -362,7 +485,8 @@ function CreatePatientEntry({ isOpen, onClose }) {
             patient_record_id: patientId,
             full_name: patientName,
             contact_number: contactNumber,
-            age: age ? parseInt(age) : null,
+            birth_date: birthDate,
+            age: calculatedAge,
             email,
             date_of_session: dateOfSession,
             time_of_session: timeOfSession,
@@ -380,10 +504,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
           );
 
           if (!appointmentRes.ok) {
-            const errText = await appointmentRes.text();
-            console.error("❌ Failed to insert appointment:", errText);
-          } else {
-            console.log("✅ Appointment successfully inserted");
+            throw new Error(await appointmentRes.text());
           }
         } catch (err) {
           console.error("❌ Error inserting into appointments:", err);
@@ -395,13 +516,16 @@ function CreatePatientEntry({ isOpen, onClose }) {
             const salesPayload = {
               client: patientName,
               person_in_charge: personInCharge,
-              date_transacted: new Date().toISOString().split('T')[0],
-              payment_method: paymentMethod === "full-payment" ? "Full Payment" : "Installment",
+              date_transacted: new Date().toISOString().split("T")[0],
+              payment_method:
+                paymentMethod === "full-payment"
+                  ? "Full Payment"
+                  : "Installment",
               packages: packageName,
               treatment: selectedTreatmentNames.join(", "),
               payment: numericAmountPaid,
               reference_no: referenceNumber,
-              patient_record_id: patientId // Add this line to link to patient record
+              patient_record_id: patientId
             };
 
             const salesRes = await fetch(`${API_BASE_URL}/sales`, {
@@ -412,10 +536,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
             });
 
             if (!salesRes.ok) {
-              const errText = await salesRes.text();
-              console.error("❌ Failed to insert sales record:", errText);
-            } else {
-              console.log("✅ Sales record successfully inserted");
+              throw new Error(await salesRes.text());
             }
           } catch (err) {
             console.error("❌ Error inserting into sales:", err);
@@ -424,13 +545,18 @@ function CreatePatientEntry({ isOpen, onClose }) {
 
         onClose();
       } else {
-        const errorText = await response.text();
-        console.error("Submission failed:", errorText);
+        throw new Error(await response.text());
       }
     } catch (error) {
       console.error("Error submitting form:", error);
-      setIsSubmitting(false); // Re-enable the button on error
+    } finally {
+      setIsSubmitting(false);
     }
+  };
+
+  // Handle alert dismissal
+  const handleAlertClose = () => {
+    setShowAlert(false);
   };
 
   const numericTotalAmount = parseFloat(totalAmount) || 0;
@@ -439,6 +565,15 @@ function CreatePatientEntry({ isOpen, onClose }) {
 
   return (
     <ModalContainer data-cy="create-patient-entry-modal">
+      {showAlert && (
+        <AlertContainer variant={alertVariant}>
+          <AlertText>
+            <AlertTitle>{alertTitle}</AlertTitle>
+            <AlertDescription>{alertMessage}</AlertDescription>
+          </AlertText>
+          <CloseAlert onClick={handleAlertClose} />
+        </AlertContainer>
+      )}
       <ModalHeader>
         <ModalIcon>
           <UserIcon />
@@ -460,6 +595,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
                   placeholder="Full name of the patient"
                   value={patientName}
                   onChange={(e) => setPatientName(e.target.value)}
+                  maxLength={100} // Limit to 50 characters
                   required
                 />
               </InputTextField>
@@ -477,6 +613,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
                   placeholder="e.g. 09XXXXXXXXX"
                   value={contactNumber}
                   onChange={(e) => setContactNumber(e.target.value)}
+                  maxLength={11} // Limit to 11 characters
                   className={` ${
                     formSubmitAttempted && formErrors.contactNumber
                       ? "border-red-500"
@@ -491,29 +628,37 @@ function CreatePatientEntry({ isOpen, onClose }) {
               )}
             </InputContainer>
 
-            {/* AGE */}
+            {/* BIRTH DATE */}
             <InputContainer>
-              <InputLabel>AGE</InputLabel>
+              <InputLabel>BIRTH DATE</InputLabel>
               <InputTextField>
                 <InputIcon>
-                  <AgeIcon />
+                  <CalendarIcon />
                 </InputIcon>
                 <Input
-                  data-cy="age-input"
-                  type="number"
-                  min="18"
-                  placeholder="Age"
-                  value={age}
-                  onChange={(e) => setAge(e.target.value)}
-                  className={` ${
-                    formSubmitAttempted && formErrors.age
+                  data-cy="birth-date-input"
+                  type="date"
+                  placeholder="Birth Date"
+                  value={birthDate}
+                  onChange={(e) => setBirthDate(e.target.value)}
+                  max={new Date().toISOString().split("T")[0]} // Prevents future dates
+                  className={`${
+                    formSubmitAttempted && formErrors.birthDate
                       ? "border-red-500"
                       : ""
                   }`}
+                  required
                 />
               </InputTextField>
-              {formSubmitAttempted && formErrors.age && (
-                <p className="text-red-500 text-sm mt-1">{formErrors.age}</p>
+              {formSubmitAttempted && formErrors.birthDate && (
+                <p className="text-red-500 text-sm mt-1">
+                  {formErrors.birthDate}
+                </p>
+              )}
+              {birthDate && !formErrors.birthDate && (
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                  Age: {calculateAge(birthDate)} years old
+                </p>
               )}
             </InputContainer>
 
@@ -530,6 +675,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
                   placeholder="example@email.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  maxLength={100} // Limit to 100 characters
                   className={` ${
                     formSubmitAttempted && formErrors.email
                       ? "border-red-500"
@@ -617,7 +763,8 @@ function CreatePatientEntry({ isOpen, onClose }) {
                       key={pkg.id}
                       value={pkg.package_name}
                     >
-                      {pkg.package_name} - ₱{pkg.price} - {pkg.sessions} sessions
+                      {pkg.package_name} - ₱{pkg.price} - {pkg.sessions}{" "}
+                      sessions
                     </SelectItem>
                   ))}
                 </ModalSelectContent>
@@ -677,7 +824,9 @@ function CreatePatientEntry({ isOpen, onClose }) {
                   type="number"
                   min="0"
                   value={sessionsLeft}
-                  onChange={(e) => setSessionsLeft(parseInt(e.target.value) || 0)}
+                  onChange={(e) =>
+                    setSessionsLeft(parseInt(e.target.value) || 0)
+                  }
                   readOnly
                 />
               </InputTextField>
@@ -717,8 +866,9 @@ function CreatePatientEntry({ isOpen, onClose }) {
                   placeholder="0%"
                   decimalsLimit={2}
                   allowNegativeValue={false}
+                  max={100} // Maximum 100% discount
                   value={packageDiscount}
-                  onValueChange={(value) => setPackageDiscount(value || "")}
+                  onValueChange={(value) => setPackageDiscount(value || "0")}
                 />
               </InputTextField>
             </InputContainer>
@@ -742,46 +892,46 @@ function CreatePatientEntry({ isOpen, onClose }) {
                 />
               </InputTextField>
             </InputContainer>
-            
-                      {/* PAYMENT METHOD RADIO */}
-          <div className="flex flex-col gap-2 mt-4">
-            <InputContainer>
-              <InputLabel>PAYMENT METHOD</InputLabel>
 
-              <RadioGroup
-                value={paymentMethod}
-                onValueChange={(val) => {
-                  setPaymentMethod(val);
-                  if (val === "full-payment") {
-                    setAmountPaid(totalAmount);
-                  } else {
-                    setAmountPaid(""); // reset if switching to installment
-                  }
-                }}
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem
-                    data-cy="payment-method-radio-full-payment"
-                    value="full-payment"
-                    id="full-payment"
-                  />
-                  <label htmlFor="full-payment" className="text-sm">
-                    FULL PAYMENT
-                  </label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem
-                    data-cy="payment-method-radio-installment"
-                    value="installment"
-                    id="installment"
-                  />
-                  <label htmlFor="installment" className="text-sm">
-                    INSTALLMENT
-                  </label>
-                </div>
-              </RadioGroup>
-            </InputContainer>
-          </div>
+            {/* PAYMENT METHOD RADIO */}
+            <div className="flex flex-col gap-2 mt-4">
+              <InputContainer>
+                <InputLabel>PAYMENT METHOD</InputLabel>
+
+                <RadioGroup
+                  value={paymentMethod}
+                  onValueChange={(val) => {
+                    setPaymentMethod(val);
+                    if (val === "full-payment") {
+                      setAmountPaid(totalAmount);
+                    } else {
+                      setAmountPaid(""); // reset if switching to installment
+                    }
+                  }}
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem
+                      data-cy="payment-method-radio-full-payment"
+                      value="full-payment"
+                      id="full-payment"
+                    />
+                    <label htmlFor="full-payment" className="text-sm">
+                      FULL PAYMENT
+                    </label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem
+                      data-cy="payment-method-radio-installment"
+                      value="installment"
+                      id="installment"
+                    />
+                    <label htmlFor="installment" className="text-sm">
+                      INSTALLMENT
+                    </label>
+                  </div>
+                </RadioGroup>
+              </InputContainer>
+            </div>
 
             <InputContainer>
               <InputLabel>AMOUNT PAID</InputLabel>
@@ -824,7 +974,6 @@ function CreatePatientEntry({ isOpen, onClose }) {
               </InputTextField>
             </InputContainer>
           </div>
-
 
           {/* DATE AND TIME OF SESSION */}
           <div className="flex flex-row w-full gap-4 mt-4">
@@ -915,17 +1064,20 @@ function CreatePatientEntry({ isOpen, onClose }) {
               <ChevronLeftIcon />
               CANCEL AND RETURN
             </Button>
-            <Button 
-              type="submit" 
-              className="md:w-1/2"
-              disabled={isSubmitting}
-            >
+            <Button type="submit" className="md:w-1/2" disabled={isSubmitting}>
               <PlusIcon />
               {isSubmitting ? "ADDING..." : "ADD ENTRY"}
             </Button>
           </div>
         </form>
       </ModalBody>
+
+      {/* Parental Consent Modal */}
+      <ConfirmParentalConsent
+        isOpen={showParentalConsentModal}
+        onClose={() => setShowParentalConsentModal(false)}
+        onConfirm={handleParentalConsentConfirm}
+      />
     </ModalContainer>
   );
 }

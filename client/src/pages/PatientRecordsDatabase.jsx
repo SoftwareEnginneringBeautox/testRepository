@@ -2,6 +2,8 @@ import React, { useState, useEffect, useCallback } from "react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { useModal } from "@/hooks/useModal";
+import { calculateAge } from "@/lib/ageCalculator";
+
 import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/Button";
@@ -24,6 +26,8 @@ import {
   TableRow
 } from "@/components/ui/Table";
 
+import DateRangeFilter from "@/components/DateRangeFilter";
+
 import { InputTextField, Input } from "@/components/ui/Input";
 
 import {
@@ -44,21 +48,11 @@ import {
 
 import MultiSelectFilter from "@/components/ui/MultiSelectFilter";
 
-// Import Pagination components from shadcn
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious
-} from "@/components/ui/Pagination";
-
 import CreatePatientEntry from "@/components/modals/CreatePatientEntry";
 import EditPatientEntry from "@/components/modals/EditPatientEntry";
 import UpdatePatientEntry from "@/components/modals/UpdatePatientEntry";
 import ArchivePatientEntry from "@/components/modals/ArchivePatientEntry";
+import DateRangePatientRecordDatabase from "@/components/modals/DateRangePatientRecordDatabase";
 
 // Import date-fns for date formatting
 import { format } from "date-fns";
@@ -78,6 +72,11 @@ function PatientRecordsDatabase() {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortOption, setSortOption] = useState("");
   const [loading, setLoading] = useState(true);
+  const [midnightRefresh, setMidnightRefresh] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [dateFilterStart, setDateFilterStart] = useState(null);
+  const [dateFilterEnd, setDateFilterEnd] = useState(null);
+  const [isDateFilterActive, setIsDateFilterActive] = useState(false);
 
   // Define the column configuration
   const columnConfig = [
@@ -111,18 +110,39 @@ function PatientRecordsDatabase() {
     .filter((col) => col.mandatory)
     .map((col) => col.value);
 
-  // State to manage column visibility - initialize with all columns visible
-  //
-
   const [selectedColumns, setSelectedColumns] = useState([]);
   // Define isColumnVisible here, before it's used
   const isColumnVisible = (columnValue) => {
     return selectedColumns.includes(columnValue);
   };
 
+  const handleDateFilterChange = (startDate, endDate, isActive) => {
+    console.log("Date filter changed:", { startDate, endDate, isActive });
+    setDateFilterStart(startDate);
+    setDateFilterEnd(endDate);
+    setIsDateFilterActive(isActive);
+    setCurrentPage(1); // Reset to first page when filter changes
+  };
+
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
   const recordsPerPage = 10;
+
+  useEffect(() => {
+    console.log("DEBUGGING MIGUEL'S AGE:");
+    const miguelBirthDate = "2000-05-16"; // Replace with actual value from your DB
+
+    // Create the same Date object in different ways
+    const date1 = new Date(miguelBirthDate);
+    const date2 = new Date(miguelBirthDate + "T00:00:00");
+    const [year, month, day] = miguelBirthDate.split("-").map(Number);
+    const date3 = new Date(year, month - 1, day);
+
+    console.log("Method 1:", calculateAge(date1));
+    console.log("Method 2:", calculateAge(date2));
+    console.log("Method 3:", calculateAge(date3));
+    console.log("Direct string:", calculateAge(miguelBirthDate));
+  }, []);
 
   // Initialize selectedColumns with ALL columns (not just mandatory)
   useEffect(() => {
@@ -139,6 +159,26 @@ function PatientRecordsDatabase() {
   useEffect(() => {
     console.log("Selected columns updated:", selectedColumns);
   }, [selectedColumns]);
+
+  // midnight refresh function
+  useEffect(() => {
+    // Calculate time until midnight
+    const now = new Date();
+    const tomorrow = new Date(now);
+    tomorrow.setDate(now.getDate() + 1);
+    tomorrow.setHours(0, 0, 0, 0);
+    const msUntilMidnight = tomorrow - now;
+
+    console.log(`Will refresh ages at midnight in ${msUntilMidnight}ms`);
+
+    // Set timeout to trigger at midnight
+    const midnightTimeout = setTimeout(() => {
+      console.log("Midnight passed - refreshing ages");
+      setMidnightRefresh((prev) => !prev);
+    }, msUntilMidnight);
+
+    return () => clearTimeout(midnightTimeout);
+  }, [midnightRefresh]);
 
   // Fetch patient records from the API
   const fetchRecords = async () => {
@@ -175,13 +215,26 @@ function PatientRecordsDatabase() {
           }
         );
         const data = await res.json();
-        setTreatmentsList(data);
+        // Make sure we set an array even if the API returns something else
+        setTreatmentsList(Array.isArray(data) ? data : []);
       } catch (err) {
         console.error("Error fetching treatments:", err);
+        setTreatmentsList([]); // Set empty array on error
       }
     };
 
     fetchTreatments();
+  }, []);
+
+  useEffect(() => {
+    // Increment trigger on mount to force recalculation
+    setRefreshTrigger((prev) => prev + 1);
+  }, []);
+
+  // Create a memoized refresh function
+  const refreshAges = useCallback(() => {
+    console.log("Manually refreshing ages...");
+    setRefreshTrigger((prev) => prev + 1);
   }, []);
 
   const getTreatmentNames = (ids) => {
@@ -310,6 +363,31 @@ function PatientRecordsDatabase() {
     }
   };
 
+  const handleOpenDateRangeModal = () => {
+    openModal("dateRangeModal");
+  };
+
+  const handleDateRangeSubmit = (startDate, endDate) => {
+    // Convert dates to Date objects
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    end.setHours(23, 59, 59, 999); // Set to end of day
+
+    // Filter records within the specified date range
+    const filteredRecords = records.filter((record) => {
+      const recordDate = new Date(
+        record.dateTransacted || record.date_of_session
+      );
+      return recordDate >= start && recordDate <= end;
+    });
+
+    // Generate PDF with the filtered records and no month limit
+    generatePRDReport(filteredRecords, null);
+
+    // Close the modal after generating the PDF
+    closeModal();
+  };
+
   const filteredRecords = [...records]
     .filter((record) => {
       const name = record.client || record.patient_name || "";
@@ -325,6 +403,24 @@ function PatientRecordsDatabase() {
         const dateA = new Date(a.dateTransacted || a.date_of_session);
         const dateB = new Date(b.dateTransacted || b.date_of_session);
         return dateB - dateA; // Most recent first
+      }
+      if (sortOption === "payment") {
+        // Get payment methods with fallbacks
+        const paymentA = a.paymentMethod || a.payment_method || "";
+        const paymentB = b.paymentMethod || b.payment_method || "";
+
+        // Check if either payment is "Full Payment" or contains "full"
+        const isFullPaymentA = paymentA.toLowerCase().includes("full");
+        const isFullPaymentB = paymentB.toLowerCase().includes("full");
+
+        // Sort full payments first, then installments
+        if (isFullPaymentA && !isFullPaymentB) return -1;
+        if (!isFullPaymentA && isFullPaymentB) return 1;
+
+        // If both are the same payment type, sort alphabetically by name as secondary sort
+        const nameA = (a.client || a.patient_name || "").toLowerCase();
+        const nameB = (b.client || b.patient_name || "").toLowerCase();
+        return nameA.localeCompare(nameB);
       }
       return 0;
     });
@@ -348,25 +444,50 @@ function PatientRecordsDatabase() {
     }
   };
 
+  // for limiting the amount of months to print
+  const isWithinMonthRange = (date, monthLimit) => {
+    const limitDate = new Date();
+    limitDate.setMonth(limitDate.getMonth() - monthLimit);
+    return new Date(date) >= limitDate;
+  };
+
   // Generate PDF report function
-  const generatePRDReport = (patientRecords) => {
+  const generatePRDReport = (patientRecords, monthLimit = 6) => {
     if (!patientRecords || patientRecords.length === 0) {
       console.error("No records available to generate PDF.");
       return;
     }
 
-    // Implementation for PDF generation (unchanged)
-    const tempDoc = new jsPDF({
+    // Only apply the month filter if monthLimit is provided
+    let filteredRecords = patientRecords;
+    if (monthLimit !== null) {
+      filteredRecords = patientRecords.filter((record) => {
+        const recordDate = new Date(
+          record.dateTransacted || record.date_of_session
+        );
+        return isWithinMonthRange(recordDate, monthLimit);
+      });
+    }
+
+    if (filteredRecords.length === 0) {
+      console.error(
+        monthLimit
+          ? `No records available within the last ${monthLimit} months.`
+          : "No records available within the selected date range."
+      );
+      return;
+    }
+
+    const doc = new jsPDF({
       orientation: "landscape",
       unit: "pt",
       format: "a4"
     });
 
-    const pageWidth = tempDoc.internal.pageSize.width;
-    const pageHeight = tempDoc.internal.pageSize.height;
+    const pageWidth = doc.internal.pageSize.width;
+    const pageHeight = doc.internal.pageSize.height;
     const margin = 40;
     const availableWidth = pageWidth - margin * 2;
-    const availableHeight = pageHeight - margin * 2;
 
     // Define base column configuration
     const baseColumns = [
@@ -388,10 +509,8 @@ function PatientRecordsDatabase() {
       { header: "REF#", width: 70 }
     ];
 
-    // Calculate total natural width
+    // Calculate scaling factor
     const naturalWidth = baseColumns.reduce((sum, col) => sum + col.width, 0);
-
-    // Calculate scaling factor to fit available width
     const scaleFactor = availableWidth / naturalWidth;
 
     // Scale column widths
@@ -410,18 +529,10 @@ function PatientRecordsDatabase() {
       return format(dateObj, "hh:mm a").toUpperCase();
     };
 
-    // Manual currency formatting function
     const formatCurrency = (amount) => {
-      // Handle zero, null, undefined, or NaN explicitly
       if (!amount || isNaN(amount) || parseFloat(amount) === 0) return "P0";
-
-      // Convert to absolute number and round to remove decimals
       const num = Math.abs(Math.round(parseFloat(amount)));
-
-      // Convert to string and add thousand separators
-      const formatted = num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-
-      return `P${formatted}`;
+      return `P${num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`;
     };
 
     const formatPaymentMethod = (method) => {
@@ -429,33 +540,77 @@ function PatientRecordsDatabase() {
       return method.toLowerCase().includes("full") ? "FULL" : "INSTALL";
     };
 
-    // Create the actual document
-    const doc = new jsPDF({
-      orientation: "landscape",
-      unit: "pt",
-      format: "a4"
-    });
-
-    // Format current date
+    // Add title and date range
     const currentDate = new Date();
-    const formattedCurrentDate = format(
-      currentDate,
-      "MMMM dd, yyyy"
-    ).toUpperCase();
+
+    // Determine date range for report title
+    let startDate, endDate;
+    if (monthLimit !== null) {
+      // If using month limit, calculate from current date
+      startDate = new Date();
+      startDate.setMonth(currentDate.getMonth() - monthLimit);
+      endDate = currentDate;
+    } else {
+      // If we're using custom dates, find min and max dates in filtered records
+      startDate = new Date(
+        Math.min(
+          ...filteredRecords.map(
+            (record) =>
+              new Date(record.dateTransacted || record.date_of_session)
+          )
+        )
+      );
+      endDate = new Date(
+        Math.max(
+          ...filteredRecords.map(
+            (record) =>
+              new Date(record.dateTransacted || record.date_of_session)
+          )
+        )
+      );
+    }
+
+    const formattedStartDate = format(startDate, "MMMM dd, yyyy").toUpperCase();
+    const formattedEndDate = format(endDate, "MMMM dd, yyyy").toUpperCase();
     const formattedDateForFilename = format(currentDate, "MMMM_dd_yyyy");
 
-    // Add title
+    // Set up document title
     doc.setFont("helvetica", "bold");
     doc.setFontSize(16);
+    doc.text("BEAUTOX PATIENT RECORDS REPORT", pageWidth / 2, margin + 10, {
+      align: "center"
+    });
+
+    // Add date range
+    doc.setFontSize(12);
     doc.text(
-      `BEAUTOX PATIENT RECORDS REPORT AS OF ${formattedCurrentDate}`,
+      `${formattedStartDate} - ${formattedEndDate}`,
       pageWidth / 2,
-      margin + 10,
+      margin + 30,
+      { align: "center" }
+    );
+
+    // Add timestamp
+    const currentTimestamp = format(
+      new Date(),
+      "MMMM dd, yyyy 'at' hh:mm a"
+    ).toUpperCase();
+    doc.setFontSize(10);
+    doc.text(`AS OF ${currentTimestamp}`, pageWidth / 2, margin + 50, {
+      align: "center"
+    });
+
+    // Add patient count
+    doc.setFontSize(10);
+    doc.text(
+      `TOTAL PATIENTS: ${filteredRecords.length}`,
+      pageWidth / 2,
+      margin + 65,
       { align: "center" }
     );
 
     // Prepare table data
-    const tableData = patientRecords.map((record) => {
+    const tableData = filteredRecords.map((record) => {
       const total = parseFloat(record.total_amount ?? "0");
       const paid = parseFloat(record.amount_paid || "0");
       const remaining = total - paid;
@@ -473,7 +628,7 @@ function PatientRecordsDatabase() {
         Array.isArray(record.treatment_ids)
           ? getTreatmentNames(record.treatment_ids).join(", ").toUpperCase()
           : record.treatment?.toUpperCase() || "N/A",
-        record.sessions_left || "N/A", // Display sessions left
+        record.sessions_left || "N/A",
         record.consent_form_signed ? "Y" : "N",
         formatPaymentMethod(record.paymentMethod || record.payment_method),
         formatCurrency(total),
@@ -483,11 +638,11 @@ function PatientRecordsDatabase() {
       ];
     });
 
-    // Configure and draw the table
+    // Generate table
     autoTable(doc, {
       head: [headers.map((h) => h.header)],
       body: tableData,
-      startY: margin + 30,
+      startY: margin + 80, // Adjusted for the patient count line
       margin: { top: margin, right: margin, bottom: margin, left: margin },
       columnStyles: {
         ...headers.reduce((acc, col, index) => {
@@ -499,13 +654,12 @@ function PatientRecordsDatabase() {
           };
           return acc;
         }, {}),
-        // Special handling for specific columns
-        4: { halign: "center" }, // Age column centered
-        9: { halign: "center" }, // Sessions left centered
-        10: { halign: "center" }, // CS (Consent) column centered
-        12: { halign: "right", cellPadding: { right: 5 } }, // Total
-        13: { halign: "right", cellPadding: { right: 5 } }, // Paid
-        14: { halign: "right", cellPadding: { right: 5 } } // Balance
+        4: { halign: "center" },
+        9: { halign: "center" },
+        10: { halign: "center" },
+        12: { halign: "right", cellPadding: { right: 5 } },
+        13: { halign: "right", cellPadding: { right: 5 } },
+        14: { halign: "right", cellPadding: { right: 5 } }
       },
       styles: {
         font: "helvetica",
@@ -537,7 +691,6 @@ function PatientRecordsDatabase() {
         );
       },
       willDrawCell: function (data) {
-        // Handle text overflow except for age and currency columns
         if (
           data.cell.text &&
           typeof data.cell.text === "string" &&
@@ -559,8 +712,20 @@ function PatientRecordsDatabase() {
       }
     });
 
+    // Create a more descriptive filename if using custom date range
+    let filename;
+    if (monthLimit === null) {
+      // For custom date range
+      const startFilename = format(startDate, "MMddyyyy");
+      const endFilename = format(endDate, "MMddyyyy");
+      filename = `Beautox_PatientRecords_${startFilename}_to_${endFilename}.pdf`;
+    } else {
+      // For standard month limit
+      filename = `Beautox_PatientRecords_${formattedDateForFilename}.pdf`;
+    }
+
     // Save the PDF
-    doc.save(`Beautox_PatientRecords_${formattedDateForFilename}.pdf`);
+    doc.save(filename);
   };
 
   // Add this function before the return statement
@@ -593,7 +758,9 @@ function PatientRecordsDatabase() {
         return record.contact_number || "N/A";
 
       case "age":
-        return record.age || "N/A";
+        return record.birth_date
+          ? calculateAge(record.birth_date)
+          : record.age || "N/A";
 
       case "email":
         return record.email || "N/A";
@@ -612,7 +779,11 @@ function PatientRecordsDatabase() {
           record.treatment_ids.length > 0 ? (
           <div className="flex flex-col gap-1">
             {record.treatment_ids.map((id) => {
-              const treatment = treatmentsList.find((t) => t.id === id);
+              // Add safety check to ensure treatmentsList is an array
+              const treatment = Array.isArray(treatmentsList)
+                ? treatmentsList.find((t) => t.id === id)
+                : null;
+
               return treatment ? (
                 <Badge
                   key={treatment.id}
@@ -621,7 +792,11 @@ function PatientRecordsDatabase() {
                 >
                   + {treatment.treatment_name.toUpperCase()}
                 </Badge>
-              ) : null;
+              ) : (
+                <Badge key={id} variant="outline">
+                  + Unknown Treatment ({id})
+                </Badge>
+              );
             })}
           </div>
         ) : (
@@ -692,8 +867,14 @@ function PatientRecordsDatabase() {
           data-cy="patient-records-title"
         >
           PATIENT RECORDS
+          {isDateFilterActive && (
+            <span className="text-xs text-lavender-400 dark:text-lavender-100 font-medium ml-2">
+              (Date Filtered)
+            </span>
+          )}
         </h4>
         <div className="flex flex-col md:flex-row items-start md:items-center justify-center gap-4 w-full md:w-auto">
+          {/* Search Box */}
           <InputTextField className="w-full md:w-auto">
             <Input
               type="text"
@@ -706,6 +887,13 @@ function PatientRecordsDatabase() {
             <MagnifyingGlassIcon className="dark:text-customNeutral-100" />
           </InputTextField>
 
+          {/* Date Filter Button - Added between search and sort */}
+          <DateRangeFilter
+            onFilterChange={handleDateFilterChange}
+            className="w-full md:w-auto cursor-pointer"
+          />
+
+          {/* Sort Dropdown */}
           <Select onValueChange={setSortOption} className="w-full md:w-auto">
             <SelectTrigger
               placeholder="SORT BY"
@@ -717,9 +905,11 @@ function PatientRecordsDatabase() {
             <SelectContent>
               <SelectItem value="alphabetical">ALPHABETICAL</SelectItem>
               <SelectItem value="date">DATE</SelectItem>
+              <SelectItem value="payment">PAYMENT METHOD</SelectItem>
             </SelectContent>
           </Select>
 
+          {/* Filter Columns Dropdown */}
           <MultiSelectFilter
             options={columnConfig}
             selectedValues={selectedColumns}
@@ -859,7 +1049,7 @@ function PatientRecordsDatabase() {
         </Button>
         <Button
           variant="callToAction"
-          onClick={() => generatePRDReport(records)}
+          onClick={handleOpenDateRangeModal}
           className="w-full md:w-auto"
           data-cy="download-records-button"
         >
@@ -901,6 +1091,14 @@ function PatientRecordsDatabase() {
           entryData={selectedEntry}
           onArchive={handleArchive}
           data-cy="archive-patient-entry-modal"
+        />
+      )}
+      {currentModal === "dateRangeModal" && (
+        <DateRangePatientRecordDatabase
+          isOpen={true}
+          onClose={closeModal}
+          onSubmit={handleDateRangeSubmit}
+          data-cy="date-range-modal"
         />
       )}
     </div>
