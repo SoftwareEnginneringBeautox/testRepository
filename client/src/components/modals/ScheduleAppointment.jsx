@@ -557,6 +557,48 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
             </div>
           </div>
 
+          <div className="border-t border-gray-200 dark:border-gray-700 pt-2 mt-2">
+            <InputContainer>
+              <InputLabel className="text-xs mb-0.5">PAYMENT METHOD</InputLabel>
+              <div className="flex flex-col gap-2 mt-1">
+                <RadioGroup
+                  value={paymentMethod}
+                  onValueChange={(val) => setPaymentMethod(val)}
+                  className="flex flex-col gap-2"
+                >
+                  <div className="flex items-center gap-2">
+                    <RadioGroupItem
+                      data-cy="payment-method-radio-full-payment"
+                      value="full-payment"
+                      id="schedule-full-payment"
+                      className="h-3 w-3"
+                    />
+                    <label
+                      htmlFor="schedule-full-payment"
+                      className="text-xs font-medium"
+                    >
+                      FULL PAYMENT
+                    </label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <RadioGroupItem
+                      data-cy="payment-method-radio-installment"
+                      value="installment"
+                      id="schedule-installment"
+                      className="h-3 w-3"
+                    />
+                    <label
+                      htmlFor="schedule-installment"
+                      className="text-xs font-medium"
+                    >
+                      INSTALLMENT
+                    </label>
+                  </div>
+                </RadioGroup>
+              </div>
+            </InputContainer>
+          </div>
+
           {/* ACTION BUTTONS */}
           <div
             className="flex gap-2 w-full pt-2"

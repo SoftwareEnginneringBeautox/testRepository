@@ -374,18 +374,71 @@ function PatientRecordsDatabase() {
     end.setHours(23, 59, 59, 999); // Set to end of day
 
     // Filter records within the specified date range
-    const filteredRecords = records.filter((record) => {
-      const recordDate = new Date(
-        record.dateTransacted || record.date_of_session
-      );
-      return recordDate >= start && recordDate <= end;
-    });
+    const filteredRecords = [...records]
+      .filter((record) => {
+        // Name filter
+        const name = record.client || record.patient_name || "";
+        const nameMatches = name
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase());
 
-    // Generate PDF with the filtered records and no month limit
-    generatePRDReport(filteredRecords, null);
+        // Date filter
+        let dateMatches = true;
+        if (isDateFilterActive && (dateFilterStart || dateFilterEnd)) {
+          const recordDate = new Date(
+            record.dateTransacted || record.date_of_session
+          );
 
-    // Close the modal after generating the PDF
-    closeModal();
+          if (dateFilterStart && dateFilterEnd) {
+            const startDate = new Date(dateFilterStart);
+            const endDate = new Date(dateFilterEnd);
+            // Set end date to end of day
+            endDate.setHours(23, 59, 59, 999);
+
+            dateMatches = recordDate >= startDate && recordDate <= endDate;
+          } else if (dateFilterStart) {
+            const startDate = new Date(dateFilterStart);
+            dateMatches = recordDate >= startDate;
+          } else if (dateFilterEnd) {
+            const endDate = new Date(dateFilterEnd);
+            endDate.setHours(23, 59, 59, 999);
+            dateMatches = recordDate <= endDate;
+          }
+        }
+
+        return nameMatches && dateMatches;
+      })
+      .sort((a, b) => {
+        if (sortOption === "alphabetical") {
+          const nameA = (a.client || a.patient_name || "").toLowerCase();
+          const nameB = (b.client || b.patient_name || "").toLowerCase();
+          return nameA.localeCompare(nameB);
+        }
+        if (sortOption === "date") {
+          const dateA = new Date(a.dateTransacted || a.date_of_session);
+          const dateB = new Date(b.dateTransacted || b.date_of_session);
+          return dateB - dateA; // Most recent first
+        }
+        if (sortOption === "payment") {
+          // Get payment methods with fallbacks
+          const paymentA = a.paymentMethod || a.payment_method || "";
+          const paymentB = b.paymentMethod || b.payment_method || "";
+
+          // Check if either payment is "Full Payment" or contains "full"
+          const isFullPaymentA = paymentA.toLowerCase().includes("full");
+          const isFullPaymentB = paymentB.toLowerCase().includes("full");
+
+          // Sort full payments first, then installments
+          if (isFullPaymentA && !isFullPaymentB) return -1;
+          if (!isFullPaymentA && isFullPaymentB) return 1;
+
+          // If both are the same payment type, sort alphabetically by name as secondary sort
+          const nameA = (a.client || a.patient_name || "").toLowerCase();
+          const nameB = (b.client || b.patient_name || "").toLowerCase();
+          return nameA.localeCompare(nameB);
+        }
+        return 0;
+      });
   };
 
   const filteredRecords = [...records]
