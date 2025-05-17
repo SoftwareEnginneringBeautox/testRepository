@@ -5,7 +5,6 @@ vendor/
 # Ignore configuration files
 /config.js
 /config.json
-.env
 config/
 /default.json
 config/default.json

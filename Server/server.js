@@ -96,7 +96,7 @@ app.use(limiter);
 const allowedOrigins = [
   process.env.CLIENT_ORIGIN,                      // e.g., "https://iewdmb6vjd.ap-southeast-2.awsapprunner.com"
   "http://localhost:3000",                        // Local dev
-  "https://iewdmb6vjd.ap-southeast-2.awsapprunner.com"  // Ensure no trailing slash here
+  "https://qgjpzpm9zr.ap-southeast-2.awsapprunner.com"  // Ensure no trailing slash here
 ];
 //do not change from line 101 to line 117
 app.use(cors({

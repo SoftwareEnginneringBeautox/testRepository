@@ -5,14 +5,8 @@ services:
     build: ./Server
     ports:
       - "4000:4000"
-    environment:
-      - NODE_ENV=production
-      - DATABASE_URL=postgres://postgres:123456@postgres:5432/usersaccs
-      - DB_USER=postgres
-      - DB_PASSWORD=123456
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_NAME=usersaccs
+    env_file:
+      - ./Server/.env
     depends_on:
       postgres:
         condition: service_healthy

@@ -1,26 +1,29 @@
 FROM node:18
 
-# Set NODE_ENV to production to ensure production behavior
-ENV NODE_ENV=production
-
-# Create app directory
+# Set working directory
 WORKDIR /usr/src/app
 
 # Copy package.json and package-lock.json
 COPY package*.json ./
 
-# Install dependencies (only production dependencies in production)
-RUN npm install --production
+# Install ALL dependencies (including dev)
+RUN npm install --include=dev
 
-# Copy the rest of the application files
+# Copy rest of the source files
 COPY . .
 
-# Expose the port the app runs on
-EXPOSE 4000
+# Build the Vite app (generates /dist)
+RUN npm run build
 
-# HEALTHCHECK to verify the app is running
+# Production ENV and cleanup
+ENV NODE_ENV=production
+
+# Expose the port used by 'serve'
+EXPOSE 3000
+
+# Healthcheck
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:4000/health || exit 1
+  CMD curl -f http://localhost:3000 || exit 1
 
-# Command to run the application
-CMD ["npm", "start"]
+# Start the static server
+CMD ["npx", "serve", "-s", "dist", "-l", "3000"]

@@ -14,7 +14,7 @@ import {
   CardHeader,
   CardFooter,
   CardTitle
-} from "@/components/ui/card";
+} from "@/components/ui/Card";
 import { useTheme } from "./ThemeProvider";
 import { Loader } from "@/components/ui/Loader";
 
