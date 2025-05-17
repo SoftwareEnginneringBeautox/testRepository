@@ -3,14 +3,14 @@ import { createContext, useContext, useEffect, useState } from "react";
 const ThemeProviderContext = createContext({
   theme: "system",
   setTheme: () => null,
-  loaderTheme: "light" // Add loaderTheme to context
+  loaderTheme: "light"
 });
 
 export function ThemeProvider({
   children,
   defaultTheme = "light",
   storageKey = "vite-ui-theme",
-  loaderStorageKey = "vite-ui-loader-theme", // New storage key for loader theme
+  loaderStorageKey = "vite-ui-loader-theme",
   ...props
 }) {
   // Initialize theme from localStorage
@@ -19,64 +19,86 @@ export function ThemeProvider({
   });
 
   // Initialize a separate loaderTheme state
-  // This will always be "light" unless explicitly set otherwise
   const [loaderTheme, setLoaderThemeState] = useState(() => {
     return localStorage.getItem(loaderStorageKey) || "light";
   });
 
+  // Track the previous pathname to detect navigation changes
+  const [prevPathname, setPrevPathname] = useState(window.location.pathname);
+
   // Core function to apply a theme
   const applyTheme = (themeValue) => {
-    // Get current pathname to check if we're on a special page
     const pathname = window.location.pathname.toLowerCase();
-    const isSpecialPage = pathname === "/login" ||
-      pathname === "/" ||
-      pathname === "/scheduleappointment";
 
-    // Don't apply theme on special pages - they manage their own theme
-    if (isSpecialPage) {
-      console.log("On special page, not applying theme:", pathname);
-      return;
-    }
+    // Define special routes that always use light theme
+    const lightThemeRoutes = [
+      "/",
+      "/login",
+      "/scheduleappointment",
+      "/landingpage"
+    ];
+
+    const isLightThemePage = lightThemeRoutes.some(
+      (route) => pathname === route.toLowerCase()
+    );
 
     const root = window.document.documentElement;
 
     // Remove existing theme classes
     root.classList.remove("light", "dark");
 
-    // Apply the appropriate theme
-    if (themeValue === "system") {
-      const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-      const systemTheme = systemPrefersDark ? "dark" : "light";
-      root.classList.add(systemTheme);
+    if (isLightThemePage) {
+      // Force light theme on special pages
+      root.classList.add("light");
+      console.log("Applying forced light theme for special page:", pathname);
     } else {
-      root.classList.add(themeValue);
+      // Apply user's preferred theme on regular pages
+      if (themeValue === "system") {
+        const systemPrefersDark = window.matchMedia(
+          "(prefers-color-scheme: dark)"
+        ).matches;
+        root.classList.add(systemPrefersDark ? "dark" : "light");
+      } else {
+        root.classList.add(themeValue);
+      }
+      console.log("Applied user theme on regular page:", themeValue, pathname);
     }
   };
 
   // Public method to set theme
   const setTheme = (newTheme) => {
-    // Always update localStorage regardless of page
     localStorage.setItem(storageKey, newTheme);
-
-    // Update state
     setThemeState(newTheme);
 
-    // Apply theme only if not on special pages
-    applyTheme(newTheme);
+    // Only immediately apply if not on a special page
+    const pathname = window.location.pathname.toLowerCase();
+    const lightThemeRoutes = [
+      "/",
+      "/login",
+      "/scheduleappointment",
+      "/landingpage"
+    ];
+    const isLightThemePage = lightThemeRoutes.some(
+      (route) => pathname === route.toLowerCase()
+    );
+
+    if (!isLightThemePage) {
+      applyTheme(newTheme);
+    }
 
     console.log("ThemeProvider: Theme set to", newTheme);
-    console.log("ThemeProvider: localStorage updated to", localStorage.getItem(storageKey));
   };
 
   // Handle logout event - preserve loader theme
   const handleLogout = () => {
-    // When user logs out, make sure we preserve the current loader theme
-    // This will be called from your logout handler
     localStorage.setItem(loaderStorageKey, loaderTheme);
-    console.log("ThemeProvider: Preserved loader theme during logout:", loaderTheme);
+    console.log(
+      "ThemeProvider: Preserved loader theme during logout:",
+      loaderTheme
+    );
   };
 
-  // Function to explicitly set loader theme independent of main theme
+  // Function to explicitly set loader theme
   const setLoaderTheme = (newLoaderTheme) => {
     localStorage.setItem(loaderStorageKey, newLoaderTheme);
     setLoaderThemeState(newLoaderTheme);
@@ -90,50 +112,59 @@ export function ThemeProvider({
 
   // Apply theme when navigating between pages
   useEffect(() => {
-    // Listen for navigation events (using popstate as a proxy)
     const handleNavigation = () => {
-      const currentTheme = localStorage.getItem(storageKey) || defaultTheme;
-      applyTheme(currentTheme);
+      const currentPathname = window.location.pathname;
+
+      // Only reapply theme if we've actually changed pages
+      if (currentPathname !== prevPathname) {
+        console.log(
+          `Navigation detected: ${prevPathname} -> ${currentPathname}`
+        );
+        setPrevPathname(currentPathname);
+
+        // Always apply the theme on navigation
+        // The applyTheme function will handle special pages internally
+        applyTheme(theme);
+      }
     };
 
-    window.addEventListener('popstate', handleNavigation);
+    // Listen for navigation events
+    window.addEventListener("popstate", handleNavigation);
 
-    // Initial application
-    applyTheme(theme);
+    // Check for navigation on each render (for programmatic navigation)
+    handleNavigation();
 
     return () => {
-      window.removeEventListener('popstate', handleNavigation);
+      window.removeEventListener("popstate", handleNavigation);
     };
-  }, []);
+  }, [prevPathname, theme]);
 
   // Handle system theme changes
   useEffect(() => {
-    if (theme !== "system") return;
-
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+
     const handleChange = () => {
-      applyTheme("system");
+      if (theme === "system") {
+        applyTheme("system");
+      }
     };
 
     mediaQuery.addEventListener("change", handleChange);
     return () => mediaQuery.removeEventListener("change", handleChange);
   }, [theme]);
 
-  // Listen for auth state changes (logout events)
+  // Listen for auth state changes
   useEffect(() => {
-    // This is a placeholder - you'll need to integrate with your actual auth system
-    // Example if using a custom event:
     const handleAuthChange = (event) => {
-      if (event.detail.type === 'logout') {
+      if (event.detail.type === "logout") {
         handleLogout();
       }
     };
 
-    window.addEventListener('authStateChange', handleAuthChange);
-    return () => window.removeEventListener('authStateChange', handleAuthChange);
-
-    // Alternative: if using an auth library, subscribe to its state changes here
-  }, [loaderTheme, handleLogout]);
+    window.addEventListener("authStateChange", handleAuthChange);
+    return () =>
+      window.removeEventListener("authStateChange", handleAuthChange);
+  }, [loaderTheme]);
 
   return (
     <ThemeProviderContext.Provider
@@ -142,7 +173,7 @@ export function ThemeProvider({
         setTheme,
         loaderTheme,
         setLoaderTheme,
-        handleLogout // Expose logout handler for direct use
+        handleLogout
       }}
       {...props}
     >

@@ -13,13 +13,6 @@ export default function Layout() {
   // Define routes that should not show the sidebar or user profile
   const sidebarlessRoutes = ["/", "/login", "/scheduleappointment"];
 
-  const lightThemeRoutes = [
-    "/",
-    "/login",
-    "/scheduleappointment",
-    "/landingpage"
-  ];
-
   // List all valid routes from your App.jsx
   const validRoutes = [
     "/admindashboard",
@@ -41,62 +34,10 @@ export default function Layout() {
         location.pathname.toLowerCase().startsWith(route.toLowerCase() + "/")
     ) && !sidebarlessRoutes.includes(location.pathname.toLowerCase());
 
-  useEffect(() => {
-    const pathname = location.pathname.toLowerCase();
-    const root = window.document.documentElement;
-    const userTheme = localStorage.getItem("vite-ui-theme");
-
-    // Define routes that should always use light theme
-    const forceableLightRoutes = ["/", "/login", "/scheduleappointment", "/landingpage"];
-
-    // Check if current route should force light theme
-    const shouldForceLightTheme = forceableLightRoutes.some(
-      (route) => pathname === route.toLowerCase()
-    );
-
-    // If on a route that must be light, force light theme
-    if (shouldForceLightTheme) {
-      root.classList.remove("dark");
-      root.classList.add("light");
-    } else {
-      // For regular routes, restore user preference
-      // But only if we're coming from a forced light route
-      const currentTheme = root.classList.contains("dark") ? "dark" : "light";
-      if (currentTheme === "light" && userTheme === "dark") {
-        root.classList.remove("light");
-        root.classList.add("dark");
-      }
-    }
-  }, [location.pathname]);
-
   // Only show the sidebar and user profile if the current route is allowed and it's not the error page
   const shouldShowSidebar =
     !sidebarlessRoutes.includes(location.pathname.toLowerCase()) &&
     !isErrorPage;
-
-  // for debugging toggle theme
-  useEffect(() => {
-    const root = window.document.documentElement;
-    const userTheme = localStorage.getItem("vite-ui-theme");
-    const currentDocTheme = root.classList.contains("dark") ? "dark" : "light";
-    const systemPrefersDark = window.matchMedia(
-      "(prefers-color-scheme: dark)"
-    ).matches;
-    const systemTheme = systemPrefersDark ? "dark" : "light";
-
-    const shouldForceLightTheme =
-      location.pathname.startsWith("/public") ||
-      location.pathname === "/login" ||
-      location.pathname === "/404" ||
-      isErrorPage;
-
-    console.log("📄 Layout Theme Check:");
-    console.log("- Current path:", location.pathname);
-    console.log("- System preference:", systemTheme);
-    console.log("- User theme from storage:", userTheme);
-    console.log("- Current document theme:", currentDocTheme);
-    console.log("- Should force light theme:", shouldForceLightTheme);
-  }, [location.pathname, isErrorPage]);
 
   return (
     <SidebarProvider
@@ -129,11 +70,15 @@ export default function Layout() {
         )}
       >
         {/* Fixed header with proper positioning */}
-        <header className={`fixed w-full flex items-center justify-between px-2 py-2 z-[50] ${
-          location.pathname === "/" || location.pathname === "/login" || location.pathname === "/landingpage"
-            ? ""
-            : "bg-white dark:bg-black shadow-sm"
-        }`}>
+        <header
+          className={`fixed w-full flex items-center justify-between px-2 py-2 z-[50] ${
+            location.pathname === "/" ||
+            location.pathname === "/login" ||
+            location.pathname === "/landingpage"
+              ? ""
+              : "bg-white dark:bg-black shadow-sm"
+          }`}
+        >
           {/* Left side - sidebar trigger */}
           <div className="flex-shrink-0 relative z-[50]">
             {shouldShowSidebar && (
@@ -153,8 +98,8 @@ export default function Layout() {
           className={cn(
             "flex flex-col flex-1 items-center",
             !sidebarlessRoutes.includes(location.pathname.toLowerCase()) &&
-            !isErrorPage &&
-            "my-16 lg:my-20"
+              !isErrorPage &&
+              "my-16 lg:my-20"
           )}
         >
           <div className="flex flex-col flex-1 w-full gap-4">
