@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/Card";
 import { useTheme } from "./ThemeProvider";
 import { Loader } from "@/components/ui/Loader";
-
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 const BeautoxPieChart = () => {
   const { theme } = useTheme();
   const [loading, setLoading] = useState(true);
@@ -42,7 +42,7 @@ const BeautoxPieChart = () => {
 
         // Use the expenses-by-month endpoint with month and year filtering
         const response = await fetch(
-          `http://localhost:4000/api/expenses-by-month?month=${currentMonth}&year=${currentYear}`
+          `${API_BASE_URL}/api/expenses-by-month?month=${currentMonth}&year=${currentYear}`
         );
 
         if (!response.ok) {

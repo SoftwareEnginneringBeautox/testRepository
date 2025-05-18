@@ -167,6 +167,7 @@ const SalesChart = ({
 
       fetchFinancialData();
     }
+    
   }, [externalFinancialData, isFinancialOverview]);
 
   const fetchSalesData = async (start, end) => {
@@ -174,7 +175,7 @@ const SalesChart = ({
     setError(null);
     try {
       const response = await fetch(
-        `http://localhost:4000/api/sales?startDate=${start}&endDate=${end}`
+        `${API_BASE_URL}/api/sales?startDate=${start}&endDate=${end}`
       );
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);

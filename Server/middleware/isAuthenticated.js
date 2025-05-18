@@ -1,23 +1,25 @@
+
+
 function isAuthenticated(req, res, next) {
-  // Bypass authentication for preflight OPTIONS requests
+  // Allow preflight
   if (req.method === 'OPTIONS') {
     return next();
   }
 
-  // Check if a valid user session exists using optional chaining
+  // 1) If user is logged in via session, proceed
   if (req.session?.user) {
     return next();
   }
 
-  // Check for a valid API key in the request headers
+  // 2) Otherwise, if a valid API key header is present, proceed
   const clientApiKey = req.headers['x-api-key'];
-  if (clientApiKey && clientApiKey === process.env.CLIENT_API_KEY) {
+  if (clientApiKey && clientApiKey === "superSecretClientKey12345") {
     return next();
   }
 
-  // Log unauthorized access attempts for debugging purposes
-  console.warn(`Unauthorized access attempt. Request IP: ${req.ip}`);
-  return res.status(401).json({ message: "Unauthorized. Please log in." });
+  // 3) Otherwise reject
+  console.warn(`Unauthorized access attempt from IP ${req.ip}`);
+  return res.status(401).json({ message: 'Unauthorized. Please log in or provide a valid API key.' });
 }
 
 module.exports = isAuthenticated;

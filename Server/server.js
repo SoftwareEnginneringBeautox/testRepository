@@ -1,3 +1,4 @@
+
 // Load environment variables (for local dev; in production, AWS environment variables override these)
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config();
@@ -137,22 +138,26 @@ app.use((req, res, next) => {
 });
 
 // Session configuration using connect-pg-simple
-app.use(session({
-  store: new pgSession({
-    pool,
-    tableName: 'session',
-    createTableIfMissing: true,
-  }),
-  secret: process.env.SESSION_SECRET || 'yourSecretKey',
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    secure: process.env.NODE_ENV === 'production', // enable in production (HTTPS required)
-    httpOnly: true,
-    // For production, if your client is on a different domain, use 'none'
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-  },
-}));
+app.use(
+  session({
+    store: new pgSession({
+      pool,
+      tableName: 'session',
+      createTableIfMissing: true,
+    }),
+    secret: process.env.SESSION_SECRET || 'yourSecretKey',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      secure: true,      // HTTPS required
+      sameSite: 'none',  // allow cross-site cookies
+      maxAge: 24 * 60 * 60 * 1000,
+    },
+  })
+);
+
+
 
 /* --------------------------------------------
    HEALTH CHECK ENDPOINT

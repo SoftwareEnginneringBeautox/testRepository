@@ -96,6 +96,7 @@ function AdministratorDashboard() {
     try {
       setLoadingStaff(true);
       const response = await axios.get(`${API_BASE_URL}/getusers`, {
+        headers: { 'x-api-key':  'superSecretClientKey12345' },
         withCredentials: true
       });
 
