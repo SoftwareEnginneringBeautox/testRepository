@@ -630,7 +630,7 @@ function CreatePatientEntry({ isOpen, onClose }) {
 
             {/* BIRTH DATE */}
             <InputContainer>
-              <InputLabel>BIRTH DATE</InputLabel>
+              <InputLabel>BIRTH DATE (Optional)</InputLabel>
               <InputTextField>
                 <InputIcon>
                   <CalendarIcon />
@@ -647,7 +647,6 @@ function CreatePatientEntry({ isOpen, onClose }) {
                       ? "border-red-500"
                       : ""
                   }`}
-                  required
                 />
               </InputTextField>
               {formSubmitAttempted && formErrors.birthDate && (

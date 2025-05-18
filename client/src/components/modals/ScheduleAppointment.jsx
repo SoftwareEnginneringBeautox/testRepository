@@ -438,7 +438,9 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
 
           {/* AGE */}
           <InputContainer>
-            <InputLabel className="text-xs mb-0.5">BIRTH DATE</InputLabel>
+            <InputLabel className="text-xs mb-0.5">
+              BIRTH DATE (Optional)
+            </InputLabel>
             <InputTextField className="h-10">
               <InputIcon className="w-7">
                 <CalendarIcon className="w-3.5 h-3.5" />
@@ -454,7 +456,6 @@ function ScheduleAppointmentModal({ isOpen, onClose }) {
                 }}
                 onBlur={(e) => validateBirthDate(e.target.value)}
                 max={new Date().toISOString().split("T")[0]} // Prevents future dates
-                required
               />
             </InputTextField>
             {ageError && (
